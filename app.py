@@ -15,7 +15,7 @@ def start_services():
     # Commands
     # Use 'shell=True' for Windows compatibility with npm/uvicorn
     frontend_cmd = ["npm", "run", "dev"]
-    backend_cmd = ["uvicorn", "app.main:app", "--reload"]
+    backend_cmd = ["uvicorn", "app.main:app", "--reload", "--port", "5172"]
 
     try:
         # Start Frontend
@@ -44,7 +44,7 @@ def start_services():
 
         print("\n[✔] Both services are starting up!")
         print("    Frontend: http://localhost:5173")
-        print("    Backend:  http://localhost:8000/docs (Swagger UI)")
+        print("    Backend:  http://localhost:5172/docs (Swagger UI)")
         print("\nPress Ctrl+C to stop both services.\n")
 
         # Function to print output from a process in a separate thread (simplified for script)
