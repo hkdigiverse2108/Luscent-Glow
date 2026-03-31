@@ -30,7 +30,7 @@ export const categories = [
   { name: "Nails", slug: "nails", image: "https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&h=400&fit=crop" },
 ];
 
-import mascaraImage from "@/assets/products/mascara-premium.png";
+// Public assets are now served from the /assets directory
 
 export const products: Product[] = [
   {
@@ -110,34 +110,34 @@ export const products: Product[] = [
   {
     id: "12", name: "Volumizing Mascara", brand: "Luscent Glow", price: 649, originalPrice: 849, discount: 24,
     rating: 4.4, reviewCount: 3201, category: "makeup", tags: ["eyes", "mascara"],
-    image: mascaraImage,
+    image: "/assets/products/mascara-premium.png",
     isTrending: true, isBestSeller: true,
   },
 ];
 
-import heroImage from "@/assets/hero-cosmetics.jpg";
+// Public assets are now served from the /assets directory
 
 export const heroSlides = [
   {
-    image: heroImage,
-    title: "Unlock Your Inner Glow",
-    subtitle: "Discover our new Hydra Glow collection — infused with nature's finest ingredients",
-    cta: "Shop Collection",
+    image: "/assets/hero/hero-1.png",
+    title: "Radiance Reimagined",
+    subtitle: "Experience the pinnacle of luxury skincare with our gold-infused collection designed to illuminate your unique glow.",
+    cta: "Discover the Collection",
     link: "/products"
   },
   {
-    image: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=1400&h=600&fit=crop",
-    title: "Summer Skin Essentials",
-    subtitle: "SPF protection meets luxurious hydration — your skin deserves both",
-    cta: "Explore Now",
+    image: "/assets/hero/hero-2.png",
+    title: "The Science of Glow",
+    subtitle: "Bespoke beauty ritual curated for your skin's unique journey to perfection. Sophistication in every drop.",
+    cta: "Explore Our Rituals",
     link: "/products"
   },
   {
-    image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1400&h=600&fit=crop",
-    title: "Bold Lips, Bold You",
-    subtitle: "Our velvet matte range in 12 stunning shades — long-lasting, cruelty-free",
-    cta: "Shop Lips",
-    link: "/products?category=makeup&search=lips"
+    image: "/assets/hero/hero-3.png",
+    title: "Timeless Elegance",
+    subtitle: "Where science meets pure elegance. Discover our Silk Foundation range that feels like a second skin.",
+    cta: "Shop The Look",
+    link: "/products?category=makeup"
   },
 ];
 

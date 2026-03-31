@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { Product } from "@/data/products";
+import { Product, products } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { getApiUrl } from "@/lib/api";
@@ -33,13 +33,20 @@ const ProductDetail = () => {
       try {
         setLoading(true);
         const response = await fetch(getApiUrl(`/products/${id}`));
-        if (!response.ok) throw new Error("Product not found");
+        if (!response.ok) throw new Error("API error");
         const data = await response.json();
         setProduct(data);
         setError(null);
       } catch (err) {
-        console.error("Error fetching product:", err);
-        setError("We couldn't find this specific treasure. It might have been curated by someone else.");
+        console.error("Error fetching product, checking local data:", err);
+        // Fallback: search local products array
+        const localProduct = products.find(p => p.id === id || p._id === id);
+        if (localProduct) {
+          setProduct(localProduct);
+          setError(null);
+        } else {
+          setError("We couldn't find this specific treasure. It might have been curated by someone else.");
+        }
       } finally {
         setLoading(false);
       }

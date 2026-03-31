@@ -74,6 +74,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <img
             src={product.image}
             alt={product.name}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = "/placeholder.svg";
+              target.onerror = null; // Prevent infinite loop if placeholder also fails
+            }}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {/* Quick Add Overlay */}

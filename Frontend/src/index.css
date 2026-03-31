@@ -115,21 +115,34 @@
   }
 
   .text-glow-gold {
-    text-shadow: 0 0 10px hsla(var(--gold), 0.3);
+    text-shadow: 0 0 15px hsla(var(--gold), 0.4);
+  }
+
+  .text-gradient-gold {
+    @apply bg-clip-text text-transparent bg-gradient-to-tr from-gold via-gold-light to-gold;
   }
 
   .shadow-ethereal {
-    box-shadow: 0 20px 50px -12px hsla(var(--gold), 0.15);
+    box-shadow: 0 30px 60px -12px hsla(var(--gold), 0.12), 0 18px 36px -18px hsla(var(--gold), 0.15);
+  }
+
+  .mask-radial-fade {
+    mask-image: radial-gradient(circle, black 40%, transparent 100%);
   }
 
   .animate-float {
-    animation: float 6s ease-in-out infinite;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  .hover-lift {
+    @apply transition-transform duration-500 ease-out hover:-translate-y-2;
   }
 
   @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
+    0% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-15px) rotate(1deg); }
+    66% { transform: translateY(5px) rotate(-1deg); }
+    100% { transform: translateY(0px) rotate(0deg); }
   }
 
   .scrollbar-hide::-webkit-scrollbar {
@@ -138,5 +151,16 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

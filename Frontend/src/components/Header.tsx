@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { Search, Heart, ShoppingBag, User, Menu, X, Gift, Package, Sparkles, LogOut } from "lucide-react";
+import { Search, Heart, ShoppingBag, User, Menu, X, Gift, Package, Sparkles, LogOut, ChevronDown } from "lucide-react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { categories, Product } from "@/data/products";
+import { categories, Product, products } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { toast } from "sonner";
 import { getApiUrl } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext.tsx";
+import LogoutConfirmation from "./auth/LogoutConfirmation.tsx";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -15,9 +17,10 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const [user, setUser] = useState<any>(null);
-  const { totalItems, clearCart } = useCart();
-  const { wishlist, clearWishlist } = useWishlist();
+  const { totalItems } = useCart();
+  const { wishlist } = useWishlist();
+  const { user, logout } = useAuth();
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
@@ -28,21 +31,7 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    const userStr = localStorage.getItem("user");
-    if (userStr) {
-      setUser(JSON.parse(userStr));
-    }
-  }, [location.pathname]); // Update on route change to catch login/logout
-
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
-    clearWishlist();
-    clearCart(); // Clear local cart state on logout
-    toast.success("Logged out successfully");
-    navigate("/");
-  };
+  // Removed local user handling as it's now in AuthContext
 
   useEffect(() => {
     const fetchSearchData = async () => {
@@ -50,10 +39,13 @@ const Header = () => {
         const response = await fetch(getApiUrl("/products/"));
         if (response.ok) {
           const data = await response.json();
-          setFetchedProducts(data);
+          setFetchedProducts(data.length > 0 ? data : products);
+        } else {
+          setFetchedProducts(products);
         }
       } catch (err) {
-        console.error("Error fetching search data:", err);
+        console.error("Error fetching search data, using local fallback:", err);
+        setFetchedProducts(products);
       }
     };
     fetchSearchData();
@@ -104,16 +96,17 @@ const Header = () => {
 
   return (
     <>
-      {/* Top bar */}
-      <div className="bg-primary text-primary-foreground text-xs py-2 text-center tracking-widest uppercase font-body">
-        Free Shipping on Orders Above ₹999 &nbsp;|&nbsp; Use Code <span className="text-gold font-semibold">GLOW15</span> for 15% Off
-      </div>
-
       <header
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled ? "bg-background/95 backdrop-blur-md shadow-sm" : "bg-background"
         }`}
       >
+        {/* Top bar */}
+        <div className="bg-primary text-primary-foreground text-[10px] lg:text-xs py-2 text-center tracking-widest uppercase font-body relative group/banner">
+          Free Shipping on Orders Above ₹999 &nbsp;|&nbsp; Use Code <span className="text-gold font-semibold">GLOW15</span> for 15% Off
+          &nbsp;&nbsp; | &nbsp;&nbsp;
+          <Link to="/quiz" className="text-gold font-bold hover:text-white transition-colors">Find Your Glow</Link>
+        </div>
         {/* Main header */}
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16 lg:h-20">
@@ -125,38 +118,45 @@ const Header = () => {
               {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
 
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2">
-              <h1 className="font-display text-2xl lg:text-3xl font-semibold tracking-wide text-foreground">
-                Luscent <span className="text-gold">Glow</span>
-              </h1>
-            </Link>
+            {/* Logo and Shop by Category */}
+            <div className="flex items-center gap-14">
+              <Link to="/" className="flex items-center gap-2">
+                <h1 className="font-display text-2xl lg:text-3xl font-semibold tracking-wide text-foreground">
+                  Luscent <span className="text-gold">Glow</span>
+                </h1>
+              </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center gap-8">
-              {categories.slice(0, 5).map((cat) => (
-                <Link
-                  key={cat.slug}
-                  to={`/products?category=${cat.slug}`}
-                  className="text-sm font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide uppercase"
-                >
-                  {cat.name}
-                </Link>
-              ))}
-              <Link
-                to="/offers"
-                className="text-sm font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide uppercase relative group"
-              >
-                Offers
-                <span className="absolute -top-3 -right-3 px-1 py-0.5 bg-rose-brand text-[8px] text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">NEW</span>
-              </Link>
-              <Link
-                to="/quiz"
-                className="text-sm font-body font-bold text-gold hover:text-gold/80 transition-all tracking-wide uppercase px-4 py-2 bg-gold/5 rounded-full border border-gold/20"
-              >
-                Find Your Glow
-              </Link>
-            </nav>
+              {/* Shop by Category Hover Dropdown */}
+              <div className="hidden lg:block relative group py-2">
+                <button className="flex items-center gap-3 text-[13px] font-body font-bold text-charcoal/90 hover:text-gold uppercase tracking-[0.25em] transition-all duration-500 py-2 group-hover:text-gold">
+                  Categories                 
+                </button>
+                
+                <div className="absolute top-full -left-4 w-64 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-[100]">
+                  <div className="bg-white border border-border/80 shadow-2xl rounded-2xl overflow-hidden py-3">
+                    <div className="space-y-0.5">
+                      {categories.map((cat) => (
+                        <Link
+                          key={cat.slug}
+                          to={`/products?category=${cat.slug}`}
+                          className="block px-6 py-3 text-[11px] font-body font-bold text-charcoal/80 uppercase tracking-widest hover:text-gold hover:bg-gold/5 transition-all duration-300"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="border-t border-border/60 mt-3 pt-2">
+                      <Link
+                        to="/products"
+                        className="block text-center px-6 py-3 text-[10px] font-body font-black text-gold hover:opacity-80 transition-all duration-300 uppercase tracking-[0.3em]"
+                      >
+                        Explore All
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Right actions */}
             <div className="flex items-center gap-1 lg:gap-3">
@@ -174,18 +174,46 @@ const Header = () => {
               </Link>
               
               {user ? (
-                <div className="flex items-center gap-2 group">
-                  <div className="hidden lg:flex flex-col items-end mr-1">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Welcome</span>
-                    <span className="text-xs text-primary font-bold line-clamp-1">{user.fullName.split(' ')[0]}</span>
+                <div className="relative group p-2">
+                  <div className="flex items-center gap-3 cursor-pointer">
+                    <div className="hidden lg:flex flex-col items-end mr-1">
+                      <span className="text-xs text-primary font-bold line-clamp-1">{user.fullName.split(' ')[0]}</span>
+                    </div>
+                    <div className="w-9 h-9 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-charcoal transition-all duration-500 shadow-sm overflow-hidden">
+                      {user.profilePicture ? (
+                        <img src={user.profilePicture} alt={user.fullName} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="font-display font-medium text-sm">{user.fullName.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
                   </div>
-                  <button 
-                    onClick={handleLogout}
-                    className="p-2 text-foreground/70 hover:text-rose-brand transition-colors relative group"
-                    title="Logout"
-                  >
-                    <LogOut size={20} />
-                  </button>
+
+                  {/* Hover Dropdown */}
+                  <div className="absolute top-[calc(100%-5px)] right-0 w-64 pt-6 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-50">
+                    <div className="bg-white border border-gold/10 rounded-[2rem] shadow-ethereal overflow-hidden">
+                      <div className="px-6 py-6 border-b border-gold/10 bg-gold/5">
+                        <h4 className="text-sm font-display font-bold text-charcoal truncate">{user.fullName}</h4>
+                        <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                      </div>
+                      <div className="p-2">
+                        <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest hover:text-gold hover:bg-gold/5 rounded-2xl transition-all">
+                          <User size={14} /> Profile
+                        </Link>
+                        <Link to="/orders" className="flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest hover:text-gold hover:bg-gold/5 rounded-2xl transition-all">
+                          <Package size={14} /> Orders
+                        </Link>
+                        <Link to="/wishlist" className="flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest hover:text-gold hover:bg-gold/5 rounded-2xl transition-all">
+                          <Heart size={14} /> Wishlist
+                        </Link>
+                        <button 
+                          onClick={() => setIsLogoutDialogOpen(true)}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-rose-brand uppercase tracking-widest hover:bg-rose-brand/5 rounded-2xl transition-all text-left"
+                        >
+                          <LogOut size={14} /> Logout
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <Link to="/login" className="p-2 text-foreground/70 hover:text-gold transition-colors" title="Login / Register">
@@ -297,9 +325,9 @@ const Header = () => {
           )}
         </AnimatePresence>
 
-        {/* Category bar — visible on scroll */}
+        {/* Category bar — visible only at top, hidden on scroll */}
         <AnimatePresence>
-          {scrolled && (
+          {!scrolled && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
@@ -318,16 +346,10 @@ const Header = () => {
                     </Link>
                   ))}
                   <Link
-                    to="/products"
-                    className="text-xs font-body font-medium text-muted-foreground hover:text-gold transition-colors tracking-wider uppercase"
+                    to="/offers"
+                    className="text-sm font-body font-bold text-gold hover:text-gold/80 transition-all tracking-wide uppercase px-4 py-2 bg-gold/5 rounded-full border border-gold/20"
                   >
-                    All Products
-                  </Link>
-                  <Link
-                    to="/quiz"
-                    className="text-[10px] font-body font-bold text-gold hover:text-gold/80 transition-all tracking-widest uppercase ml-4"
-                  >
-                    Radiance Quiz
+                    Offers
                   </Link>
                 </div>
               </div>
@@ -335,6 +357,17 @@ const Header = () => {
           )}
         </AnimatePresence>
       </header>
+
+      {/* Logout Confirmation Dialog */}
+      <LogoutConfirmation 
+        isOpen={isLogoutDialogOpen}
+        onClose={() => setIsLogoutDialogOpen(false)}
+        onConfirm={() => {
+          logout();
+          setIsLogoutDialogOpen(false);
+          navigate("/");
+        }}
+      />
 
       {/* Mobile menu */}
       <AnimatePresence>
@@ -374,18 +407,57 @@ const Header = () => {
                   About Us
                 </Link>
                 <Link 
+                  to="/contact" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
+                >
+                  Contact Us
+                </Link>
+                <Link 
+                  to="/faq" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
+                >
+                  FAQ's
+                </Link>
+                <Link 
+                  to="/track-order" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
+                >
+                  Track Order
+                </Link>
+                <Link 
+                  to="/blogs" 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
+                >
+                  Journal
+                </Link>
+                <Link 
                   to="/quiz" 
                   onClick={() => setMobileMenuOpen(false)} 
-                  className="flex items-center gap-3 text-gold font-bold"
+                  className="flex items-center gap-3 text-gold font-bold py-2"
                 >
                   <Sparkles size={18} /> Radiance Quiz
                 </Link>
-                <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-foreground/70">
-                  <Gift size={18} /> Gift Cards
-                </Link>
-                <Link to="/bulk-orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-foreground/70">
-                  <Package size={18} /> Bulk Orders for Corporate
-                </Link>
+                <div className="pt-4 space-y-4">
+                  <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-foreground/70 text-sm">
+                    <Gift size={18} /> Gift Cards
+                  </Link>
+                  <Link to="/bulk-orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-foreground/70 text-sm">
+                    <Package size={18} /> Bulk Orders for Corporate
+                  </Link>
+                </div>
+                
+                <div className="pt-6 border-t border-border/50">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Policies</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    <Link to="/privacy-policy" onClick={() => setMobileMenuOpen(false)} className="text-xs text-muted-foreground hover:text-gold">Privacy Policy</Link>
+                    <Link to="/terms-and-conditions" onClick={() => setMobileMenuOpen(false)} className="text-xs text-muted-foreground hover:text-gold">Terms & Conditions</Link>
+                    <Link to="/return-policy" onClick={() => setMobileMenuOpen(false)} className="text-xs text-muted-foreground hover:text-gold">Return & Refund</Link>
+                  </div>
+                </div>
               </div>
             </nav>
           </motion.div>

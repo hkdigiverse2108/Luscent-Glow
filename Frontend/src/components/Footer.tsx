@@ -16,14 +16,14 @@ const Footer = () => {
               Crafted with love, powered by nature.
             </p>
             <div className="flex items-center gap-4 pt-2">
-              <a href="#" className="text-primary-foreground/50 hover:text-gold transition-colors"><Instagram size={18} /></a>
-              <a href="#" className="text-primary-foreground/50 hover:text-gold transition-colors"><Facebook size={18} /></a>
-              <a href="#" className="text-primary-foreground/50 hover:text-gold transition-colors"><Youtube size={18} /></a>
-              <a href="#" className="text-primary-foreground/50 hover:text-gold transition-colors"><Twitter size={18} /></a>
+              <a href="https://instagram.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Instagram size={18} /></a>
+              <a href="https://facebook.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Facebook size={18} /></a>
+              <a href="https://youtube.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Youtube size={18} /></a>
+              <a href="https://twitter.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Twitter size={18} /></a>
             </div>
-            <div className="pt-2 space-y-1 text-sm text-primary-foreground/50 font-body">
-              <p>📧 hello@luscentglow.com</p>
-              <p>📞 +91 98765 43210</p>
+            <div className="pt-2 space-y-2 text-sm text-primary-foreground/50 font-body">
+              <a href="mailto:hello@luscentglow.com" className="hover:text-gold transition-colors flex items-center gap-2">📧 hello@luscentglow.com</a>
+              <a href="tel:+919876543210" className="hover:text-gold transition-colors flex items-center gap-2">📞 +91 98765 43210</a>
             </div>
           </div>
 
@@ -35,9 +35,9 @@ const Footer = () => {
               <Link to="/contact" className="block text-primary-foreground/60 hover:text-gold transition-colors">Contact Us</Link>
               <Link to="/faq" className="block text-primary-foreground/60 hover:text-gold transition-colors">FAQ's</Link>
               <Link to="/offers" className="block text-primary-foreground/60 hover:text-gold transition-colors">Special Offers</Link>
-              <Link to="/blog" className="block text-primary-foreground/60 hover:text-gold transition-colors">Blogs</Link>
+              <Link to="/blogs" className="block text-primary-foreground/60 hover:text-gold transition-colors">Blogs</Link>
               <Link to="/track-order" className="block text-primary-foreground/60 hover:text-gold transition-colors">Track Your Order</Link>
-              <Link to="/careers" className="block text-primary-foreground/60 hover:text-gold transition-colors">Careers</Link>
+              <Link to="/contact" className="block text-primary-foreground/60 hover:text-gold transition-colors">Careers</Link>
             </nav>
           </div>
 
@@ -47,7 +47,7 @@ const Footer = () => {
             <nav className="space-y-2 text-sm font-body">
               <Link to="/return-policy" className="block text-primary-foreground/60 hover:text-gold transition-colors">Return & Refund</Link>
               <Link to="/privacy-policy" className="block text-primary-foreground/60 hover:text-gold transition-colors">Privacy Policy</Link>
-              <Link to="/terms" className="block text-primary-foreground/60 hover:text-gold transition-colors">Terms & Conditions</Link>
+              <Link to="/terms-and-conditions" className="block text-primary-foreground/60 hover:text-gold transition-colors">Terms & Conditions</Link>
               <Link to="/shipping-policy" className="block text-primary-foreground/60 hover:text-gold transition-colors">Shipping Policy</Link>
               <Link to="/cancellation-policy" className="block text-primary-foreground/60 hover:text-gold transition-colors">Cancellation Policy</Link>
             </nav>

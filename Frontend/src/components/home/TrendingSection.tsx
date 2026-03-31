@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { Product } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
@@ -15,10 +15,20 @@ const TrendingSection = () => {
         const response = await fetch("/api/products/");
         if (response.ok) {
           const data = await response.json();
-          setTrending(data.filter((p: Product) => p.isTrending));
+          if (data && data.length > 0) {
+            setTrending(data.filter((p: Product) => p.isTrending));
+          } else {
+            const { products } = await import("@/data/products");
+            setTrending(products.filter(p => p.isTrending));
+          }
+        } else {
+          const { products } = await import("@/data/products");
+          setTrending(products.filter(p => p.isTrending));
         }
       } catch (err) {
         console.error("Error fetching trending:", err);
+        const { products } = await import("@/data/products");
+        setTrending(products.filter(p => p.isTrending));
       } finally {
         setLoading(false);
       }
@@ -28,59 +38,93 @@ const TrendingSection = () => {
 
   const scroll = (dir: "left" | "right") => {
     if (scrollRef.current) {
-      scrollRef.current.scrollBy({ left: dir === "left" ? -300 : 300, behavior: "smooth" });
+      scrollRef.current.scrollBy({ left: dir === "left" ? -400 : 400, behavior: "smooth" });
     }
   };
 
   return (
-    <section className="py-16 lg:py-20">
-      <div className="container mx-auto px-4">
-        <div className="flex items-end justify-between mb-8">
-          <div>
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
+    <section className="relative py-24 lg:py-32 overflow-hidden bg-background">
+      {/* Background Decor */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rose-light/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/4" />
+
+      <div className="container mx-auto px-6 lg:px-12 relative z-10">
+        <div className="flex flex-col md:flex-row items-baseline justify-between mb-16 gap-6">
+          <div className="max-w-2xl">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              className="text-sm font-body font-medium text-gold uppercase tracking-widest mb-2"
+              className="flex items-center gap-3 text-gold mb-4"
             >
-              What's Hot
-            </motion.p>
+              <Sparkles size={16} />
+              <span className="text-sm font-body font-semibold uppercase tracking-[0.25em]">Highly Coveted</span>
+            </motion.div>
+            
             <motion.h2
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="font-display text-3xl lg:text-4xl font-bold text-foreground"
+              transition={{ delay: 0.1 }}
+              className="font-display text-4xl lg:text-6xl font-bold text-foreground leading-tight"
             >
-              Trending Today
+              Trending <span className="italic font-light text-gold/80">Essence</span>
             </motion.h2>
+            
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="mt-4 text-muted-foreground font-body text-base lg:text-lg max-w-lg"
+            >
+              Curated by our beauty experts, these are the formulas everyone is talking about this season.
+            </motion.p>
           </div>
-          <div className="hidden md:flex items-center gap-2">
-            <button onClick={() => scroll("left")} className="p-2 border border-border rounded-full hover:bg-secondary transition-colors">
-              <ChevronLeft size={18} />
+
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => scroll("left")} 
+              className="group p-4 border border-gold/20 rounded-full hover:bg-gold hover:border-gold transition-all duration-500 shadow-xl"
+            >
+              <ChevronLeft size={20} className="group-hover:text-charcoal transition-colors" />
             </button>
-            <button onClick={() => scroll("right")} className="p-2 border border-border rounded-full hover:bg-secondary transition-colors">
-              <ChevronRight size={18} />
+            <button 
+              onClick={() => scroll("right")} 
+              className="group p-4 border border-gold/20 rounded-full hover:bg-gold hover:border-gold transition-all duration-500 shadow-xl"
+            >
+              <ChevronRight size={20} className="group-hover:text-charcoal transition-colors" />
             </button>
           </div>
         </div>
+
         <div
           ref={scrollRef}
-          className="flex gap-5 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4 snap-x snap-mandatory min-h-[400px]"
+          className="flex gap-8 overflow-x-auto scrollbar-hide pb-8 -mx-6 px-6 snap-x snap-mandatory min-h-[450px]"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {loading ? (
             [...Array(4)].map((_, i) => (
-              <div key={i} className="min-w-[240px] max-w-[240px] aspect-[3/4] bg-secondary animate-pulse rounded-[2rem]" />
+              <div key={i} className="min-w-[280px] max-w-[280px] aspect-[3/4.5] bg-secondary/40 animate-pulse rounded-[2.5rem]" />
             ))
           ) : trending.length > 0 ? (
-            trending.map((product) => (
-              <div key={product._id || product.id} className="min-w-[240px] max-w-[240px] snap-start">
-                <ProductCard product={product} />
-              </div>
+            trending.map((product, i) => (
+              <motion.div 
+                key={product._id || product.id}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1, duration: 0.6 }}
+                className="min-w-[280px] max-w-[280px] snap-start"
+              >
+                <div className="hover-lift transition-all duration-500">
+                  <ProductCard product={product} />
+                </div>
+              </motion.div>
             ))
           ) : (
-            <div className="w-full text-center py-20 italic text-muted-foreground font-body">
-              The trends are being curated. Reveal them soon.
+            <div className="w-full text-center py-20 italic text-muted-foreground font-body text-xl">
+              Curating the next generation of radiance...
             </div>
           )}
         </div>

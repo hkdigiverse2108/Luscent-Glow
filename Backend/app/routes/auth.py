@@ -52,7 +52,8 @@ async def signin(auth: UserAuthModel = Body(...)):
         "user": {
             "fullName": user["fullName"],
             "mobileNumber": user["mobileNumber"],
-            "email": user["email"]
+            "email": user["email"],
+            "profilePicture": user.get("profilePicture")
         }
     }
 
@@ -99,3 +100,68 @@ async def reset_password(data: PasswordResetModel = Body(...)):
     )
     
     return {"message": "Password updated successfully"}
+
+@router.put("/profile/update")
+async def update_profile(data: dict = Body(...)):
+    db = await get_database()
+    mobileNumber = data.get("mobileNumber")
+    if not mobileNumber:
+        raise HTTPException(status_code=400, detail="Mobile number is required")
+    
+    update_data = {
+        "fullName": data.get("fullName"),
+        "email": data.get("email"),
+        "profilePicture": data.get("profilePicture")
+    }
+    
+    # Filter out None values
+    update_data = {k: v for k, v in update_data.items() if v is not None}
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No data provided to update")
+
+    result = await db["users"].update_one(
+        {"mobileNumber": mobileNumber},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    # Get updated user
+    updated_user = await db["users"].find_one({"mobileNumber": mobileNumber})
+    
+    return {
+        "status": "success",
+        "user": {
+            "fullName": updated_user["fullName"],
+            "mobileNumber": updated_user["mobileNumber"],
+            "email": updated_user["email"],
+            "profilePicture": updated_user.get("profilePicture")
+        }
+    }
+
+@router.put("/change-password")
+async def change_password(data: dict = Body(...)):
+    db = await get_database()
+    mobileNumber = data.get("mobileNumber")
+    old_password = data.get("oldPassword")
+    new_password = data.get("newPassword")
+    
+    if not all([mobileNumber, old_password, new_password]):
+        raise HTTPException(status_code=400, detail="Mobile number and both passwords are required")
+        
+    user = await db["users"].find_one({"mobileNumber": mobileNumber})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if not verify_password(old_password, user["password"]):
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
+        
+    hashed_password = hash_password(new_password)
+    await db["users"].update_one(
+        {"mobileNumber": mobileNumber},
+        {"$set": {"password": hashed_password}}
+    )
+    
+    return {"status": "success", "message": "Password updated successfully"}

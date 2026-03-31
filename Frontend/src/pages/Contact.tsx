@@ -6,8 +6,8 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { getApiUrl } from "@/lib/api";
 
-import boutiqueStorefront from "@/assets/contact/boutique-storefront.png";
-import glowTexture from "@/assets/contact/glow-texture.png";
+const boutiqueStorefront = "/assets/contact/boutique-storefront.png";
+const glowTexture = "/assets/contact/glow-texture.png";
 
 const Contact = () => {
   const [formStep, setFormStep] = useState(1);

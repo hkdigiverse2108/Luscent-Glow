@@ -7,6 +7,7 @@ from .routes.auth import router as auth_router
 from .routes.wishlist import router as wishlist_router
 from .routes.cart import router as cart_router
 from .routes.contact import router as contact_router
+from .routes.orders import router as orders_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,17 +17,12 @@ async def lifespan(app: FastAPI):
     # Shutdown: Close MongoDB connection
     await close_mongo_connection()
 
-app = FastAPI(title="Glow Haven API", lifespan=lifespan)
+app = FastAPI(title="Lucsent Glow API", lifespan=lifespan)
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,6 +34,7 @@ app.include_router(auth_router, tags=["Auth"])
 app.include_router(wishlist_router, tags=["Wishlist"])
 app.include_router(cart_router, tags=["Cart"])
 app.include_router(contact_router, prefix="/contact", tags=["Contact"])
+app.include_router(orders_router, tags=["Orders"])
 
 @app.get("/", tags=["Root"])
 async def read_root():

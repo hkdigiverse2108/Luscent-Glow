@@ -9,6 +9,7 @@ interface WishlistContextType {
   isInWishlist: (id: string) => boolean;
   clearWishlist: () => void;
   syncWithServer: () => Promise<void>;
+  removeFromWishlist: (productId: string) => Promise<void>;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
@@ -114,8 +115,31 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     await fetchServerWishlist();
   };
 
+  const removeFromWishlist = async (productId: string) => {
+    const user = getLoggedInUser();
+    
+    // Optimistic local update
+    setWishlist((prev) => prev.filter((item) => (item._id || item.id) !== productId));
+    
+    // Sync with server if logged in
+    if (user && user.mobileNumber) {
+      try {
+        await fetch(getApiUrl("/wishlist/remove"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userMobile: user.mobileNumber,
+            productId: productId
+          })
+        });
+      } catch (error) {
+        console.error("Error removing from wishlist on server:", error);
+      }
+    }
+  };
+
   return (
-    <WishlistContext.Provider value={{ wishlist, toggleWishlist, isInWishlist, clearWishlist, syncWithServer }}>
+    <WishlistContext.Provider value={{ wishlist, toggleWishlist, isInWishlist, clearWishlist, syncWithServer, removeFromWishlist }}>
       {children}
     </WishlistContext.Provider>
   );

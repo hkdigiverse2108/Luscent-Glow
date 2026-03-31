@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, TicketPercent } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const DiscountBanner = () => {
@@ -25,48 +25,58 @@ const DiscountBanner = () => {
   }, []);
 
   return (
-    <section className="py-8">
-      <div className="container mx-auto px-4">
+    <section className="py-24">
+      <div className="container mx-auto px-6 lg:px-12">
         <motion.div
-          initial={{ opacity: 0, scale: 0.98 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative rounded-2xl overflow-hidden"
+          className="relative rounded-[3rem] overflow-hidden min-h-[450px] flex items-center bg-charcoal shadow-ethereal"
         >
-          <img
-            src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1200&h=400&fit=crop"
-            alt="Sale banner"
-            className="w-full h-64 lg:h-80 object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary/60 to-transparent" />
-          <div className="absolute inset-0 flex items-center">
-            <div className="container mx-auto px-8 lg:px-16">
-              <div className="max-w-md space-y-4">
-                <p className="text-sm font-body font-semibold text-gold uppercase tracking-widest">
-                  Limited Time Offer
-                </p>
-                <h3 className="font-display text-3xl lg:text-4xl font-bold text-primary-foreground">
-                  Flat 40% Off on Skincare
-                </h3>
-                <div className="flex items-center gap-4">
+          {/* Background Image with Mask */}
+          <div className="absolute inset-0">
+            <img
+              src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1600&h=600&fit=crop"
+              alt="Sale banner"
+              className="w-full h-full object-cover opacity-60"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/40 to-transparent" />
+          </div>
+
+          <div className="relative z-10 w-full lg:px-24 py-16">
+            <div className="max-w-xl space-y-8">
+              <div className="flex items-center gap-3 text-gold">
+                <TicketPercent size={20} />
+                <span className="text-sm font-body font-bold uppercase tracking-[0.3em]">Exclusive Invitation</span>
+              </div>
+              
+              <h3 className="font-display text-5xl lg:text-7xl font-bold text-white leading-tight">
+                Save <span className="text-gold italic">40%</span> on All <br/> Essential Radiance.
+              </h3>
+
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex items-center gap-3">
                   {Object.entries(timeLeft).map(([unit, value]) => (
-                    <div key={unit} className="text-center">
-                      <div className="w-14 h-14 bg-background/15 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                        <span className="font-body font-bold text-xl text-primary-foreground">
+                    <div key={unit} className="text-center group">
+                      <div className="w-16 h-16 glass-premium rounded-2xl flex items-center justify-center border-white/10 group-hover:border-gold/30 transition-colors">
+                        <span className="font-body font-bold text-2xl text-white">
                           {String(value).padStart(2, "0")}
                         </span>
                       </div>
-                      <span className="text-[10px] text-primary-foreground/60 uppercase tracking-wider font-body mt-1 block">
+                      <span className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-medium mt-2 block">
                         {unit}
                       </span>
                     </div>
                   ))}
                 </div>
+                
+                <div className="h-12 w-[1px] bg-white/20 mx-4 hidden sm:block" />
+                
                 <Link
                   to="/products?category=skincare"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gold text-primary font-body font-semibold text-sm uppercase tracking-wider rounded-full hover:bg-gold/90 transition-colors"
+                  className="px-10 py-5 bg-gold text-charcoal font-body font-bold text-sm uppercase tracking-widest rounded-full hover:bg-white transition-all duration-500 shadow-2xl flex items-center gap-3"
                 >
-                  Shop Now <ArrowRight size={16} />
+                  Retrieve Offer <ArrowRight size={18} />
                 </Link>
               </div>
             </div>

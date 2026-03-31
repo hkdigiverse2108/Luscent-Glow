@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { getApiUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useAuth } from "@/context/AuthContext";
 
 type ViewState = "login" | "signup" | "forgot-password" | "verify-otp" | "new-password";
 
@@ -44,6 +45,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { syncCart } = useCart();
   const { syncWithServer: syncWishlist } = useWishlist();
+  const { login: authLogin } = useAuth();
 
   // Track the flow to know where to return or proceed
   const handleBack = () => {
@@ -122,9 +124,7 @@ const Login = () => {
           toast.info(data.message);
         } else {
           toast.success("Login Successful!");
-          localStorage.setItem("user", JSON.stringify(data.user));
-          await syncCart(); // Sync cart immediately after login
-          await syncWishlist(); // Sync wishlist immediately after login
+          authLogin(data.user);
           navigate("/");
         }
       } else if (view === "signup") {

@@ -16,7 +16,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { getApiUrl } from "@/lib/api";
-import corporateGifting from "@/assets/corporate-gifting.png";
+const corporateGifting = "/assets/corporate-gifting.png";
 
 const BulkOrders = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);

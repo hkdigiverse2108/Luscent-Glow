@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -126,7 +127,7 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
             
             <div className="mt-20 pt-12 border-t border-gold/10 text-center">
               <p className="font-body text-sm text-muted-foreground italic">
-                Need more information? Our <a href="/contact" className="text-gold font-bold hover:underline">Glow Concierge</a> is here to help.
+                Need more information? Our <Link to="/contact" className="text-gold font-bold hover:underline">Glow Concierge</Link> is here to help.
               </p>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { getApiUrl } from "@/lib/api";
+import { useWishlist } from "./WishlistContext";
 
 export interface CartItem {
   id: string;
@@ -11,6 +12,7 @@ export interface CartItem {
   quantity: number;
   selectedShade?: string;
   selectedSize?: string;
+  metadata?: any;
 }
 
 export interface Coupon {
@@ -37,6 +39,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { removeFromWishlist } = useWishlist();
   const [items, setItems] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem("luscent-glow-cart");
     return saved ? JSON.parse(saved) : [];
@@ -109,7 +112,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             productId: newItem.id,
             quantity: newItem.quantity,
             selectedShade: newItem.selectedShade,
-            selectedSize: newItem.selectedSize
+            selectedSize: newItem.selectedSize,
+            metadata: newItem.metadata
           }),
         });
       } catch (error) {
@@ -122,7 +126,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         (item) => 
           item.id === newItem.id && 
           item.selectedShade === newItem.selectedShade && 
-          item.selectedSize === newItem.selectedSize
+          item.selectedSize === newItem.selectedSize &&
+          JSON.stringify(item.metadata) === JSON.stringify(newItem.metadata)
       );
 
       if (existing) {
@@ -130,7 +135,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return prev.map((item) =>
           item.id === newItem.id &&
           item.selectedShade === newItem.selectedShade &&
-          item.selectedSize === newItem.selectedSize
+          item.selectedSize === newItem.selectedSize &&
+          JSON.stringify(item.metadata) === JSON.stringify(newItem.metadata)
             ? { ...item, quantity: item.quantity + newItem.quantity }
             : item
         );
@@ -172,7 +178,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateQuantity = async (id: string, quantity: number, selectedShade?: string, selectedSize?: string) => {
-    if (quantity < 1) return;
+    if (quantity <= 0) {
+      await removeItem(id, selectedShade, selectedSize);
+      await removeFromWishlist(id);
+      return;
+    }
     const user = getLoggedInUser();
 
     if (user?.mobileNumber) {

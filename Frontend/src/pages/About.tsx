@@ -4,9 +4,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 
-import heroAbout from "@/assets/about/hero-about.png";
-import valuesBotanical from "@/assets/about/values-botanical.png";
-import curatorPortrait from "@/assets/about/curator-portrait.png";
+const heroAbout = "/assets/about/hero-about.png";
+const valuesBotanical = "/assets/about/values-botanical.png";
+const curatorPortrait = "/assets/about/curator-portrait.png";
 
 const About = () => {
   const fadeIn = {

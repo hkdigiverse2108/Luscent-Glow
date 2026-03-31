@@ -80,7 +80,7 @@ products_data = [
     {
         "name": "Volumizing Mascara", "brand": "Luscent Glow", "price": 649, "originalPrice": 849, "discount": 24,
         "rating": 4.4, "reviewCount": 3201, "category": "makeup", "tags": ["eyes", "mascara"],
-        "image": "https://images.unsplash.com/photo-1631214500115-598fc2cb8ada?w=500&h=500&fit=crop",
+        "image": "/assets/products/mascara-premium.png",
         "isTrending": True, "isBestSeller": True,
     },
 ]

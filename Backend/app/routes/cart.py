@@ -31,7 +31,8 @@ async def get_cart(userMobile: str):
                 "category": product["category"],
                 "quantity": item["quantity"],
                 "selectedShade": item.get("selectedShade"),
-                "selectedSize": item.get("selectedSize")
+                "selectedSize": item.get("selectedSize"),
+                "metadata": item.get("metadata")
             }
             full_cart.append(cart_entry)
             
@@ -46,7 +47,8 @@ async def add_to_cart(item: CartItemModel = Body(...)):
         "userMobile": item.userMobile,
         "productId": item.productId,
         "selectedShade": item.selectedShade,
-        "selectedSize": item.selectedSize
+        "selectedSize": item.selectedSize,
+        "metadata": item.metadata
     }
     
     existing = await db["cart"].find_one(query)

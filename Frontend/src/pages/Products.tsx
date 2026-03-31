@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { categories, Product } from "@/data/products";
+import { categories, Product, products } from "@/data/products";
 import { getApiUrl } from "@/lib/api";
 
 const priceRanges = [
@@ -38,23 +38,34 @@ const Products = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProductsData = async () => {
       try {
         setLoading(true);
         const response = await fetch(getApiUrl("/products/"));
-        if (!response.ok) throw new Error("Failed to fetch products");
-        const data = await response.json();
-        setFetchedProducts(data);
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            setFetchedProducts(data);
+          } else {
+            const { products: localProducts } = await import("@/data/products");
+            setFetchedProducts(localProducts);
+          }
+        } else {
+          const { products: localProducts } = await import("@/data/products");
+          setFetchedProducts(localProducts);
+        }
         setError(null);
       } catch (err) {
-        console.error("Error fetching products:", err);
-        setError("Unable to build the collection right now. Please try again later.");
+        console.error("Error fetching products, falling back to local data:", err);
+        const { products: localProducts } = await import("@/data/products");
+        setFetchedProducts(localProducts);
+        setError(null);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchProductsData();
   }, []);
 
   let filtered = fetchedProducts;

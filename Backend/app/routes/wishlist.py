@@ -57,6 +57,15 @@ async def toggle_wishlist(data: WishlistToggleModel = Body(...)):
         await db["wishlist"].insert_one(new_item)
         return {"status": "added", "message": "Product added to wishlist"}
 
+@router.post("/remove")
+async def remove_from_wishlist(data: WishlistToggleModel = Body(...)):
+    db = await get_database()
+    await db["wishlist"].delete_one({
+        "userMobile": data.userMobile,
+        "productId": data.productId
+    })
+    return {"status": "removed", "message": "Product removed from wishlist"}
+
 @router.delete("/clear/{userMobile}")
 async def clear_wishlist(userMobile: str):
     db = await get_database()

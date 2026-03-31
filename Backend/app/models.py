@@ -89,6 +89,7 @@ class UserModel(BaseModel):
     isAdmin: bool = Field(default=False)
     isVerified: bool = Field(default=False)
     otp: Optional[str] = Field(default=None)
+    profilePicture: Optional[str] = Field(default=None)
     createdAt: Optional[str] = Field(default=None)
 
     class Config:
@@ -159,6 +160,7 @@ class CartItemModel(BaseModel):
     quantity: int = Field(..., ge=1)
     selectedShade: Optional[str] = Field(default=None)
     selectedSize: Optional[str] = Field(default=None)
+    metadata: Optional[dict] = Field(default=None)
     createdAt: Optional[str] = Field(default=None)
 
     class Config:
@@ -173,6 +175,7 @@ class CartUpdateModel(BaseModel):
     quantity: int = Field(..., ge=1)
     selectedShade: Optional[str] = Field(default=None)
     selectedSize: Optional[str] = Field(default=None)
+    metadata: Optional[dict] = Field(default=None)
 
 class ContactInquiryModel(BaseModel):
     """
@@ -197,5 +200,42 @@ class ContactInquiryModel(BaseModel):
                 "phoneNumber": "+91 9876543210",
                 "subject": "Curation Advice",
                 "message": "I would love to know more about..."
+            }
+        }
+
+class OrderItem(BaseModel):
+    """
+    Schema for an item within an order.
+    """
+    productId: str = Field(...)
+    name: str = Field(...)
+    price: float = Field(...)
+    quantity: int = Field(..., ge=1)
+    image: str = Field(...)
+    selectedShade: Optional[str] = Field(default=None)
+    selectedSize: Optional[str] = Field(default=None)
+
+class OrderModel(BaseModel):
+    """
+    Schema for a complete user order.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    userMobile: str = Field(...)
+    items: List[OrderItem] = Field(...)
+    totalAmount: float = Field(...)
+    status: str = Field(default="Processing") # Processing, Quality Check, Shipped, Delivered, Cancelled
+    paymentStatus: str = Field(default="Pending")
+    shippingAddress: Optional[dict] = Field(default=None)
+    createdAt: str = Field(...)
+    orderNumber: str = Field(...)
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "userMobile": "+91 9876543210",
+                "totalAmount": 2499,
+                "status": "Processing",
+                "orderNumber": "LG-827364"
             }
         }
