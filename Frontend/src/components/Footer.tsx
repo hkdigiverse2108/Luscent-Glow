@@ -23,7 +23,7 @@ const Footer = () => {
             </div>
             <div className="pt-2 space-y-2 text-sm text-primary-foreground/50 font-body">
               <a href="mailto:hello@luscentglow.com" className="hover:text-gold transition-colors flex items-center gap-2">📧 hello@luscentglow.com</a>
-              <a href="tel:+919876543210" className="hover:text-gold transition-colors flex items-center gap-2">📞 +91 98765 43210</a>
+              <a href="tel:+919712663607" className="hover:text-gold transition-colors flex items-center gap-2">📞 +91 97126 63607</a>
             </div>
           </div>
 

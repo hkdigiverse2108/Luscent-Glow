@@ -82,51 +82,56 @@ const TrendingSection = () => {
             </motion.p>
           </div>
 
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => scroll("left")} 
-              className="group p-4 border border-gold/20 rounded-full hover:bg-gold hover:border-gold transition-all duration-500 shadow-xl"
-            >
-              <ChevronLeft size={20} className="group-hover:text-charcoal transition-colors" />
-            </button>
-            <button 
-              onClick={() => scroll("right")} 
-              className="group p-4 border border-gold/20 rounded-full hover:bg-gold hover:border-gold transition-all duration-500 shadow-xl"
-            >
-              <ChevronRight size={20} className="group-hover:text-charcoal transition-colors" />
-            </button>
-          </div>
         </div>
 
-        <div
-          ref={scrollRef}
-          className="flex gap-8 overflow-x-auto scrollbar-hide pb-8 -mx-6 px-6 snap-x snap-mandatory min-h-[450px]"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {loading ? (
-            [...Array(4)].map((_, i) => (
-              <div key={i} className="min-w-[280px] max-w-[280px] aspect-[3/4.5] bg-secondary/40 animate-pulse rounded-[2.5rem]" />
-            ))
-          ) : trending.length > 0 ? (
-            trending.map((product, i) => (
-              <motion.div 
-                key={product._id || product.id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.6 }}
-                className="min-w-[280px] max-w-[280px] snap-start"
-              >
-                <div className="hover-lift transition-all duration-500">
-                  <ProductCard product={product} />
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <div className="w-full text-center py-20 italic text-muted-foreground font-body text-xl">
-              Curating the next generation of radiance...
-            </div>
-          )}
+        <div className="relative group/carousel">
+          {/* Navigation Buttons - Positioned near cards */}
+          <button 
+            onClick={() => scroll("left")} 
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 z-20 p-4 bg-white/80 backdrop-blur-md border border-gold/20 rounded-full hover:bg-gold hover:border-gold transition-all duration-500 shadow-xl opacity-0 group-hover/carousel:opacity-100 hidden md:flex items-center justify-center group/btn"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={20} className="text-charcoal group-hover/btn:scale-110 transition-transform" />
+          </button>
+          
+          <button 
+            onClick={() => scroll("right")} 
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 z-20 p-4 bg-white/80 backdrop-blur-md border border-gold/20 rounded-full hover:bg-gold hover:border-gold transition-all duration-500 shadow-xl opacity-0 group-hover/carousel:opacity-100 hidden md:flex items-center justify-center group/btn"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={20} className="text-charcoal group-hover/btn:scale-110 transition-transform" />
+          </button>
+
+          <div
+            ref={scrollRef}
+            className="flex gap-8 overflow-x-auto scrollbar-hide pb-8 -mx-6 px-6 snap-x snap-mandatory min-h-[450px]"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {loading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="min-w-[280px] max-w-[280px] aspect-[3/4.5] bg-secondary/40 animate-pulse rounded-[2.5rem]" />
+              ))
+            ) : trending.length > 0 ? (
+              trending.map((product, i) => (
+                <motion.div 
+                  key={product._id || product.id}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.6 }}
+                  className="min-w-[280px] max-w-[280px] snap-start"
+                >
+                  <div className="hover-lift transition-all duration-500">
+                    <ProductCard product={product} />
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="w-full text-center py-20 italic text-muted-foreground font-body text-xl">
+                Curating the next generation of radiance...
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

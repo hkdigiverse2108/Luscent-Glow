@@ -126,36 +126,45 @@ const Header = () => {
                 </h1>
               </Link>
 
-              {/* Shop by Category Hover Dropdown */}
-              <div className="hidden lg:block relative group py-2">
-                <button className="flex items-center gap-3 text-[13px] font-body font-bold text-charcoal/90 hover:text-gold uppercase tracking-[0.25em] transition-all duration-500 py-2 group-hover:text-gold">
-                  Categories                 
-                </button>
-                
-                <div className="absolute top-full -left-4 w-64 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-[100]">
-                  <div className="bg-white border border-border/80 shadow-2xl rounded-2xl overflow-hidden py-3">
-                    <div className="space-y-0.5">
-                      {categories.map((cat) => (
-                        <Link
-                          key={cat.slug}
-                          to={`/products?category=${cat.slug}`}
-                          className="block px-6 py-3 text-[11px] font-body font-bold text-charcoal/80 uppercase tracking-widest hover:text-gold hover:bg-gold/5 transition-all duration-300"
-                        >
-                          {cat.name}
-                        </Link>
-                      ))}
+              {/* Shop by Category Hover Dropdown — Hidden until scrolled (Header-2) */}
+              <AnimatePresence>
+                {scrolled && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="hidden lg:block relative group py-2"
+                  >
+                    <button className="flex items-center gap-3 text-[13px] font-body font-bold text-charcoal/90 hover:text-gold uppercase tracking-[0.25em] transition-all duration-500 py-2 group-hover:text-gold">
+                      Categories                 
+                    </button>
+                    
+                    <div className="absolute top-full -left-4 w-64 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-[100]">
+                      <div className="bg-white border border-border/80 shadow-2xl rounded-2xl overflow-hidden py-3">
+                        <div className="space-y-0.5">
+                          {categories.map((cat) => (
+                            <Link
+                              key={cat.slug}
+                              to={`/products?category=${cat.slug}`}
+                              className="block px-6 py-3 text-[11px] font-body font-bold text-charcoal/80 uppercase tracking-widest hover:text-gold hover:bg-gold/5 transition-all duration-300"
+                            >
+                              {cat.name}
+                            </Link>
+                          ))}
+                        </div>
+                        <div className="border-t border-border/60 mt-3 pt-2">
+                          <Link
+                            to="/products"
+                            className="block text-center px-6 py-3 text-[10px] font-body font-black text-gold hover:opacity-80 transition-all duration-300 uppercase tracking-[0.3em]"
+                          >
+                            Explore All
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                    <div className="border-t border-border/60 mt-3 pt-2">
-                      <Link
-                        to="/products"
-                        className="block text-center px-6 py-3 text-[10px] font-body font-black text-gold hover:opacity-80 transition-all duration-300 uppercase tracking-[0.3em]"
-                      >
-                        Explore All
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Right actions */}

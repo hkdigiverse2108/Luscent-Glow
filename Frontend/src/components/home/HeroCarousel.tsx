@@ -108,13 +108,6 @@ const HeroCarousel = () => {
                     <span className="relative z-10">{slide.cta}</span>
                     <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
                   </Link>
-
-                  <Link 
-                    to="/about"
-                    className="px-10 py-4 border border-white/30 backdrop-blur-md text-white font-body font-semibold text-sm uppercase tracking-widest rounded-full hover:bg-white/10 transition-all duration-500"
-                  >
-                    Our Story
-                  </Link>
                 </motion.div>
               </motion.div>
             </AnimatePresence>

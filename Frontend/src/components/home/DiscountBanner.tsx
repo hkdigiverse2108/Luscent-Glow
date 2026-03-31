@@ -73,7 +73,7 @@ const DiscountBanner = () => {
                 <div className="h-12 w-[1px] bg-white/20 mx-4 hidden sm:block" />
                 
                 <Link
-                  to="/products?category=skincare"
+                  to="/offers"
                   className="px-10 py-5 bg-gold text-charcoal font-body font-bold text-sm uppercase tracking-widest rounded-full hover:bg-white transition-all duration-500 shadow-2xl flex items-center gap-3"
                 >
                   Retrieve Offer <ArrowRight size={18} />

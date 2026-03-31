@@ -249,7 +249,7 @@ const Contact = () => {
                       </div>
                       <div className="space-y-2">
                         <p className="text-xs font-body font-bold text-gold uppercase tracking-widest">Digital Concierge</p>
-                        <p className="font-display text-2xl font-bold text-foreground">+91 98765 43210</p>
+                        <p className="font-display text-2xl font-bold text-foreground">+91 97126 63607</p>
                         <p className="text-sm font-body text-muted-foreground italic">Available for one-on-one WhatsApp curation.</p>
                       </div>
                     </div>
