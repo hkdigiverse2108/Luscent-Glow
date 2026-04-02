@@ -40,11 +40,11 @@ const TrackOrder = () => {
       
       <main>
         {/* Luxury Hero Background */}
-        <section className="relative pt-32 pb-20 overflow-hidden bg-charcoal">
+        <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 overflow-hidden bg-charcoal">
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gold/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 opacity-40" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-rose-light/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 opacity-30" />
           
-          <div className="container mx-auto px-6 relative z-10 text-center">
+          <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -52,14 +52,14 @@ const TrackOrder = () => {
               className="space-y-6 max-w-3xl mx-auto"
             >
               <div className="flex items-center justify-center gap-3 text-gold">
-                <div className="h-[1px] w-8 bg-gold" />
-                <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em]">Concierge Services</span>
-                <div className="h-[1px] w-8 bg-gold" />
+                <div className="h-[1px] w-6 md:w-8 bg-gold" />
+                <span className="text-[9px] md:text-[10px] font-body font-bold uppercase tracking-[0.3em]">Concierge Services</span>
+                <div className="h-[1px] w-6 md:w-8 bg-gold" />
               </div>
-              <h1 className="font-display text-4xl lg:text-7xl font-bold text-white tracking-tight leading-tight">
+              <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-tight md:leading-[1.1]">
                 Track Your <span className="text-gradient-gold italic font-light">Glow Journey</span>
               </h1>
-              <p className="text-white/60 font-body text-balance lg:text-lg max-w-xl mx-auto">
+              <p className="text-white/60 font-body text-sm md:text-lg max-w-xl mx-auto italic">
                 "Anticipation is the first step of the ritual. Follow your curated treasures as they travel from our vault to your vanity."
               </p>
             </motion.div>
@@ -67,7 +67,7 @@ const TrackOrder = () => {
         </section>
 
         {/* Tracking Input Card */}
-        <section className="container mx-auto px-6 -mt-12 relative z-20 pb-24">
+        <section className="container mx-auto px-4 md:px-6 -mt-8 md:-mt-12 relative z-20 pb-20 md:pb-24">
           <AnimatePresence mode="wait">
             {!isTracking ? (
               <motion.div
@@ -75,9 +75,9 @@ const TrackOrder = () => {
                 initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="max-w-4xl mx-auto bg-white rounded-[3rem] p-8 lg:p-16 shadow-ethereal border border-gold/10"
+                className="max-w-4xl mx-auto bg-white rounded-[2.5rem] md:rounded-[3rem] p-6 sm:p-8 lg:p-16 shadow-ethereal border border-gold/10"
               >
-                <form onSubmit={handleTrack} className="grid lg:grid-cols-2 gap-8 items-end">
+                <form onSubmit={handleTrack} className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-end">
                   <div className="space-y-4">
                     <label className="text-[10px] font-body font-bold text-charcoal uppercase tracking-widest pl-2">Order ID</label>
                     <div className="relative">
@@ -86,7 +86,7 @@ const TrackOrder = () => {
                         required
                         type="text"
                         placeholder="e.g. #LUC-7890"
-                        className="w-full bg-[#f8f8f8] border border-transparent rounded-2xl py-6 pl-16 pr-6 font-body focus:bg-white focus:border-gold/30 outline-none transition-all"
+                        className="w-full bg-[#f8f8f8] border border-transparent rounded-xl md:rounded-2xl py-4 md:py-6 pl-14 md:pl-16 pr-6 font-body focus:bg-white focus:border-gold/30 outline-none transition-all text-sm"
                         value={orderId}
                         onChange={(e) => setOrderId(e.target.value)}
                       />
@@ -100,17 +100,17 @@ const TrackOrder = () => {
                         required
                         type="email"
                         placeholder="your@email.com"
-                        className="w-full bg-[#f8f8f8] border border-transparent rounded-2xl py-6 pl-16 pr-6 font-body focus:bg-white focus:border-gold/30 outline-none transition-all"
+                        className="w-full bg-[#f8f8f8] border border-transparent rounded-xl md:rounded-2xl py-4 md:py-6 pl-14 md:pl-16 pr-6 font-body focus:bg-white focus:border-gold/30 outline-none transition-all text-sm"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                       />
                     </div>
                   </div>
-                  <div className="lg:col-span-2 pt-4">
+                  <div className="md:col-span-2 pt-4">
                     <button
                       disabled={loading}
                       type="submit"
-                      className="w-full py-6 bg-charcoal text-white font-body font-bold uppercase tracking-[0.25em] rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden"
+                      className="w-full py-4 md:py-6 bg-charcoal text-white font-body font-bold uppercase tracking-[0.25em] rounded-xl md:rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden text-xs md:text-sm"
                     >
                       {loading ? (
                         <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -153,37 +153,37 @@ const TrackOrder = () => {
                 className="max-w-5xl mx-auto space-y-8"
               >
                 {/* Status Bar */}
-                <div className="bg-white rounded-[3rem] p-8 lg:p-12 shadow-ethereal border border-gold/10 flex flex-wrap items-center justify-between gap-8">
-                  <div>
-                    <p className="text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em] mb-1">Current Status</p>
-                    <h2 className="font-display text-3xl font-bold flex items-center gap-3">
+                <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-8 lg:p-12 shadow-ethereal border border-gold/10 flex flex-col md:flex-row flex-wrap items-center justify-between gap-6 md:gap-8">
+                  <div className="text-center md:text-left">
+                    <p className="text-[9px] md:text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em] mb-1">Current Status</p>
+                    <h2 className="font-display text-2xl md:text-3xl font-bold flex items-center justify-center md:justify-start gap-3">
                       <Truck size={28} className="text-gold" />
                       In Transit
                     </h2>
                   </div>
                   <div className="w-px h-12 bg-border/50 hidden lg:block" />
-                  <div>
-                    <p className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Order Identifier</p>
-                    <p className="font-body font-bold text-lg">{orderId || "#LUC-7890-GLOW"}</p>
+                  <div className="text-center md:text-left">
+                    <p className="text-[9px] md:text-[10px] font-body font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Order Identifier</p>
+                    <p className="font-body font-bold text-base md:text-lg">{orderId || "#LUC-7890-GLOW"}</p>
                   </div>
                   <div className="w-px h-12 bg-border/50 hidden lg:block" />
-                  <div>
-                    <p className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Estimated Arrival</p>
-                    <p className="font-body font-bold text-lg flex items-center gap-2">
+                  <div className="text-center md:text-left">
+                    <p className="text-[9px] md:text-[10px] font-body font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Estimated Arrival</p>
+                    <p className="font-body font-bold text-base md:text-lg flex items-center justify-center md:justify-start gap-2">
                        <Calendar size={18} className="text-gold" /> April 1, 2026
                     </p>
                   </div>
                   <button 
                     onClick={() => setIsTracking(false)}
-                    className="p-4 rounded-full border border-gold/10 hover:bg-gold/5 transition-colors group"
+                    className="p-3 md:p-4 rounded-full border border-gold/10 hover:bg-gold/5 transition-colors group"
                   >
                     <RefreshCw size={20} className="text-gold group-hover:rotate-180 transition-transform duration-700" />
                   </button>
                 </div>
 
                 {/* Animated Timeline Stage */}
-                <div className="bg-white rounded-[4rem] p-8 lg:p-20 shadow-ethereal border border-gold/10 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1.5 bg-secondary overflow-hidden">
+                <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-6 sm:p-8 md:p-12 lg:p-20 shadow-ethereal border border-gold/10 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 md:h-1.5 bg-secondary overflow-hidden">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: "55%" }}
@@ -192,36 +192,41 @@ const TrackOrder = () => {
                       />
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-12 relative">
+                  <div className="flex flex-col md:grid md:grid-cols-5 gap-10 md:gap-12 relative">
                     {trackingSteps.map((step, i) => {
                       const isActive = step.id <= 3;
                       const isCurrent = step.id === 3;
                       
                       return (
-                        <div key={step.id} className="relative group">
-                          <div className={`w-16 h-16 rounded-3xl mx-auto mb-6 flex items-center justify-center transition-all duration-700 relative z-10 ${
+                        <div key={step.id} className="relative group flex md:block items-center gap-6 md:gap-0">
+                          <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl flex-shrink-0 md:mx-auto mb-0 md:mb-6 flex items-center justify-center transition-all duration-700 relative z-10 ${
                             isActive 
-                              ? "bg-gold text-white shadow-xl shadow-gold/20" 
+                              ? "bg-gold text-white shadow-lg md:shadow-xl shadow-gold/20" 
                               : "bg-secondary text-muted-foreground/40 border border-border"
                           }`}>
-                            {step.icon}
+                            <div className="scale-75 md:scale-100">
+                              {step.icon}
+                            </div>
                             {isCurrent && (
-                              <div className="absolute inset-0 rounded-3xl border-4 border-gold animate-ping opacity-20" />
+                              <div className="absolute inset-0 rounded-2xl md:rounded-3xl border-2 md:border-4 border-gold animate-ping opacity-20" />
                             )}
                           </div>
-                          <div className="text-center space-y-2">
-                            <p className={`font-body font-bold text-[10px] uppercase tracking-[0.15em] ${isActive ? "text-charcoal" : "text-muted-foreground/40"}`}>
+                          <div className="text-left md:text-center space-y-1 md:space-y-2">
+                            <p className={`font-body font-bold text-[9px] md:text-[10px] uppercase tracking-[0.15em] ${isActive ? "text-charcoal" : "text-muted-foreground/40"}`}>
                               {step.title}
                             </p>
-                            <p className="text-[9px] font-body text-muted-foreground leading-tight italic">
+                            <p className="text-[8px] md:text-[9px] font-body text-muted-foreground leading-tight italic">
                               {step.description}
                             </p>
-                            <div className={`flex items-center justify-center gap-1.5 text-[8px] font-body font-bold uppercase tracking-widest pt-2 ${isActive ? "text-gold" : "text-muted-foreground/20"}`}>
+                            <div className={`flex items-center justify-start md:justify-center gap-1.5 text-[7px] md:text-[8px] font-body font-bold uppercase tracking-widest pt-1 md:pt-2 ${isActive ? "text-gold" : "text-muted-foreground/20"}`}>
                               <Clock size={10} /> {step.time}
                             </div>
                           </div>
                           {i < trackingSteps.length - 1 && (
-                            <div className="hidden md:block absolute top-[31px] left-[calc(50%+32px)] w-[calc(100%-64px)] h-[2px] bg-secondary" />
+                            <>
+                              <div className="hidden md:block absolute top-[31px] left-[calc(50%+32px)] w-[calc(100%-64px)] h-[2px] bg-secondary" />
+                              <div className="md:hidden absolute top-[48px] left-[23px] w-[2px] h-[calc(100%-48px+40px)] bg-secondary" />
+                            </>
                           )}
                         </div>
                       );
@@ -229,24 +234,24 @@ const TrackOrder = () => {
                   </div>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2 bg-[#f4f2ee] rounded-[3rem] p-12 border border-gold/5 flex items-center justify-between gap-12 overflow-hidden relative">
-                    <div className="space-y-6 relative z-10">
-                      <div className="flex items-center gap-3 text-gold">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  <div className="lg:col-span-2 bg-[#f4f2ee] rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 border border-gold/5 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 overflow-hidden relative">
+                    <div className="space-y-4 md:space-y-6 relative z-10 text-center md:text-left">
+                      <div className="flex items-center justify-center md:justify-start gap-3 text-gold">
                          <Sparkles size={18} />
                          <span className="text-[10px] font-body font-bold uppercase tracking-[0.2em]">Live Location</span>
                       </div>
-                      <h3 className="font-display text-4xl font-bold">Mumbai Vault <br /><span className="text-gold italic font-light">Processing</span></h3>
-                      <button className="flex items-center gap-3 text-[10px] font-body font-bold uppercase tracking-widest text-charcoal hover:text-gold transition-colors">
+                      <h3 className="font-display text-3xl md:text-4xl font-bold">Mumbai Vault <br /><span className="text-gold italic font-light">Processing</span></h3>
+                      <button className="flex items-center justify-center md:justify-start gap-3 text-[10px] font-body font-bold uppercase tracking-widest text-charcoal hover:text-gold transition-colors mx-auto md:mx-0">
                         View Detailed Log <ArrowRight size={14} />
                       </button>
                     </div>
-                    <div className="w-1/2 absolute -right-20 top-0 bottom-0 opacity-10">
+                    <div className="w-full md:w-1/2 absolute -right-10 md:-right-20 top-0 bottom-0 opacity-5 md:opacity-10 pointer-events-none">
                        <MapPin size={400} className="text-charcoal" />
                     </div>
                   </div>
 
-                  <div className="bg-charcoal rounded-[3rem] p-12 text-white space-y-8">
+                  <div className="bg-charcoal rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 text-white space-y-6 md:space-y-8">
                     <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.2em]">Package Insight</p>
                     <div className="space-y-4">
                       <div className="flex justify-between items-center pb-4 border-b border-white/5">
@@ -255,15 +260,15 @@ const TrackOrder = () => {
                       </div>
                       <div className="flex justify-between items-center pb-4 border-b border-white/5">
                         <span className="text-[10px] text-white/40 uppercase">Carrier</span>
-                        <span className="font-body font-bold">Lucsent Express</span>
+                        <span className="font-body font-bold text-sm">Lucsent Express</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-[10px] text-white/40 uppercase">Method</span>
-                        <span className="font-body font-bold text-gold">Priority Air</span>
+                        <span className="font-body font-bold text-sm text-gold">Priority Air</span>
                       </div>
                     </div>
                     <div className="pt-4">
-                      <Link to="/products" className="w-full py-4 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold hover:text-charcoal transition-all duration-500">
+                      <Link to="/products" className="w-full py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold hover:text-charcoal transition-all duration-500">
                         Continue Shopping
                       </Link>
                     </div>
@@ -275,27 +280,27 @@ const TrackOrder = () => {
         </section>
 
         {/* Global Support Call */}
-        <section className="py-24 lg:py-40 relative">
-          <div className="container mx-auto px-6 text-center">
+        <section className="py-16 md:py-24 lg:py-40 relative">
+          <div className="container mx-auto px-4 md:px-6 text-center">
             <motion.div
                initial={{ opacity: 0 }}
                whileInView={{ opacity: 1 }}
                viewport={{ once: true }}
-               className="max-w-4xl mx-auto space-y-12"
+               className="max-w-4xl mx-auto space-y-8 md:space-y-12"
             >
-              <div className="space-y-6">
-                <h2 className="font-display text-4xl lg:text-7xl font-bold text-charcoal tracking-tight">Need <span className="text-gradient-gold italic font-light">Assistance?</span></h2>
-                <p className="text-muted-foreground font-body text-lg max-w-xl mx-auto">
-                  Questions about your gems? Our radiance consultants are on standby to ensure your delivery is as smooth as our textures.
+              <div className="space-y-4 md:space-y-6">
+                <h2 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-charcoal tracking-tight leading-tight">Need <span className="text-gradient-gold italic font-light">Assistance?</span></h2>
+                <p className="text-sm md:text-lg text-muted-foreground font-body max-w-xl mx-auto italic">
+                  "Questions about your gems? Our radiance consultants are on standby to ensure your delivery is as smooth as our textures."
                 </p>
               </div>
               
-              <div className="flex flex-wrap justify-center gap-8">
-                <a href="#whatsapp" className="flex items-center gap-4 px-10 py-5 bg-[#25D366] text-white rounded-full font-body font-bold uppercase tracking-widest text-xs hover:shadow-2xl hover:translate-y-[-4px] transition-all">
-                  Connect on WhatsApp
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 md:gap-8">
+                <a href="#whatsapp" className="w-full sm:w-auto flex items-center justify-center gap-4 px-8 md:px-10 py-4 md:py-5 bg-[#25D366] text-white rounded-full font-body font-bold uppercase tracking-widest text-[10px] md:text-xs hover:shadow-2xl hover:translate-y-[-4px] transition-all">
+                  WhatsApp Support
                 </a>
-                <Link to="/contact" className="flex items-center gap-4 px-10 py-5 border border-charcoal text-charcoal rounded-full font-body font-bold uppercase tracking-widest text-xs hover:bg-charcoal hover:text-white transition-all">
-                  Visit Support Center
+                <Link to="/contact" className="w-full sm:w-auto flex items-center justify-center gap-4 px-8 md:px-10 py-4 md:py-5 border border-charcoal text-charcoal rounded-full font-body font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-charcoal hover:text-white transition-all">
+                  Contact Concierge
                 </Link>
               </div>
             </motion.div>

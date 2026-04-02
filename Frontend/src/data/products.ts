@@ -142,10 +142,10 @@ export const heroSlides = [
 ];
 
 export const instagramPosts = [
-  { image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=300&fit=crop", link: "#" },
-  { image: "https://images.unsplash.com/photo-1583241800698-e8ab01830a07?w=300&h=300&fit=crop", link: "#" },
-  { image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=300&h=300&fit=crop", link: "#" },
-  { image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop", link: "#" },
-  { image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300&h=300&fit=crop", link: "#" },
-  { image: "https://images.unsplash.com/photo-1487412912498-0447578fcca8?w=300&h=300&fit=crop", link: "#" },
+  { image: "/assets/instagram/post1.png", link: "https://www.instagram.com/hk_digiverse/", caption: "Celebrating our 3rd Grand Opening! Proud moment for the entire HK DigiVerse family. ✨ #HKDigiverse #Growth" },
+  { image: "/assets/instagram/post2.png", link: "https://www.instagram.com/hk_digiverse/", caption: "Strategic collaboration with Surat Diamond Bourse (SDB) – empowering industries with transformative digital solutions. 💎 #TechInnovation" },
+  { image: "/assets/instagram/post3.png", link: "https://www.instagram.com/hk_digiverse/", caption: "Innovative App Development: Creating seamless digital experiences for smart event management. 📱 #AppDev #HKDigiverse" },
+  { image: "/assets/instagram/post4.png", link: "https://www.instagram.com/hk_digiverse/", caption: "Our luxury workspace – where innovation meets elegant design. Transforming businesses one line of code at a time. 💻 #WorkplaceDesign" },
+  { image: "/assets/instagram/post5.png", link: "https://www.instagram.com/hk_digiverse/", caption: "Digital Transformation: Empowering your business to grow smarter and faster with cutting-edge tech. 🚀 #DigitalSuccess" },
+  { image: "/assets/instagram/post6.png", link: "https://www.instagram.com/hk_digiverse/", caption: "Future of Retail: Immersive Jewelry Shopping experience with AR/VR integration. ✨ #TechLifestyle #Surat" },
 ];

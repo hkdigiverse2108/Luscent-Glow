@@ -93,27 +93,27 @@ const BulkOrders = () => {
         <div className="fixed top-20 right-0 w-[500px] h-[500px] bg-gold/5 blur-[120px] rounded-full pointer-events-none z-0" />
 
         {/* Hero Section */}
-        <section className="relative pt-32 pb-24 lg:pt-48 lg:pb-40 overflow-hidden">
+        <section className="relative pt-24 pb-16 lg:pt-48 lg:pb-40 overflow-hidden">
           <div className="container mx-auto px-4 relative z-10">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 md:gap-16 items-center">
               <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.8 }}
-                className="max-w-2xl"
+                className="max-w-2xl text-center lg:text-left"
               >
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 mb-6 md:mb-8">
                   <Gift size={14} className="text-gold" />
                   <span className="text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em]">Corporate Concierge</span>
                 </div>
-                <h1 className="font-display text-5xl lg:text-7xl font-bold text-foreground leading-[1.1] mb-8">
-                  Elevate Your <span className="italic font-light text-gold">Corporate</span> Gifting.
+                <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6 md:mb-8">
+                  Elevate Your <span className="italic font-light text-gold italic">Corporate</span> Gifting.
                 </h1>
-                <p className="text-lg font-body text-muted-foreground leading-relaxed mb-12 max-w-lg">
-                  Transform business relationships into lasting impressions with our bespoke curation service for events, employees, and executive partners.
+                <p className="text-base md:text-lg font-body text-muted-foreground leading-relaxed mb-8 md:mb-12 max-w-lg mx-auto lg:mx-0 italic">
+                  "Transform business relationships into lasting impressions with our bespoke curation service for events, employees, and executive partners."
                 </p>
-                <div className="flex flex-wrap gap-6">
-                  <a href="#inquiry-form" className="px-10 py-5 bg-primary text-white rounded-full font-body font-bold uppercase tracking-widest text-xs hover:bg-gold transition-all shadow-xl hover:shadow-gold/20">
+                <div className="flex flex-wrap justify-center lg:justify-start gap-6">
+                  <a href="#inquiry-form" className="px-8 md:px-10 py-4 md:py-5 bg-primary text-white rounded-full font-body font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-gold transition-all shadow-xl hover:shadow-gold/20">
                     Initiate Consultation
                   </a>
                 </div>
@@ -140,9 +140,9 @@ const BulkOrders = () => {
         </section>
 
         {/* Brand Pillars */}
-        <section className="py-24 bg-secondary/30 backdrop-blur-sm border-y border-border">
+        <section className="py-16 md:py-24 bg-secondary/30 backdrop-blur-sm border-y border-border">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center sm:text-left">
               {features.map((feature, idx) => (
                 <motion.div
                   key={idx}
@@ -150,13 +150,13 @@ const BulkOrders = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="space-y-4"
+                  className="space-y-4 flex flex-col items-center sm:items-start"
                 >
-                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gold shadow-sm">
+                  <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gold shadow-sm group-hover:scale-110 transition-transform">
                     {feature.icon}
                   </div>
-                  <h3 className="font-display text-xl font-bold text-foreground">{feature.title}</h3>
-                  <p className="text-sm font-body text-muted-foreground leading-relaxed">{feature.description}</p>
+                  <h3 className="font-display text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">{feature.title}</h3>
+                  <p className="text-xs md:text-sm font-body text-muted-foreground leading-relaxed">{feature.description}</p>
                 </motion.div>
               ))}
             </div>
@@ -164,25 +164,25 @@ const BulkOrders = () => {
         </section>
 
         {/* Inquiry Portal */}
-        <section id="inquiry-form" className="py-32 lg:py-48">
+        <section id="inquiry-form" className="py-20 md:py-32 lg:py-48">
           <div className="container mx-auto px-4">
             <div className="max-w-5xl mx-auto">
-              <div className="grid lg:grid-cols-5 gap-20">
-                <div className="lg:col-span-2 space-y-8">
+              <div className="grid lg:grid-cols-5 gap-12 md:gap-20">
+                <div className="lg:col-span-2 space-y-8 text-center lg:text-left">
                   <div className="space-y-4">
-                    <h2 className="font-display text-4xl font-bold text-foreground">The Inquiry <span className="text-gold italic font-light">Portal</span></h2>
-                    <p className="font-body text-muted-foreground leading-relaxed">
+                    <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">The Inquiry <span className="text-gold italic font-light">Portal</span></h2>
+                    <p className="font-body text-sm md:text-base text-muted-foreground leading-relaxed">
                       Share your requirements and our dedicated account manager will reach out with a personalized catalog and tiered pricing dashboard within 2 hours.
                     </p>
                   </div>
-                  <div className="p-8 bg-primary rounded-[2.5rem] text-white space-y-6">
-                    <div className="flex items-center gap-4">
+                  <div className="p-6 md:p-8 bg-primary rounded-[2rem] md:rounded-[2.5rem] text-white flex flex-col sm:flex-row lg:flex-col gap-6 md:gap-6">
+                    <div className="flex items-center justify-center lg:justify-start gap-4">
                       <Users className="text-gold" size={20} />
-                      <p className="text-sm font-body">1,200+ Global Partners</p>
+                      <p className="text-xs md:text-sm font-body font-bold uppercase tracking-widest">1,200+ Global Partners</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center justify-center lg:justify-start gap-4">
                       <Package className="text-gold" size={20} />
-                      <p className="text-sm font-body">Bespoke Packaging Included</p>
+                      <p className="text-xs md:text-sm font-body font-bold uppercase tracking-widest">Bespoke Packaging</p>
                     </div>
                   </div>
                 </div>
@@ -191,9 +191,9 @@ const BulkOrders = () => {
                   {!isSubmitted ? (
                     <motion.form 
                       onSubmit={handleSubmit}
-                      className="space-y-8"
+                      className="space-y-6 md:space-y-8"
                     >
-                      <div className="grid md:grid-cols-2 gap-8">
+                      <div className="grid sm:grid-cols-2 gap-6 md:gap-8">
                         <div className="space-y-2">
                           <label className="text-[10px] font-body font-bold text-gold uppercase tracking-widest pl-1">Full Name</label>
                           <input 
@@ -201,7 +201,7 @@ const BulkOrders = () => {
                             type="text"
                             value={formState.name}
                             onChange={(e) => setFormState({...formState, name: e.target.value})}
-                            className="w-full bg-white border border-border px-6 py-4 rounded-2xl focus:outline-none focus:border-gold transition-colors font-body text-sm"
+                            className="w-full bg-white border border-border px-6 py-4 rounded-xl md:rounded-2xl focus:outline-none focus:border-gold transition-colors font-body text-sm"
                             placeholder="Alex Thorne"
                           />
                         </div>
@@ -212,13 +212,13 @@ const BulkOrders = () => {
                             type="email"
                             value={formState.email}
                             onChange={(e) => setFormState({...formState, email: e.target.value})}
-                            className="w-full bg-white border border-border px-6 py-4 rounded-2xl focus:outline-none focus:border-gold transition-colors font-body text-sm"
+                            className="w-full bg-white border border-border px-6 py-4 rounded-xl md:rounded-2xl focus:outline-none focus:border-gold transition-colors font-body text-sm"
                             placeholder="alex@company.com"
                           />
                         </div>
                       </div>
 
-                      <div className="grid md:grid-cols-2 gap-8">
+                      <div className="grid sm:grid-cols-2 gap-6 md:gap-8">
                         <div className="space-y-2">
                           <label className="text-[10px] font-body font-bold text-gold uppercase tracking-widest pl-1">Company Name</label>
                           <input 
@@ -226,7 +226,7 @@ const BulkOrders = () => {
                             type="text"
                             value={formState.companyName}
                             onChange={(e) => setFormState({...formState, companyName: e.target.value})}
-                            className="w-full bg-white border border-border px-6 py-4 rounded-2xl focus:outline-none focus:border-gold transition-colors font-body text-sm"
+                            className="w-full bg-white border border-border px-6 py-4 rounded-xl md:rounded-2xl focus:outline-none focus:border-gold transition-colors font-body text-sm"
                             placeholder="Vanguard Elite Ltd."
                           />
                         </div>
@@ -237,7 +237,7 @@ const BulkOrders = () => {
                             type="tel"
                             value={formState.phoneNumber}
                             onChange={(e) => setFormState({...formState, phoneNumber: e.target.value})}
-                            className="w-full bg-white border border-border px-6 py-4 rounded-2xl focus:outline-none focus:border-gold transition-colors font-body text-sm"
+                            className="w-full bg-white border border-border px-6 py-4 rounded-xl md:rounded-2xl focus:outline-none focus:border-gold transition-colors font-body text-sm"
                             placeholder="+91 99999 99999"
                           />
                         </div>

@@ -70,7 +70,7 @@ const Contact = () => {
         </div>
 
         {/* Hero Section */}
-        <section className="pt-32 pb-20 lg:pt-48 lg:pb-32 bg-primary relative overflow-hidden">
+        <section className="pt-24 pb-16 lg:pt-48 lg:pb-32 bg-primary relative overflow-hidden">
           <div className="absolute top-0 right-0 w-1/3 h-full bg-gold/5 blur-3xl rounded-full translate-x-1/2 -translate-y-1/2" />
           <div className="container mx-auto px-4 relative z-10">
             <motion.div 
@@ -78,11 +78,11 @@ const Contact = () => {
               animate={{ opacity: 1, y: 0 }}
               className="max-w-3xl"
             >
-              <p className="text-sm font-body font-bold text-gold uppercase tracking-[0.4em] mb-6">The Glow Concierge</p>
-              <h1 className="font-display text-5xl lg:text-7xl font-bold text-white leading-tight mb-8">
-                Your Radiance,<br />Our <span className="italic font-light">Priority.</span>
+              <p className="text-[10px] md:text-sm font-body font-bold text-gold uppercase tracking-[0.4em] mb-4 md:mb-6">The Glow Concierge</p>
+              <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 md:mb-8 text-glow-gold/30">
+                Your Radiance,<br />Our <span className="italic font-light text-gold/80">Priority.</span>
               </h1>
-              <p className="text-lg font-body text-white/60 leading-relaxed max-w-xl">
+              <p className="text-sm md:text-lg font-body text-white/60 leading-relaxed max-w-xl">
                 Whether you seek personalized product curation or require immediate support, our artisan team is here to illuminate your journey.
               </p>
             </motion.div>
@@ -108,21 +108,21 @@ const Contact = () => {
                 </div>
 
                 {!isSubmitted ? (
-                  <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="grid md:grid-cols-3 gap-8">
+                  <form onSubmit={handleSubmit} className="space-y-6 md:space-y-8">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                       <div className="relative group">
                         <input 
                           type="text" 
                           required
                           value={formState.name}
                           onChange={(e) => setFormState({...formState, name: e.target.value})}
-                          className="w-full bg-transparent border-b-2 border-border py-4 outline-none focus:border-gold transition-colors font-body peer placeholder-transparent"
+                          className="w-full bg-transparent border-b-2 border-border py-4 outline-none focus:border-gold transition-colors font-body peer placeholder-transparent text-sm md:text-base"
                           placeholder="Name"
                           id="name"
                         />
                         <label 
                           htmlFor="name"
-                          className="absolute left-0 top-4 text-muted-foreground font-body transition-all pointer-events-none 
+                          className="absolute left-0 top-4 text-xs md:text-sm text-muted-foreground font-body transition-all pointer-events-none 
                           peer-focus:-top-4 peer-focus:text-xs peer-focus:text-gold peer-[:not(:placeholder-shown)]:-top-4 peer-[:not(:placeholder-shown)]:text-xs"
                         >
                           Full Name
@@ -134,31 +134,31 @@ const Contact = () => {
                           required
                           value={formState.email}
                           onChange={(e) => setFormState({...formState, email: e.target.value})}
-                          className="w-full bg-transparent border-b-2 border-border py-4 outline-none focus:border-gold transition-colors font-body peer placeholder-transparent"
+                          className="w-full bg-transparent border-b-2 border-border py-4 outline-none focus:border-gold transition-colors font-body peer placeholder-transparent text-sm md:text-base"
                           placeholder="Email"
                           id="email"
                         />
                         <label 
                           htmlFor="email"
-                          className="absolute left-0 top-4 text-muted-foreground font-body transition-all pointer-events-none 
+                          className="absolute left-0 top-4 text-xs md:text-sm text-muted-foreground font-body transition-all pointer-events-none 
                           peer-focus:-top-4 peer-focus:text-xs peer-focus:text-gold peer-[:not(:placeholder-shown)]:-top-4 peer-[:not(:placeholder-shown)]:text-xs"
                         >
                           Email Address
                         </label>
                       </div>
-                      <div className="relative group">
+                      <div className="relative group sm:col-span-2 lg:col-span-1">
                         <input 
                           type="tel" 
                           required
                           value={formState.phoneNumber}
                           onChange={(e) => setFormState({...formState, phoneNumber: e.target.value})}
-                          className="w-full bg-transparent border-b-2 border-border py-4 outline-none focus:border-gold transition-colors font-body peer placeholder-transparent"
+                          className="w-full bg-transparent border-b-2 border-border py-4 outline-none focus:border-gold transition-colors font-body peer placeholder-transparent text-sm md:text-base"
                           placeholder="Phone Number"
                           id="phoneNumber"
                         />
                         <label 
                           htmlFor="phoneNumber"
-                          className="absolute left-0 top-4 text-muted-foreground font-body transition-all pointer-events-none 
+                          className="absolute left-0 top-4 text-xs md:text-sm text-muted-foreground font-body transition-all pointer-events-none 
                           peer-focus:-top-4 peer-focus:text-xs peer-focus:text-gold peer-[:not(:placeholder-shown)]:-top-4 peer-[:not(:placeholder-shown)]:text-xs"
                         >
                           Phone Number
@@ -168,13 +168,13 @@ const Contact = () => {
 
                     <div className="relative">
                       <p className="text-xs font-body font-bold text-gold uppercase tracking-widest mb-4">Nature of Inquiry</p>
-                      <div className="flex flex-wrap gap-3">
+                      <div className="flex flex-wrap gap-2 md:gap-3">
                         {subjects.map((sub) => (
                           <button
                             key={sub}
                             type="button"
                             onClick={() => setFormState({...formState, subject: sub})}
-                            className={`px-6 py-2 rounded-full border text-xs font-body transition-all ${
+                            className={`px-4 md:px-6 py-2 rounded-full border text-[10px] md:text-xs font-body font-bold uppercase tracking-widest transition-all ${
                               formState.subject === sub 
                                 ? "bg-gold border-gold text-primary shadow-lg shadow-gold/20" 
                                 : "border-border text-muted-foreground hover:border-gold/50"
@@ -191,13 +191,13 @@ const Contact = () => {
                         required
                         value={formState.message}
                         onChange={(e) => setFormState({...formState, message: e.target.value})}
-                        className="w-full bg-transparent border-b-2 border-border py-4 outline-none focus:border-gold transition-colors font-body min-h-[150px] resize-none peer placeholder-transparent"
+                        className="w-full bg-transparent border-b-2 border-border py-4 outline-none focus:border-gold transition-colors font-body min-h-[120px] md:min-h-[150px] resize-none peer placeholder-transparent text-sm md:text-base"
                         placeholder="Message"
                         id="message"
                       />
                       <label 
                         htmlFor="message"
-                        className="absolute left-0 top-4 text-muted-foreground font-body transition-all pointer-events-none 
+                        className="absolute left-0 top-4 text-xs md:text-sm text-muted-foreground font-body transition-all pointer-events-none 
                         peer-focus:-top-4 peer-focus:text-xs peer-focus:text-gold peer-[:not(:placeholder-shown)]:-top-4 peer-[:not(:placeholder-shown)]:text-xs"
                       >
                         Tell us more about your discovery
@@ -206,7 +206,7 @@ const Contact = () => {
 
                     <button 
                       type="submit"
-                      className="group flex items-center gap-4 px-12 py-5 bg-primary text-white rounded-full font-body font-bold uppercase tracking-widest text-xs hover:bg-gold transition-all shadow-2xl hover:shadow-gold/30"
+                      className="w-full sm:w-auto group flex items-center justify-center gap-4 px-10 md:px-12 py-4 md:py-5 bg-primary text-white rounded-full font-body font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-gold transition-all shadow-2xl hover:shadow-gold/30"
                     >
                       Illuminate My Inquiry <Send size={16} className="group-hover:translate-x-2 transition-transform" />
                     </button>

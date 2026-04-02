@@ -163,9 +163,9 @@ const Products = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6 md:py-8 lg:py-12">
         {/* Breadcrumb */}
-        <p className="text-sm font-body text-muted-foreground mb-6">
+        <p className="text-[10px] md:text-xs font-body text-muted-foreground mb-4 md:mb-6 uppercase tracking-widest opacity-70">
           Home / {selectedCategory ? categories.find((c) => c.slug === selectedCategory)?.name : "All Products"}
           {searchParam && <span className="text-gold font-medium"> / Searching for "{searchParam}"</span>}
         </p>
@@ -179,28 +179,28 @@ const Products = () => {
           {/* Main content */}
           <div className="flex-1">
             {/* Top bar */}
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-sm font-body text-muted-foreground">
-                {filtered.length} product{filtered.length !== 1 ? "s" : ""}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+              <p className="text-xs md:text-sm font-body text-muted-foreground order-2 sm:order-1">
+                Showing <span className="text-foreground font-semibold">{filtered.length}</span> luxury formulas
               </p>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between sm:justify-end gap-3 order-1 sm:order-2">
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden flex items-center gap-1.5 px-3 py-2 border border-border rounded-md text-sm font-body"
+                  className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-secondary text-primary rounded-full text-xs font-body font-bold uppercase tracking-widest border border-border/50 hover:bg-gold hover:text-white transition-all"
                 >
-                  <SlidersHorizontal size={14} /> Filters
+                  <SlidersHorizontal size={14} /> Filter
                 </button>
                 <div className="relative">
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none bg-background border border-border rounded-md px-4 py-2 pr-8 text-sm font-body focus:outline-none focus:ring-1 focus:ring-gold/30"
+                    className="appearance-none bg-background border border-border rounded-full px-5 py-2.5 pr-10 text-[11px] font-body font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-gold/20"
                   >
                     {sortOptions.map((opt) => (
                       <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                   </select>
-                  <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                 </div>
               </div>
             </div>
@@ -263,8 +263,8 @@ const Products = () => {
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
-              transition={{ type: "tween" }}
-              className="fixed left-0 top-0 bottom-0 w-72 bg-background z-50 p-6 overflow-y-auto lg:hidden"
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed left-0 top-0 bottom-0 w-[85%] max-w-sm bg-background z-50 p-6 overflow-y-auto lg:hidden shadow-2xl border-r border-gold/10"
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="font-display text-xl font-semibold">Filters</h2>

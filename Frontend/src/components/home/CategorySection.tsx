@@ -15,15 +15,15 @@ const CategorySection = () => {
   ];
 
   return (
-    <section className="py-24 lg:py-32 bg-[#FDFCFB]">
-      <div className="container mx-auto px-6 lg:px-12">
-        <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
+    <section className="py-16 md:py-24 lg:py-32 bg-[#FDFCFB]">
+      <div className="container mx-auto px-4 md:px-6 lg:px-12">
+        <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 md:mb-16 gap-6">
           <div className="max-w-xl">
             <motion.span
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
-              className="text-sm font-body font-bold text-gold uppercase tracking-[0.3em] mb-4 block"
+              className="text-xs md:text-sm font-body font-bold text-gold uppercase tracking-[0.3em] mb-3 md:mb-4 block"
             >
               The Collections
             </motion.span>
@@ -31,7 +31,7 @@ const CategorySection = () => {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="font-display text-4xl lg:text-6xl font-bold text-foreground leading-[1.1]"
+              className="font-display text-3xl md:text-4xl lg:text-6xl font-bold text-foreground leading-[1.1]"
             >
               Curated for Your <span className="italic font-light text-gold/80">Unique Ritual</span>
             </motion.h2>
@@ -40,14 +40,14 @@ const CategorySection = () => {
             to="/products"
             className="group flex items-center gap-3 font-body font-semibold text-charcoal hover:text-gold transition-colors duration-300"
           >
-            <span className="uppercase tracking-widest text-sm">View All Categories</span>
-            <div className="w-10 h-10 rounded-full border border-charcoal/10 flex items-center justify-center group-hover:border-gold transition-colors">
-              <ArrowRight size={18} />
+            <span className="uppercase tracking-widest text-xs md:text-sm">View All Categories</span>
+            <div className="w-8 h-8 md:w-10 md:h-10 rounded-full border border-charcoal/10 flex items-center justify-center group-hover:border-gold transition-colors">
+              <ArrowRight size={16} className="md:w-4.5 md:h-4.5" />
             </div>
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-6 auto-rows-[240px] gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-6 auto-rows-[200px] md:auto-rows-[240px] gap-4 md:gap-6">
           {categories.map((cat, i) => (
             <motion.div
               key={cat.slug}
@@ -55,7 +55,7 @@ const CategorySection = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 0.6 }}
-              className={`${spans[i] || "md:col-span-1"} group relative overflow-hidden rounded-[2.5rem] shadow-ethereal hover-lift transition-all duration-700`}
+              className={`${spans[i] || "md:col-span-1"} group relative overflow-hidden rounded-[1.5rem] md:rounded-[2.5rem] shadow-ethereal hover-lift transition-all duration-700`}
             >
               <Link
                 to={`/products?category=${cat.slug}`}

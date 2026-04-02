@@ -276,7 +276,7 @@ const GiftCards = () => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
                  <div className="space-y-8">
                     <span className="text-gold font-body text-sm font-bold uppercase tracking-[0.4em] block">Redefining Gifting</span>
-                    <h2 className="font-display text-5xl lg:text-7xl font-bold leading-tight">
+                    <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
                        Because Beauty is a <span className="italic font-light text-gold/80 hover-lift">Personal Choice.</span>
                     </h2>
                     <p className="text-white/60 font-body text-lg leading-relaxed max-w-xl">

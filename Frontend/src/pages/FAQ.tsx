@@ -108,11 +108,11 @@ const FAQ = () => {
       <main className="pt-32 pb-24">
         <div className="container mx-auto px-4">
           {/* Header Section */}
-          <div className="max-w-3xl mx-auto text-center mb-16">
+          <div className="max-w-3xl mx-auto text-center mb-12 md:mb-16 px-4">
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-gold font-body font-bold uppercase tracking-[0.3em] mb-4 text-xs"
+              className="text-gold font-body font-bold uppercase tracking-[0.3em] mb-4 text-[10px] md:text-xs"
             >
               Concierge Services
             </motion.p>
@@ -120,7 +120,7 @@ const FAQ = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="font-display text-5xl lg:text-7xl font-bold text-foreground mb-6"
+              className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight md:leading-[1.1]"
             >
               How can we <span className="italic font-light">assist you?</span>
             </motion.h1>
@@ -128,10 +128,10 @@ const FAQ = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="font-body text-muted-foreground text-lg"
+              className="font-body text-muted-foreground text-sm md:text-lg italic"
             >
-              Explore our curated guide to the most frequent inquiries regarding 
-              your journey to radiant skin.
+              "Explore our curated guide to the most frequent inquiries regarding 
+              your journey to radiant skin."
             </motion.p>
           </div>
 
@@ -140,17 +140,17 @@ const FAQ = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="max-w-xl mx-auto mb-16 relative"
+            className="max-w-xl mx-auto mb-12 md:mb-16 relative px-4"
           >
-            <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-              <Search className="w-5 h-5 text-muted-foreground/50" />
+            <div className="absolute inset-y-0 left-9 md:left-5 flex items-center pointer-events-none">
+              <Search className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground/50" />
             </div>
             <input 
               type="text"
               placeholder="Search for a question..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-14 pr-6 py-5 bg-white border border-gold/10 rounded-2xl font-body text-foreground focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold/30 transition-all shadow-ethereal"
+              className="w-full pl-12 md:pl-14 pr-6 py-4 md:py-5 bg-white border border-gold/10 rounded-xl md:rounded-2xl font-body text-sm md:text-base text-foreground focus:outline-none focus:ring-2 focus:ring-gold/20 focus:border-gold/30 transition-all shadow-ethereal"
             />
           </motion.div>
 
@@ -160,23 +160,23 @@ const FAQ = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="lg:w-1/3 flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 scrollbar-hide"
+              className="lg:w-1/3 flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 scrollbar-hide px-4 md:px-0"
             >
               {faqData.map((cat) => (
                 <button
                   key={cat.category}
                   onClick={() => setActiveCategory(cat.category)}
                   className={`
-                    flex items-center gap-4 px-6 py-4 rounded-xl transition-all duration-300 whitespace-nowrap
+                    flex items-center gap-3 md:gap-4 px-5 md:px-6 py-3 md:py-4 rounded-xl transition-all duration-300 whitespace-nowrap
                     ${activeCategory === cat.category 
                       ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105" 
-                      : "bg-white text-muted-foreground hover:bg-gold/5 hover:text-primary"}
+                      : "bg-white text-muted-foreground hover:bg-gold/5 hover:text-primary border border-gold/5"}
                   `}
                 >
-                  <span className={`${activeCategory === cat.category ? "text-gold" : "text-muted-foreground/50"}`}>
+                  <span className={`${activeCategory === cat.category ? "text-gold" : "text-muted-foreground/50"} flex-shrink-0`}>
                     {cat.icon}
                   </span>
-                  <span className="font-body font-bold uppercase tracking-wider text-xs">
+                  <span className="font-body font-bold uppercase tracking-wider text-[10px] md:text-xs">
                     {cat.category}
                   </span>
                 </button>
@@ -198,18 +198,18 @@ const FAQ = () => {
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <Accordion type="single" collapsible className="space-y-4">
+                  <Accordion type="single" collapsible className="space-y-4 px-4 md:px-0">
                     {filteredFaqs[0]?.questions.length > 0 ? (
                       filteredFaqs[0].questions.map((q) => (
                         <AccordionItem 
                           key={q.id} 
                           value={q.id}
-                          className="bg-white border border-gold/10 rounded-2xl px-6 data-[state=open]:border-gold/30 transition-all shadow-sm"
+                          className="bg-white border border-gold/10 rounded-xl md:rounded-2xl px-5 md:px-6 data-[state=open]:border-gold/30 transition-all shadow-sm"
                         >
-                          <AccordionTrigger className="font-display text-xl font-bold text-foreground hover:no-underline text-left py-6">
+                          <AccordionTrigger className="font-display text-lg md:text-xl font-bold text-foreground hover:no-underline text-left py-5 md:py-6">
                             {q.question}
                           </AccordionTrigger>
-                          <AccordionContent className="font-body text-muted-foreground text-lg leading-relaxed pb-6">
+                          <AccordionContent className="font-body text-muted-foreground text-sm md:text-lg leading-relaxed pb-5 md:pb-6 italic">
                             {q.answer}
                           </AccordionContent>
                         </AccordionItem>

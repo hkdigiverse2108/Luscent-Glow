@@ -43,7 +43,7 @@ const TrendingSection = () => {
   };
 
   return (
-    <section className="relative py-24 lg:py-32 overflow-hidden bg-background">
+    <section className="relative py-16 md:py-24 lg:py-32 overflow-hidden bg-background">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gold/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4" />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-rose-light/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/4" />
@@ -66,7 +66,7 @@ const TrendingSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="font-display text-4xl lg:text-6xl font-bold text-foreground leading-tight"
+              className="font-display text-3xl md:text-4xl lg:text-6xl font-bold text-foreground leading-tight"
             >
               Trending <span className="italic font-light text-gold/80">Essence</span>
             </motion.h2>
@@ -76,7 +76,7 @@ const TrendingSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="mt-4 text-muted-foreground font-body text-base lg:text-lg max-w-lg"
+              className="mt-4 text-muted-foreground font-body text-sm md:text-base lg:text-lg max-w-lg"
             >
               Curated by our beauty experts, these are the formulas everyone is talking about this season.
             </motion.p>
@@ -104,7 +104,7 @@ const TrendingSection = () => {
 
           <div
             ref={scrollRef}
-            className="flex gap-8 overflow-x-auto scrollbar-hide pb-8 -mx-6 px-6 snap-x snap-mandatory min-h-[450px]"
+            className="flex gap-4 md:gap-8 overflow-x-auto scrollbar-hide pb-8 -mx-4 px-4 md:-mx-6 md:px-6 snap-x snap-mandatory min-h-[400px] md:min-h-[450px]"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {loading ? (
@@ -119,7 +119,7 @@ const TrendingSection = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1, duration: 0.6 }}
-                  className="min-w-[280px] max-w-[280px] snap-start"
+                  className="min-w-[240px] xs:min-w-[280px] max-w-[280px] snap-start"
                 >
                   <div className="hover-lift transition-all duration-500">
                     <ProductCard product={product} />

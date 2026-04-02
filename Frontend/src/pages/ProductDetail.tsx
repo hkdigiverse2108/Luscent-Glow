@@ -54,23 +54,33 @@ const ProductDetail = () => {
 
     if (id) fetchProduct();
   }, [id]);
-
   useEffect(() => {
-    const fetchRelated = async () => {
+    const fetchRelatedAndAlsoViewed = async () => {
       if (!product) return;
-      try {
-        const response = await fetch(getApiUrl("/products/"));
-        if (response.ok) {
-          const data = await response.json();
-          const filtered = data.filter((p: Product) => p.category === product?.category && (p._id || p.id) !== (product?._id || product?.id)).slice(0, 4);
-          setRelatedProducts(filtered);
+        let data;
+        try {
+          const response = await fetch(getApiUrl("/products/"));
+          if (response.ok) {
+            data = await response.json();
+          } else {
+            throw new Error("API failed");
+          }
+        } catch (err) {
+          console.error("Error fetching related items from API, using local data:", err);
+          data = products;
         }
-      } catch (err) {
-        console.error("Error fetching related products:", err);
-      }
+
+        const currentId = product?._id || product?.id;
+        
+        // Related: Same category, excluding current product (4 items)
+        const related = data.filter((p: Product) => 
+          p.category === product?.category && 
+          (p._id || p.id) !== currentId
+        ).slice(0, 4);
+        setRelatedProducts(related);
     };
 
-    fetchRelated();
+    fetchRelatedAndAlsoViewed();
   }, [product]);
 
   const isWishlisted = product ? isInWishlist(product._id || product.id) : false;
@@ -142,7 +152,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <p className="text-sm font-body text-muted-foreground mb-6 uppercase tracking-wider">
+        <p className="text-[10px] md:text-sm font-body text-muted-foreground mb-4 md:mb-6 uppercase tracking-widest opacity-70">
           Home / {product.category || "Collection"} / {product.name || "Treasure Detail"}
         </p>
 
@@ -168,9 +178,9 @@ const ProductDetail = () => {
             animate={{ opacity: 1, x: 0 }}
             className="space-y-6"
           >
-            <div>
-              <p className="text-sm font-body font-medium text-gold uppercase tracking-widest mb-1">{product.brand}</p>
-              <h1 className="font-display text-3xl lg:text-4xl font-bold text-foreground">{product.name}</h1>
+            <div className="space-y-2">
+              <p className="text-xs md:text-sm font-body font-bold text-gold uppercase tracking-[0.2em] mb-1">{product.brand}</p>
+              <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground leading-tight">{product.name}</h1>
             </div>
 
             {/* Rating */}
@@ -186,13 +196,13 @@ const ProductDetail = () => {
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-3">
-              <span className="font-body text-3xl font-bold text-foreground">₹{product?.price?.toLocaleString() || "TBD"}</span>
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{product?.price?.toLocaleString() || "TBD"}</span>
               {product?.originalPrice && (
-                <>
-                  <span className="text-lg text-muted-foreground line-through font-body">₹{product.originalPrice.toLocaleString()}</span>
-                  <span className="text-sm font-body font-semibold text-destructive">{product.discount || "10"}% OFF</span>
-                </>
+                <div className="flex items-center gap-2">
+                  <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{product.originalPrice.toLocaleString()}</span>
+                  <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{product.discount || "10"}% OFF</span>
+                </div>
               )}
             </div>
 
@@ -250,35 +260,37 @@ const ProductDetail = () => {
             )}
 
             {/* Quantity + Add to cart */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center border border-border rounded-md">
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 text-muted-foreground hover:text-foreground">
-                  <Minus size={14} />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <div className="flex items-center justify-between border border-border rounded-xl bg-secondary/30">
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-4 text-muted-foreground hover:text-foreground transition-colors">
+                  <Minus size={16} />
                 </button>
-                <span className="px-4 text-sm font-body font-medium">{quantity}</span>
-                <button onClick={() => setQuantity(quantity + 1)} className="p-3 text-muted-foreground hover:text-foreground">
-                  <Plus size={14} />
+                <span className="px-6 text-base font-body font-bold">{quantity}</span>
+                <button onClick={() => setQuantity(quantity + 1)} className="p-4 text-muted-foreground hover:text-foreground transition-colors">
+                  <Plus size={16} />
                 </button>
               </div>
-              <button 
-                onClick={handleAddToCart}
-                className="flex-1 flex items-center justify-center gap-2 py-3.5 bg-primary text-primary-foreground font-body font-semibold text-sm uppercase tracking-wider rounded-md hover:bg-primary/90 transition-colors"
-              >
-                <ShoppingBag size={16} /> Add to Cart
-              </button>
-              <button 
-                onClick={() => product && toggleWishlist(product)}
-                className={`p-3.5 border rounded-md transition-colors ${
-                  isWishlisted ? "bg-rose/10 border-rose text-rose" : "border-border text-muted-foreground hover:text-rose hover:border-rose"
-                }`}
-              >
-                <Heart size={18} className={isWishlisted ? "fill-rose" : ""} />
-              </button>
+              <div className="flex items-center gap-3 flex-1">
+                <button 
+                  onClick={handleAddToCart}
+                  className="flex-1 flex items-center justify-center gap-2 py-4 bg-primary text-primary-foreground font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-gold transition-all shadow-xl shadow-primary/10 active:scale-95"
+                >
+                  <ShoppingBag size={18} /> Add to Cart
+                </button>
+                <button 
+                  onClick={() => product && toggleWishlist(product)}
+                  className={`p-4 border rounded-xl transition-all active:scale-95 ${
+                    isWishlisted ? "bg-rose/10 border-rose text-rose" : "border-border text-muted-foreground hover:text-rose hover:border-rose bg-secondary/30"
+                  }`}
+                >
+                  <Heart size={20} className={isWishlisted ? "fill-rose" : ""} />
+                </button>
+              </div>
             </div>
 
             <button 
               onClick={handleBuyNow}
-              className="w-full py-3.5 bg-gold text-primary font-body font-semibold text-sm uppercase tracking-wider rounded-md hover:bg-gold/90 transition-colors"
+              className="w-full py-4 bg-gold text-primary font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-gold/90 transition-all shadow-xl shadow-gold/20 active:scale-95"
             >
               Buy Now
             </button>
@@ -306,13 +318,13 @@ const ProductDetail = () => {
         </div>
 
         {/* Tabs */}
-        <div className="mt-16">
-          <div className="flex border-b border-border">
+        <div className="mt-12 md:mt-20">
+          <div className="flex overflow-x-auto scrollbar-hide border-b border-border -mx-4 px-4 md:mx-0 md:px-0">
             {["description", "ingredients", "how to use", "reviews"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 text-sm font-body font-medium capitalize transition-colors border-b-2 ${
+                className={`whitespace-nowrap px-6 py-4 text-[10px] md:text-xs font-body font-bold uppercase tracking-widest transition-all border-b-2 ${
                   activeTab === tab ? "border-gold text-gold" : "border-transparent text-muted-foreground hover:text-foreground"
                 }`}
               >

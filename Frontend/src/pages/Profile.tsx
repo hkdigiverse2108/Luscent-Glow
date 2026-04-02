@@ -129,16 +129,16 @@ const Profile = () => {
     <div className="min-h-screen bg-[#faf9f6]">
       <Header />
       
-      <main className="container mx-auto px-6 py-20 lg:py-32">
+      <main className="container mx-auto px-4 md:px-6 py-12 md:py-20 lg:py-32">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row gap-12 items-start mb-20">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-center md:items-start mb-12 md:mb-20 text-center md:text-left">
             <div className="relative group">
-              <div className="w-40 h-40 rounded-full bg-gold/10 border-2 border-gold/20 flex items-center justify-center text-gold overflow-hidden">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gold/10 border-2 border-gold/20 flex items-center justify-center text-gold overflow-hidden">
                 {profilePicture ? (
                   <img src={profilePicture} alt={fullName} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="font-display text-5xl font-light">{user.fullName.charAt(0).toUpperCase()}</span>
+                  <span className="font-display text-4xl md:text-5xl font-light">{user.fullName.charAt(0).toUpperCase()}</span>
                 )}
               </div>
               <input 
@@ -150,21 +150,21 @@ const Profile = () => {
               />
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-2 right-2 w-10 h-10 bg-charcoal text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gold hover:text-charcoal transition-all"
+                className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-8 h-8 md:w-10 md:h-10 bg-charcoal text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gold hover:text-charcoal transition-all"
               >
-                <Camera size={18} />
+                <Camera size={16} />
               </button>
             </div>
             
-            <div className="space-y-4 pt-4 text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start gap-3 text-gold">
+            <div className="space-y-3 md:space-y-4 pt-0 md:pt-4">
+              <div className="flex items-center justify-center md:justify-start gap-2 md:gap-3 text-gold">
                 <ShieldCheck size={16} />
-                <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em]">Verified Ritualist</span>
+                <span className="text-[9px] md:text-[10px] font-body font-bold uppercase tracking-[0.3em]">Verified Ritualist</span>
               </div>
-              <h1 className="font-display text-5xl lg:text-7xl font-bold text-charcoal tracking-tight lowercase">
+              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-charcoal tracking-tight lowercase leading-tight">
                 {user.fullName.split(' ')[0]}<span className="text-gold">.</span>
               </h1>
-              <p className="text-muted-foreground font-body max-w-md italic">
+              <p className="text-sm md:text-base text-muted-foreground font-body max-w-md italic">
                 A curator of radiance and keeper of sacred wellness.
               </p>
             </div>
@@ -172,13 +172,13 @@ const Profile = () => {
 
           <div className="grid lg:grid-cols-3 gap-16">
             {/* Sidebar Navigation */}
-            <div className="space-y-4">
+            <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 gap-3 md:gap-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
               {[
-                { id: "details", label: "Personal Details", icon: <User size={18} /> },
-                { id: "orders", label: "My Orders", icon: <ShoppingBag size={18} /> },
+                { id: "details", label: "Details", icon: <User size={18} /> },
+                { id: "orders", label: "Orders", icon: <ShoppingBag size={18} /> },
                 { id: "wishlist", label: "Wishlist", icon: <Heart size={18} /> },
-                { id: "payments", label: "Saved Payments", icon: <CreditCard size={18} /> },
-                { id: "password", label: "Change Password", icon: <Lock size={18} /> },
+                { id: "payments", label: "Payments", icon: <CreditCard size={18} /> },
+                { id: "password", label: "Security", icon: <Lock size={18} /> },
               ].map((item) => (
                 <button
                   key={item.id}
@@ -191,28 +191,28 @@ const Profile = () => {
                       setActiveView(item.id as ProfileView);
                     }
                   }}
-                  className={`w-full flex items-center justify-between p-6 rounded-3xl transition-all duration-500 group ${
+                  className={`flex-shrink-0 lg:flex-shrink-1 flex items-center justify-between p-4 md:p-6 rounded-2xl md:rounded-3xl transition-all duration-500 group ${
                     activeView === item.id 
-                      ? "bg-white shadow-ethereal border border-gold/10 text-charcoal" 
-                      : "text-muted-foreground hover:bg-gold/5"
+                      ? "bg-white shadow-lg border border-gold/10 text-charcoal" 
+                      : "text-muted-foreground hover:bg-gold/5 bg-white/40 lg:bg-transparent"
                   }`}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 md:gap-4">
                     <div className={`${activeView === item.id ? "text-gold" : "group-hover:text-gold"} transition-colors`}>
                       {item.icon}
                     </div>
-                    <span className="text-xs font-body font-bold uppercase tracking-widest">{item.label}</span>
+                    <span className="text-[10px] md:text-xs font-body font-bold uppercase tracking-widest">{item.label}</span>
                   </div>
-                  {activeView === item.id && <ChevronRight size={16} className="text-gold" />}
+                  {activeView === item.id && <ChevronRight size={16} className="text-gold hidden lg:block" />}
                 </button>
               ))}
               
               <button 
                 onClick={() => setIsLogoutDialogOpen(true)}
-                className="w-full flex items-center gap-4 p-6 rounded-3xl text-rose-brand hover:bg-rose-brand/5 transition-all mt-8 group"
+                className="flex-shrink-0 lg:flex-shrink-1 flex items-center gap-3 md:gap-4 p-4 md:p-6 rounded-2xl md:rounded-3xl text-rose-brand hover:bg-rose-brand/5 transition-all mt-0 lg:mt-8 group bg-rose-brand/5 lg:bg-transparent"
               >
                 <LogOut size={18} className="group-hover:rotate-12 transition-transform" />
-                <span className="text-xs font-body font-bold uppercase tracking-widest">Logout</span>
+                <span className="text-[10px] md:text-xs font-body font-bold uppercase tracking-widest">Logout</span>
               </button>
             </div>
 
@@ -225,9 +225,9 @@ const Profile = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white rounded-[3rem] p-8 lg:p-16 shadow-ethereal border border-gold/10"
+                    className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-12 lg:p-16 shadow-ethereal border border-gold/10"
                   >
-                    <h3 className="font-display text-3xl font-bold mb-12 text-charcoal">Identity Update</h3>
+                    <h3 className="font-display text-2xl md:text-3xl font-bold mb-8 md:mb-12 text-charcoal">Identity Update</h3>
                     <form onSubmit={handleUpdate} className="space-y-10">
                       <div className="space-y-4 group">
                         <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">Full Name</label>
@@ -237,7 +237,7 @@ const Profile = () => {
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full bg-[#f8f8f8] border border-transparent rounded-2xl py-6 pl-16 pr-6 font-body focus:bg-white focus:border-gold/30 outline-none transition-all duration-500 shadow-sm"
+                            className="w-full bg-[#f8f8f8] border border-transparent rounded-xl md:rounded-2xl py-4 md:py-6 pl-14 md:pl-16 pr-6 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 outline-none transition-all duration-500 shadow-sm"
                             required
                           />
                         </div>
@@ -252,7 +252,7 @@ const Profile = () => {
                               type="email"
                               value={email}
                               onChange={(e) => setEmail(e.target.value)}
-                              className="w-full bg-[#f8f8f8] border border-transparent rounded-2xl py-6 pl-16 pr-6 font-body focus:bg-white focus:border-gold/30 outline-none transition-all duration-500 shadow-sm"
+                              className="w-full bg-[#f8f8f8] border border-transparent rounded-xl md:rounded-2xl py-4 md:py-6 pl-14 md:pl-16 pr-6 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 outline-none transition-all duration-500 shadow-sm"
                               required
                             />
                           </div>
@@ -266,7 +266,7 @@ const Profile = () => {
                               disabled
                               type="text"
                               value={user.mobileNumber}
-                              className="w-full bg-[#f0f0f0] border border-transparent rounded-2xl py-6 pl-16 pr-6 font-body outline-none cursor-not-allowed"
+                              className="w-full bg-[#f0f0f0] border border-transparent rounded-xl md:rounded-2xl py-4 md:py-6 pl-14 md:pl-16 pr-6 font-body text-sm md:text-base outline-none cursor-not-allowed"
                             />
                           </div>
                         </div>
@@ -276,7 +276,7 @@ const Profile = () => {
                         <button
                           disabled={loading}
                           type="submit"
-                          className="w-full py-6 bg-charcoal text-white font-body font-bold uppercase tracking-[0.25em] rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-2xl overflow-hidden"
+                          className="w-full py-4 md:py-6 bg-charcoal text-white font-body font-bold uppercase tracking-[0.2em] md:tracking-[0.25em] rounded-xl md:rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-2xl overflow-hidden text-xs md:text-sm"
                         >
                           {loading ? "Syncing..." : "Update Details"}
                         </button>

@@ -83,7 +83,7 @@ const Orders = () => {
                 <ShoppingBag size={16} />
                 <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em]">Ritual History</span>
               </div>
-              <h1 className="font-display text-5xl lg:text-7xl font-bold text-charcoal tracking-tight lowercase">
+              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-charcoal tracking-tight lowercase leading-[1.1]">
                 your <span className="text-gradient-gold italic font-light">orders.</span>
               </h1>
             </div>

@@ -16,7 +16,7 @@ const Footer = () => {
               Crafted with love, powered by nature.
             </p>
             <div className="flex items-center gap-4 pt-2">
-              <a href="https://instagram.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Instagram size={18} /></a>
+              <a href="https://instagram.com/hk_digiverse" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Instagram size={18} /></a>
               <a href="https://facebook.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Facebook size={18} /></a>
               <a href="https://youtube.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Youtube size={18} /></a>
               <a href="https://twitter.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Twitter size={18} /></a>

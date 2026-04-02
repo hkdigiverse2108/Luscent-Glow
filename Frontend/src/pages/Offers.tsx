@@ -99,7 +99,7 @@ const Offers = () => {
                 <Sparkles size={16} className="text-gold" />
                 <span className="text-xs font-body font-bold text-gold uppercase tracking-[0.2em]">Magnificent Glow Deals</span>
               </div>
-              <h1 className="font-display text-5xl lg:text-7xl font-bold leading-tight">
+              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1]">
                 Exclusive <span className="text-gold italic">Treasures</span> Waiting For You
               </h1>
               <p className="font-body text-lg text-white/70 max-w-lg">
@@ -236,7 +236,7 @@ const Offers = () => {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
               <div className="lg:col-span-5 space-y-8">
                 <div className="space-y-4">
-                  <h2 className="font-display text-4xl lg:text-5xl font-bold leading-tight">
+                  <h2 className="font-display text-4xl md:text-5xl font-bold leading-[1.1]">
                     The More You <span className="text-gold italic">Glow</span>, 
                     The More You Save
                   </h2>

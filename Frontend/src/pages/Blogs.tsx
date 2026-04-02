@@ -24,8 +24,8 @@ const Blogs = () => {
           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gold/10 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/4 opacity-40" />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-rose-light/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/4 opacity-30" />
           
-          <div className="container mx-auto px-6 lg:px-12 relative z-10">
-            <div className="flex flex-col lg:flex-row gap-16 items-center">
+          <div className="container mx-auto px-4 md:px-6 lg:px-12 relative z-10">
+            <div className="flex flex-col lg:flex-row gap-10 md:gap-16 items-center">
               {/* Featured Image Stage */}
               <motion.div 
                 initial={{ opacity: 0, x: -50 }}
@@ -35,7 +35,7 @@ const Blogs = () => {
               >
                 <div className="relative group">
                   <div className="absolute -inset-4 bg-gold/10 blur-2xl rounded-[3rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                  <div className="relative aspect-[16/9] rounded-[2.5rem] lg:rounded-[3.5rem] overflow-hidden shadow-2xl">
+                  <div className="relative aspect-[16/9] rounded-[2rem] md:rounded-[2.5rem] lg:rounded-[3.5rem] overflow-hidden shadow-2xl">
                     <motion.img 
                       whileHover={{ scale: 1.05 }}
                       transition={{ duration: 1.5 }}
@@ -59,10 +59,10 @@ const Blogs = () => {
                   <div className="flex items-center gap-4 text-[10px] font-body font-bold text-gold/60 uppercase tracking-widest">
                     <span>{featuredPost.date}</span>
                   </div>
-                  <h1 className="font-display text-4xl lg:text-6xl font-bold text-white leading-tight">
+                  <h1 className="font-display text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                     {featuredPost.title}
                   </h1>
-                  <p className="text-white/60 font-body text-base lg:text-lg leading-relaxed max-w-xl">
+                  <p className="text-white/60 font-body text-sm md:text-base lg:text-lg leading-relaxed max-w-xl">
                     {featuredPost.excerpt}
                   </p>
                 </div>
@@ -92,8 +92,8 @@ const Blogs = () => {
         </section>
 
         {/* Categories & Grid */}
-        <section className="py-24 lg:py-32 bg-[#faf9f6]">
-          <div className="container mx-auto px-6 lg:px-12">
+        <section className="py-16 md:py-24 lg:py-32 bg-[#faf9f6]">
+          <div className="container mx-auto px-4 md:px-6 lg:px-12">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
               <div>
                 <motion.div
@@ -110,7 +110,7 @@ const Blogs = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.1 }}
-                  className="font-display text-4xl lg:text-5xl font-bold text-foreground"
+                  className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground"
                 >
                   Glow Haven <span className="text-gradient-gold italic font-light">Chronicles</span>
                 </motion.h2>
@@ -129,8 +129,8 @@ const Blogs = () => {
         </section>
 
         {/* Luxury Newsletter Section */}
-        <section className="py-24 lg:py-40 relative">
-          <div className="container mx-auto px-6 lg:px-12">
+        <section className="py-16 md:py-24 lg:py-40 relative">
+          <div className="container mx-auto px-4 md:px-6 lg:px-12">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -149,22 +149,22 @@ const Blogs = () => {
                     <Mail size={20} className="animate-bounce" />
                     <div className="h-[1px] w-12 bg-gold/30" />
                   </div>
-                  <h2 className="font-display text-4xl lg:text-7xl font-bold text-white tracking-tight">
+                  <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight">
                     Stay <span className="text-gradient-gold italic font-light">Radiant</span>
                   </h2>
-                  <p className="text-white/60 font-body text-lg leading-relaxed">
+                  <p className="text-white/60 font-body text-sm md:text-lg leading-relaxed">
                     Join our inner circle for exclusive skincare rituals, early product unveiling, and mindful beauty inspiration straight to your sanctuary.
                   </p>
                 </div>
 
-                <div className="relative max-w-lg mx-auto">
+                <div className="relative max-w-lg mx-auto flex flex-col items-center">
                   <input
                     type="email"
                     placeholder="Enter your email sanctuary"
-                    className="w-full bg-white/5 border border-white/10 rounded-full py-6 pr-44 pl-8 text-white font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all text-sm lg:text-base lg:placeholder:text-lg focus:placeholder:opacity-0"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl md:rounded-full py-4 md:py-6 md:pr-44 md:pl-8 px-6 text-white font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all text-sm md:text-base focus:placeholder:opacity-0"
                   />
-                  <button className="absolute right-2 top-2 bottom-2 px-10 bg-gold text-charcoal font-body font-bold rounded-full uppercase tracking-widest text-[10px] hover:bg-white transition-all duration-500 shadow-xl group/btn">
-                    <span className="relative z-10 flex items-center gap-3">
+                  <button className="w-full md:w-auto md:absolute md:right-2 md:top-2 md:bottom-2 mt-4 md:mt-0 py-4 md:py-0 px-10 bg-gold text-charcoal font-body font-bold rounded-2xl md:rounded-full uppercase tracking-widest text-[10px] md:text-[10px] hover:bg-white transition-all duration-500 shadow-xl group/btn min-h-[48px]">
+                    <span className="relative z-10 flex items-center justify-center gap-3">
                       Subscribe <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
                     </span>
                   </button>

@@ -31,6 +31,18 @@ const Header = () => {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [mobileMenuOpen]);
+
   // Removed local user handling as it's now in AuthContext
 
   useEffect(() => {
@@ -102,10 +114,14 @@ const Header = () => {
         }`}
       >
         {/* Top bar */}
-        <div className="bg-primary text-primary-foreground text-[10px] lg:text-xs py-2 text-center tracking-widest uppercase font-body relative group/banner">
-          Free Shipping on Orders Above ₹999 &nbsp;|&nbsp; Use Code <span className="text-gold font-semibold">GLOW15</span> for 15% Off
-          &nbsp;&nbsp; | &nbsp;&nbsp;
-          <Link to="/quiz" className="text-gold font-bold hover:text-white transition-colors">Find Your Glow</Link>
+        <div className="bg-primary text-primary-foreground text-[8px] md:text-[10px] lg:text-xs py-2 px-2 md:px-4 text-center tracking-widest uppercase font-body relative group/banner overflow-hidden">
+          <div className="flex items-center justify-center gap-x-2 gap-y-1 flex-wrap md:gap-4 animate-in fade-in slide-in-from-top-1 duration-500">
+            <span>Free Shipping Above ₹999</span>
+            <span className="hidden xs:inline opacity-40">|</span>
+            <span>Use Code <span className="text-gold font-semibold">GLOW15</span></span>
+            <span className="hidden sm:inline opacity-40">|</span>
+            <Link to="/quiz" className="hidden sm:inline text-gold font-bold hover:text-white transition-colors">Find Your Glow</Link>
+          </div>
         </div>
         {/* Main header */}
         <div className="container mx-auto px-4">
@@ -119,9 +135,9 @@ const Header = () => {
             </button>
 
             {/* Logo and Shop by Category */}
-            <div className="flex items-center gap-14">
-              <Link to="/" className="flex items-center gap-2">
-                <h1 className="font-display text-2xl lg:text-3xl font-semibold tracking-wide text-foreground">
+            <div className="flex items-center gap-3 md:gap-4 lg:gap-14">
+              <Link to="/" className="flex items-center gap-1.5 md:gap-2 transform active:scale-95 transition-transform">
+                <h1 className="font-display text-[17px] xs:text-xl md:text-2xl lg:text-3xl font-semibold tracking-wide text-foreground whitespace-nowrap">
                   Luscent <span className="text-gold">Glow</span>
                 </h1>
               </Link>
@@ -168,17 +184,17 @@ const Header = () => {
             </div>
 
             {/* Right actions */}
-            <div className="flex items-center gap-1 lg:gap-3">
+            <div className="flex items-center gap-0.5 xs:gap-1.5 md:gap-2 lg:gap-3">
               <button
                 onClick={() => setSearchOpen(!searchOpen)}
                 className="p-2 text-foreground/70 hover:text-gold transition-colors"
               >
                 <Search size={20} />
               </button>
-              <Link to="/gift-cards" className="hidden lg:flex p-2 text-foreground/70 hover:text-gold transition-colors">
+              <Link to="/gift-cards" className="hidden sm:flex p-2 text-foreground/70 hover:text-gold transition-colors">
                 <Gift size={20} />
               </Link>
-              <Link to="/bulk-orders" className="hidden lg:flex p-2 text-foreground/70 hover:text-gold transition-colors">
+              <Link to="/bulk-orders" className="hidden md:flex p-2 text-foreground/70 hover:text-gold transition-colors">
                 <Package size={20} />
               </Link>
               
@@ -208,12 +224,6 @@ const Header = () => {
                         <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest hover:text-gold hover:bg-gold/5 rounded-2xl transition-all">
                           <User size={14} /> Profile
                         </Link>
-                        <Link to="/orders" className="flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest hover:text-gold hover:bg-gold/5 rounded-2xl transition-all">
-                          <Package size={14} /> Orders
-                        </Link>
-                        <Link to="/wishlist" className="flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest hover:text-gold hover:bg-gold/5 rounded-2xl transition-all">
-                          <Heart size={14} /> Wishlist
-                        </Link>
                         <button 
                           onClick={() => setIsLogoutDialogOpen(true)}
                           className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-rose-brand uppercase tracking-widest hover:bg-rose-brand/5 rounded-2xl transition-all text-left"
@@ -230,18 +240,18 @@ const Header = () => {
                 </Link>
               )}
 
-              <Link to="/wishlist" className="p-2 text-foreground/70 hover:text-gold transition-colors relative">
+              <Link to="/wishlist" className="p-1.5 md:p-2 text-foreground/70 hover:text-gold transition-colors relative">
                 <Heart size={20} />
                 {wishlist.length > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute top-0 right-0 md:-top-0.5 md:-right-0.5 w-3.5 h-3.5 md:w-4 md:h-4 bg-gold text-primary-foreground text-[8px] md:text-[10px] font-bold rounded-full flex items-center justify-center">
                     {wishlist.length}
                   </span>
                 )}
               </Link>
-              <Link to="/cart" className="p-2 text-foreground/70 hover:text-gold transition-colors relative">
-                <ShoppingBag size={20} />
+              <Link to="/cart" className="p-1.5 xs:p-2 text-foreground/70 hover:text-gold transition-colors relative">
+                <ShoppingBag size={20} className="w-5 h-5" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gold text-primary-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+                  <span className="absolute top-0 right-0 md:-top-0.5 md:-right-0.5 w-3.5 h-3.5 md:w-4 md:h-4 bg-gold text-primary-foreground text-[8px] md:text-[10px] font-bold rounded-full flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -267,8 +277,8 @@ const Header = () => {
                     value={searchQuery}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     onKeyDown={handleSearchKeyPress}
-                    placeholder="Search for products, brands, categories..."
-                    className="w-full pl-12 pr-4 py-3 bg-secondary rounded-full text-sm font-body focus:outline-none focus:ring-2 focus:ring-gold/30 placeholder:text-muted-foreground"
+                    placeholder="Search products..."
+                    className="w-full pl-11 pr-4 py-3.5 bg-secondary rounded-2xl text-sm font-body focus:outline-none focus:ring-2 focus:ring-gold/30 placeholder:text-muted-foreground transition-all"
                     autoFocus
                   />
                   
@@ -279,7 +289,7 @@ const Header = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 10 }}
-                        className="absolute top-full left-0 right-0 mt-3 bg-white rounded-3xl z-[80] shadow-2xl border border-border"
+                        className="absolute top-full left-0 right-0 mt-3 bg-white rounded-2xl z-[80] shadow-2xl border border-border/50 max-h-[80vh] overflow-hidden flex flex-col"
                       >
                         <div className="p-4 max-h-[400px] overflow-y-auto">
                           <p className="text-[10px] font-body font-bold text-primary uppercase tracking-[0.2em] mb-4 px-2">
@@ -378,98 +388,134 @@ const Header = () => {
         }}
       />
 
-      {/* Mobile menu */}
+      {/* Mobile menu drawer */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            initial={{ x: "-100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "-100%" }}
-            transition={{ type: "tween", duration: 0.3 }}
-            className="fixed inset-0 z-[60] bg-background lg:hidden"
-          >
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="font-display text-xl font-semibold">
-                Luscent <span className="text-gold">Glow</span>
-              </h2>
-              <button onClick={() => setMobileMenuOpen(false)} className="p-2">
-                <X size={22} />
-              </button>
-            </div>
-            <nav className="p-6 space-y-6">
-              {categories.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  to={`/products?category=${cat.slug}`}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
-                >
-                  {cat.name}
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[55] lg:hidden"
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 bottom-0 w-[85%] max-w-sm z-[60] bg-background lg:hidden flex flex-col shadow-2xl"
+            >
+              <div className="flex items-center justify-between p-5 border-b border-gold/10">
+                <Link to="/" onClick={() => setMobileMenuOpen(false)}>
+                  <h2 className="font-display text-xl font-semibold">
+                    Luscent <span className="text-gold">Glow</span>
+                  </h2>
                 </Link>
-              ))}
-              <div className="border-t border-border pt-6 space-y-4">
-                <Link 
-                  to="/about" 
+                <button 
                   onClick={() => setMobileMenuOpen(false)} 
-                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
+                  className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-foreground/70 active:scale-90 transition-transform"
                 >
-                  About Us
-                </Link>
-                <Link 
-                  to="/contact" 
-                  onClick={() => setMobileMenuOpen(false)} 
-                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
-                >
-                  Contact Us
-                </Link>
-                <Link 
-                  to="/faq" 
-                  onClick={() => setMobileMenuOpen(false)} 
-                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
-                >
-                  FAQ's
-                </Link>
-                <Link 
-                  to="/track-order" 
-                  onClick={() => setMobileMenuOpen(false)} 
-                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
-                >
-                  Track Order
-                </Link>
-                <Link 
-                  to="/blogs" 
-                  onClick={() => setMobileMenuOpen(false)} 
-                  className="block text-lg font-body font-medium text-foreground/80 hover:text-gold transition-colors tracking-wide"
-                >
-                  Journal
-                </Link>
-                <Link 
-                  to="/quiz" 
-                  onClick={() => setMobileMenuOpen(false)} 
-                  className="flex items-center gap-3 text-gold font-bold py-2"
-                >
-                  <Sparkles size={18} /> Radiance Quiz
-                </Link>
-                <div className="pt-4 space-y-4">
-                  <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-foreground/70 text-sm">
-                    <Gift size={18} /> Gift Cards
-                  </Link>
-                  <Link to="/bulk-orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-foreground/70 text-sm">
-                    <Package size={18} /> Bulk Orders for Corporate
-                  </Link>
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+                {/* User section in mobile menu */}
+                <div className="mb-10">
+                  {user ? (
+                    <div className="flex items-center gap-4 p-4 bg-gold/5 rounded-[1.5rem] border border-gold/10 overflow-hidden">
+                      <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shadow-sm overflow-hidden flex-shrink-0 animate-in fade-in zoom-in duration-500">
+                        {user.profilePicture ? (
+                          <img src={user.profilePicture} alt={user.fullName} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="font-display font-medium text-lg">{user.fullName.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-display font-bold text-foreground truncate">{user.fullName}</p>
+                        <p className="text-[10px] text-muted-foreground truncate uppercase tracking-widest">{user.email}</p>
+                        <div className="flex gap-4 mt-2">
+                          <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="text-[10px] font-black text-gold uppercase tracking-widest hover:opacity-70 transition-opacity">My Account</Link>
+                          <button onClick={() => { setMobileMenuOpen(false); setIsLogoutDialogOpen(true); }} className="text-[10px] font-black text-rose-brand uppercase tracking-widest hover:opacity-70 transition-opacity">Logout</button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <Link 
+                      to="/login" 
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between p-5 bg-charcoal text-white rounded-[1.5rem] shadow-xl shadow-charcoal/10 group overflow-hidden relative"
+                    >
+                      <div className="relative z-10">
+                        <p className="text-[10px] font-body font-bold uppercase tracking-[0.25em] mb-1 opacity-70">Welcome to Luscent</p>
+                        <p className="text-lg font-display font-bold">Sign In / Register</p>
+                      </div>
+                      <User size={24} className="opacity-10 absolute -right-2 -bottom-2 w-16 h-16 transform group-hover:scale-110 transition-transform duration-700" />
+                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center relative z-10 group-hover:bg-gold transition-colors duration-500">
+                        <User size={18} />
+                      </div>
+                    </Link>
+                  )}
                 </div>
-                
-                <div className="pt-6 border-t border-border/50">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Policies</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    <Link to="/privacy-policy" onClick={() => setMobileMenuOpen(false)} className="text-xs text-muted-foreground hover:text-gold">Privacy Policy</Link>
-                    <Link to="/terms-and-conditions" onClick={() => setMobileMenuOpen(false)} className="text-xs text-muted-foreground hover:text-gold">Terms & Conditions</Link>
-                    <Link to="/return-policy" onClick={() => setMobileMenuOpen(false)} className="text-xs text-muted-foreground hover:text-gold">Return & Refund</Link>
+
+                <div className="space-y-8">
+                  <div>
+                    <p className="text-[10px] font-bold text-gold uppercase tracking-[0.3em] mb-5">Shop By Category</p>
+                    <div className="grid grid-cols-1 gap-1">
+                      {categories.map((cat) => (
+                        <Link
+                          key={cat.slug}
+                          to={`/products?category=${cat.slug}`}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center justify-between py-4 px-4 text-base font-body font-medium text-foreground hover:bg-gold/5 rounded-2xl transition-all border-b border-border/30 last:border-0 active:bg-gold/10"
+                        >
+                          {cat.name}
+                          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                            <ChevronDown size={14} className="-rotate-90 text-muted-foreground" />
+                          </div>
+                        </Link>
+                      ))}
+                      <Link
+                        to="/products"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center justify-between py-4 px-4 text-base font-body font-bold text-gold hover:bg-gold/5 rounded-2xl transition-all active:bg-gold/10"
+                      >
+                        Explore All Collections
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-5">More</p>
+                    <div className="grid grid-cols-1 gap-3">
+                       <Link to="/offers" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3 px-4 bg-gold/5 border border-gold/10 text-gold font-bold rounded-2xl font-body">
+                        <span className="animate-pulse">🔥</span> Exclusive Offers
+                       </Link>
+                       <div className="grid grid-cols-2 gap-3">
+                          <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 bg-secondary/50 rounded-2xl border border-border/50">
+                            <Gift size={16} className="text-gold" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Gifts</span>
+                          </Link>
+                          <Link to="/bulk-orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 bg-secondary/50 rounded-2xl border border-border/50">
+                            <Package size={16} className="text-gold" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Bulk</span>
+                          </Link>
+                       </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </nav>
-          </motion.div>
+              
+              <div className="p-6 border-t border-border bg-secondary/20">
+                 <div className="flex gap-4 mb-4">
+                    <Link to="/privacy-policy" onClick={() => setMobileMenuOpen(false)} className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Privacy</Link>
+                    <Link to="/terms-and-conditions" onClick={() => setMobileMenuOpen(false)} className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Terms</Link>
+                 </div>
+                 <p className="text-[10px] text-muted-foreground italic">© 2024 Luscent Glow. All rights reserved.</p>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

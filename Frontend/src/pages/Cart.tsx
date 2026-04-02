@@ -52,12 +52,12 @@ const Cart = () => {
       <main className="container mx-auto px-4 py-12 lg:py-20">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-6">
             <div className="space-y-2">
-              <Link to="/products" className="inline-flex items-center gap-2 text-gold hover:gap-3 transition-all text-sm font-body font-medium uppercase tracking-widest mb-4">
+              <Link to="/products" className="inline-flex items-center gap-2 text-gold hover:gap-3 transition-all text-[10px] md:text-sm font-body font-bold uppercase tracking-widest mb-2 md:mb-4">
                 <ChevronLeft size={16} /> Back to Collection
               </Link>
-              <h1 className="font-display text-5xl lg:text-6xl font-light text-foreground tracking-tight">
+              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight leading-[1.1]">
                 Shopping <span className="italic font-normal">Bag</span>
               </h1>
             </div>
@@ -97,9 +97,9 @@ const Cart = () => {
               {/* Items List */}
               <div className="lg:col-span-7 space-y-12">
                 {/* Free Shipping Progress */}
-                <div className="bg-white p-6 rounded-3xl border border-gold/10 shadow-sm relative overflow-hidden">
-                  <div className="flex justify-between items-center mb-4">
-                    <p className="text-xs font-body font-bold uppercase tracking-wider">
+                <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-gold/10 shadow-sm relative overflow-hidden">
+                  <div className="flex justify-between items-center mb-3 md:mb-4">
+                    <p className="text-[9px] md:text-xs font-body font-bold uppercase tracking-wider text-muted-foreground">
                       {subtotal >= freeShippingThreshold ? 
                         "✨ You've unlocked Complimentary Shipping" : 
                         `Add ₹${(freeShippingThreshold - subtotal).toLocaleString()} more for Complimentary Shipping`}
@@ -125,7 +125,7 @@ const Cart = () => {
                       exit={{ opacity: 0, x: -50 }}
                       className="group flex gap-6 lg:gap-10 items-center"
                     >
-                      <div className="relative w-32 h-40 lg:w-44 lg:h-56 bg-secondary rounded-[2rem] overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-2xl transition-all duration-700">
+                      <div className="relative w-24 h-32 md:w-32 md:h-40 lg:w-44 lg:h-56 bg-secondary rounded-xl md:rounded-[2rem] overflow-hidden flex-shrink-0 shadow-md group-hover:shadow-2xl transition-all duration-700">
                         <img 
                           src={item.image} 
                           alt={item.name} 
@@ -136,23 +136,23 @@ const Cart = () => {
                       <div className="flex-1 space-y-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em] mb-2">{item.category}</p>
-                            <h3 className="font-display text-2xl lg:text-3xl font-light text-foreground leading-tight">
+                            <p className="text-[9px] md:text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em] mb-1 md:mb-2">{item.category}</p>
+                            <h3 className="font-display text-xl md:text-2xl lg:text-3xl font-light text-foreground leading-tight">
                               {item.name}
                             </h3>
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap gap-4 text-[10px] font-body font-bold uppercase tracking-widest text-muted-foreground">
+                        <div className="flex flex-wrap gap-2 md:gap-4 text-[8px] md:text-[10px] font-body font-bold uppercase tracking-widest text-muted-foreground mt-2">
                           {item.selectedShade && (
-                            <div className="flex items-center gap-1.5 bg-white border border-border px-2 py-1 rounded-full">
-                              <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                            <div className="flex items-center gap-1 bg-white border border-border px-2 py-0.5 md:py-1 rounded-full">
+                              <span className="w-1 h-1 rounded-full bg-gold" />
                               {item.selectedShade}
                             </div>
                           )}
                           {item.selectedSize && (
-                            <div className="flex items-center gap-1.5 bg-white border border-border px-2 py-1 rounded-full">
-                              <span className="w-1.5 h-1.5 rounded-full bg-gold" />
+                            <div className="flex items-center gap-1 bg-white border border-border px-2 py-0.5 md:py-1 rounded-full">
+                              <span className="w-1 h-1 rounded-full bg-gold" />
                               {item.selectedSize}
                             </div>
                           )}
@@ -193,11 +193,11 @@ const Cart = () => {
               {/* Order Summary */}
               <div className="lg:col-span-5 lg:pl-10">
                 <div className="sticky top-32 space-y-8">
-                  <div className="glass-gold p-10 lg:p-12 rounded-[4rem] shadow-ethereal relative overflow-hidden animate-float">
+                  <div className="glass-gold p-6 md:p-10 lg:p-12 rounded-[2.5rem] md:rounded-[4rem] shadow-ethereal relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 blur-[80px] rounded-full -mr-32 -mt-32" />
                     
-                    <div className="flex justify-between items-center mb-10 border-b border-gold/10 pb-6">
-                      <h2 className="font-display text-3xl font-light text-foreground italic">Bag Summary</h2>
+                    <div className="flex justify-between items-center mb-8 md:mb-10 border-b border-gold/10 pb-6">
+                      <h2 className="font-display text-2xl md:text-3xl font-light text-foreground italic">Bag Summary</h2>
                       <button 
                         onClick={clearCart}
                         className="text-[10px] font-body font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors"
@@ -273,10 +273,10 @@ const Cart = () => {
                         </div>
                       )}
 
-                      <div className="pt-8 border-t border-gold/20">
+                      <div className="pt-6 md:pt-8 border-t border-gold/20">
                         <div className="flex justify-between items-center">
-                          <span className="font-display text-2xl font-light text-foreground">Total</span>
-                          <span className="font-display text-4xl font-normal text-gold text-glow-gold">₹{total.toLocaleString()}</span>
+                          <span className="font-display text-xl md:text-2xl font-light text-foreground">Total</span>
+                          <span className="font-display text-3xl md:text-4xl font-normal text-gold text-glow-gold">₹{total.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>

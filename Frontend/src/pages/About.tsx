@@ -45,7 +45,7 @@ const About = () => {
       
       <main>
         {/* Editorial Hero */}
-        <section className="relative h-[85vh] overflow-hidden flex items-center">
+        <section className="relative min-h-[60vh] lg:h-[85vh] overflow-hidden flex items-center">
           <motion.div 
             initial={{ scale: 1.1, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -65,7 +65,7 @@ const About = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="text-sm font-body font-bold text-gold uppercase tracking-[0.3em] mb-4"
+              className="text-[10px] md:text-sm font-body font-bold text-gold uppercase tracking-[0.3em] mb-4"
             >
               The Luscent Chronicle
             </motion.p>
@@ -73,10 +73,10 @@ const About = () => {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 1 }}
-              className="font-display text-5xl lg:text-8xl font-bold text-white leading-tight mb-8"
+              className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-white leading-tight mb-8"
             >
-              Curating Radiance,<br />
-              Defying <span className="italic font-light">Convention.</span>
+              Curating Radiance,<br className="hidden md:block" />
+              Defying <span className="italic font-light text-gold/80">Convention.</span>
             </motion.h1>
           </div>
         </section>
@@ -87,10 +87,10 @@ const About = () => {
             <div className="max-w-4xl mx-auto text-center space-y-12">
               <motion.div {...fadeIn}>
                 <Sparkles size={32} className="mx-auto text-gold mb-8 opacity-50" />
-                <h2 className="font-display text-3xl lg:text-5xl font-bold text-foreground mb-8 leading-tight">
-                  Beauty is not a trend.<br />It is a <span className="text-gold">Quiet Revolution.</span>
+                <h2 className="font-display text-2xl md:text-3xl lg:text-5xl font-bold text-foreground mb-6 md:mb-8 leading-tight">
+                  Beauty is not a trend.<br className="hidden md:block" />It is a <span className="text-gold italic font-light">Quiet Revolution.</span>
                 </h2>
-                <div className="space-y-6 text-lg font-body text-muted-foreground leading-relaxed">
+                <div className="space-y-4 md:space-y-6 text-base md:text-lg font-body text-muted-foreground leading-relaxed">
                   <p>
                     Luscent Glow was born from a singular obsession: to bridge the gap between scientific precision and botanical poetry. We believe that skincare should not just be a routine, but a daily ritual of self-appreciation.
                   </p>
@@ -104,9 +104,9 @@ const About = () => {
         </section>
 
         {/* Philosophy Grid */}
-        <section className="py-20 bg-secondary/30 relative">
+        <section className="py-16 md:py-20 bg-secondary/30 relative">
           <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
               {values.map((value, i) => (
                 <motion.div
                   key={value.title}
@@ -141,19 +141,19 @@ const About = () => {
             viewport={{ once: true }}
             className="container mx-auto px-4 relative z-10 text-center text-white"
           >
-            <h3 className="font-display text-4xl lg:text-6xl font-bold uppercase tracking-[0.2em] mb-4">
+            <h3 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold uppercase tracking-[0.2em] mb-4">
               98% Natural Origins
             </h3>
-            <p className="font-body text-sm lg:text-lg tracking-widest opacity-80">
+            <p className="font-body text-[10px] md:text-sm lg:text-lg tracking-[0.3em] font-bold opacity-80">
               CRAFTED IN SMALL BATCHES FOR UNCOMPROMISED POTENCY
             </p>
           </motion.div>
         </section>
 
         {/* The Curators */}
-        <section className="py-24 lg:py-40">
+        <section className="py-20 md:py-32 lg:py-40">
           <div className="container mx-auto px-4">
-            <div className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+            <div className="flex flex-col lg:flex-row items-center gap-12 md:gap-16 lg:gap-24">
               <motion.div 
                 initial={{ opacity: 0, x: -30 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -170,12 +170,12 @@ const About = () => {
                 className="lg:w-1/2 space-y-8"
               >
                 <p className="text-gold font-body font-bold uppercase tracking-widest text-sm">Our Founder</p>
-                <h2 className="font-display text-4xl lg:text-6xl font-bold text-foreground">A Vision of <span className="italic font-light">Subtle Luxury.</span></h2>
-                <div className="space-y-6 text-muted-foreground font-body leading-relaxed text-lg">
+                <h2 className="font-display text-3xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">A Vision of <span className="italic font-light">Subtle Luxury.</span></h2>
+                <div className="space-y-6 text-muted-foreground font-body leading-relaxed text-base md:text-lg">
                   <p>
                     "I wanted to create a space where beauty wasn't about concealment, but about enhancement. Luscent Glow is my love letter to skin that breathes, shines, and tells its own unique story."
                   </p>
-                  <p className="font-display text-xl text-primary font-bold">— Janvi Vasani, Founder & Curator</p>
+                  <p className="font-display text-lg md:text-xl text-primary font-bold">— Janvi Vasani, Founder & Curator</p>
                 </div>
                 <div className="pt-8">
                   <button className="px-10 py-4 bg-primary text-primary-foreground font-body font-bold uppercase tracking-widest text-xs rounded-full hover:bg-gold transition-all shadow-xl hover:shadow-gold/20">
@@ -188,13 +188,13 @@ const About = () => {
         </section>
 
         {/* Commitment Badge */}
-        <section className="py-20 border-y border-gold/10 bg-secondary/10">
+        <section className="py-16 md:py-20 border-y border-gold/10 bg-secondary/10">
           <div className="container mx-auto px-4">
-            <div className="flex flex-wrap justify-around items-center gap-12 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
-              <span className="font-display text-lg font-bold uppercase tracking-widest">100% Vegan</span>
-              <span className="font-display text-lg font-bold uppercase tracking-widest">Paraben Free</span>
-              <span className="font-display text-lg font-bold uppercase tracking-widest">Cruelty Free</span>
-              <span className="font-display text-lg font-bold uppercase tracking-widest">Recyclable Glass</span>
+            <div className="flex flex-wrap justify-center md:justify-around items-center gap-8 md:gap-12 opacity-60">
+              <span className="font-display text-xs md:text-lg font-bold uppercase tracking-[0.3em]">100% Vegan</span>
+              <span className="font-display text-xs md:text-lg font-bold uppercase tracking-[0.3em]">Paraben Free</span>
+              <span className="font-display text-xs md:text-lg font-bold uppercase tracking-[0.3em]">Cruelty Free</span>
+              <span className="font-display text-xs md:text-lg font-bold uppercase tracking-[0.3em]">Recyclable</span>
             </div>
           </div>
         </section>

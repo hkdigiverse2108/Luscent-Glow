@@ -33,28 +33,28 @@ const Wishlist = () => {
       <main className="container mx-auto px-4 py-12 lg:py-20">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-6">
             <div className="space-y-2">
-              <Link to="/products" className="inline-flex items-center gap-2 text-gold hover:gap-3 transition-all text-sm font-body font-medium uppercase tracking-widest mb-4">
+              <Link to="/products" className="inline-flex items-center gap-2 text-gold hover:gap-3 transition-all text-[10px] md:text-sm font-body font-bold uppercase tracking-widest mb-2 md:mb-4">
                 <ChevronLeft size={16} /> Back to Collection
               </Link>
-              <h1 className="font-display text-5xl lg:text-6xl font-light text-foreground tracking-tight">
+              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight leading-[1.1]">
                 Heart's <span className="italic font-normal">Desires</span>
               </h1>
             </div>
             {wishlist.length > 0 && (
-              <div className="flex items-center gap-6">
+              <div className="flex items-center gap-4 md:gap-6">
                 <button 
                   onClick={moveAllToBag}
-                  className="px-6 py-2.5 bg-gold text-primary-foreground text-[10px] font-body font-bold uppercase tracking-[0.2em] rounded-full hover:bg-gold/90 transition-all shadow-lg hover:shadow-gold/20"
+                  className="px-5 md:px-6 py-2.5 bg-gold text-primary-foreground text-[9px] md:text-[10px] font-body font-bold uppercase tracking-[0.2em] rounded-full hover:bg-gold/90 transition-all shadow-lg hover:shadow-gold/20 flex-1 sm:flex-none whitespace-nowrap"
                 >
                   Move All to Bag
                 </button>
                 <button 
                   onClick={clearWishlist}
-                  className="text-[10px] font-body font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors"
+                  className="text-[9px] md:text-[10px] font-body font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors whitespace-nowrap"
                 >
-                  Clear All Desires
+                  Clear All
                 </button>
               </div>
             )}
@@ -81,7 +81,7 @@ const Wishlist = () => {
               </Link>
             </motion.div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-12 lg:gap-x-10 lg:gap-y-16">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-x-6 md:gap-y-12 lg:gap-x-10 lg:gap-y-16">
               <AnimatePresence mode="popLayout">
                 {wishlist.map((product) => (
                   <motion.div
@@ -127,14 +127,14 @@ const Wishlist = () => {
           )}
           
           {wishlist.length > 0 && (
-            <div className="mt-20 p-12 bg-gold/5 rounded-[3rem] border border-gold/10 text-center">
-              <h3 className="font-display text-2xl font-light mb-4">Ready to make them yours?</h3>
-              <p className="text-muted-foreground font-body mb-8 max-w-sm mx-auto text-sm leading-relaxed">
-                Your selected treasures are waiting. Move them to your bag to complete your radiance ritual.
+            <div className="mt-16 md:mt-24 p-8 md:p-12 bg-gold/5 rounded-[2.5rem] md:rounded-[3rem] border border-gold/10 text-center">
+              <h3 className="font-display text-xl md:text-2xl font-light mb-4">Ready to make them yours?</h3>
+              <p className="text-muted-foreground font-body mb-8 max-w-sm mx-auto text-xs md:text-sm leading-relaxed italic">
+                "Your selected treasures are waiting. Move them to your bag to complete your radiance ritual."
               </p>
               <Link 
                 to="/cart"
-                className="inline-flex items-center gap-2 text-sm font-body font-bold uppercase tracking-widest text-gold hover:gap-3 transition-all"
+                className="inline-flex items-center gap-2 text-[10px] md:text-sm font-body font-bold uppercase tracking-widest text-gold hover:gap-3 transition-all"
               >
                 Go to Shopping Bag <ArrowRight size={16} />
               </Link>

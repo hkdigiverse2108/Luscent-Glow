@@ -40,8 +40,8 @@ const NewArrivals = () => {
   const remaining = newProducts.slice(2);
 
   return (
-    <section className="py-24 lg:py-32 overflow-hidden bg-white">
-      <div className="container mx-auto px-6 lg:px-12">
+    <section className="py-16 md:py-24 lg:py-32 overflow-hidden bg-white">
+      <div className="container mx-auto px-4 md:px-6 lg:px-12">
         <div className="text-center mb-20">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -56,7 +56,7 @@ const NewArrivals = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-display text-4xl lg:text-7xl font-bold text-foreground mb-6"
+            className="font-display text-3xl md:text-5xl lg:text-7xl font-bold text-foreground mb-4 md:mb-6"
           >
             Spring <span className="text-gradient-gold italic font-light">Newcomers</span>
           </motion.h2>
@@ -65,7 +65,7 @@ const NewArrivals = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-muted-foreground font-body text-lg max-w-2xl mx-auto"
+            className="text-muted-foreground font-body text-sm md:text-base lg:text-lg max-w-2xl mx-auto"
           >
             Introducing the latest breakthrough formulas, curated specifically for the modern aesthetic and timed for the season of rebirth.
           </motion.p>
@@ -80,7 +80,7 @@ const NewArrivals = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
-              className={`flex flex-col ${i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-20`}
+              className={`flex flex-col ${i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-8 md:gap-12 lg:gap-20`}
             >
               {/* Product Image Stage */}
               <div className="relative w-full lg:w-[45%]">
@@ -101,10 +101,10 @@ const NewArrivals = () => {
                 <div className="inline-block px-3 py-1 bg-secondary rounded-lg text-gold font-body text-[10px] font-bold uppercase tracking-widest">
                   {product.category}
                 </div>
-                <h3 className="font-display text-3xl lg:text-5xl font-bold text-foreground leading-tight">
+                <h3 className="font-display text-2xl md:text-3xl lg:text-5xl font-bold text-foreground leading-tight">
                   {product.name}
                 </h3>
-                <p className="text-muted-foreground font-body text-base lg:text-lg leading-relaxed max-w-xl">
+                <p className="text-muted-foreground font-body text-sm md:text-base lg:text-lg leading-relaxed max-w-xl">
                   {product.description || "Unveiling our most awaited formula yet. Engineered for perfection, designed for the conscious soul."}
                 </p>
                 

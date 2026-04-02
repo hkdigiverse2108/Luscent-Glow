@@ -17,7 +17,7 @@ const HeroCarousel = () => {
   const slide = heroSlides[current];
 
   return (
-    <section className="relative h-screen min-h-[700px] overflow-hidden bg-charcoal">
+    <section className="relative h-[90vh] md:h-screen min-h-[600px] md:min-h-[700px] overflow-hidden bg-charcoal">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
@@ -79,7 +79,7 @@ const HeroCarousel = () => {
                     hidden: { opacity: 0, y: 30 },
                     visible: { opacity: 1, y: 0 }
                   }}
-                  className="font-display text-5xl lg:text-8xl font-bold text-white leading-[1.1] mb-6 drop-shadow-2xl"
+                  className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.1] mb-6 drop-shadow-2xl"
                 >
                   {slide.title}
                 </motion.h1>
@@ -103,7 +103,7 @@ const HeroCarousel = () => {
                 >
                   <Link 
                     to={slide.link || "/products"}
-                    className="group relative px-10 py-4 bg-gold text-charcoal font-body font-semibold text-sm uppercase tracking-widest rounded-full hover:bg-white transition-all duration-500 flex items-center gap-2 overflow-hidden"
+                    className="group relative px-8 md:px-10 py-3.5 md:py-4 bg-gold text-charcoal font-body font-semibold text-xs md:text-sm uppercase tracking-widest rounded-full hover:bg-white transition-all duration-500 flex items-center gap-2 overflow-hidden"
                   >
                     <span className="relative z-10">{slide.cta}</span>
                     <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
@@ -116,18 +116,18 @@ const HeroCarousel = () => {
       </div>
 
       {/* Progress Indicators */}
-      <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-6 items-center">
+      <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 md:gap-6 items-center z-10">
         {heroSlides.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className="group relative"
+            className="group relative p-2"
           >
             <div className={`w-0.5 transition-all duration-500 ${
-              i === current ? "h-12 bg-gold" : "h-6 bg-white/20 group-hover:bg-white/50"
+              i === current ? "h-8 md:h-12 bg-gold" : "h-4 md:h-6 bg-white/20 group-hover:bg-white/50"
             }`} />
             {i === current && (
-              <span className="absolute -left-12 top-1/2 -translate-y-1/2 text-gold font-display text-sm font-bold">
+              <span className="absolute -left-10 md:-left-12 top-1/2 -translate-y-1/2 text-gold font-display text-[10px] md:text-sm font-bold">
                 0{i + 1}
               </span>
             )}

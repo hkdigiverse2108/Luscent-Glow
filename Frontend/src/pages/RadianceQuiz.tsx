@@ -84,10 +84,10 @@ const RadianceQuiz = () => {
         <div className="max-w-4xl mx-auto">
           {!isFinished ? (
             <div className="space-y-12">
-              <div className="text-center space-y-4">
-                <p className="text-xs font-body font-bold text-gold uppercase tracking-[0.3em]">Radiance Ritual Consultation</p>
-                <h1 className="font-display text-4xl lg:text-5xl font-light text-foreground italic">Find Your Personalized Glow</h1>
-                <div className="w-full h-1 bg-secondary rounded-full overflow-hidden max-w-xs mx-auto mt-8">
+              <div className="text-center space-y-4 md:space-y-6">
+                <p className="text-[10px] md:text-xs font-body font-bold text-gold uppercase tracking-[0.3em]">Radiance Ritual Consultation</p>
+                <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-light text-foreground italic px-4">Find Your Personalized Glow</h1>
+                <div className="w-full h-1 bg-secondary rounded-full overflow-hidden max-w-[200px] md:max-w-xs mx-auto mt-6 md:mt-8">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
@@ -104,24 +104,24 @@ const RadianceQuiz = () => {
                   exit={{ opacity: 0, x: -20 }}
                   className="space-y-8"
                 >
-                  <h2 className="font-display text-2xl lg:text-3xl text-center text-foreground font-light mb-10">
+                  <h2 className="font-display text-xl sm:text-2xl lg:text-3xl text-center text-foreground font-light mb-8 md:mb-10 px-4">
                     {steps[currentStep].question}
                   </h2>
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {steps[currentStep].options.map((option) => (
                       <button
                         key={option.id}
                         onClick={() => handleOptionSelect(option.id)}
-                        className={`group p-6 rounded-3xl border text-left transition-all duration-500 hover:shadow-ethereal flex items-center gap-5 ${
+                        className={`group p-5 md:p-6 rounded-2xl md:rounded-3xl border text-left transition-all duration-500 hover:shadow-ethereal flex items-center gap-4 md:gap-5 ${
                           answers[steps[currentStep].id] === option.id 
                             ? "bg-primary text-primary-foreground border-primary" 
                             : "bg-white border-gold/10 text-foreground hover:border-gold/30 hover:bg-gold/5"
                         }`}
                       >
-                        <span className="text-3xl filter grayscale group-hover:grayscale-0 transition-all">{option.icon}</span>
+                        <span className="text-2xl md:text-3xl filter grayscale group-hover:grayscale-0 transition-all">{option.icon}</span>
                         <div>
-                          <p className="font-body font-bold text-sm tracking-wide mb-1 uppercase">{option.label}</p>
-                          <p className="text-xs opacity-60 italic">{option.sub}</p>
+                          <p className="font-body font-bold text-[10px] md:text-sm tracking-widest mb-0.5 md:mb-1 uppercase">{option.label}</p>
+                          <p className="text-[10px] md:text-xs opacity-60 italic">{option.sub}</p>
                         </div>
                         {answers[steps[currentStep].id] === option.id && <Check className="ml-auto text-gold" size={20} />}
                       </button>
@@ -147,19 +147,19 @@ const RadianceQuiz = () => {
               animate={{ opacity: 1, scale: 1 }}
               className="space-y-16"
             >
-              <div className="text-center space-y-6">
-                <div className="w-20 h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-4 text-gold animate-pulse">
+              <div className="text-center space-y-4 md:space-y-6">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-gold/10 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 text-gold animate-pulse">
                   <Sparkles size={32} />
                 </div>
-                <h1 className="font-display text-4xl lg:text-6xl font-light text-foreground tracking-tight">
-                  Your Radiance <span className="italic font-normal">Ritual</span>
+                <h1 className="font-display text-3xl sm:text-4xl md:text-6xl font-light text-primary tracking-tight leading-tight">
+                  Your Radiance <span className="italic font-normal text-gold">Ritual</span>
                 </h1>
-                <p className="text-muted-foreground font-body max-w-md mx-auto italic">
+                <p className="text-xs md:text-sm text-muted-foreground font-body max-w-sm mx-auto italic">
                   "Authentic glow begins with understanding. Based on your profile, we have curated these treasures to harmonize with your skin's natural rhythm."
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {loading ? (
                   <div className="col-span-3 text-center py-20">
                     <div className="w-12 h-12 border-4 border-gold/20 border-t-gold rounded-full animate-spin mx-auto mb-4" />
@@ -198,18 +198,18 @@ const RadianceQuiz = () => {
                 ))}
               </div>
 
-              <div className="text-center space-y-8 pt-10">
-                <div className="p-8 border border-gold/10 bg-gold/5 rounded-[3rem] max-w-2xl mx-auto">
-                  <h3 className="font-display text-2xl font-light mb-4">Complete Your Transformation</h3>
-                  <p className="text-sm font-body text-muted-foreground mb-6">
+              <div className="text-center space-y-8 pt-6 md:pt-10">
+                <div className="p-6 md:p-8 border border-gold/10 bg-gold/5 rounded-[2rem] md:rounded-[3rem] max-w-2xl mx-auto">
+                  <h3 className="font-display text-2xl md:text-3xl font-light mb-4">Complete Your Transformation</h3>
+                  <p className="text-[10px] md:text-sm font-body text-muted-foreground mb-6">
                     Use code <span className="font-bold text-gold">GLOWCONSULT</span> for a complimentary signature sample with this ritual.
                   </p>
-                  <div className="flex flex-wrap justify-center gap-4">
+                  <div className="flex flex-col sm:flex-row justify-center gap-4">
                     <Link 
                       to="/cart"
-                      className="inline-flex items-center gap-3 px-10 py-4 bg-primary text-primary-foreground rounded-full font-body font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold transition-all"
+                      className="inline-flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-full font-body font-bold uppercase tracking-[0.15em] text-[10px] md:text-xs hover:bg-gold transition-all"
                     >
-                      Purchase Full Ritual <ArrowRight size={18} />
+                      Purchase Ritual <ArrowRight size={16} />
                     </Link>
                     <button 
                       onClick={() => {
@@ -217,9 +217,9 @@ const RadianceQuiz = () => {
                         setCurrentStep(0);
                         setAnswers({});
                       }}
-                      className="inline-flex items-center gap-3 px-10 py-4 border border-gold/30 text-gold rounded-full font-body font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold/5 transition-all"
+                      className="inline-flex items-center justify-center gap-3 px-8 py-4 border border-gold/30 text-gold rounded-full font-body font-bold uppercase tracking-[0.15em] text-[10px] md:text-xs hover:bg-gold/5 transition-all"
                     >
-                      <RefreshCw size={18} /> Retake Quiz
+                      <RefreshCw size={16} /> Retake Quiz
                     </button>
                   </div>
                 </div>
