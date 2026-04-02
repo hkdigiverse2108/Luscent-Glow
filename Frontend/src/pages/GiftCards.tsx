@@ -47,7 +47,9 @@ const GiftCards = () => {
         theme: selectedTheme.id, 
         recipient: recipientName, 
         recipientMobile,
-        message 
+        message,
+        price: finalAmount,
+        image: selectedTheme.image
       }
     });
     

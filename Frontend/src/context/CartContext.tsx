@@ -21,11 +21,18 @@ export interface Coupon {
   value: number;
 }
 
+export interface AppliedGiftCard {
+  code: string;
+  balance: number;
+  theme?: string;
+  image?: string;
+}
+
 interface CartContextType {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (id: string, selectedShade?: string, selectedSize?: string) => void;
-  updateQuantity: (id: string, quantity: number, selectedShade?: string, selectedSize?: string) => void;
+  removeItem: (id: string, selectedShade?: string, selectedSize?: string, metadata?: any) => void;
+  updateQuantity: (id: string, quantity: number, selectedShade?: string, selectedSize?: string, metadata?: any) => void;
   clearCart: () => void;
   totalItems: number;
   subtotal: number;
@@ -33,10 +40,32 @@ interface CartContextType {
   applyCoupon: (code: string) => boolean;
   removeCoupon: () => void;
   discountAmount: number;
+  appliedGiftCard: AppliedGiftCard | null;
+  applyGiftCard: (code: string) => Promise<boolean>;
+  removeGiftCard: () => void;
+  giftCardDiscount: number;
+  receivedGiftCards: AppliedGiftCard[];
+  availableCoupons: Coupon[];
+  fetchReceivedGiftCards: () => Promise<void>;
   syncCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
+
+const getLoggedInUser = () => {
+    const userStr = localStorage.getItem("user");
+    return userStr ? JSON.parse(userStr) : null;
+};
+
+// Helper for Guest ID
+const getGuestId = () => {
+    let id = localStorage.getItem("luscent-glow-guest-id");
+    if (!id) {
+        id = `guest_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`;
+        localStorage.setItem("luscent-glow-guest-id", id);
+    }
+    return id;
+};
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { removeFromWishlist } = useWishlist();
@@ -44,31 +73,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const saved = localStorage.getItem("luscent-glow-cart");
     return saved ? JSON.parse(saved) : [];
   });
-
-  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(null);
-
-  const getLoggedInUser = () => {
-    const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
-  };
-
-  const validCoupons: Coupon[] = [
-    { code: "GLOW20", discountType: "percentage", value: 20 },
-    { code: "FESTIVE15", discountType: "percentage", value: 15 },
-    { code: "GLOWUP", discountType: "fixed", value: 500 },
-    { code: "FREESHIP", discountType: "shipping", value: 99 },
-    { code: "GLOW15", discountType: "percentage", value: 15 },
-  ];
+  const [appliedCoupon, setAppliedCoupon] = useState<Coupon | null>(() => {
+    const saved = localStorage.getItem("luscent-glow-applied-coupon");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [appliedGiftCard, setAppliedGiftCard] = useState<AppliedGiftCard | null>(() => {
+    const saved = localStorage.getItem("luscent-glow-applied-giftcard");
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [receivedGiftCards, setReceivedGiftCards] = useState<AppliedGiftCard[]>([]);
 
   const fetchServerCart = useCallback(async () => {
     const user = getLoggedInUser();
-    if (!user || !user.mobileNumber) return;
+    const guestId = getGuestId();
+    const identifier = user?.mobileNumber || guestId;
 
     try {
-      const response = await fetch(getApiUrl(`/cart/${user.mobileNumber}`));
+      const response = await fetch(getApiUrl(`/cart/${identifier}`));
       if (response.ok) {
         const serverCart = await response.json();
-        // Overwrite local cart with server data when logged in
         if (serverCart && Array.isArray(serverCart)) {
           setItems(serverCart);
         }
@@ -78,47 +101,86 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Sync with server on mount or when user changes
+  const fetchReceivedGiftCards = useCallback(async () => {
+    const user = getLoggedInUser();
+    if (!user || !user.mobileNumber) return;
+
+    try {
+      const response = await fetch(getApiUrl(`/gift-cards/received/${user.mobileNumber}`));
+      if (response.ok) {
+        const data = await response.json();
+        setReceivedGiftCards(data);
+      }
+    } catch (error) {
+      console.error("Error fetching received gift cards:", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchServerCart();
-    
-    // Periodically check for user changes in localStorage (simple way to detect login/logout)
-    const interval = setInterval(() => {
-      const user = getLoggedInUser();
-      if (user && items.length === 0) {
-        // If user just logged in and client cart is empty, try to fetch
-        fetchServerCart();
-      }
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [fetchServerCart]);
+    fetchReceivedGiftCards();
+  }, [fetchServerCart, fetchReceivedGiftCards]);
 
   useEffect(() => {
     localStorage.setItem("luscent-glow-cart", JSON.stringify(items));
   }, [items]);
 
+  useEffect(() => {
+    if (appliedCoupon) {
+      localStorage.setItem("luscent-glow-applied-coupon", JSON.stringify(appliedCoupon));
+    } else {
+      localStorage.removeItem("luscent-glow-applied-coupon");
+    }
+  }, [appliedCoupon]);
+
+  useEffect(() => {
+    if (appliedGiftCard) {
+      localStorage.setItem("luscent-glow-applied-giftcard", JSON.stringify(appliedGiftCard));
+    } else {
+      localStorage.removeItem("luscent-glow-applied-giftcard");
+    }
+  }, [appliedGiftCard]);
+  
+  useEffect(() => {
+    if (appliedCoupon) {
+      localStorage.setItem("luscent-glow-applied-coupon", JSON.stringify(appliedCoupon));
+    } else {
+      localStorage.removeItem("luscent-glow-applied-coupon");
+    }
+  }, [appliedCoupon]);
+
+  useEffect(() => {
+    if (appliedGiftCard) {
+      localStorage.setItem("luscent-glow-applied-giftcard", JSON.stringify(appliedGiftCard));
+    } else {
+      localStorage.removeItem("luscent-glow-applied-giftcard");
+    }
+  }, [appliedGiftCard]);
+
   const addItem = async (newItem: CartItem) => {
     const user = getLoggedInUser();
+    const guestId = getGuestId();
     
-    // If user is logged in, sync with backend
-    if (user?.mobileNumber) {
-      try {
-        await fetch(getApiUrl("/cart/add"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userMobile: user.mobileNumber,
-            productId: newItem.id,
-            quantity: newItem.quantity,
-            selectedShade: newItem.selectedShade,
-            selectedSize: newItem.selectedSize,
-            metadata: newItem.metadata
-          }),
-        });
-      } catch (error) {
-        console.error("Error adding to cart on server:", error);
-      }
+    // Always sync with backend
+    try {
+      await fetch(getApiUrl("/cart/add"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userMobile: user?.mobileNumber || null,
+          guestId: user?.mobileNumber ? null : guestId,
+          productId: newItem.id,
+          quantity: newItem.quantity,
+          price: newItem.price,
+          name: newItem.name,
+          image: newItem.image,
+          selectedShade: newItem.selectedShade,
+          selectedSize: newItem.selectedSize,
+          metadata: newItem.metadata
+        }),
+      });
+    } catch (error) {
+      console.error("Error adding to cart on server:", error);
     }
 
     setItems((prev) => {
@@ -147,67 +209,71 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const removeItem = async (id: string, selectedShade?: string, selectedSize?: string) => {
+  const removeItem = async (id: string, selectedShade?: string, selectedSize?: string, metadata?: any) => {
     const user = getLoggedInUser();
-    
-    if (user?.mobileNumber) {
-      try {
-        await fetch(getApiUrl("/cart/remove"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userMobile: user.mobileNumber,
-            productId: id,
-            selectedShade,
-            selectedSize,
-            quantity: 0
-          }),
-        });
-      } catch (error) {
-        console.error("Error removing from cart on server:", error);
-      }
+    const guestId = getGuestId();
+
+    // Universal Removal from DB
+    try {
+      await fetch(getApiUrl("/cart/remove"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userMobile: user?.mobileNumber || null,
+          guestId: user?.mobileNumber ? null : guestId,
+          productId: id,
+          selectedShade,
+          selectedSize,
+          quantity: 0,
+          metadata: metadata || null
+        }),
+      });
+    } catch (error) {
+      console.error("Error removing from cart on server:", error);
     }
 
     setItems((prev) => prev.filter(
       (item) => 
         !(item.id === id && 
           item.selectedShade === selectedShade && 
-          item.selectedSize === selectedSize)
+          item.selectedSize === selectedSize &&
+          JSON.stringify(item.metadata) === JSON.stringify(metadata))
     ));
     toast.info("Item removed from cart");
   };
 
-  const updateQuantity = async (id: string, quantity: number, selectedShade?: string, selectedSize?: string) => {
+  const updateQuantity = async (id: string, quantity: number, selectedShade?: string, selectedSize?: string, metadata?: any) => {
     if (quantity <= 0) {
-      await removeItem(id, selectedShade, selectedSize);
-      await removeFromWishlist(id);
+      await removeItem(id, selectedShade, selectedSize, metadata);
       return;
     }
     const user = getLoggedInUser();
+    const guestId = getGuestId();
 
-    if (user?.mobileNumber) {
-      try {
-        await fetch(getApiUrl("/cart/update"), {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            userMobile: user.mobileNumber,
-            productId: id,
-            quantity,
-            selectedShade,
-            selectedSize
-          }),
-        });
-      } catch (error) {
-        console.error("Error updating quantity on server:", error);
-      }
+    try {
+      await fetch(getApiUrl("/cart/update"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userMobile: user?.mobileNumber || null,
+          guestId: user?.mobileNumber ? null : guestId,
+          productId: id,
+          quantity,
+          selectedShade,
+          selectedSize,
+          metadata: metadata || null
+        }),
+      });
+    } catch (error) {
+      console.error("Error updating cart quantity on server:", error);
     }
 
     setItems((prev) =>
       prev.map((item) =>
         item.id === id &&
         item.selectedShade === selectedShade &&
-        item.selectedSize === selectedSize
+        item.selectedSize === selectedSize &&
+        JSON.stringify(item.metadata) === JSON.stringify(metadata)
           ? { ...item, quantity }
           : item
       )
@@ -216,24 +282,35 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = async () => {
     const user = getLoggedInUser();
-    
-    if (user?.mobileNumber) {
-      try {
-        await fetch(getApiUrl(`/cart/clear/${user.mobileNumber}`), {
-          method: "DELETE",
-        });
-      } catch (error) {
-        console.error("Error clearing cart on server:", error);
-      }
+    const guestId = getGuestId();
+    const identifier = user?.mobileNumber || guestId;
+
+    try {
+      await fetch(getApiUrl(`/cart/clear/${identifier}`), {
+        method: "DELETE",
+      });
+    } catch (error) {
+      console.error("Error clearing cart on server:", error);
     }
 
     setItems([]);
     setAppliedCoupon(null);
+    setAppliedGiftCard(null);
+    localStorage.removeItem("luscent-glow-cart");
+    localStorage.removeItem("luscent-glow-applied-coupon");
+    localStorage.removeItem("luscent-glow-applied-giftcard");
     toast.info("Cart cleared");
   };
 
+  const availableCoupons: Coupon[] = [
+    { code: "GLOW20", discountType: "percentage", value: 20 },
+    { code: "FESTIVE15", discountType: "percentage", value: 15 },
+    { code: "FREESHIP", discountType: "shipping", value: 0 },
+    { code: "GLOWUP", discountType: "fixed", value: 500 }
+  ];
+
   const applyCoupon = (code: string): boolean => {
-    const coupon = validCoupons.find((c) => c.code.toUpperCase() === code.toUpperCase());
+    const coupon = availableCoupons.find((c) => c.code.toUpperCase() === code.toUpperCase());
     if (coupon) {
       setAppliedCoupon(coupon);
       toast.success(`Coupon ${coupon.code} applied successfully!`);
@@ -248,32 +325,68 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.info("Coupon removed");
   };
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-  const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const applyGiftCard = async (code: string): Promise<boolean> => {
+    try {
+      const response = await fetch(getApiUrl(`/gift-cards/validate/${code}`));
+      if (response.ok) {
+        const data = await response.json();
+        setAppliedGiftCard({
+          code: data.code,
+          balance: data.balance,
+          theme: data.theme,
+          image: data.image
+        });
+        toast.success(`Gift card ₹${data.balance} applied!`);
+        return true;
+      }
+    } catch (error) {
+      console.error("Error validating gift card:", error);
+    }
+    toast.error("Invalid or empty gift card");
+    return false;
+  };
 
-  const discountAmount = appliedCoupon 
-    ? appliedCoupon.discountType === "percentage" 
-      ? (subtotal * appliedCoupon.value) / 100 
-      : appliedCoupon.discountType === "fixed" 
-        ? appliedCoupon.value 
-        : 0
-    : 0;
+  const removeGiftCard = () => {
+    setAppliedGiftCard(null);
+    toast.info("Gift card removed");
+  };
+
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discountType === "percentage") discountAmount = (subtotal * appliedCoupon.value) / 100;
+    else if (appliedCoupon.discountType === "fixed") discountAmount = appliedCoupon.value;
+    else if (appliedCoupon.discountType === "shipping") discountAmount = 50;
+  }
+
+  const giftCardDiscount = appliedGiftCard ? Math.min(subtotal - discountAmount, appliedGiftCard.balance) : 0;
 
   return (
-    <CartContext.Provider value={{ 
-      items, 
-      addItem, 
-      removeItem, 
-      updateQuantity, 
-      clearCart, 
-      totalItems, 
-      subtotal,
-      appliedCoupon,
-      applyCoupon,
-      removeCoupon,
-      discountAmount,
-      syncCart: fetchServerCart
-    }}>
+    <CartContext.Provider
+      value={{
+        items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        totalItems,
+        subtotal,
+        appliedCoupon,
+        applyCoupon,
+        removeCoupon,
+        discountAmount,
+        appliedGiftCard,
+        applyGiftCard,
+        removeGiftCard,
+        giftCardDiscount,
+        receivedGiftCards,
+        availableCoupons,
+        fetchReceivedGiftCards,
+        syncCart: fetchServerCart
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
@@ -281,8 +394,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
+  if (context === undefined) throw new Error("useCart must be used within a CartProvider");
   return context;
 };

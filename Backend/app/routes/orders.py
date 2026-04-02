@@ -18,6 +18,9 @@ async def create_order(order_data: dict = Body(...)):
     # In a real app, you'd calculate total and verify stock here
     # For now, we simulate order creation from the frontend request
     
+    order_number = generate_order_number()
+    created_at = datetime.utcnow().isoformat()
+    
     new_order = {
         "userMobile": order_data.get("userMobile"),
         "items": order_data.get("items"),
@@ -25,12 +28,63 @@ async def create_order(order_data: dict = Body(...)):
         "status": "Processing",
         "paymentStatus": order_data.get("paymentStatus", "Pending"),
         "shippingAddress": order_data.get("shippingAddress"),
-        "createdAt": datetime.utcnow().isoformat(),
-        "orderNumber": generate_order_number()
+        "createdAt": created_at,
+        "orderNumber": order_number
     }
     
     inserted_order = await db["orders"].insert_one(new_order)
     created_order = await db["orders"].find_one({"_id": inserted_order.inserted_id})
+    
+    # Process Redemption of Applied Gift Card if any
+    applied_gc_code = order_data.get("appliedGiftCardCode")
+    gc_discount = order_data.get("giftCardDiscount", 0)
+    
+    if applied_gc_code and gc_discount > 0:
+        gc = await db["gift_cards"].find_one({"code": applied_gc_code.upper()})
+        if gc:
+            new_balance = max(0, gc.get("currentBalance", 0) - gc_discount)
+            is_active = new_balance > 0
+            
+            await db["gift_cards"].update_one(
+                {"_id": gc["_id"]},
+                {"$set": {
+                    "currentBalance": new_balance,
+                    "isActive": is_active,
+                    "lastUsedAt": created_at,
+                    "lastOrderNumber": order_number
+                }}
+            )
+
+    # Process Purchase of New Gift Cards if any
+    for item in order_data.get("items", []):
+        if item.get("productId", "").startswith("giftcard-") or item.get("category") == "Gift Cards":
+            # Generate a unique gift card code
+            gift_code = "LG-GIFT-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)) + "-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4))
+            
+            # Expiry: 1 year from now
+            from datetime import timedelta
+            expiry_date = (datetime.utcnow() + timedelta(days=365)).isoformat()
+            
+            metadata = item.get("metadata", {})
+            
+            gift_card = {
+                "code": gift_code,
+                "initialBalance": item.get("price", 0),
+                "currentBalance": item.get("price", 0),
+                "senderMobile": order_data.get("userMobile"),
+                "recipientName": metadata.get("recipient", "Valued Customer"),
+                "recipientMobile": metadata.get("recipientMobile"),
+                "message": metadata.get("message"),
+                "theme": metadata.get("theme", "Gold Radiance"),
+                "image": metadata.get("image"),
+                "isActive": True,
+                "expiryDate": expiry_date,
+                "createdAt": created_at,
+                "orderNumber": order_number
+            }
+            
+            await db["gift_cards"].insert_one(gift_card)
+    
     return created_order
 
 @router.get("/", response_description="List all orders for a user", response_model=List[OrderModel])

@@ -48,9 +48,16 @@ const Orders = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      if (!user) return;
+      const guestId = localStorage.getItem("luscent-glow-guest-id");
+      const identifier = user?.mobileNumber || guestId;
+      
+      if (!identifier) {
+        setLoading(false);
+        return;
+      }
+      
       try {
-        const response = await fetch(getApiUrl(`/orders/?userMobile=${encodeURIComponent(user.mobileNumber)}`));
+        const response = await fetch(getApiUrl(`/orders/?userMobile=${encodeURIComponent(identifier)}`));
         if (response.ok) {
           const data = await response.json();
           setOrders(data);

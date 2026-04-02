@@ -10,19 +10,34 @@ router = APIRouter(prefix="/cart", tags=["Cart"])
 @router.get("/{userMobile}")
 async def get_cart(userMobile: str):
     db = await get_database()
-    # Find all cart items for the user
-    cart_items = await db["cart"].find({"userMobile": userMobile}).to_list(1000)
+    # Find items by userMobile or guestId if it looks like one
+    query = {"$or": [{"userMobile": userMobile}, {"guestId": userMobile}]}
+    cart_items = await db["cart"].find(query).to_list(1000)
     
     # Fetch full product details for each cart item
     full_cart = []
     for item in cart_items:
-        product = await db["products"].find_one({"_id": ObjectId(item["productId"])})
+        productId = item["productId"]
+        
+        # Special handling for Gift Cards (they have a specific prefix and aren't in the products DB)
+        if productId.startswith("giftcard-"):
+            cart_entry = {
+                "id": productId,
+                "name": item.get("name") or f"Digital Gift Card — {item.get('metadata', {}).get('theme', 'Classic')}",
+                "price": item.get("price") or item.get("metadata", {}).get("price", 0),
+                "image": item.get("image") or item.get("metadata", {}).get("image", ""),
+                "category": "Gift Cards",
+                "quantity": item["quantity"],
+                "metadata": item.get("metadata")
+            }
+            full_cart.append(cart_entry)
+            continue
+
+        product = await db["products"].find_one({"_id": ObjectId(productId)})
         if not product:
-            # Fallback if product ID was stored as string or not found
-            product = await db["products"].find_one({"_id": item["productId"]})
+            product = await db["products"].find_one({"_id": productId})
             
         if product:
-            # Merge product details with cart item details (quantity, shade, size)
             cart_entry = {
                 "id": str(product["_id"]),
                 "name": product["name"],
@@ -42,19 +57,21 @@ async def get_cart(userMobile: str):
 async def add_to_cart(item: CartItemModel = Body(...)):
     db = await get_database()
     
-    # Check if item with same ID, shade, and size already exists for this user
+    # Check by user OR guest
     query = {
-        "userMobile": item.userMobile,
         "productId": item.productId,
         "selectedShade": item.selectedShade,
         "selectedSize": item.selectedSize,
         "metadata": item.metadata
     }
+    if item.userMobile:
+        query["userMobile"] = item.userMobile
+    else:
+        query["guestId"] = item.guestId
     
     existing = await db["cart"].find_one(query)
     
     if existing:
-        # Increment quantity
         new_quantity = existing["quantity"] + item.quantity
         await db["cart"].update_one(
             {"_id": existing["_id"]},
@@ -62,7 +79,6 @@ async def add_to_cart(item: CartItemModel = Body(...)):
         )
         return {"status": "updated", "message": "Cart quantity updated"}
     else:
-        # Insert new item
         item_dict = item.model_dump(by_alias=True, exclude=["id"])
         item_dict["createdAt"] = datetime.utcnow().isoformat()
         await db["cart"].insert_one(item_dict)
@@ -73,11 +89,15 @@ async def update_cart_quantity(data: CartUpdateModel = Body(...)):
     db = await get_database()
     
     query = {
-        "userMobile": data.userMobile,
         "productId": data.productId,
         "selectedShade": data.selectedShade,
-        "selectedSize": data.selectedSize
+        "selectedSize": data.selectedSize,
+        "metadata": data.metadata
     }
+    if data.userMobile:
+        query["userMobile"] = data.userMobile
+    else:
+        query["guestId"] = data.guestId
     
     result = await db["cart"].update_one(
         query,
@@ -94,11 +114,15 @@ async def remove_from_cart(data: CartUpdateModel = Body(...)):
     db = await get_database()
     
     query = {
-        "userMobile": data.userMobile,
         "productId": data.productId,
         "selectedShade": data.selectedShade,
-        "selectedSize": data.selectedSize
+        "selectedSize": data.selectedSize,
+        "metadata": data.metadata
     }
+    if data.userMobile:
+        query["userMobile"] = data.userMobile
+    else:
+        query["guestId"] = data.guestId
     
     result = await db["cart"].delete_one(query)
     
@@ -107,8 +131,10 @@ async def remove_from_cart(data: CartUpdateModel = Body(...)):
         
     return {"message": "Item removed from cart"}
 
-@router.delete("/clear/{userMobile}")
-async def clear_cart(userMobile: str):
+@router.delete("/clear/{identifier}")
+async def clear_cart(identifier: str):
     db = await get_database()
-    await db["cart"].delete_many({"userMobile": userMobile})
+    # Identifier could be userMobile or guestId
+    query = {"$or": [{"userMobile": identifier}, {"guestId": identifier}]}
+    await db["cart"].delete_many(query)
     return {"message": "Cart cleared successfully"}

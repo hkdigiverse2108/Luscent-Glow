@@ -8,6 +8,7 @@ from .routes.wishlist import router as wishlist_router
 from .routes.cart import router as cart_router
 from .routes.contact import router as contact_router
 from .routes.orders import router as orders_router
+from .routes.gift_cards import router as gift_cards_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,6 +36,7 @@ app.include_router(wishlist_router, tags=["Wishlist"])
 app.include_router(cart_router, tags=["Cart"])
 app.include_router(contact_router, prefix="/contact", tags=["Contact"])
 app.include_router(orders_router, tags=["Orders"])
+app.include_router(gift_cards_router, tags=["Gift Cards"])
 
 @app.get("/", tags=["Root"])
 async def read_root():
