@@ -2,6 +2,7 @@ from fastapi import APIRouter, Body, HTTPException, status
 from ..models import UserModel, UserAuthModel, OTPVerifyModel, PasswordResetModel, ForgotPasswordModel
 from ..database import get_database
 from datetime import datetime
+from bson import ObjectId
 import bcrypt
 import random
 
@@ -50,10 +51,12 @@ async def signin(auth: UserAuthModel = Body(...)):
     return {
         "status": "success",
         "user": {
+            "id": str(user["_id"]),
             "fullName": user["fullName"],
             "mobileNumber": user["mobileNumber"],
             "email": user["email"],
-            "profilePicture": user.get("profilePicture")
+            "profilePicture": user.get("profilePicture"),
+            "shippingAddress": user.get("shippingAddress")
         }
     }
 
@@ -104,14 +107,47 @@ async def reset_password(data: PasswordResetModel = Body(...)):
 @router.put("/profile/update")
 async def update_profile(data: dict = Body(...)):
     db = await get_database()
-    mobileNumber = data.get("mobileNumber")
-    if not mobileNumber:
-        raise HTTPException(status_code=400, detail="Mobile number is required")
+    userId = data.get("userId")
+    newMobileNumber = data.get("mobileNumber")
     
+    if not userId:
+        # Fallback to mobileNumber if userId is not provided (legacy support)
+        # Note: This won't support mobile number changes if userId is missing.
+        user = await db["users"].find_one({"mobileNumber": newMobileNumber})
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        userId = str(user["_id"])
+
+    try:
+        user_id_obj = ObjectId(userId)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    # Get current user state
+    current_user = await db["users"].find_one({"_id": user_id_obj})
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    oldMobileNumber = current_user["mobileNumber"]
+    
+    # Check if mobile number is being changed
+    if newMobileNumber and newMobileNumber != oldMobileNumber:
+        # Check if new number is already taken
+        existing_user = await db["users"].find_one({"mobileNumber": newMobileNumber})
+        if existing_user:
+            raise HTTPException(status_code=400, detail="New mobile number is already registered")
+        
+        # We will update everything later once the main update is successful
+        should_update_relations = True
+    else:
+        should_update_relations = False
+
     update_data = {
         "fullName": data.get("fullName"),
         "email": data.get("email"),
-        "profilePicture": data.get("profilePicture")
+        "mobileNumber": newMobileNumber,
+        "profilePicture": data.get("profilePicture"),
+        "shippingAddress": data.get("shippingAddress")
     }
     
     # Filter out None values
@@ -121,23 +157,52 @@ async def update_profile(data: dict = Body(...)):
         raise HTTPException(status_code=400, detail="No data provided to update")
 
     result = await db["users"].update_one(
-        {"mobileNumber": mobileNumber},
+        {"_id": user_id_obj},
         {"$set": update_data}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="User not found")
+    if should_update_relations:
+        # Update references across all collections
+        # 1. Cart
+        await db["cart"].update_many(
+            {"userMobile": oldMobileNumber},
+            {"$set": {"userMobile": newMobileNumber}}
+        )
         
+        # 2. Wishlist
+        await db["wishlist"].update_many(
+            {"userMobile": oldMobileNumber},
+            {"$set": {"userMobile": newMobileNumber}}
+        )
+        
+        # 3. Orders
+        await db["orders"].update_many(
+            {"userMobile": oldMobileNumber},
+            {"$set": {"userMobile": newMobileNumber}}
+        )
+
+        # 4. Gift Cards (both sender and recipient)
+        await db["gift_cards"].update_many(
+            {"senderMobile": oldMobileNumber},
+            {"$set": {"senderMobile": newMobileNumber}}
+        )
+        await db["gift_cards"].update_many(
+            {"recipientMobile": oldMobileNumber},
+            {"$set": {"recipientMobile": newMobileNumber}}
+        )
+
     # Get updated user
-    updated_user = await db["users"].find_one({"mobileNumber": mobileNumber})
+    updated_user = await db["users"].find_one({"_id": user_id_obj})
     
     return {
         "status": "success",
         "user": {
+            "id": str(updated_user["_id"]),
             "fullName": updated_user["fullName"],
             "mobileNumber": updated_user["mobileNumber"],
             "email": updated_user["email"],
-            "profilePicture": updated_user.get("profilePicture")
+            "profilePicture": updated_user.get("profilePicture"),
+            "shippingAddress": updated_user.get("shippingAddress")
         }
     }
 

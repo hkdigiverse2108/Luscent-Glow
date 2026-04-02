@@ -4,7 +4,7 @@ import {
   ShoppingBag, ChevronRight, Package, 
   Truck, CheckCircle2, Clock, 
   ExternalLink, Search, Archive,
-  ArrowRight
+  ArrowRight, ChevronLeft, Sparkles
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
@@ -12,6 +12,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
+import { useNavigate } from "react-router-dom";
 
 interface OrderItem {
   productId: string;
@@ -42,6 +43,7 @@ const statusConfig = {
 
 const Orders = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -81,17 +83,31 @@ const Orders = () => {
     <div className="min-h-screen bg-[#faf9f6]">
       <Header />
       
-      <main className="container mx-auto px-6 py-20 lg:py-32">
-        <div className="max-w-5xl mx-auto">
+      <main className="container mx-auto px-6 py-12 md:py-20 lg:py-32">
+        <div className="max-w-6xl mx-auto">
+          {/* Nav Back */}
+          <button 
+            onClick={() => navigate("/profile")} 
+            className="flex items-center gap-4 text-muted-foreground hover:text-gold transition-all group mb-12 md:mb-16"
+          >
+            <div className="w-12 h-12 rounded-full bg-white border border-gold/10 flex items-center justify-center group-hover:border-gold/30 transition-all shadow-ethereal">
+              <ChevronLeft size={20} />
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em] leading-none mb-1">Return</span>
+              <span className="text-xs font-display font-medium text-charcoal">Back to Profile</span>
+            </div>
+          </button>
+
           {/* Page Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16 md:mb-24">
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-gold">
-                <ShoppingBag size={16} />
-                <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em]">Ritual History</span>
+                <Sparkles size={14} className="opacity-50" />
+                <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Transaction Archive</span>
               </div>
-              <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-charcoal tracking-tight lowercase leading-[1.1]">
-                your <span className="text-gradient-gold italic font-light">orders.</span>
+              <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-charcoal tracking-tight lowercase leading-[0.9]">
+                Your <span className="text-gold italic font-light">Orders</span>
               </h1>
             </div>
 
@@ -198,7 +214,10 @@ const Orders = () => {
                             <p className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest mb-1">Grand Total</p>
                             <p className="font-display text-2xl font-bold text-charcoal">₹{order.totalAmount.toLocaleString()}</p>
                           </div>
-                          <button className="flex items-center gap-2 text-gold hover:text-charcoal transition-colors group/link">
+                          <button 
+                            onClick={() => navigate(`/track-order?orderId=${order.orderNumber}`)}
+                            className="flex items-center gap-2 text-gold hover:text-charcoal transition-colors group/link"
+                          >
                             <span className="text-[10px] font-body font-bold uppercase tracking-widest">Track Ritual</span>
                             <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
                           </button>

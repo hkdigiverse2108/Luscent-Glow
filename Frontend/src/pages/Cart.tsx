@@ -16,7 +16,8 @@ import {
   ChevronRight,
   Tag,
   Copy,
-  Check
+  Check,
+  Sparkles
 } from "lucide-react";
 import { 
   Dialog, 
@@ -61,8 +62,8 @@ const Cart = () => {
   const [isPlacingOrder, setIsPlacingOrder] = React.useState(false);
   const [orderComplete, setOrderComplete] = React.useState(false);
 
-  const shipping = 50; // Flat charge, offset by coupons if applicable
-  const tax = 0; // Removed as requested by user
+  const shipping = 50; 
+  const tax = 0; 
   const total = Math.max(0, subtotal + shipping + tax - discountAmount - giftCardDiscount);
 
   const handleApplyGiftCard = () => {
@@ -110,8 +111,6 @@ const Cart = () => {
         window.scrollTo(0, 0);
         navigate("/orders");
       } else {
-        // Even if server returns error, if it's a demo, we might want to show success
-        // but for now we follow the response. Let's make it robust.
         const errorData = await response.json();
         console.error("Order error:", errorData);
         toast.error("Process interrupted. Please try again.");
@@ -119,18 +118,9 @@ const Cart = () => {
     } catch (error) {
       console.error("Purchase error:", error);
       toast.error("Could not reach our fulfillment center.");
-      
-      // FALLBACK for User's 'Always Success' request if needed: 
-      // In a real demo, we might setOrderComplete(true) anyway, 
-      // but let's keep it honest to the API for now unless it's a persistent blocker.
     } finally {
       setIsPlacingOrder(false);
     }
-  };
-
-  const handleApplyCoupon = () => {
-    if (!couponInput.trim()) return;
-    applyCoupon(couponInput);
   };
 
   const freeShippingThreshold = 999;
@@ -161,8 +151,7 @@ const Cart = () => {
             <div className="space-y-4">
               <h1 className="font-display text-5xl md:text-6xl font-light text-foreground tracking-tight">Ritual <span className="italic font-normal">Secured</span></h1>
               <p className="text-muted-foreground font-body text-lg max-w-md mx-auto leading-relaxed">
-                Your curated selection has been successfully recorded in our orders database. 
-                {items.some(i => i.category === "Gift Cards") && " Your digital gift cards have been dispatched to the recipients."}
+                Your curated selection has been successfully recorded in our orders database.
               </p>
             </div>
 
@@ -182,47 +171,74 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#faf9f6]">
+    <div className="min-h-screen bg-[#faf9f6] relative overflow-hidden">
       <Header />
-      <main className="container mx-auto px-4 py-12 lg:py-20">
+      
+      {/* Luxury Aura Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden select-none z-0">
+        <motion.div 
+          animate={{ 
+            x: [0, 40, 0],
+            y: [0, 60, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[-5%] right-[-5%] w-[45%] h-[45%] bg-gold/10 rounded-full blur-[130px] opacity-40" 
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, -30, 0],
+            y: [0, 40, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[5%] left-[-10%] w-[50%] h-[50%] bg-rose-light/10 rounded-full blur-[110px] opacity-35" 
+        />
+      </div>
+
+      <main className="container mx-auto px-4 py-12 lg:py-24 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-6">
-            <div className="space-y-2">
-              <Link to="/products" className="inline-flex items-center gap-2 text-gold hover:gap-3 transition-all text-[10px] md:text-sm font-body font-bold uppercase tracking-widest mb-2 md:mb-4">
-                <ChevronLeft size={16} /> Back to Collection
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 md:mb-24 gap-10">
+            <div className="space-y-4">
+              <Link to="/products" className="inline-flex items-center gap-3 text-gold hover:gap-5 transition-all text-[11px] md:text-xs font-body font-bold uppercase tracking-[0.3em] mb-4 group">
+                <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Collection
               </Link>
-              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-light text-foreground tracking-tight leading-[1.1]">
-                Shopping <span className="italic font-normal">Bag</span>
-              </h1>
+              <div className="space-y-1">
+                <div className="flex items-center gap-3 text-gold">
+                  <Sparkles size={14} className="opacity-50" />
+                  <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Curated Selections</span>
+                </div>
+                <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-charcoal tracking-tight lowercase leading-[0.9]">
+                  Shopping <span className="text-gold italic font-light">Bag</span>
+                </h1>
+              </div>
             </div>
-            <div className="hidden md:flex flex-col items-end gap-2">
-              <p className="text-sm font-body text-muted-foreground uppercase tracking-[0.2em]">{totalItems} Curated Items</p>
-              <button 
-                onClick={clearCart}
-                className="text-[10px] font-body font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors"
-              >
-                Clear All Items
-              </button>
+            <div className="hidden md:flex flex-col items-end gap-3 pb-2">
+              <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-full border border-white/50 shadow-sm">
+                <ShoppingBag size={18} className="text-gold" />
+                <p className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">{totalItems} Boutique Items</p>
+              </div>
             </div>
           </div>
 
           {items.length === 0 ? (
             <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center py-24 lg:py-40 bg-white/50 border border-white rounded-[3rem] shadow-ethereal backdrop-blur-sm"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center py-24 lg:py-40 bg-white/40 backdrop-blur-3xl border border-white/50 rounded-[3rem] shadow-ethereal relative overflow-hidden"
             >
-              <div className="w-24 h-24 bg-gold/5 rounded-full flex items-center justify-center mx-auto mb-8 text-gold/60">
-                <ShoppingBag size={40} strokeWidth={1} />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+              <div className="w-24 h-24 bg-gold/5 rounded-full flex items-center justify-center mx-auto mb-10 text-gold/40">
+                <ShoppingBag size={48} strokeWidth={1} />
               </div>
-              <h2 className="font-display text-3xl font-light mb-6 text-foreground">Your collection is empty</h2>
-              <p className="text-muted-foreground font-body mb-10 max-w-md mx-auto leading-relaxed">
+              <h2 className="font-display text-4xl font-light mb-6 text-charcoal tracking-tight">Your collection is empty<span className="text-gold">.</span></h2>
+              <p className="text-muted-foreground/60 font-body mb-10 max-w-sm mx-auto leading-relaxed italic text-sm text-center">
                 Discover our latest arrivals in skincare and makeup, curated to reveal your inner radiance.
               </p>
               <Link 
                 to="/products"
-                className="inline-flex items-center gap-3 px-10 py-4 bg-primary text-primary-foreground rounded-full font-body font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold transition-all duration-500 shadow-xl hover:shadow-gold/20"
+                className="inline-flex items-center gap-4 px-12 py-5 bg-charcoal text-white rounded-full font-body font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl"
               >
                 Explore Collection <ArrowRight size={18} />
               </Link>
@@ -231,102 +247,61 @@ const Cart = () => {
             <div className="grid lg:grid-cols-12 gap-12 lg:gap-20 items-start">
               {/* Items List */}
               <div className="lg:col-span-7 space-y-12">
-                {/* Free Shipping Progress */}
-                <div className="bg-white p-5 md:p-6 rounded-2xl md:rounded-3xl border border-gold/10 shadow-sm relative overflow-hidden">
-                  <div className="flex justify-between items-center mb-3 md:mb-4">
-                    <p className="text-[9px] md:text-xs font-body font-bold uppercase tracking-wider text-muted-foreground">
-                      {subtotal >= freeShippingThreshold ? 
-                        "✨ You've unlocked Complimentary Shipping" : 
-                        `Add ₹${(freeShippingThreshold - subtotal).toLocaleString()} more for Complimentary Shipping`}
-                    </p>
-                    <span className="text-[10px] font-bold text-gold">{Math.round(progressToFreeShipping)}%</span>
-                  </div>
-                  <div className="h-1.5 w-full bg-secondary rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progressToFreeShipping}%` }}
-                      className="h-full bg-gold shadow-[0_0_10px_rgba(182,143,76,0.3)]"
-                    />
-                  </div>
-                </div>
-
                 <AnimatePresence mode="popLayout">
-                  {items.map((item) => (
+                  {items.map((item, index) => (
                     <motion.div
                       key={`${item.id}-${item.selectedShade}-${item.selectedSize}`}
                       layout
-                      initial={{ opacity: 0, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, x: -50 }}
-                      className="group flex gap-6 lg:gap-10 items-center"
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -100, transition: { duration: 0.5 } }}
+                      transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                      className="group relative"
                     >
-                      <div className={`relative ${item.category === "Gift Cards" ? "aspect-[16/10] w-32 md:w-48 lg:w-56" : "w-24 h-32 md:w-32 md:h-40 lg:w-44 lg:h-56"} bg-secondary rounded-xl md:rounded-[2rem] overflow-hidden flex-shrink-0 shadow-md group-hover:shadow-2xl transition-all duration-700`}>
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                        />
-                      </div>
-                      
-                      <div className="flex-1 min-w-0 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="space-y-3 flex-1 min-w-0">
-                          <div>
-                            <p className="text-[9px] md:text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em] mb-1 md:mb-2">{item.category}</p>
-                            <h3 className="font-display text-lg md:text-xl lg:text-2xl font-light text-foreground leading-tight truncate">
-                              {item.name}
-                            </h3>
-                          </div>
-
-                          <div className="flex flex-wrap gap-2 md:gap-3 text-[8px] md:text-[10px] font-body font-bold uppercase tracking-widest text-muted-foreground">
-                            {item.selectedShade && (
-                              <div className="flex items-center gap-1 bg-white border border-border px-2 py-0.5 rounded-full">
-                                <span className="w-1 h-1 rounded-full bg-gold" />
-                                {item.selectedShade}
-                              </div>
-                            )}
-                            {item.selectedSize && (
-                              <div className="flex items-center gap-1 bg-white border border-border px-2 py-0.5 rounded-full">
-                                <span className="w-1 h-1 rounded-full bg-gold" />
-                                {item.selectedSize}
-                              </div>
-                            )}
-                          </div>
-
-                          {item.metadata?.recipient && (
-                             <div className="space-y-1.5 pt-2 border-t border-gold/10">
-                               <p className="text-[9px] font-body text-muted-foreground uppercase tracking-wider">Recipient: <span className="text-foreground font-bold">{item.metadata.recipient}</span></p>
-                               {item.metadata.message && (
-                                 <p className="text-[10px] font-body italic text-muted-foreground line-clamp-1 opacity-80">"{item.metadata.message}"</p>
-                               )}
-                             </div>
-                          )}
-
-                          <div className="flex items-center border border-gold/10 rounded-xl bg-white p-1 w-fit mt-4">
-                            <button 
-                              onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedShade, item.selectedSize, item.metadata)}
-                              className="p-1.5 text-muted-foreground hover:text-gold transition-colors"
-                            >
-                              <Minus size={12} />
-                            </button>
-                            <span className="px-3 text-xs font-bold font-body min-w-[2rem] text-center">{item.quantity}</span>
-                            <button 
-                              onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedShade, item.selectedSize, item.metadata)}
-                              className="p-1.5 text-muted-foreground hover:text-gold transition-colors"
-                            >
-                              <Plus size={12} />
-                            </button>
-                          </div>
+                      <div className="flex gap-8 lg:gap-14 items-center p-8 md:p-10 bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3.5rem] border border-white/50 shadow-ethereal hover:shadow-2xl transition-all duration-700 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                        
+                        <div className={`relative ${item.category === "Gift Cards" ? "aspect-[16/10] w-36 md:w-56" : "w-28 h-36 md:w-44 md:h-56"} bg-[#f8f8f8] rounded-2xl md:rounded-[2.5rem] overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-2xl transition-all duration-1000 group-hover:translate-x-2`}>
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                         </div>
+                        
+                        <div className="flex-1 min-w-0 flex flex-col lg:flex-row lg:items-center justify-between gap-8 lg:gap-12 pl-2">
+                          <div className="space-y-4 flex-1 min-w-0">
+                            <div>
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="w-6 h-[1px] bg-gold/30" />
+                                <p className="text-[9px] font-body font-bold text-gold uppercase tracking-[0.4em] leading-none">{item.category}</p>
+                              </div>
+                              <h3 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold text-charcoal leading-tight truncate tracking-tight lowercase">
+                                {item.name}<span className="text-gold italic font-light">.</span>
+                              </h3>
+                              
+                              <div className="flex flex-wrap gap-2 mt-4">
+                                {item.selectedShade && (
+                                  <span className="text-[9px] font-body font-bold uppercase tracking-widest text-muted-foreground/60 bg-gold/5 px-3 py-1 rounded-full border border-gold/5">{item.selectedShade}</span>
+                                )}
+                                {item.selectedSize && (
+                                  <span className="text-[9px] font-body font-bold uppercase tracking-widest text-muted-foreground/60 bg-gold/5 px-3 py-1 rounded-full border border-gold/5">{item.selectedSize}</span>
+                                )}
+                              </div>
+                            </div>
 
-                        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 border-t md:border-t-0 border-gold/10 pt-4 md:pt-0">
-                          <p className="font-display text-xl lg:text-2xl font-normal text-foreground">₹{(item.price * item.quantity).toLocaleString()}</p>
-                          <button 
-                            onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)}
-                            className="text-[9px] font-body font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors group/del flex items-center gap-2"
-                          >
-                            <Trash2 size={12} className="opacity-50 group-hover/del:opacity-100" />
-                            Dispose
-                          </button>
+                            <div className="flex items-center gap-6 mt-6">
+                              <div className="flex items-center bg-white/40 backdrop-blur-md border border-gold/5 rounded-2xl p-1 shadow-sm">
+                                <button onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedShade, item.selectedSize, item.metadata)} className="w-10 h-10 flex items-center justify-center text-muted-foreground/60 hover:text-gold transition-all hover:bg-gold/5 rounded-xl"><Minus size={14} /></button>
+                                <span className="w-10 text-sm font-bold font-body text-charcoal text-center">{item.quantity}</span>
+                                <button onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedShade, item.selectedSize, item.metadata)} className="w-10 h-10 flex items-center justify-center text-muted-foreground/60 hover:text-gold transition-all hover:bg-gold/5 rounded-xl"><Plus size={14} /></button>
+                              </div>
+                              <button onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)} className="group/del flex items-center gap-3 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-rose-brand transition-all">
+                                <div className="w-10 h-10 flex items-center justify-center rounded-2xl bg-rose-brand/5 group-hover/del:bg-rose-brand group-hover/del:text-white transition-all duration-500"><Trash2 size={16} strokeWidth={1.5} /></div>
+                                <span className="hidden md:inline">Dispose</span>
+                              </button>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.4em] mb-1">Ritual Value</p>
+                            <p className="font-display text-3xl lg:text-4xl font-normal text-charcoal tracking-tight">₹{(item.price * item.quantity).toLocaleString()}</p>
+                          </div>
                         </div>
                       </div>
                     </motion.div>
@@ -334,256 +309,120 @@ const Cart = () => {
                 </AnimatePresence>
               </div>
 
-              {/* Order Summary */}
-              <div className="lg:col-span-5 lg:pl-10">
-                <div className="sticky top-32 space-y-8">
-                  <div className="glass-gold p-6 md:p-10 lg:p-12 rounded-[2.5rem] md:rounded-[4rem] shadow-ethereal relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 blur-[80px] rounded-full -mr-32 -mt-32" />
+              {/* Order Summary Sidebar */}
+              <div className="lg:col-span-5 relative mt-12 lg:mt-0">
+                <div className="sticky top-32 space-y-10">
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-charcoal/90 backdrop-blur-3xl p-10 md:p-14 rounded-[3rem] md:rounded-[4.5rem] shadow-ethereal border border-white/10 relative overflow-hidden text-white"
+                  >
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-gold/10 blur-[100px] rounded-full -mr-40 -mt-40 pointer-events-none" />
                     
-                    <div className="flex justify-between items-center mb-8 md:mb-10 border-b border-gold/10 pb-6">
-                      <h2 className="font-display text-2xl md:text-3xl font-light text-foreground italic">Bag Summary</h2>
-                      <button 
-                        onClick={clearCart}
-                        className="text-[10px] font-body font-bold uppercase tracking-[0.2em] text-muted-foreground hover:text-destructive transition-colors"
-                      >
-                        Clear Bag
-                      </button>
+                    <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-8">
+                       <div className="space-y-1">
+                         <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.4em] leading-none">Checkout Protocol</p>
+                         <h2 className="font-display text-4xl font-light text-white italic tracking-tight">Summary<span className="text-gold font-serif">.</span></h2>
+                       </div>
                     </div>
                     
-                    <div className="space-y-6 mb-10">
-                      <div className="flex justify-between text-xs font-body font-bold text-muted-foreground uppercase tracking-wider">
-                        <span>Subtotal</span>
-                        <span className="text-foreground">₹{subtotal.toLocaleString()}</span>
-                      </div>
-
-                      <div className="flex justify-between text-xs font-body font-bold text-muted-foreground uppercase tracking-wider">
-                        <span>Logistics</span>
-                        <span className="text-foreground">₹{shipping.toLocaleString()}</span>
+                    <div className="space-y-8 mb-12">
+                      <div className="flex justify-between text-[11px] font-body font-bold text-white/40 uppercase tracking-[0.3em] items-center">
+                        <span>Base Selections</span>
+                        <span className="text-white">₹{subtotal.toLocaleString()}</span>
                       </div>
                       
-                      {/* Unified Coupons Selection Card */}
                       <div className="pt-2">
                         <Dialog open={isCouponsModalOpen} onOpenChange={setIsCouponsModalOpen}>
                           <DialogTrigger asChild>
-                            <button className="w-full text-left bg-white/60 hover:bg-white border border-gold/20 rounded-2xl p-5 md:p-6 flex items-center justify-between group transition-all duration-500 shadow-sm hover:shadow-md">
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-rose-brand/10 rounded-xl flex items-center justify-center text-rose-brand group-hover:scale-110 transition-transform duration-500">
-                                  <Tag size={24} strokeWidth={1.5} />
-                                </div>
-                                <div>
-                                  <h4 className="text-sm font-display font-bold text-foreground tracking-wide">Coupons</h4>
-                                  <p className="text-[10px] md:text-xs font-body font-medium text-rose-brand uppercase tracking-widest mt-0.5">Apply now and save extra!</p>
+                            <button className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/5 rounded-3xl p-6 flex items-center justify-between group transition-all duration-500 shadow-xl">
+                              <div className="flex items-center gap-6">
+                                <div className="w-14 h-14 bg-gold/10 rounded-2xl flex items-center justify-center text-gold group-hover:scale-110 transition-transform duration-700 shadow-inner"><Tag size={28} strokeWidth={1} /></div>
+                                <div className="space-y-1">
+                                  <h4 className="text-sm font-display font-bold text-white tracking-widest uppercase">Sacred Offers</h4>
+                                  <p className="text-[10px] font-body font-medium text-gold/60 uppercase tracking-widest leading-none">View available rituals</p>
                                 </div>
                               </div>
-                              <ChevronRight size={20} className="text-rose-brand transition-transform group-hover:translate-x-1" />
+                              <ChevronRight size={20} className="text-gold transition-transform group-hover:translate-x-1" />
                             </button>
                           </DialogTrigger>
                           
-                          <DialogContent className="max-w-md w-[95vw] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl flex flex-col max-h-[85vh]">
-                             {/* Custom Header matching screenshot */}
-                             <div className="bg-white px-6 py-5 border-b border-gray-100 flex items-center gap-4">
-                               <DialogClose className="p-1 hover:bg-gray-100 rounded-full transition-colors text-rose-brand">
-                                 <ChevronLeft size={24} />
-                               </DialogClose>
-                               <DialogTitle className="font-display text-xl lg:text-2xl font-bold text-[#424242]">
-                                 Coupons & Offers
-                               </DialogTitle>
+                          <DialogContent className="max-w-md w-[95vw] rounded-[3rem] p-0 overflow-hidden border-white/10 shadow-2xl flex flex-col max-h-[85vh] bg-[#fdfcfb]">
+                             <div className="bg-white px-8 py-6 border-b border-gray-100 flex items-center gap-6">
+                               <DialogClose className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gold"><ChevronLeft size={24} /></DialogClose>
+                               <DialogTitle className="font-display text-2xl font-bold text-charcoal tracking-tight lowercase">Sacred <span className="text-gold italic font-light">Offers</span></DialogTitle>
                              </div>
-
                              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f8f9fb]">
-                               {/* Top Manual Entry Bar like screenshot */}
-                               <div className="p-4 md:p-6 bg-white shadow-sm mb-4">
-                                  <div className="relative flex items-center bg-[#f0f2f5] rounded-xl border border-gray-200 overflow-hidden group focus-within:ring-2 focus-within:ring-rose-brand/20 transition-all">
-                                    <input 
-                                      type="text" 
-                                      value={couponInput}
-                                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                                      placeholder="Enter Coupon Code" 
-                                      className="flex-1 bg-transparent border-none px-5 py-4 text-sm font-medium text-foreground outline-none placeholder:text-gray-400"
-                                    />
-                                    <button 
-                                      onClick={() => { if(applyCoupon(couponInput)) setIsCouponsModalOpen(false); }}
-                                      className="px-6 py-4 text-sm font-bold text-gray-500 hover:text-rose-brand transition-colors uppercase tracking-wider"
-                                    >
-                                      Apply
-                                    </button>
+                               <div className="p-6 bg-white shadow-sm mb-6">
+                                  <div className="relative flex items-center bg-secondary rounded-2xl border border-gold/5 overflow-hidden group focus-within:ring-2 focus-within:ring-gold/20 transition-all">
+                                    <input type="text" value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} placeholder="Enter Ritual Code" className="flex-1 bg-transparent border-none px-6 py-5 text-sm font-body font-bold text-charcoal outline-none placeholder:text-muted-foreground/30 uppercase tracking-widest" />
+                                    <button onClick={() => { if(applyCoupon(couponInput)) setIsCouponsModalOpen(false); }} className="px-8 py-5 text-[10px] font-body font-bold text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em]">Apply</button>
                                   </div>
                                </div>
-
-                               <div className="px-4 md:px-6 space-y-6 pb-20">
-                                 {/* Unlocked Coupons section */}
+                               <div className="px-6 space-y-6 pb-20">
                                  <div className="space-y-4">
-                                   <div className="flex items-center justify-between px-1">
-                                      <h5 className="text-[13px] font-medium text-[#4a5568] tracking-tight">Unlocked Coupons</h5>
-                                   </div>
-
-                                   <div className="grid gap-4">
-                                     {availableCoupons.map((coupon, i) => (
-                                       <div 
-                                         key={coupon.code}
-                                         className={`relative bg-white rounded-xl p-5 shadow-sm border ${appliedCoupon?.code === coupon.code ? 'border-gold shadow-md' : 'border-gray-100'}`}
-                                       >
-                                         <div className="flex justify-between items-start gap-4 mb-4">
+                                   <div className="flex items-center gap-3 px-2"><Sparkles size={12} className="text-gold opacity-50" /><h5 className="text-[10px] font-body font-bold text-muted-foreground/60 uppercase tracking-[0.3em]">Unlocked Potential</h5></div>
+                                   <div className="grid gap-5">
+                                     {availableCoupons.map((coupon) => (
+                                       <div key={coupon.code} className={`relative bg-white rounded-[2rem] p-6 shadow-sm border transition-all duration-500 ${appliedCoupon?.code === coupon.code ? 'border-gold shadow-gold/10' : 'border-gold/5'}`}>
+                                         <div className="flex justify-between items-start gap-4 mb-6">
                                            <div className="space-y-3 flex-1">
-                                              {/* Boutique Identity */}
-                                              <div className="flex items-center gap-2">
-                                                 <h6 className="font-display text-lg font-bold text-gold/80 tracking-tight">
-                                                   Glow Boutique
-                                                 </h6>
-                                              </div>
-                                              <div>
-                                                <h4 className="text-base font-bold text-foreground leading-tight uppercase tracking-tight">
-                                                  {coupon.code === "GLOW20" ? "20% OFF" : 
-                                                   coupon.code === "FESTIVE15" ? "15% OFF" : 
-                                                   coupon.code === "FREESHIP" ? "FREE SHIPPING" : 
-                                                   "₹500 OFF"}
-                                                </h4>
-                                                <p className="text-[11px] md:text-xs text-[#4a5568] mt-1 font-medium leading-relaxed">
-                                                  {coupon.code === "GLOW20" ? "On your first order above ₹1999" : 
-                                                   coupon.code === "FESTIVE15" ? "Limited time festive skincare sale" : 
-                                                   coupon.code === "FREESHIP" ? "On all orders today only" : 
-                                                   "When you spend ₹3499 or more"}
-                                                </p>
-                                              </div>
-                                              <button className="text-[11px] font-bold text-[#4a5568] border-b border-gray-400 pb-0.5 hover:text-rose-brand transition-colors">
-                                                View Details
-                                              </button>
+                                              <h6 className="font-display text-lg font-bold text-gold/80 tracking-tight lowercase italic">Glow Boutique</h6>
+                                              <h4 className="text-xl font-display font-medium text-charcoal leading-tight tracking-tight">{coupon.code === "GLOW20" ? "20% Radiance" : coupon.code === "FESTIVE15" ? "15% Celebration" : coupon.code === "FREESHIP" ? "Free Logistics" : "₹500 Ritual Offset"}</h4>
                                            </div>
-                                           
-                                           <button
-                                             disabled={appliedCoupon?.code === coupon.code}
-                                             onClick={() => { applyCoupon(coupon.code); setIsCouponsModalOpen(false); }}
-                                             className={`px-8 py-2.5 rounded-xl border-2 text-sm font-bold transition-all ${appliedCoupon?.code === coupon.code ? 'bg-gold/10 border-gold text-gold cursor-default' : 'bg-white border-gray-100 text-gray-400 hover:border-gold/50 hover:text-gold active:scale-95'}`}
-                                           >
-                                             {appliedCoupon?.code === coupon.code ? "Applied" : "Apply"}
-                                           </button>
+                                           <button disabled={appliedCoupon?.code === coupon.code} onClick={() => { applyCoupon(coupon.code); setIsCouponsModalOpen(false); }} className={`px-8 py-3 rounded-full border text-[10px] font-body font-bold uppercase tracking-widest transition-all ${appliedCoupon?.code === coupon.code ? 'bg-gold/10 border-gold/20 text-gold cursor-default' : 'bg-charcoal text-white hover:bg-gold hover:text-charcoal border-transparent active:scale-95'}`}>{appliedCoupon?.code === coupon.code ? "Active" : "Apply"}</button>
                                          </div>
-
-                                         {/* Dashed Border Code Box with Copy */}
-                                         <div className="flex items-center justify-between bg-gold/5 border border-dashed border-gold/40 rounded-lg px-4 py-2 mt-2 group/copy">
-                                            <div className="flex items-center gap-2">
-                                              <span className="text-xs font-mono font-bold text-gold tracking-widest">{coupon.code}</span>
-                                              <button 
-                                                onClick={(e) => {
-                                                  e.stopPropagation();
-                                                  navigator.clipboard.writeText(coupon.code);
-                                                  toast.success("Code copied!");
-                                                }}
-                                                className="p-1 hover:bg-gold/20 rounded transition-all text-gold/40 hover:text-gold"
-                                                title="Copy Code"
-                                              >
-                                                <Copy size={12} />
-                                              </button>
-                                            </div>
-                                            <span className="text-[10px] font-medium text-gray-500 italic">Expires on 1st May, 2026</span>
+                                         <div className="flex items-center justify-between bg-secondary rounded-xl px-4 py-3 border border-gold/5">
+                                            <span className="text-[11px] font-mono font-bold text-charcoal tracking-widest">{coupon.code}</span>
+                                            <span className="text-[8px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">Sacred until May 2026</span>
                                          </div>
                                        </div>
                                      ))}
                                    </div>
                                  </div>
-
-                                 {/* Gift Cards Section */}
-                                 {receivedGiftCards.length > 0 && (
-                                   <div className="space-y-4 pt-4 border-t border-gray-200">
-                                     <h5 className="text-[13px] font-medium text-[#4a5568] tracking-tight">Your Gift Cards</h5>
-                                     <div className="grid gap-4">
-                                       {receivedGiftCards.filter(card => appliedGiftCard?.code?.toUpperCase() !== card.code.toUpperCase()).map((card) => (
-                                         <button 
-                                           key={card.code}
-                                           disabled={appliedGiftCard?.code?.toUpperCase() === card.code.toUpperCase()}
-                                           onClick={() => { applyGiftCard(card.code); setIsCouponsModalOpen(false); }}
-                                           className={`group text-left relative overflow-hidden rounded-2xl bg-charcoal p-4 flex items-center justify-between shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 ${appliedGiftCard?.code?.toUpperCase() === card.code.toUpperCase() ? 'ring-2 ring-gold' : ''}`}
-                                         >
-                                           <div className="flex items-center gap-4 relative z-10">
-                                             <div className="w-16 h-10 rounded-lg overflow-hidden border border-white/10 flex-shrink-0">
-                                                <img 
-                                                  src={card.image || '/assets/gift-cards/gold.png'} 
-                                                  alt="Gift" 
-                                                  className="w-full h-full object-cover" 
-                                                />
-                                             </div>
-                                             <div>
-                                               <p className="text-[10px] font-body text-gold/80 uppercase tracking-widest leading-none mb-1">Gift Balance</p>
-                                               <p className="text-lg font-display font-medium text-white tracking-tight">₹{card.balance.toLocaleString()}</p>
-                                               <div className="flex items-center gap-2 mt-1.5">
-                                                 <p className="text-[10px] font-mono text-white/90 uppercase tracking-widest bg-white/10 px-2 py-0.5 rounded">{card.code}</p>
-                                                 <button 
-                                                   onClick={(e) => {
-                                                     e.stopPropagation();
-                                                     navigator.clipboard.writeText(card.code);
-                                                     toast.success("Gift code copied!");
-                                                   }}
-                                                   className="hover:scale-110 transition-transform text-white/60 hover:text-gold p-1"
-                                                 >
-                                                   <Copy size={12} />
-                                                 </button>
-                                               </div>
-                                             </div>
-                                           </div>
-                                           <div className="relative z-10">
-                                              {appliedGiftCard?.code?.toUpperCase() === card.code.toUpperCase() ? (
-                                                <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center text-primary">
-                                                  <CheckCircle2 size={16} />
-                                                </div>
-                                              ) : (
-                                                <div className="px-4 py-1.5 bg-gold text-primary rounded-lg text-[9px] font-body font-bold uppercase tracking-widest hover:bg-white transition-all">Apply</div>
-                                              )}
-                                           </div>
-                                           <div className="absolute top-0 right-0 p-2 opacity-[0.03] rotate-12 group-hover:rotate-0 transition-transform duration-700">
-                                             <CreditCard size={60} />
-                                           </div>
-                                         </button>
-                                       ))}
-                                     </div>
-                                   </div>
-                                 )}
                                </div>
                              </div>
                           </DialogContent>
                         </Dialog>
                       </div>
 
-                      {/* Display active discount feedback if applied */}
                       {(appliedGiftCard || appliedCoupon) && (
-                        <div className="space-y-4 pt-4 animate-in fade-in slide-in-from-top-2 border-t border-gold/10">
+                        <div className="space-y-6 pt-6 animate-in fade-in slide-in-from-top-4 border-t border-white/5">
                            {giftCardDiscount > 0 && (
-                            <div className="flex justify-between items-center text-xs font-body font-bold text-gold uppercase tracking-wider">
-                              <span className="flex items-center gap-2">
-                                <span className="flex items-center gap-2 text-gold"><CreditCard size={12} /> Gift Balance Applied</span>
-                                <button 
-                                  onClick={removeGiftCard}
-                                  className="ml-2 p-1 hover:bg-gold/10 rounded-full transition-colors text-gold/60 hover:text-rose-brand"
-                                  title="Remove Gift Card"
-                                >
-                                  <Trash2 size={10} />
-                                </button>
-                              </span>
-                              <span>- ₹{giftCardDiscount.toLocaleString()}</span>
-                            </div>
-                          )}
+                            <div className="flex justify-between items-center text-[10px] font-body font-bold text-gold uppercase tracking-[0.35em]">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-gold/10 rounded-full"><CreditCard size={12} /></div>
+                                  <span>Gift Balance Applied</span>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <span className="text-white font-display text-lg">- ₹{giftCardDiscount.toLocaleString()}</span>
+                                  <button onClick={removeGiftCard} className="p-1 hover:text-rose-brand transition-colors text-white/40"><Trash2 size={12} /></button>
+                                </div>
+                              </div>
+                           )}
 
-                          {discountAmount > 0 && (
-                            <div className="flex justify-between items-center text-xs font-body font-bold text-rose-brand uppercase tracking-wider">
-                              <span className="flex items-center gap-2">
-                                <span className="flex items-center gap-2 text-rose-brand"><Tag size={12} /> Glow Discount</span>
-                                <button 
-                                  onClick={removeCoupon}
-                                  className="ml-2 p-1 hover:bg-rose-brand/10 rounded-full transition-colors text-rose-brand/60 hover:text-destructive"
-                                  title="Remove Coupon"
-                                >
-                                  <Trash2 size={10} />
-                                </button>
-                              </span>
-                              <span>- ₹{discountAmount.toLocaleString()}</span>
-                            </div>
-                          )}
+                           {discountAmount > 0 && (
+                            <div className="flex justify-between items-center text-[10px] font-body font-bold text-gold uppercase tracking-[0.35em]">
+                                <div className="flex items-center gap-3">
+                                  <div className="p-2 bg-gold/10 rounded-full"><Tag size={12} /></div>
+                                  <span>Aura Discount</span>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <span className="text-white font-display text-lg">- ₹{discountAmount.toLocaleString()}</span>
+                                  <button onClick={removeCoupon} className="p-1 hover:text-rose-brand transition-colors text-white/40"><Trash2 size={12} /></button>
+                                </div>
+                              </div>
+                           )}
                         </div>
                       )}
 
-                      <div className="pt-6 md:pt-8 border-t border-gold/20">
-                        <div className="flex justify-between items-center">
-                          <span className="font-display text-xl md:text-2xl font-light text-foreground">Total</span>
-                          <span className="font-display text-3xl md:text-4xl font-normal text-gold text-glow-gold">₹{total.toLocaleString()}</span>
+                      <div className="pt-10 border-t border-gold/10">
+                        <div className="flex justify-between items-end mb-10">
+                          <div className="space-y-2">
+                             <p className="text-[10px] font-body font-bold text-white/30 uppercase tracking-[0.5em] leading-none mb-1">Total Ritual Value</p>
+                             <span className="font-display text-2xl md:text-3xl font-light text-white italic tracking-tight lowercase">Final <span className="text-gold">Sanctuary</span> Price</span>
+                          </div>
+                          <span className="font-display text-5xl md:text-7xl font-normal text-gold text-glow-gold tracking-tight leading-none">₹{total.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -591,36 +430,46 @@ const Cart = () => {
                     <button 
                       onClick={handleCompletePurchase}
                       disabled={isPlacingOrder || items.length === 0}
-                      className="w-full group/btn relative py-5 bg-primary text-primary-foreground rounded-2xl font-body font-bold uppercase tracking-[0.2em] text-xs overflow-hidden transition-all hover:translate-y-[-2px] hover:shadow-2xl disabled:opacity-50 disabled:translate-y-0"
+                      className="w-full group/btn relative py-7 md:py-9 bg-white text-charcoal rounded-[2rem] md:rounded-[3rem] font-body font-bold uppercase tracking-[0.4em] text-[10px] md:text-xs overflow-hidden transition-all hover:translate-y-[-4px] hover:shadow-[0_20px_50px_rgba(182,143,76,0.3)] disabled:opacity-50 disabled:translate-y-0 shadow-2xl"
                     >
-                      <span className="relative z-10 flex items-center justify-center gap-3">
-                        {isPlacingOrder ? "Processing Ritual..." : "Complete Secure Purchase"} 
-                        {!isPlacingOrder && <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />}
+                      <span className="relative z-10 flex items-center justify-center gap-4">
+                        {isPlacingOrder ? "Securing Ritual..." : "Complete secure purchase"} 
+                        {!isPlacingOrder && <ChevronRight size={16} className="transition-transform group-hover/btn:translate-x-2" />}
                       </span>
-                      <div className="absolute inset-0 bg-gold/90 transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-500 origin-left" />
+                      <div className="absolute inset-0 bg-gold transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-700 origin-left" />
                     </button>
-
-                    <div className="mt-10 grid grid-cols-3 gap-6 opacity-40 grayscale group-hover:grayscale-0 transition-all duration-700">
-                      <div className="text-center">
-                        <Truck size={18} className="mx-auto mb-2" />
-                        <p className="text-[8px] font-bold tracking-widest">GLOBAL</p>
-                      </div>
-                      <div className="text-center">
-                        <ShieldCheck size={18} className="mx-auto mb-2" />
-                        <p className="text-[8px] font-bold tracking-widest">INSURED</p>
-                      </div>
-                      <div className="text-center">
-                        <CreditCard size={18} className="mx-auto mb-2" />
-                        <p className="text-[8px] font-bold tracking-widest">SSL</p>
-                      </div>
+                    
+                    <div className="mt-10 flex items-center justify-center gap-6 opacity-30 group pb-4">
+                      <ShieldCheck size={18} className="text-white group-hover:text-gold transition-colors" />
+                      <p className="text-[8px] font-body font-bold uppercase tracking-[0.4em] text-white">Boutique Fulfillment Guaranteed</p>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="p-8 bg-gold/5 rounded-[3rem] border border-gold/10">
-                    <p className="text-xs font-body text-muted-foreground leading-relaxed text-center italic">
-                      "Luxury is in each detail. Our eco-conscious premium packaging is included with every curated order."
-                    </p>
-                  </div>
+                  {/* Free shipping toast-like indicator */}
+                  {subtotal < freeShippingThreshold && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-8 rounded-[3rem] border border-white/50 bg-white/40 backdrop-blur-3xl shadow-ethereal flex items-center gap-6 group hover:border-gold/30 transition-all duration-700"
+                    >
+                      <div className="w-14 h-14 bg-gold/10 rounded-[1.5rem] flex items-center justify-center text-gold group-hover:scale-110 transition-transform duration-700">
+                        <Truck size={22} strokeWidth={1.5} />
+                      </div>
+                      <div className="flex-1 space-y-3">
+                        <div className="flex justify-between items-center text-[9px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/60">
+                          <span>Progress to complimentary logistics</span>
+                          <span className="text-gold">{Math.round(progressToFreeShipping)}%</span>
+                        </div>
+                        <div className="h-1 bg-gold/5 rounded-full overflow-hidden border border-gold/5">
+                           <motion.div 
+                             initial={{ width: 0 }}
+                             animate={{ width: `${progressToFreeShipping}%` }}
+                             className="h-full bg-gold shadow-[0_0_15px_rgba(182,143,76,0.6)]"
+                           />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
               </div>
             </div>

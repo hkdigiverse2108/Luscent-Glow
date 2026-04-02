@@ -90,6 +90,7 @@ class UserModel(BaseModel):
     isVerified: bool = Field(default=False)
     otp: Optional[str] = Field(default=None)
     profilePicture: Optional[str] = Field(default=None)
+    shippingAddress: Optional[dict] = Field(default=None)
     createdAt: Optional[str] = Field(default=None)
 
     class Config:

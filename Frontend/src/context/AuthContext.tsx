@@ -10,6 +10,12 @@ interface User {
   email: string;
   mobileNumber: string;
   profilePicture?: string;
+  shippingAddress?: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
 }
 
 interface AuthContextType {

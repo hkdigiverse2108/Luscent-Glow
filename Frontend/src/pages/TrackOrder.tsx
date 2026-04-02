@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Package, Truck, CheckCircle2, Search, MapPin, 
   Calendar, ShoppingBag, ArrowRight, ShieldCheck, 
-  HelpCircle, ChevronRight, Clock, Box, Mail, Sparkles
+  HelpCircle, ChevronRight, Clock, Box, Mail, Sparkles, ChevronLeft
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 const trackingSteps = [
   { id: 1, title: "Order Confirmed", description: "Payment received & confirmed", icon: <CheckCircle2 size={24} />, time: "9:30 AM, March 29" },
@@ -19,10 +20,22 @@ const trackingSteps = [
 ];
 
 const TrackOrder = () => {
+  const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const [orderId, setOrderId] = useState("");
   const [email, setEmail] = useState("");
   const [isTracking, setIsTracking] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const urlOrderId = searchParams.get("orderId");
+    if (urlOrderId) {
+      setOrderId(urlOrderId);
+    }
+    if (user?.email) {
+      setEmail(user.email);
+    }
+  }, [searchParams, user]);
 
   const handleTrack = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,28 +52,45 @@ const TrackOrder = () => {
       <Header />
       
       <main>
+        {/* Navigation Back */}
+        <div className="bg-charcoal pt-12 md:pt-16 px-4 md:px-6">
+          <div className="container mx-auto">
+            <button 
+              onClick={() => window.history.back()} 
+              className="flex items-center gap-4 text-white/50 hover:text-gold transition-all group mb-8"
+            >
+              <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-gold/30 transition-all shadow-2xl">
+                <ChevronLeft size={20} />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em] leading-none mb-1">Return</span>
+                <span className="text-xs font-display font-medium text-white">Back to Orders</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
         {/* Luxury Hero Background */}
-        <section className="relative pt-24 pb-16 md:pt-32 md:pb-20 overflow-hidden bg-charcoal">
+        <section className="relative pb-16 md:pb-24 overflow-hidden bg-charcoal">
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gold/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 opacity-40" />
           <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-rose-light/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 opacity-30" />
           
           <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               className="space-y-6 max-w-3xl mx-auto"
             >
-              <div className="flex items-center justify-center gap-3 text-gold">
-                <div className="h-[1px] w-6 md:w-8 bg-gold" />
-                <span className="text-[9px] md:text-[10px] font-body font-bold uppercase tracking-[0.3em]">Concierge Services</span>
-                <div className="h-[1px] w-6 md:w-8 bg-gold" />
+              <div className="flex items-center justify-center gap-4 text-gold mb-4">
+                <Sparkles size={16} className="opacity-50" />
+                <span className="text-[10px] font-body font-bold uppercase tracking-[0.4em]">Logistics Portal</span>
               </div>
-              <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-tight md:leading-[1.1]">
-                Track Your <span className="text-gradient-gold italic font-light">Glow Journey</span>
+              <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-[0.9] lowercase">
+                Track Your <span className="text-gold italic font-light">Order</span>
               </h1>
-              <p className="text-white/60 font-body text-sm md:text-lg max-w-xl mx-auto italic">
-                "Anticipation is the first step of the ritual. Follow your curated treasures as they travel from our vault to your vanity."
+              <p className="text-white/40 font-body text-sm md:text-base max-w-lg mx-auto leading-relaxed italic">
+                Secure real-time updates on your curated selections from our fulfillment center to your residence.
               </p>
             </motion.div>
           </div>
