@@ -32,6 +32,16 @@ import Profile from "./pages/Profile.tsx";
 import Orders from "./pages/Orders.tsx";
 import OrderSuccess from "./pages/OrderSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import AdminLayout from "./components/Admin/AdminLayout.tsx";
+import AdminDashboard from "./pages/Admin/AdminDashboard.tsx";
+import AdminProducts from "./pages/Admin/AdminProducts.tsx";
+import AdminOrders from "./pages/Admin/AdminOrders.tsx";
+import AdminNewsletter from "./pages/Admin/AdminNewsletter.tsx";
+import AdminInquiries from "./pages/Admin/AdminInquiries.tsx";
+import AdminSettings from "./pages/Admin/AdminSettings.tsx";
+import AdminLogin from "./pages/Admin/AdminLogin.tsx";
+import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute.tsx";
+import { AdminThemeProvider } from "./context/AdminThemeContext.tsx";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +80,28 @@ const App = () => (
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/order-success" element={<OrderSuccess />} />
+                
+                {/* Admin Sanctuary Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                
+                <Route path="/admin" element={
+                  <AdminProtectedRoute />
+                }>
+                  <Route element={
+                    <AdminThemeProvider>
+                      <AdminLayout />
+                    </AdminThemeProvider>
+                  }>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="newsletter" element={<AdminNewsletter />} />
+                    <Route path="inquiries" element={<AdminInquiries />} />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
+                </Route>
+
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

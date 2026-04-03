@@ -55,6 +55,7 @@ async def signin(auth: UserAuthModel = Body(...)):
             "fullName": user["fullName"],
             "mobileNumber": user["mobileNumber"],
             "email": user["email"],
+            "isAdmin": user.get("isAdmin", False),
             "profilePicture": user.get("profilePicture"),
             "shippingAddress": user.get("shippingAddress")
         }
@@ -201,6 +202,7 @@ async def update_profile(data: dict = Body(...)):
             "fullName": updated_user["fullName"],
             "mobileNumber": updated_user["mobileNumber"],
             "email": updated_user["email"],
+            "isAdmin": updated_user.get("isAdmin", False),
             "profilePicture": updated_user.get("profilePicture"),
             "shippingAddress": updated_user.get("shippingAddress")
         }

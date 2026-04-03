@@ -9,6 +9,7 @@ interface User {
   fullName: string;
   email: string;
   mobileNumber: string;
+  isAdmin?: boolean;
   profilePicture?: string;
   shippingAddress?: {
     street: string;
