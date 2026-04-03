@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Tag, 
   Clock, 
-  Copy, 
-  Check, 
   ArrowRight, 
   Gift, 
   Percent, 
@@ -15,18 +12,30 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { useToast } from "@/components/ui/use-toast";
 
 const Offers = () => {
-  const { toast } = useToast();
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [timeLeft, setTimeLeft] = useState({ 
+    hours: 4, 
+    minutes: 22, 
+    seconds: 15 
+  });
 
-  const promoCodes = [
-    { code: "GLOW20", discount: "20% OFF", description: "On your first order above ₹1999", color: "bg-gold" },
-    { code: "FESTIVE15", discount: "15% OFF", description: "Limited time festive skincare sale", color: "bg-primary" },
-    { code: "FREESHIP", discount: "FREE SHIPPING", description: "On all orders today only", color: "bg-accent" },
-    { code: "GLOWUP", discount: "₹500 OFF", description: "When you spend ₹3499 or more", color: "bg-rose-light" },
-  ];
+  // Countdown timer logic
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        return prev;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTime = (time: { hours: number; minutes: number; seconds: number }) => {
+    return `${String(time.hours).padStart(2, '0')}:${String(time.minutes).padStart(2, '0')}:${String(time.seconds).padStart(2, '0')}`;
+  };
 
   const flashDeals = [
     { 
@@ -34,14 +43,14 @@ const Offers = () => {
       discount: "FLAT 40% OFF", 
       category: "Skincare Essentials",
       image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=400&fit=crop",
-      endsIn: "04:22:15"
+      endsIn: formatTime(timeLeft)
     },
     { 
       title: "Weekend Lip Color Special", 
       discount: "BUY 2 GET 1 FREE", 
       category: "Luxury Makeup",
       image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=600&h=400&fit=crop",
-      endsIn: "12:45:00"
+      endsIn: "12:45:00" // This one can remain static or also use the timer
     }
   ];
 
@@ -64,15 +73,7 @@ const Offers = () => {
     }
   ];
 
-  const copyToClipboard = (code: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(code);
-    toast({
-      title: "Code Copied!",
-      description: `${code} has been copied to your clipboard.`,
-    });
-    setTimeout(() => setCopiedCode(null), 3000);
-  };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -107,7 +108,7 @@ const Offers = () => {
                 Your journey to radiance starts with these exclusive offers.
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
-                <a href="#coupons" className="px-8 py-4 bg-gold text-primary font-body font-bold uppercase tracking-widest text-xs rounded-full hover:shadow-lg hover:shadow-gold/20 transition-all">
+                <a href="#flash-deals" className="px-8 py-4 bg-gold text-primary font-body font-bold uppercase tracking-widest text-xs rounded-full hover:shadow-lg hover:shadow-gold/20 transition-all">
                   Browse Offers
                 </a>
                 <Link to="/products" className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-body font-bold uppercase tracking-widest text-xs rounded-full hover:bg-white/20 transition-all">
@@ -118,62 +119,10 @@ const Offers = () => {
           </div>
         </section>
 
-        {/* Promo Codes Section */}
-        <section id="coupons" className="py-24 bg-secondary/30">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
-              <div className="space-y-4">
-                <h2 className="font-display text-4xl font-bold text-primary">Unlock Extra Savings</h2>
-                <p className="text-muted-foreground font-body max-w-md">
-                  Copy our exclusive boutique promo codes to use at checkout for instant luxury discounts.
-                </p>
-              </div>
-              <div className="flex items-center gap-2 text-gold font-body font-bold text-sm uppercase tracking-wider">
-                <Sparkles size={18} />
-                <span>Offers Refresh Weekly</span>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {promoCodes.map((item, idx) => (
-                <motion.div
-                  key={item.code}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  viewport={{ once: true }}
-                  className="group bg-white rounded-[2rem] p-8 shadow-ethereal border border-border/50 hover:border-gold/30 transition-all relative overflow-hidden"
-                >
-                  <div className="space-y-4 relative z-10">
-                    <div className="flex items-center justify-between">
-                      <div className="p-3 bg-secondary rounded-2xl text-gold group-hover:bg-gold group-hover:text-primary transition-colors duration-500">
-                        <Tag size={20} />
-                      </div>
-                      <span className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest">Valid Today</span>
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-display font-bold text-primary">{item.discount}</h3>
-                      <p className="text-xs text-muted-foreground font-body leading-relaxed mt-1">{item.description}</p>
-                    </div>
-                    <button 
-                      onClick={() => copyToClipboard(item.code)}
-                      className="w-full flex items-center justify-between px-5 py-4 bg-secondary rounded-2xl border border-dashed border-gold/40 hover:bg-gold/5 group-hover:border-gold transition-all"
-                    >
-                      <span className="font-body font-bold text-sm text-primary group-hover:text-gold tracking-widest uppercase">{item.code}</span>
-                      {copiedCode === item.code ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-gold/60" />}
-                    </button>
-                  </div>
-                  
-                  {/* Decorative background circle */}
-                  <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-gold/5 rounded-full blur-2xl group-hover:bg-gold/10 transition-colors" />
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* Flash Deals Section */}
-        <section className="py-24">
+        <section id="flash-deals" className="py-24">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16 space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-light/30 rounded-full text-rose-brand">
