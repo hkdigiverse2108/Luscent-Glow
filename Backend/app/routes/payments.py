@@ -164,12 +164,55 @@ async def payment_callback(request: Request):
                     }
                     await db["orders"].insert_one(new_order)
                     
-                    # 4. Clear the user's cart
+                    # 4. Process Gift Card Rituals (NEW LOGIC Integration)
+                    # A. Redemption of Applied Gift Card
+                    applied_gc_code = order_data.get("appliedGiftCardCode")
+                    gc_discount = order_data.get("giftCardDiscount", 0)
+                    
+                    if applied_gc_code and gc_discount > 0:
+                        gc = await db["gift_cards"].find_one({"code": applied_gc_code.upper()})
+                        if gc:
+                            new_balance = max(0, gc.get("currentBalance", 0) - gc_discount)
+                            await db["gift_cards"].update_one(
+                                {"_id": gc["_id"]},
+                                {"$set": {
+                                    "currentBalance": new_balance,
+                                    "isActive": new_balance > 0,
+                                    "lastUsedAt": datetime.utcnow().isoformat(),
+                                    "lastOrderNumber": payment_record["orderNumber"]
+                                }}
+                            )
+
+                    # B. Purchase of New Gift Cards
+                    for item in order_data.get("items", []):
+                        if item.get("productId", "").startswith("giftcard-") or item.get("category") == "Gift Cards":
+                            gift_code = "LG-GIFT-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)) + "-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4))
+                            from datetime import timedelta
+                            expiry_date = (datetime.utcnow() + timedelta(days=365)).isoformat()
+                            metadata = item.get("metadata", {})
+                            
+                            gift_card = {
+                                "code": gift_code,
+                                "initialBalance": item.get("price", 0),
+                                "currentBalance": item.get("price", 0),
+                                "senderMobile": order_data.get("userMobile"),
+                                "recipientName": metadata.get("recipient", "Valued Customer"),
+                                "recipientMobile": metadata.get("recipientMobile"),
+                                "message": metadata.get("message"),
+                                "theme": metadata.get("theme", "Gold Radiance"),
+                                "isActive": True,
+                                "expiryDate": expiry_date,
+                                "createdAt": datetime.utcnow().isoformat(),
+                                "orderNumber": payment_record["orderNumber"]
+                            }
+                            await db["gift_cards"].insert_one(gift_card)
+
+                    # 5. Clear the user's cart
                     identifier = order_data.get("userMobile")
                     if identifier:
                         await db["cart"].delete_many({"$or": [{"userMobile": identifier}, {"guestId": identifier}]})
                     
-                    print(f"Deferred Order PLACED successfully for {merchant_txn_id}")
+                    print(f"Deferred Order & Gift Cards PROCESSED successfully for {merchant_txn_id}")
 
             # 5. Update payment record
             await db["payments"].update_one(
@@ -258,12 +301,55 @@ async def payment_redirect(merchantTransactionId: str = None):
                     }
                     await db["orders"].insert_one(new_order)
                     
-                    # 4. Clear the user's cart (fallback path)
+                    # 4. Process Gift Card Rituals (Status Check Fallback Integration)
+                    # A. Redemption of Applied Gift Card
+                    applied_gc_code = order_data.get("appliedGiftCardCode")
+                    gc_discount = order_data.get("giftCardDiscount", 0)
+                    
+                    if applied_gc_code and gc_discount > 0:
+                        gc = await db["gift_cards"].find_one({"code": applied_gc_code.upper()})
+                        if gc:
+                            new_balance = max(0, gc.get("currentBalance", 0) - gc_discount)
+                            await db["gift_cards"].update_one(
+                                {"_id": gc["_id"]},
+                                {"$set": {
+                                    "currentBalance": new_balance,
+                                    "isActive": new_balance > 0,
+                                    "lastUsedAt": datetime.utcnow().isoformat(),
+                                    "lastOrderNumber": payment_record["orderNumber"]
+                                }}
+                            )
+
+                    # B. Purchase of New Gift Cards
+                    for item in order_data.get("items", []):
+                        if item.get("productId", "").startswith("giftcard-") or item.get("category") == "Gift Cards":
+                            gift_code = "LG-GIFT-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)) + "-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4))
+                            from datetime import timedelta
+                            expiry_date = (datetime.utcnow() + timedelta(days=365)).isoformat()
+                            metadata = item.get("metadata", {})
+                            
+                            gift_card = {
+                                "code": gift_code,
+                                "initialBalance": item.get("price", 0),
+                                "currentBalance": item.get("price", 0),
+                                "senderMobile": order_data.get("userMobile"),
+                                "recipientName": metadata.get("recipient", "Valued Customer"),
+                                "recipientMobile": metadata.get("recipientMobile"),
+                                "message": metadata.get("message"),
+                                "theme": metadata.get("theme", "Gold Radiance"),
+                                "isActive": True,
+                                "expiryDate": expiry_date,
+                                "createdAt": datetime.utcnow().isoformat(),
+                                "orderNumber": payment_record["orderNumber"]
+                            }
+                            await db["gift_cards"].insert_one(gift_card)
+
+                    # 5. Clear the user's cart (fallback path)
                     identifier = order_data.get("userMobile")
                     if identifier:
                         await db["cart"].delete_many({"$or": [{"userMobile": identifier}, {"guestId": identifier}]})
                     
-                    print(f"Status Verified: Deferred Order PLACED successfully for {merchantTransactionId}")
+                    print(f"Status Verified: Deferred Order & Gift Cards PROCESSED successfully for {merchant_txn_id}")
 
             # 5. Update payment record (Status Check update)
             await db["payments"].update_one(

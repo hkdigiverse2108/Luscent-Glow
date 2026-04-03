@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Calendar, Clock, User } from "lucide-react";
 import { BlogPost } from "@/data/blogData";
@@ -8,9 +9,10 @@ interface BlogCardProps {
   index: number;
 }
 
-const BlogCard = ({ post, index }: BlogCardProps) => {
+const BlogCard = forwardRef<HTMLDivElement, BlogCardProps>(({ post, index }, ref) => {
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -67,6 +69,8 @@ const BlogCard = ({ post, index }: BlogCardProps) => {
       </div>
     </motion.div>
   );
-};
+});
+
+BlogCard.displayName = "BlogCard";
 
 export default BlogCard;

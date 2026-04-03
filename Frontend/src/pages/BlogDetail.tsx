@@ -75,17 +75,17 @@ const BlogDetail = () => {
             className="w-full h-full object-cover"
           />
           
-          <div className="absolute inset-0 bg-gradient-to-t from-[#faf9f6] via-[#faf9f6]/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-charcoal/80 via-charcoal/40 to-transparent" />
           
           <div className="absolute inset-0 container mx-auto px-4 md:px-6 lg:px-12 flex flex-col justify-end pb-12 md:pb-24 lg:pb-32">
             <div className="max-w-5xl space-y-6 md:space-y-8">
               {/* Proper Breadcrumbs */}
-              <nav className="flex flex-wrap items-center gap-2 md:gap-3 text-[9px] md:text-[10px] font-body font-bold text-white uppercase tracking-[0.2em] mb-4 md:mb-6">
-                <Link to="/" className="hover:text-gold transition-colors">Home</Link>
-                <ChevronRight size={10} className="text-white/40" />
-                <Link to="/blogs" className="hover:text-gold transition-colors">Journal</Link>
-                <ChevronRight size={10} className="text-white/40" />
-                <span className="text-white/40 truncate max-w-[150px] md:max-w-[200px]">{post.title}</span>
+              <nav className="flex flex-wrap items-center gap-2 md:gap-3 text-xs font-body font-bold text-white uppercase tracking-[0.2em] mb-4 md:mb-6">
+                <Link to="/" className="hover:text-gold transition-all">Home</Link>
+                <ChevronRight size={10} className="text-gold/60" />
+                <Link to="/blogs" className="hover:text-gold transition-all">Journal</Link>
+                <ChevronRight size={10} className="text-gold/60" />
+                <span className="text-white/60 truncate max-w-[150px] md:max-w-[200px]">{post.title}</span>
               </nav>
 
               <motion.div
@@ -102,33 +102,33 @@ const BlogDetail = () => {
                   {post.title}
                 </h1>
 
-                <div className="flex flex-wrap items-center gap-6 md:gap-12 text-[9px] md:text-[10px] font-body font-bold text-white uppercase tracking-widest border-t border-white/10 pt-6 md:pt-10">
+                <div className="flex flex-wrap items-center gap-6 md:gap-12 text-[11px] md:text-xs font-body font-bold text-white uppercase tracking-widest border-t border-white/20 pt-6 md:pt-10">
                   <div className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-gold/30 flex items-center justify-center bg-gold/10 group-hover:bg-gold transition-all duration-500">
+                    <div className="w-12 h-12 rounded-full border border-gold/40 flex items-center justify-center bg-gold/10 group-hover:bg-gold transition-all duration-500">
                       <User size={16} className="text-gold group-hover:text-charcoal" />
                     </div>
                     <div>
-                      <p className="text-white/40 mb-0.5 md:mb-1 tracking-[0.2em]">Written By</p>
-                      <p className="text-white group-hover:text-gold transition-colors">{post.author}</p>
+                      <p className="text-white/60 mb-0.5 md:mb-1 tracking-[0.2em]">Written By</p>
+                      <p className="text-white group-hover:text-gold transition-all">{post.author}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 flex items-center justify-center bg-white/5">
+                    <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center bg-white/5">
                       <Calendar size={16} className="text-gold" />
                     </div>
                     <div>
-                      <p className="text-white/40 mb-0.5 md:mb-1 tracking-[0.2em]">Published</p>
+                      <p className="text-white/60 mb-0.5 md:mb-1 tracking-[0.2em]">Published</p>
                       <p className="text-white">{post.date}</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/10 flex items-center justify-center bg-white/5">
+                    <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center bg-white/5">
                       <Clock size={16} className="text-gold" />
                     </div>
                     <div>
-                      <p className="text-white/40 mb-0.5 md:mb-1 tracking-[0.2em]">Read Time</p>
+                      <p className="text-white/60 mb-0.5 md:mb-1 tracking-[0.2em]">Read Time</p>
                       <p className="text-white">{post.readTime}</p>
                     </div>
                   </div>

@@ -1,7 +1,39 @@
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Youtube, Twitter, Mail } from "lucide-react";
+import { Instagram, Facebook, Youtube, Twitter, Mail, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { getApiUrl } from "@/lib/api";
+import { toast } from "sonner";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(getApiUrl("/api/newsletter/subscribe"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || "Welcome to our inner circle!");
+        setEmail("");
+      } else {
+        toast.error(data.detail || "Something went wrong. Please try again.");
+      }
+    } catch (error) {
+      toast.error("Could not reach our sanctuary. Check your connection.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-16">
@@ -53,20 +85,26 @@ const Footer = () => {
             </nav>
           </div>
 
-          {/* Newsletter */}
           <div className="space-y-4">
-            <h4 className="font-display text-lg font-semibold">Newsletter</h4>
-            <p className="text-sm text-primary-foreground/60 font-body">Get exclusive offers & beauty tips straight to your inbox.</p>
-            <div className="flex gap-0">
+            <h4 className="font-display text-lg font-semibold italic text-gold">Beauty Line</h4>
+            <p className="text-sm text-primary-foreground/60 font-body italic">Curated aesthetics & beauty tips straight to your inbox.</p>
+            <form onSubmit={handleSubscribe} className="flex gap-0">
               <input
                 type="email"
                 placeholder="Your email"
-                className="flex-1 px-4 py-2.5 bg-primary-foreground/10 text-sm font-body rounded-l-md focus:outline-none focus:ring-1 focus:ring-gold/50 placeholder:text-primary-foreground/30"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="flex-1 px-4 py-2.5 bg-primary-foreground/10 text-sm font-body rounded-l-xl focus:outline-none focus:ring-1 focus:ring-gold/50 placeholder:text-primary-foreground/30 transition-all"
               />
-              <button className="px-4 py-2.5 bg-gold text-primary font-body text-sm font-semibold rounded-r-md hover:bg-gold/90 transition-colors">
-                <Mail size={16} />
+              <button 
+                type="submit"
+                disabled={isSubmitting}
+                className="px-6 py-2.5 bg-gold text-primary font-body text-sm font-semibold rounded-r-xl hover:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              >
+                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
               </button>
-            </div>
+            </form>
           </div>
         </div>
 

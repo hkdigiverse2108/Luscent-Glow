@@ -7,10 +7,40 @@ import BlogCard from "@/components/BlogCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { blogPosts, blogCategories } from "@/data/blogData";
 import { Link } from "react-router-dom";
+import { getApiUrl } from "@/lib/api";
+import { toast } from "sonner";
 
 const Blogs = () => {
   const featuredPost = blogPosts.find(post => post.featured) || blogPosts[0];
-  
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch(getApiUrl("/api/newsletter/subscribe"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.message || "Welcome to our inner circle!");
+        setEmail("");
+      } else {
+        toast.error(data.detail || "Something went wrong.");
+      }
+    } catch (error) {
+      toast.error("Could not reach our sanctuary.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredPosts = blogPosts.filter(post => post.id !== featuredPost.id);
 
   return (
@@ -19,7 +49,7 @@ const Blogs = () => {
       
       <main>
         {/* Cinematic Hero Spotlight */}
-        <section className="relative py-20 lg:py-32 overflow-hidden bg-charcoal">
+        <section className="relative py-12 lg:py-16 overflow-hidden bg-charcoal">
           {/* Background Elements */}
           <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-gold/10 rounded-full blur-[150px] -translate-y-1/2 translate-x-1/4 opacity-40" />
           <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-rose-light/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/4 opacity-30" />
@@ -92,7 +122,7 @@ const Blogs = () => {
         </section>
 
         {/* Categories & Grid */}
-        <section className="py-16 md:py-24 lg:py-32 bg-[#faf9f6]">
+        <section className="py-10 md:py-16 bg-[#faf9f6]">
           <div className="container mx-auto px-4 md:px-6 lg:px-12">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
               <div>
@@ -128,53 +158,63 @@ const Blogs = () => {
           </div>
         </section>
 
-        {/* Luxury Newsletter Section */}
-        <section className="py-16 md:py-24 lg:py-40 relative">
-          <div className="container mx-auto px-4 md:px-6 lg:px-12">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              className="relative overflow-hidden group bg-charcoal rounded-[4rem] lg:rounded-[6rem] p-12 lg:p-24 text-center shadow-2xl"
-            >
-              {/* Background Glow */}
-              <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_rgba(182,143,76,0.15),_transparent_70%)]" />
-              <div className="absolute -top-40 -left-40 w-96 h-96 bg-gold/20 rounded-full blur-[100px] opacity-20 animate-float" />
-              <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-rose-light/10 rounded-full blur-[100px] opacity-30 animate-pulse" />
-              
-              <div className="relative z-10 max-w-2xl mx-auto space-y-12">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-center gap-4 text-gold/60">
-                    <div className="h-[1px] w-12 bg-gold/30" />
-                    <Mail size={20} className="animate-bounce" />
-                    <div className="h-[1px] w-12 bg-gold/30" />
-                  </div>
-                  <h2 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white tracking-tight">
-                    Stay <span className="text-gradient-gold italic font-light">Radiant</span>
-                  </h2>
-                  <p className="text-white/60 font-body text-sm md:text-lg leading-relaxed">
-                    Join our inner circle for exclusive skincare rituals, early product unveiling, and mindful beauty inspiration straight to your sanctuary.
-                  </p>
-                </div>
+        {/* Cinematic Brand Finale */}
+        <section className="relative py-12 md:py-16 overflow-hidden">
+          {/* Subtle Aura Background */}
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gold/5 rounded-full blur-[120px] opacity-40" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-rose-light/5 rounded-full blur-[100px] opacity-30" />
+          </div>
 
-                <div className="relative max-w-lg mx-auto flex flex-col items-center">
-                  <input
-                    type="email"
-                    placeholder="Enter your email sanctuary"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl md:rounded-full py-4 md:py-6 md:pr-44 md:pl-8 px-6 text-white font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all text-sm md:text-base focus:placeholder:opacity-0"
-                  />
-                  <button className="w-full md:w-auto md:absolute md:right-2 md:top-2 md:bottom-2 mt-4 md:mt-0 py-4 md:py-0 px-10 bg-gold text-charcoal font-body font-bold rounded-2xl md:rounded-full uppercase tracking-widest text-[10px] md:text-[10px] hover:bg-white transition-all duration-500 shadow-xl group/btn min-h-[48px]">
-                    <span className="relative z-10 flex items-center justify-center gap-3">
-                      Subscribe <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />
-                    </span>
-                  </button>
-                </div>
-                
-                <p className="text-[10px] font-body text-white/30 uppercase tracking-[0.2em]">
-                  By joining, you agree to our <Link to="/privacy-policy" className="text-gold/60 underline hover:text-gold transition-colors">Privacy Sanctum</Link>
-                </p>
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="max-w-4xl mx-auto text-center space-y-12">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                className="flex items-center justify-center gap-8 mb-4"
+              >
+                <motion.div 
+                  initial={{ width: 0 }}
+                  whileInView={{ width: "4rem" }}
+                  viewport={{ once: true }}
+                  className="h-[1px] bg-gradient-to-r from-transparent via-gold/30 to-gold/60" 
+                />
+                <Sparkles size={24} className="text-gold/40 animate-pulse" strokeWidth={1} />
+                <motion.div 
+                  initial={{ width: 0 }}
+                  whileInView={{ width: "4rem" }}
+                  viewport={{ once: true }}
+                  className="h-[1px] bg-gradient-to-l from-transparent via-gold/30 to-gold/60" 
+                />
+              </motion.div>
+              
+              <div className="space-y-6">
+                <motion.h3 
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                  className="font-display text-5xl md:text-6xl lg:text-8xl font-light text-charcoal tracking-tighter"
+                >
+                  Stay <span className="text-gradient-gold italic font-normal">Inspired</span>
+                </motion.h3>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5, duration: 1 }}
+                  className="flex flex-col items-center gap-4"
+                >
+                  <p className="font-body text-[10px] md:text-xs text-charcoal/30 uppercase tracking-[0.6em] leading-relaxed">
+                    Every story is an invitation to your own
+                  </p>
+                  <p className="font-display text-xl md:text-2xl text-gold/60 italic font-light">
+                    Ritual of Radiance
+                  </p>
+                </motion.div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </section>
       </main>
