@@ -41,7 +41,7 @@ const Products = () => {
     const fetchProductsData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(getApiUrl("/products/"));
+        const response = await fetch(getApiUrl("/api/products/"));
         if (response.ok) {
           const data = await response.json();
           if (data && data.length > 0) {

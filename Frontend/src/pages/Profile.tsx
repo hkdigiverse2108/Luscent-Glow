@@ -5,7 +5,7 @@ import {
   Settings, LogOut, ChevronRight, 
   Camera, ShoppingBag, Heart, CreditCard,
   Lock, CheckCircle2, AlertCircle, Plus,
-  MapPin, Home, Globe, Building, Sparkles
+  MapPin, Home, Globe, Building, Sparkles, ChevronDown
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
@@ -16,6 +16,15 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import LogoutConfirmation from "@/components/auth/LogoutConfirmation";
 
 type ProfileView = "details" | "orders" | "wishlist" | "payments" | "password";
+
+const INDIAN_STATES = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
+  "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", 
+  "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", 
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh", "Uttarakhand", 
+  "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", "Dadra and Nagar Haveli and Daman and Diu", 
+  "Delhi", "Jammu and Kashmir", "Ladakh", "Lakshadweep", "Puducherry"
+];
 
 const Profile = () => {
   const { user, syncUser, logout } = useAuth();
@@ -74,7 +83,7 @@ const Profile = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(getApiUrl("/auth/profile/update"), {
+      const response = await fetch(getApiUrl("/api/auth/profile/update"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -117,7 +126,7 @@ const Profile = () => {
 
     setPasswordLoading(true);
     try {
-      const response = await fetch(getApiUrl("/auth/change-password"), {
+      const response = await fetch(getApiUrl("/api/auth/change-password"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -401,13 +410,18 @@ const Profile = () => {
                             <div className="space-y-4 group">
                               <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">State</label>
                               <div className="relative">
-                                <Globe className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors" size={18} />
-                                <input
-                                  type="text"
+                                <Globe className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors z-10" size={18} />
+                                <select
                                   value={state}
                                   onChange={(e) => setState(e.target.value)}
-                                  className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                                />
+                                  className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-12 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500 appearance-none cursor-pointer"
+                                >
+                                  <option value="" disabled className="text-muted-foreground">Select State</option>
+                                  {INDIAN_STATES.map((s) => (
+                                    <option key={s} value={s} className="bg-white text-charcoal">{s}</option>
+                                  ))}
+                                </select>
+                                <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/30 pointer-events-none group-focus-within:text-gold transition-colors" size={16} />
                               </div>
                             </div>
                             <div className="col-span-2 lg:col-span-1 space-y-4 group">

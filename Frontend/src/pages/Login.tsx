@@ -67,13 +67,13 @@ const Login = () => {
       let payload = {};
 
       if (view === "login") {
-        endpoint = getApiUrl("/auth/signin");
+        endpoint = getApiUrl("/api/auth/signin");
         payload = { mobileNumber, password };
       } else if (view === "signup") {
-        endpoint = getApiUrl("/auth/signup");
+        endpoint = getApiUrl("/api/auth/signup");
         payload = { fullName, mobileNumber, email, password };
       } else if (view === "forgot-password") {
-        endpoint = getApiUrl("/auth/forgot-password");
+        endpoint = getApiUrl("/api/auth/forgot-password");
         payload = { mobileNumber };
       } else if (view === "verify-otp") {
         if (prevView === "forgot-password") {
@@ -83,7 +83,7 @@ const Login = () => {
           setLoading(false);
           return;
         }
-        endpoint = getApiUrl("/auth/verify-otp");
+        endpoint = getApiUrl("/api/auth/verify-otp");
         payload = { mobileNumber, otp: otpValue };
       } else if (view === "new-password") {
         if (password !== confirmPassword) {
@@ -91,7 +91,7 @@ const Login = () => {
           setLoading(false);
           return;
         }
-        endpoint = getApiUrl("/auth/reset-password");
+        endpoint = getApiUrl("/api/auth/reset-password");
         payload = { mobileNumber, otp: otpValue, newPassword: password };
       }
 

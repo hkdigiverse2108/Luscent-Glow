@@ -32,7 +32,7 @@ const ProductDetail = () => {
     const fetchProduct = async () => {
       try {
         setLoading(true);
-        const response = await fetch(getApiUrl(`/products/${id}`));
+        const response = await fetch(getApiUrl(`/api/products/${id}`));
         if (!response.ok) throw new Error("API error");
         const data = await response.json();
         setProduct(data);
@@ -59,7 +59,7 @@ const ProductDetail = () => {
       if (!product) return;
         let data;
         try {
-          const response = await fetch(getApiUrl("/products/"));
+          const response = await fetch(getApiUrl("/api/products/"));
           if (response.ok) {
             data = await response.json();
           } else {

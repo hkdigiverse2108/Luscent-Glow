@@ -87,10 +87,19 @@ async def create_order(order_data: dict = Body(...)):
     
     return created_order
 
-@router.get("/", response_description="List all orders for a user", response_model=List[OrderModel])
-async def list_orders(userMobile: str = Query(...)):
+@router.get("/", response_description="List all systemic orders", response_model=List[OrderModel])
+async def list_orders(userMobile: Optional[str] = Query(None), guestId: Optional[str] = Query(None)):
     db = await get_database()
-    orders = await db["orders"].find({"userMobile": userMobile}).sort("createdAt", -1).to_list(100)
+    
+    query = {}
+    if userMobile or guestId:
+        query = {"$or": []}
+        if userMobile:
+            query["$or"].append({"userMobile": userMobile})
+        if guestId:
+            query["$or"].append({"userMobile": guestId})
+            
+    orders = await db["orders"].find(query).sort("createdAt", -1).to_list(100)
     return orders
 
 @router.get("/{id}", response_description="Get a single order", response_model=OrderModel)

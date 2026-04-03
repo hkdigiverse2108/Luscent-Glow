@@ -89,7 +89,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const identifier = user?.mobileNumber || guestId;
 
     try {
-      const response = await fetch(getApiUrl(`/cart/${identifier}`));
+      const response = await fetch(getApiUrl(`/api/cart/${identifier}`));
       if (response.ok) {
         const serverCart = await response.json();
         if (serverCart && Array.isArray(serverCart)) {
@@ -106,7 +106,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user || !user.mobileNumber) return;
 
     try {
-      const response = await fetch(getApiUrl(`/gift-cards/received/${user.mobileNumber}`));
+      const response = await fetch(getApiUrl(`/api/gift-cards/received/${user.mobileNumber}`));
       if (response.ok) {
         const data = await response.json();
         setReceivedGiftCards(data);
@@ -163,7 +163,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Always sync with backend
     try {
-      await fetch(getApiUrl("/cart/add"), {
+      await fetch(getApiUrl("/api/cart/add"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -215,7 +215,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Universal Removal from DB
     try {
-      await fetch(getApiUrl("/cart/remove"), {
+      await fetch(getApiUrl("/api/cart/remove"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -251,7 +251,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const guestId = getGuestId();
 
     try {
-      await fetch(getApiUrl("/cart/update"), {
+      await fetch(getApiUrl("/api/cart/update"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -286,7 +286,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const identifier = user?.mobileNumber || guestId;
 
     try {
-      await fetch(getApiUrl(`/cart/clear/${identifier}`), {
+      await fetch(getApiUrl(`/api/cart/clear/${identifier}`), {
         method: "DELETE",
       });
     } catch (error) {
@@ -327,7 +327,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const applyGiftCard = async (code: string): Promise<boolean> => {
     try {
-      const response = await fetch(getApiUrl(`/gift-cards/validate/${code}`));
+      const response = await fetch(getApiUrl(`/api/gift-cards/validate/${code}`));
       if (response.ok) {
         const data = await response.json();
         setAppliedGiftCard({

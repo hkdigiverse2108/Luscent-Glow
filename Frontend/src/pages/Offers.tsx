@@ -64,7 +64,7 @@ const Offers = () => {
       tag: "Best Seller"
     },
     {
-      name: "Glass Skin Ritual",
+      name: "Daily Essentials Set",
       items: ["Cleansing Gel", "Niacinamide Toner", "Day Cream"],
       price: "₹2,199",
       originalPrice: "₹2,899",
@@ -98,7 +98,7 @@ const Offers = () => {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-gold/20 backdrop-blur-md rounded-full border border-gold/30">
                 <Sparkles size={16} className="text-gold" />
-                <span className="text-xs font-body font-bold text-gold uppercase tracking-[0.2em]">Magnificent Glow Deals</span>
+                <span className="text-xs font-body font-bold text-gold uppercase tracking-[0.2em]">Current Special Offers</span>
               </div>
               <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1]">
                 Exclusive <span className="text-gold italic">Treasures</span> Waiting For You
@@ -109,7 +109,7 @@ const Offers = () => {
               </p>
               <div className="flex flex-wrap gap-4 pt-4">
                 <a href="#flash-deals" className="px-8 py-4 bg-gold text-primary font-body font-bold uppercase tracking-widest text-xs rounded-full hover:shadow-lg hover:shadow-gold/20 transition-all">
-                  Browse Offers
+                  Explore Offers
                 </a>
                 <Link to="/products" className="px-8 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white font-body font-bold uppercase tracking-widest text-xs rounded-full hover:bg-white/20 transition-all">
                   Shop Collection
@@ -129,9 +129,9 @@ const Offers = () => {
                 <Clock size={14} />
                 <span className="text-[10px] font-body font-bold uppercase tracking-widest">Limited Availability</span>
               </div>
-              <h2 className="font-display text-4xl lg:text-5xl font-bold text-primary italic">Flash Glow Deals</h2>
+              <h2 className="font-display text-4xl lg:text-5xl font-bold text-primary italic">Limited Time Flash Sale</h2>
               <p className="text-muted-foreground font-body max-w-xl mx-auto">
-                These magnificent offers disappear as quickly as a morning mist. 
+                These special offers disappear quickly. 
                 Claim yours before the timer runs out.
               </p>
             </div>
@@ -186,12 +186,12 @@ const Offers = () => {
               <div className="lg:col-span-5 space-y-8">
                 <div className="space-y-4">
                   <h2 className="font-display text-4xl md:text-5xl font-bold leading-[1.1]">
-                    The More You <span className="text-gold italic">Glow</span>, 
+                    The More You <span className="text-gold italic">Shop</span>, 
                     The More You Save
                   </h2>
                   <p className="text-white/60 font-body leading-relaxed">
-                    Elevate your entire routine. Our tiered rewards and bundled kits are 
-                    designed to provide the maximum radiance with the best value.
+                    Improve your daily routine. Our tiered rewards and value sets are 
+                    designed to provide the best results with the best value.
                   </p>
                 </div>
 

@@ -48,7 +48,7 @@ const Header = () => {
   useEffect(() => {
     const fetchSearchData = async () => {
       try {
-        const response = await fetch(getApiUrl("/products/"));
+        const response = await fetch(getApiUrl("/api/products/"));
         if (response.ok) {
           const data = await response.json();
           setFetchedProducts(data.length > 0 ? data : products);

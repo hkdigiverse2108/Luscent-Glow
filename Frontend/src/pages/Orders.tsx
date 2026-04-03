@@ -25,11 +25,11 @@ interface OrderItem {
 }
 
 interface Order {
-  _id: string;
+  id: string;
   orderNumber: string;
   items: OrderItem[];
   totalAmount: number;
-  status: "Processing" | "Quality Check" | "Shipped" | "Delivered" | "Cancelled";
+  status: "Processing" | "Quality Check" | "Shipped" | "Delivered" | "Cancelled" | "Pending Payment";
   createdAt: string;
 }
 
@@ -39,6 +39,7 @@ const statusConfig = {
   "Shipped": { icon: <Truck size={16} />, color: "text-gold", bg: "bg-gold/10", step: 3 },
   "Delivered": { icon: <CheckCircle2 size={16} />, color: "text-green-500", bg: "bg-green-500/10", step: 4 },
   "Cancelled": { icon: <Package size={16} />, color: "text-rose-500", bg: "bg-rose-500/10", step: 0 },
+  "Pending Payment": { icon: <Clock size={16} />, color: "text-amber-500", bg: "bg-amber-500/10", step: 0 },
 };
 
 const Orders = () => {
@@ -50,19 +51,12 @@ const Orders = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const guestId = localStorage.getItem("luscent-glow-guest-id");
-      const identifier = user?.mobileNumber || guestId;
-      
-      if (!identifier) {
-        setLoading(false);
-        return;
-      }
-      
       try {
-        const response = await fetch(getApiUrl(`/orders/?userMobile=${encodeURIComponent(identifier)}`));
+        const response = await fetch(getApiUrl("/api/orders/"));
         if (response.ok) {
           const data = await response.json();
-          setOrders(data);
+          // Ensure data is an array
+          setOrders(Array.isArray(data) ? data : []);
         }
       } catch (error) {
         console.error("Error fetching orders:", error);
@@ -133,7 +127,7 @@ const Orders = () => {
             <div className="space-y-10">
               {filteredOrders.map((order, idx) => (
                 <motion.div
-                  key={order._id}
+                  key={order.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
@@ -173,7 +167,7 @@ const Orders = () => {
                             <div className="flex-1 space-y-1">
                               <h4 className="font-display text-lg font-semibold text-charcoal group-hover/item:text-gold transition-colors">{item.name}</h4>
                               <p className="text-xs font-body text-muted-foreground">
-                                {item.quantity} x ₹{item.price.toLocaleString()}
+                                {item.quantity} x ₹{Number(item.price || 0).toLocaleString()}
                                 {item.selectedShade && <span className="mx-2">•</span>}
                                 {item.selectedShade}
                               </p>
@@ -212,7 +206,7 @@ const Orders = () => {
                         <div className="flex items-end justify-between pt-4 border-t border-gold/5">
                           <div>
                             <p className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest mb-1">Grand Total</p>
-                            <p className="font-display text-2xl font-bold text-charcoal">₹{order.totalAmount.toLocaleString()}</p>
+                            <p className="font-display text-2xl font-bold text-charcoal">₹{Number(order.totalAmount || 0).toLocaleString()}</p>
                           </div>
                           <button 
                             onClick={() => navigate(`/track-order?orderId=${order.orderNumber}`)}

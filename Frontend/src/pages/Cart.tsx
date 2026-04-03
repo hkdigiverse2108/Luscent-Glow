@@ -17,7 +17,9 @@ import {
   Tag,
   Copy,
   Check,
-  Sparkles
+  Sparkles,
+  MapPin,
+  Settings
 } from "lucide-react";
 import { 
   Dialog, 
@@ -33,6 +35,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 const Cart = () => {
   const { 
@@ -54,6 +57,7 @@ const Cart = () => {
     availableCoupons,
     fetchReceivedGiftCards
   } = useCart();
+  const { user } = useAuth();
   
   const navigate = useNavigate();
   const [couponInput, setCouponInput] = React.useState("");
@@ -62,7 +66,7 @@ const Cart = () => {
   const [isPlacingOrder, setIsPlacingOrder] = React.useState(false);
   const [orderComplete, setOrderComplete] = React.useState(false);
 
-  const shipping = 50; 
+  const shipping = subtotal >= 999 ? 0 : 50; 
   const tax = 0; 
   const total = Math.max(0, subtotal + shipping + tax - discountAmount - giftCardDiscount);
 
@@ -73,9 +77,7 @@ const Cart = () => {
   };
 
   const handleCompletePurchase = async () => {
-    const userStr = localStorage.getItem("user");
     const guestId = localStorage.getItem("luscent-glow-guest-id");
-    const user = userStr ? JSON.parse(userStr) : null;
     const identifier = user?.mobileNumber || guestId || "Guest";
     
     setIsPlacingOrder(true);
@@ -96,24 +98,23 @@ const Cart = () => {
         appliedGiftCardCode: appliedGiftCard?.code || null,
         giftCardDiscount: giftCardDiscount || 0,
         paymentStatus: "Paid",
-        shippingAddress: {}
+        shippingAddress: user?.shippingAddress || { street: "Not Provided", city: "Update in Profile", state: "N/A", zipCode: "000000" }
       };
 
-      const response = await fetch(getApiUrl("/orders/"), {
+      const response = await fetch(getApiUrl("/api/payments/initiate"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderData),
       });
 
-      if (response.ok) {
-        await clearCart();
-        toast.success("Ritual Secured: Your order has been placed!");
-        window.scrollTo(0, 0);
-        navigate("/orders");
+      const data = await response.json();
+
+      if (response.ok && data.paymentUrl) {
+        // Redirection to PhonePe
+        window.location.href = data.paymentUrl;
       } else {
-        const errorData = await response.json();
-        console.error("Order error:", errorData);
-        toast.error("Process interrupted. Please try again.");
+        console.error("Payment error:", data);
+        toast.error("Payment gateway is currently offline.");
       }
     } catch (error) {
       console.error("Purchase error:", error);
@@ -149,7 +150,7 @@ const Cart = () => {
             </div>
             
             <div className="space-y-4">
-              <h1 className="font-display text-5xl md:text-6xl font-light text-foreground tracking-tight">Ritual <span className="italic font-normal">Secured</span></h1>
+              <h1 className="font-display text-5xl md:text-6xl font-light text-foreground tracking-tight">Order <span className="italic font-normal">Placed</span></h1>
               <p className="text-muted-foreground font-body text-lg max-w-md mx-auto leading-relaxed">
                 Your curated selection has been successfully recorded in our orders database.
               </p>
@@ -207,7 +208,7 @@ const Cart = () => {
               <div className="space-y-1">
                 <div className="flex items-center gap-3 text-gold">
                   <Sparkles size={14} className="opacity-50" />
-                  <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Curated Selections</span>
+                  <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Special Selections</span>
                 </div>
                 <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-charcoal tracking-tight lowercase leading-[0.9]">
                   Shopping <span className="text-gold italic font-light">Bag</span>
@@ -217,7 +218,7 @@ const Cart = () => {
             <div className="hidden md:flex flex-col items-end gap-3 pb-2">
               <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-full border border-white/50 shadow-sm">
                 <ShoppingBag size={18} className="text-gold" />
-                <p className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">{totalItems} Boutique Items</p>
+                <p className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">{totalItems} Total Items</p>
               </div>
             </div>
           </div>
@@ -234,7 +235,7 @@ const Cart = () => {
               </div>
               <h2 className="font-display text-4xl font-light mb-6 text-charcoal tracking-tight">Your collection is empty<span className="text-gold">.</span></h2>
               <p className="text-muted-foreground/60 font-body mb-10 max-w-sm mx-auto leading-relaxed italic text-sm text-center">
-                Discover our latest arrivals in skincare and makeup, curated to reveal your inner radiance.
+                Discover our latest arrivals in skincare and makeup, curated for your perfect glow.
               </p>
               <Link 
                 to="/products"
@@ -294,7 +295,7 @@ const Cart = () => {
                               </div>
                               <button onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)} className="group/del flex items-center gap-3 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-rose-brand transition-all">
                                 <div className="w-10 h-10 flex items-center justify-center rounded-2xl bg-rose-brand/5 group-hover/del:bg-rose-brand group-hover/del:text-white transition-all duration-500"><Trash2 size={16} strokeWidth={1.5} /></div>
-                                <span className="hidden md:inline">Dispose</span>
+                                <span className="hidden md:inline">Remove</span>
                               </button>
                             </div>
                           </div>
@@ -315,42 +316,72 @@ const Cart = () => {
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="bg-charcoal/90 backdrop-blur-3xl p-10 md:p-14 rounded-[3rem] md:rounded-[4.5rem] shadow-ethereal border border-white/10 relative overflow-hidden text-white"
+                    className="bg-white/60 backdrop-blur-3xl p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] shadow-ethereal border border-gold/10 relative overflow-hidden text-charcoal"
                   >
-                    <div className="absolute top-0 right-0 w-80 h-80 bg-gold/10 blur-[100px] rounded-full -mr-40 -mt-40 pointer-events-none" />
+                    <div className="absolute top-0 right-0 w-80 h-80 bg-gold/5 blur-[100px] rounded-full -mr-40 -mt-40 pointer-events-none" />
                     
-                    <div className="flex justify-between items-center mb-10 border-b border-white/5 pb-8">
+                    <div className="flex justify-between items-center mb-8 border-b border-gold/10 pb-6">
                        <div className="space-y-1">
-                         <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.4em] leading-none">Checkout Protocol</p>
-                         <h2 className="font-display text-4xl font-light text-white italic tracking-tight">Summary<span className="text-gold font-serif">.</span></h2>
+                         <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.4em] leading-none mb-1">Order Summary</p>
+                         <h2 className="font-display text-3xl font-light text-charcoal italic tracking-tight">Summary<span className="text-gold font-serif">.</span></h2>
                        </div>
                     </div>
                     
                     <div className="space-y-8 mb-12">
-                      <div className="flex justify-between text-[11px] font-body font-bold text-white/40 uppercase tracking-[0.3em] items-center">
-                        <span>Base Selections</span>
-                        <span className="text-white">₹{subtotal.toLocaleString()}</span>
+                      <div className="mb-8 pt-6 border-t border-gold/10">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center gap-3 text-gold">
+                            <MapPin size={14} className="opacity-60" />
+                            <span className="text-[10px] font-body font-bold uppercase tracking-[0.4em]">Delivery Destination</span>
+                          </div>
+                          <Link to="/profile" className="text-[9px] font-body font-bold text-muted-foreground/40 hover:text-gold transition-colors flex items-center gap-1 group">
+                            <Settings size={10} /> CHANGE
+                          </Link>
+                        </div>
+                        
+                        {user?.shippingAddress?.street ? (
+                          <div className="p-5 rounded-2xl bg-white/40 border border-gold/5 space-y-1">
+                            <p className="text-[11px] font-body font-medium text-charcoal leading-relaxed">{user.shippingAddress.street}</p>
+                            <p className="text-[10px] font-body text-muted-foreground/60">{user.shippingAddress.city}, {user.shippingAddress.state} {user.shippingAddress.zipCode}</p>
+                          </div>
+                        ) : (
+                          <div className="p-5 rounded-2xl bg-rose-brand/5 border border-rose-brand/10">
+                            <p className="text-[10px] font-body font-bold text-rose-brand/60 italic leading-relaxed">No sanctuary address found. Please update your profile for seamless delivery.</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex justify-between text-[11px] font-body font-bold text-muted-foreground/60 uppercase tracking-[0.3em] items-center">
+                        <span>Subtotal</span>
+                        <span className="text-charcoal">₹{subtotal.toLocaleString()}</span>
+                      </div>
+
+                      <div className="flex justify-between text-[11px] font-body font-bold text-muted-foreground/60 uppercase tracking-[0.3em] items-center">
+                        <span>Logistics (Shipping)</span>
+                        <span className={shipping === 0 ? "text-gold" : "text-charcoal"}>
+                          {shipping === 0 ? "FREE" : `₹${shipping}`}
+                        </span>
                       </div>
                       
                       <div className="pt-2">
                         <Dialog open={isCouponsModalOpen} onOpenChange={setIsCouponsModalOpen}>
                           <DialogTrigger asChild>
-                            <button className="w-full text-left bg-white/5 hover:bg-white/10 border border-white/5 rounded-3xl p-6 flex items-center justify-between group transition-all duration-500 shadow-xl">
-                              <div className="flex items-center gap-6">
-                                <div className="w-14 h-14 bg-gold/10 rounded-2xl flex items-center justify-center text-gold group-hover:scale-110 transition-transform duration-700 shadow-inner"><Tag size={28} strokeWidth={1} /></div>
+                            <button className="w-full text-left bg-white/70 hover:bg-white border border-gold/10 rounded-2xl p-5 flex items-center justify-between group transition-all duration-500 shadow-sm hover:shadow-xl">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center text-gold group-hover:scale-110 transition-transform duration-700 shadow-inner"><Tag size={24} strokeWidth={1} /></div>
                                 <div className="space-y-1">
-                                  <h4 className="text-sm font-display font-bold text-white tracking-widest uppercase">Sacred Offers</h4>
-                                  <p className="text-[10px] font-body font-medium text-gold/60 uppercase tracking-widest leading-none">View available rituals</p>
+                                  <h4 className="text-xs font-display font-bold text-charcoal tracking-widest uppercase">Available Coupons</h4>
+                                  <p className="text-[9px] font-body font-medium text-gold/60 uppercase tracking-widest leading-none">Choose a discount code</p>
                                 </div>
                               </div>
-                              <ChevronRight size={20} className="text-gold transition-transform group-hover:translate-x-1" />
+                              <ChevronRight size={18} className="text-gold transition-transform group-hover:translate-x-1" />
                             </button>
                           </DialogTrigger>
                           
                           <DialogContent className="max-w-md w-[95vw] rounded-[3rem] p-0 overflow-hidden border-white/10 shadow-2xl flex flex-col max-h-[85vh] bg-[#fdfcfb]">
                              <div className="bg-white px-8 py-6 border-b border-gray-100 flex items-center gap-6">
                                <DialogClose className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gold"><ChevronLeft size={24} /></DialogClose>
-                               <DialogTitle className="font-display text-2xl font-bold text-charcoal tracking-tight lowercase">Sacred <span className="text-gold italic font-light">Offers</span></DialogTitle>
+                               <DialogTitle className="font-display text-2xl font-bold text-charcoal tracking-tight lowercase">Available <span className="text-gold italic font-light">Coupons</span></DialogTitle>
                              </div>
                              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f8f9fb]">
                                <div className="p-6 bg-white shadow-sm mb-6">
@@ -386,43 +417,39 @@ const Cart = () => {
                         </Dialog>
                       </div>
 
-                      {(appliedGiftCard || appliedCoupon) && (
-                        <div className="space-y-6 pt-6 animate-in fade-in slide-in-from-top-4 border-t border-white/5">
-                           {giftCardDiscount > 0 && (
-                            <div className="flex justify-between items-center text-[10px] font-body font-bold text-gold uppercase tracking-[0.35em]">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-gold/10 rounded-full"><CreditCard size={12} /></div>
-                                  <span>Gift Balance Applied</span>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <span className="text-white font-display text-lg">- ₹{giftCardDiscount.toLocaleString()}</span>
-                                  <button onClick={removeGiftCard} className="p-1 hover:text-rose-brand transition-colors text-white/40"><Trash2 size={12} /></button>
-                                </div>
-                              </div>
-                           )}
+                         <div className="space-y-6 pt-6 animate-in fade-in slide-in-from-top-4 border-t border-gold/10">
+                            {giftCardDiscount > 0 && (
+                             <div className="flex justify-between items-center text-[10px] font-body font-bold text-gold uppercase tracking-[0.35em]">
+                                 <div className="flex items-center gap-3">
+                                   <div className="p-2 bg-gold/10 rounded-full"><CreditCard size={12} /></div>
+                                   <span>Gift Balance Applied</span>
+                                 </div>
+                                 <div className="flex items-center gap-4">
+                                   <span className="text-charcoal font-display text-lg">- ₹{giftCardDiscount.toLocaleString()}</span>
+                                   <button onClick={removeGiftCard} className="p-1 hover:text-rose-brand transition-colors text-muted-foreground/40"><Trash2 size={12} /></button>
+                                 </div>
+                               </div>
+                            )}
 
-                           {discountAmount > 0 && (
-                            <div className="flex justify-between items-center text-[10px] font-body font-bold text-gold uppercase tracking-[0.35em]">
-                                <div className="flex items-center gap-3">
-                                  <div className="p-2 bg-gold/10 rounded-full"><Tag size={12} /></div>
-                                  <span>Aura Discount</span>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <span className="text-white font-display text-lg">- ₹{discountAmount.toLocaleString()}</span>
-                                  <button onClick={removeCoupon} className="p-1 hover:text-rose-brand transition-colors text-white/40"><Trash2 size={12} /></button>
-                                </div>
-                              </div>
-                           )}
-                        </div>
-                      )}
-
-                      <div className="pt-10 border-t border-gold/10">
-                        <div className="flex justify-between items-end mb-10">
-                          <div className="space-y-2">
-                             <p className="text-[10px] font-body font-bold text-white/30 uppercase tracking-[0.5em] leading-none mb-1">Total Ritual Value</p>
-                             <span className="font-display text-2xl md:text-3xl font-light text-white italic tracking-tight lowercase">Final <span className="text-gold">Sanctuary</span> Price</span>
+                            {discountAmount > 0 && (
+                             <div className="flex justify-between items-center text-[10px] font-body font-bold text-gold uppercase tracking-[0.35em]">
+                                 <div className="flex items-center gap-3">
+                                   <div className="p-2 bg-gold/10 rounded-full"><Tag size={12} /></div>
+                                   <span>Aura Discount</span>
+                                 </div>
+                                 <div className="flex items-center gap-4">
+                                   <span className="text-charcoal font-display text-lg">- ₹{discountAmount.toLocaleString()}</span>
+                                   <button onClick={removeCoupon} className="p-1 hover:text-rose-brand transition-colors text-muted-foreground/40"><Trash2 size={12} /></button>
+                                 </div>
+                               </div>
+                            )}
+                                             <div className="pt-8 border-t border-gold/10">
+                        <div className="flex justify-between items-end mb-8">
+                          <div className="space-y-1">
+                             <p className="text-[10px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.5em] leading-none mb-1">Total Ritual Value</p>
+                             <span className="font-display text-xl md:text-2xl font-light text-charcoal italic tracking-tight lowercase">Grand <span className="text-gold">Total</span> Price</span>
                           </div>
-                          <span className="font-display text-5xl md:text-7xl font-normal text-gold text-glow-gold tracking-tight leading-none">₹{total.toLocaleString()}</span>
+                          <span className="font-display text-3xl md:text-5xl font-normal text-gold tracking-tight leading-none drop-shadow-[0_2px_10px_rgba(182,143,76,0.15)]">₹{total.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -430,19 +457,19 @@ const Cart = () => {
                     <button 
                       onClick={handleCompletePurchase}
                       disabled={isPlacingOrder || items.length === 0}
-                      className="w-full group/btn relative py-7 md:py-9 bg-white text-charcoal rounded-[2rem] md:rounded-[3rem] font-body font-bold uppercase tracking-[0.4em] text-[10px] md:text-xs overflow-hidden transition-all hover:translate-y-[-4px] hover:shadow-[0_20px_50px_rgba(182,143,76,0.3)] disabled:opacity-50 disabled:translate-y-0 shadow-2xl"
+                      className="w-full group/btn relative py-5 md:py-6 bg-charcoal text-white rounded-2xl font-body font-bold uppercase tracking-[0.4em] text-[10px] md:text-xs overflow-hidden transition-all hover:translate-y-[-2px] hover:shadow-[0_10px_30px_rgba(182,143,76,0.2)] disabled:opacity-50 disabled:translate-y-0 shadow-2xl"
                     >
                       <span className="relative z-10 flex items-center justify-center gap-4">
-                        {isPlacingOrder ? "Securing Ritual..." : "Complete secure purchase"} 
+                        {isPlacingOrder ? "Placing Order..." : "Complete purchase"} 
                         {!isPlacingOrder && <ChevronRight size={16} className="transition-transform group-hover/btn:translate-x-2" />}
                       </span>
                       <div className="absolute inset-0 bg-gold transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-700 origin-left" />
                     </button>
                     
-                    <div className="mt-10 flex items-center justify-center gap-6 opacity-30 group pb-4">
-                      <ShieldCheck size={18} className="text-white group-hover:text-gold transition-colors" />
-                      <p className="text-[8px] font-body font-bold uppercase tracking-[0.4em] text-white">Boutique Fulfillment Guaranteed</p>
-                    </div>
+                    <div className="mt-8 flex items-center justify-center gap-4 opacity-40 group pb-4">
+                      <ShieldCheck size={16} className="text-charcoal group-hover:text-gold transition-colors" />
+                      <p className="text-[8px] font-body font-bold uppercase tracking-[0.4em] text-charcoal">Secure Checkout Guaranteed</p>
+                    </div>      </div>
                   </motion.div>
 
                   {/* Free shipping toast-like indicator */}

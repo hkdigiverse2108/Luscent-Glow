@@ -30,7 +30,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!user || !user.mobileNumber) return;
 
     try {
-      const response = await fetch(getApiUrl(`/wishlist/${user.mobileNumber}`));
+      const response = await fetch(getApiUrl(`/api/wishlist/${user.mobileNumber}`));
       if (response.ok) {
         const serverWishlist = await response.json();
         // Merge or replace? For simplicity, we'll replace the local with server data
@@ -79,7 +79,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Sync with server if logged in
     if (user && user.mobileNumber) {
       try {
-        await fetch(getApiUrl("/wishlist/toggle"), {
+        await fetch(getApiUrl("/api/wishlist/toggle"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -104,7 +104,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     
     if (user && user.mobileNumber) {
       try {
-        await fetch(getApiUrl(`/wishlist/clear/${user.mobileNumber}`), { method: "DELETE" });
+        await fetch(getApiUrl(`/api/wishlist/clear/${user.mobileNumber}`), { method: "DELETE" });
       } catch (error) {
         console.error("Error clearing wishlist on server:", error);
       }
@@ -124,7 +124,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Sync with server if logged in
     if (user && user.mobileNumber) {
       try {
-        await fetch(getApiUrl("/wishlist/remove"), {
+        await fetch(getApiUrl("/api/wishlist/remove"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

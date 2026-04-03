@@ -173,11 +173,12 @@ class CartItemModel(BaseModel):
 
 class CartUpdateModel(BaseModel):
     """
-    Schema for updating cart item quantity.
+    Schema for updating cart item quantity or removing items.
     """
-    userMobile: str = Field(...)
+    userMobile: Optional[str] = Field(default=None)
+    guestId: Optional[str] = Field(default=None)
     productId: str = Field(...)
-    quantity: int = Field(..., ge=1)
+    quantity: int = Field(..., ge=0)
     price: Optional[float] = Field(default=None)
     name: Optional[str] = Field(default=None)
     image: Optional[str] = Field(default=None)
@@ -237,6 +238,7 @@ class OrderModel(BaseModel):
     shippingAddress: Optional[dict] = Field(default=None)
     createdAt: str = Field(...)
     orderNumber: str = Field(...)
+    merchantTransactionId: Optional[str] = Field(default=None)
 
     class Config:
         populate_by_name = True
@@ -278,3 +280,25 @@ class GiftCardModel(BaseModel):
                 "isActive": True
             }
         }
+
+class PaymentRecordModel(BaseModel):
+    """
+    Detailed audit log for every payment transaction.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    merchantId: str = Field(...)
+    merchantTransactionId: str = Field(...)
+    orderNumber: str = Field(...)
+    userMobile: str = Field(...)
+    amount: float = Field(...)
+    status: str = Field(default="INITIATED") # INITIATED, SUCCESS, FAILED, PENDING
+    providerReferenceId: Optional[str] = Field(default=None)
+    paymentMode: Optional[str] = Field(default=None)
+    response: Optional[str] = Field(default=None)
+    data: Optional[dict] = Field(default=None)
+    rawResponse: Optional[dict] = Field(default=None)
+    createdAt: str = Field(...)
+    updatedAt: str = Field(...)
+
+    class Config:
+        populate_by_name = True
