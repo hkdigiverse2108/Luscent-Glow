@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Package, 
@@ -10,27 +10,51 @@ import {
   ChevronRight, 
   Building2, 
   Gift, 
-  Layers
+  Layers,
+  Zap
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { getApiUrl } from "@/lib/api";
-const corporateGifting = "/assets/corporate-gifting.png";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 
 const BulkOrders = () => {
+  const [config, setConfig] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formState, setFormState] = useState({
+  
+  const initialFormState = {
     name: "",
     email: "",
     phoneNumber: "",
     companyName: "",
-    estimatedQuantity: "50-100",
+    estimatedQuantity: "",
     subject: "Bulk/Corporate Inquiry",
     message: ""
-  });
+  };
 
-  const quantities = ["10-50", "50-100", "100-500", "500+"];
+  const [formState, setFormState] = useState(initialFormState);
+
+  const fetchConfig = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/bulk-orders/settings"));
+      if (response.ok) {
+        const data = await response.json();
+        setConfig(data);
+        if (data.quantities?.length > 0) {
+          setFormState(prev => ({ ...prev, estimatedQuantity: data.quantities[0] }));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch bulk order settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConfig();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,47 +66,34 @@ const BulkOrders = () => {
       });
       if (response.ok) {
         setIsSubmitted(true);
+        setFormState({ ...initialFormState, estimatedQuantity: config?.quantities?.[0] || "" });
       }
     } catch (err) {
       console.error("Error submitting bulk inquiry:", err);
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
+  const resolveIcon = (iconName: string, size = 24) => {
+    switch (iconName) {
+      case 'Layers': return <Layers size={size} />;
+      case 'Truck': return <Truck size={size} />;
+      case 'ShieldCheck': return <ShieldCheck size={size} />;
+      case 'Building2': return <Building2 size={size} />;
+      case 'Users': return <Users size={size} />;
+      case 'Package': return <Package size={size} />;
+      default: return <Zap size={size} />;
     }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-
-  const features = [
-    {
-      icon: <Layers size={24} />,
-      title: "Bespoke Curation",
-      description: "Tailored product selections that align perfectly with your brand identity and event theme."
-    },
-    {
-      icon: <Truck size={24} />,
-      title: "Priority Logistics",
-      description: "White-glove delivery service with real-time tracking for large-scale domestic and global shipments."
-    },
-    {
-      icon: <ShieldCheck size={24} />,
-      title: "Quality Assurance",
-      description: "Every item undergoes rigorous luxury-standard inspection before being elegantly hand-packed."
-    },
-    {
-      icon: <Building2 size={24} />,
-      title: "Corporate Exclusive",
-      description: "Access to tiered pricing structures and exclusive limited-edition collections for our partners."
-    }
-  ];
+  if (loading || !config) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="font-display text-xs uppercase tracking-[0.3em] text-gold animate-pulse">
+          Establishing Corporate Connection...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background selection:bg-gold/30">
@@ -104,13 +115,17 @@ const BulkOrders = () => {
               >
                 <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/20 mb-6 md:mb-8">
                   <Gift size={14} className="text-gold" />
-                  <span className="text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em]">Corporate Concierge</span>
+                  <span className="text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em]">{config.heroBadge}</span>
                 </div>
                 <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6 md:mb-8">
-                  Elevate Your <span className="italic font-light text-gold italic">Corporate</span> Gifting.
+                  {config.heroTitle.split(' Corporate ').length > 1 ? (
+                    <>
+                      {config.heroTitle.split(' Corporate ')[0]} <span className="italic font-light text-gold">Corporate</span> {config.heroTitle.split(' Corporate ')[1]}
+                    </>
+                  ) : config.heroTitle}
                 </h1>
                 <p className="text-base md:text-lg font-body text-muted-foreground leading-relaxed mb-8 md:mb-12 max-w-lg mx-auto lg:mx-0 italic">
-                  "Transform business relationships into lasting impressions with our bespoke curation service for events, employees, and executive partners."
+                  "{config.heroDescription}"
                 </p>
                 <div className="flex flex-wrap justify-center lg:justify-start gap-6">
                   <a href="#inquiry-form" className="px-8 md:px-10 py-4 md:py-5 bg-primary text-white rounded-full font-body font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-gold transition-all shadow-xl hover:shadow-gold/20">
@@ -127,7 +142,7 @@ const BulkOrders = () => {
               >
                 <div className="aspect-[4/5] rounded-[4rem] overflow-hidden shadow-2xl relative z-10">
                   <img 
-                    src={corporateGifting} 
+                    src={getAssetUrl(config.heroImage)} 
                     alt="Luxury Corporate Gifting" 
                     className="w-full h-full object-cover scale-105 hover:scale-100 transition-transform duration-1000"
                   />
@@ -143,7 +158,7 @@ const BulkOrders = () => {
         <section className="py-16 md:py-24 bg-secondary/30 backdrop-blur-sm border-y border-border">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 text-center sm:text-left">
-              {features.map((feature, idx) => (
+              {config.features.map((feature: any, idx: number) => (
                 <motion.div
                   key={idx}
                   initial={{ opacity: 0, y: 20 }}
@@ -153,10 +168,10 @@ const BulkOrders = () => {
                   className="space-y-4 flex flex-col items-center sm:items-start"
                 >
                   <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gold shadow-sm group-hover:scale-110 transition-transform">
-                    {feature.icon}
+                    {resolveIcon(feature.icon)}
                   </div>
                   <h3 className="font-display text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">{feature.title}</h3>
-                  <p className="text-xs md:text-sm font-body text-muted-foreground leading-relaxed">{feature.description}</p>
+                  <p className="text-xs md:text-sm font-body text-muted-foreground leading-relaxed">{feature.desc}</p>
                 </motion.div>
               ))}
             </div>
@@ -170,20 +185,24 @@ const BulkOrders = () => {
               <div className="grid lg:grid-cols-5 gap-12 md:gap-20">
                 <div className="lg:col-span-2 space-y-8 text-center lg:text-left">
                   <div className="space-y-4">
-                    <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">The Inquiry <span className="text-gold italic font-light">Portal</span></h2>
+                    <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground">
+                      {config.inquiryTitle.split(' Portal ').length > 1 ? (
+                        <>
+                          {config.inquiryTitle.split(' Portal ')[0]} <span className="text-gold italic font-light">Portal</span> {config.inquiryTitle.split(' Portal ')[1]}
+                        </>
+                      ) : config.inquiryTitle}
+                    </h2>
                     <p className="font-body text-sm md:text-base text-muted-foreground leading-relaxed">
-                      Share your requirements and our dedicated account manager will reach out with a personalized catalog and tiered pricing dashboard within 2 hours.
+                      {config.inquiryDescription}
                     </p>
                   </div>
                   <div className="p-6 md:p-8 bg-primary rounded-[2rem] md:rounded-[2.5rem] text-white flex flex-col sm:flex-row lg:flex-col gap-6 md:gap-6">
-                    <div className="flex items-center justify-center lg:justify-start gap-4">
-                      <Users className="text-gold" size={20} />
-                      <p className="text-xs md:text-sm font-body font-bold uppercase tracking-widest">1,200+ Global Partners</p>
-                    </div>
-                    <div className="flex items-center justify-center lg:justify-start gap-4">
-                      <Package className="text-gold" size={20} />
-                      <p className="text-xs md:text-sm font-body font-bold uppercase tracking-widest">Bespoke Packaging</p>
-                    </div>
+                    {config.stats.map((stat: any, i: number) => (
+                      <div key={i} className="flex items-center justify-center lg:justify-start gap-4">
+                        {resolveIcon(stat.icon, 20)}
+                        <p className="text-xs md:text-sm font-body font-bold uppercase tracking-widest">{stat.label}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
@@ -231,7 +250,7 @@ const BulkOrders = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] font-body font-bold text-gold uppercase tracking-widest pl-1">Contact Number</label>
+                          <label className="text-[10px) font-body font-bold text-gold uppercase tracking-widest pl-1">Contact Number</label>
                           <input 
                             required
                             type="tel"
@@ -246,7 +265,7 @@ const BulkOrders = () => {
                       <div className="space-y-4">
                         <label className="text-[10px] font-body font-bold text-gold uppercase tracking-widest pl-1">Estimated Quantity</label>
                         <div className="flex flex-wrap gap-4">
-                          {quantities.map(q => (
+                          {config.quantities.map((q: string) => (
                             <button
                               key={q}
                               type="button"

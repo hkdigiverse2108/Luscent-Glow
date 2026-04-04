@@ -4,6 +4,7 @@ import { Product } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { ArrowRight, Sparkle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 
 const NewArrivals = () => {
   const [newProducts, setNewProducts] = useState<Product[]>([]);
@@ -12,11 +13,13 @@ const NewArrivals = () => {
   useEffect(() => {
     const fetchNew = async () => {
       try {
-        const response = await fetch("/api/products/");
+        const response = await fetch(getApiUrl("/api/products/"));
         if (response.ok) {
           const data = await response.json();
-          if (data && data.length > 0) {
-            setNewProducts(data.filter((p: Product) => p.isNew));
+          const filtered = data.filter((p: Product) => p.isNew);
+          
+          if (filtered.length > 0) {
+            setNewProducts(filtered);
           } else {
             const { products } = await import("@/data/products");
             setNewProducts(products.filter(p => p.isNew));
@@ -88,7 +91,7 @@ const NewArrivals = () => {
                   <motion.img
                     whileHover={{ scale: 1.05 }}
                     transition={{ duration: 1.5 }}
-                    src={product.image}
+                    src={getAssetUrl(product.image)}
                     alt={product.name}
                     className="w-full h-full object-cover"
                   />

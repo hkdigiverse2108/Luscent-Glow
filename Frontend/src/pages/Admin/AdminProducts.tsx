@@ -13,7 +13,7 @@ import {
   Package,
   Image as ImageIcon
 } from "lucide-react";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import ProductFormModal from "@/components/Admin/ProductFormModal.tsx";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -137,28 +137,34 @@ const AdminProducts = () => {
       <div className={`backdrop-blur-3xl border rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-700 ${
         isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-             <thead className={`border-b font-body text-xs font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${
-               isDark ? "bg-white/[0.02] border-white/5 text-white/30" : "bg-charcoal/[0.02] border-charcoal/5 text-charcoal/70"
+        <div className="overflow-x-auto overflow-y-visible">
+          <table className="w-full text-left border-collapse">
+             <thead className={`border-b font-body text-[12px] font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${
+               isDark ? "bg-white/[0.04] border-white/10 text-white/50" : "bg-charcoal/[0.04] border-charcoal/10 text-charcoal/80"
              }`}>
                 <tr>
-                   <th className="px-8 py-6">Product Ritual</th>
-                   <th className="px-6 py-6">Category</th>
-                   <th className="px-6 py-6">Price</th>
-                   <th className="px-6 py-6 text-right">Actions</th>
+                   <th className="px-8 py-6 min-w-[300px] font-extrabold uppercase tracking-[0.3em]">Product Ritual</th>
+                   <th className="px-6 py-6 font-extrabold uppercase tracking-[0.3em]">Brand</th>
+                   <th className="px-6 py-6 font-extrabold uppercase tracking-[0.3em]">Category</th>
+                   <th className="px-6 py-6 font-extrabold uppercase tracking-[0.3em]">Pricing</th>
+                   <th className="px-6 py-6 font-extrabold uppercase tracking-[0.3em]">Performance</th>
+                   <th className="px-6 py-6 font-extrabold uppercase tracking-[0.3em]">Status</th>
+                   <th className="px-6 py-6 text-right pr-12 font-extrabold uppercase tracking-[0.3em]">Actions</th>
                 </tr>
              </thead>
              <tbody className={`divide-y transition-colors duration-700 ${
-               isDark ? "divide-white/5" : "divide-charcoal/5"
+               isDark ? "divide-white/10" : "divide-charcoal/10"
              }`}>
                 {loading ? (
-                  Array(5).fill(0).map((_, i) => (
+                   Array(5).fill(0).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-8 py-6"><div className="h-12 w-48 bg-white/5 rounded-xl" /></td>
-                      <td className="px-6 py-6"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-8 w-8 ml-auto bg-white/5 rounded-full" /></td>
+                      <td className="px-8 py-8"><div className="h-14 w-48 bg-white/5 rounded-xl" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-10 w-10 ml-auto bg-white/5 rounded-full" /></td>
                     </tr>
                   ))
                 ) : filteredProducts.length > 0 ? (
@@ -167,54 +173,91 @@ const AdminProducts = () => {
                       key={p._id || p.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="group/row hover:bg-white/[0.02] transition-colors"
+                      className="group/row hover:bg-white/[0.03] transition-colors"
                     >
-                       <td className="px-8 py-6">
-                          <div className="flex items-center gap-4">
-                             <div className="w-14 h-14 rounded-2xl overflow-hidden bg-charcoal relative flex-shrink-0 border border-white/5 shadow-lg">
+                       <td className="px-8 py-8">
+                          <div className="flex items-center gap-5">
+                             <div className="w-16 h-16 rounded-2xl overflow-hidden bg-charcoal relative flex-shrink-0 border border-white/10 shadow-xl">
                                 {p.image ? (
-                                  <img src={p.image} alt={p.name} className="w-full h-full object-cover transition-transform group-hover/row:scale-110 duration-700" />
+                                  <img src={getAssetUrl(p.image)} alt={p.name} className="w-full h-full object-cover transition-transform group-hover/row:scale-110 duration-700" />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-white/10"><ImageIcon size={20} /></div>
+                                  <div className="w-full h-full flex items-center justify-center text-white/20"><ImageIcon size={24} /></div>
                                 )}
                              </div>
                              <div>
-                                <h4 className={`text-base font-bold mb-1 transition-colors group-hover/row:text-gold ${
+                                <h4 className={`text-[15px] font-extrabold mb-1.5 transition-colors group-hover/row:text-gold ${
                                   isDark ? "text-white" : "text-charcoal"
                                 }`}>{p.name}</h4>
-                                <p className={`text-xs font-bold uppercase tracking-widest truncate max-w-[200px] transition-colors ${
-                                  isDark ? "text-white/20" : "text-charcoal/60"
+                                <p className={`text-[13px] font-extrabold uppercase tracking-widest truncate max-w-[200px] transition-colors ${
+                                  isDark ? "text-white/60" : "text-charcoal/80"
                                 }`}>ID: {p._id || p.id}</p>
                              </div>
                           </div>
                        </td>
-                       <td className="px-6 py-6">
-                          <span className="px-3 py-1 bg-white/5 rounded-lg text-\[11px\] font-bold text-gold/60 uppercase tracking-widest border border-gold/10">
+                       <td className="px-6 py-8">
+                          <span className={`text-[14px] font-extrabold tracking-wider ${isDark ? "text-white/90" : "text-charcoal/90"}`}>
+                             {p.brand || "Luscent Glow"}
+                          </span>
+                       </td>
+                       <td className="px-6 py-8">
+                          <span className="px-5 py-2 bg-gold/10 rounded-xl text-[13px] font-extrabold text-gold uppercase tracking-widest border border-gold/20 shadow-sm">
                              {p.category}
                           </span>
                        </td>
-                       <td className={`px-6 py-6 font-display text-lg font-medium italic transition-colors ${
-                         isDark ? "text-white" : "text-charcoal"
-                       }`}>
-                          ₹{p.price}
+                       <td className="px-6 py-8">
+                          <div className="space-y-2">
+                             <div className={`font-display text-2xl font-bold italic ${isDark ? "text-white" : "text-charcoal"}`}>
+                                ₹{p.price}
+                             </div>
+                             {p.originalPrice && (
+                               <div className="flex items-center gap-3">
+                                 <span className="text-[14px] font-bold line-through opacity-60">₹{p.originalPrice}</span>
+                                 <span className="text-[14px] font-extrabold text-rose-500">-{p.discount}%</span>
+                               </div>
+                             )}
+                          </div>
                        </td>
-                       <td className="px-6 py-6 text-right">
-                          <div className="flex items-center justify-end gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity duration-300">
+                       <td className="px-6 py-8">
+                          <div className="space-y-2">
+                             <div className="flex items-center gap-2 text-gold">
+                                <span className="text-lg font-bold">{p.rating}</span>
+                                <span className="text-[14px] opacity-100">★</span>
+                             </div>
+                             <div className={`text-[13px] font-extrabold uppercase tracking-widest ${isDark ? "text-white/60" : "text-charcoal/80"}`}>
+                               {p.reviewCount?.toLocaleString()} Reviews
+                             </div>
+                          </div>
+                       </td>
+                       <td className="px-6 py-8">
+                          <div className="flex flex-wrap gap-2.5">
+                             {p.isNew && (
+                               <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[12px] font-extrabold uppercase tracking-widest border border-emerald-500/30 shadow-sm">New</span>
+                             )}
+                             {p.isTrending && (
+                               <span className="px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-500 text-[12px] font-extrabold uppercase tracking-widest border border-indigo-500/30 shadow-sm">Trending</span>
+                             )}
+                             {p.isBestSeller && (
+                               <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[12px] font-extrabold uppercase tracking-widest border border-gold/30 shadow-sm">Elite</span>
+                             )}
+                          </div>
+                       </td>
+                       <td className="px-6 py-8 text-right pr-8">
+                          <div className="flex items-center justify-end gap-3">
                              <button 
                                 onClick={() => openEditModal(p)}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
                                   isDark ? "bg-white/5 text-white/40 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold hover:bg-gold/10"
                                 }`}
                              >
-                                <Edit2 size={16} />
+                                <Edit2 size={18} />
                              </button>
                              <button 
                                 onClick={() => handleDelete(p._id || p.id)}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
                                   isDark ? "bg-white/5 text-white/40 hover:text-rose-light hover:bg-rose-light/10" : "bg-charcoal/5 text-charcoal/40 hover:text-rose-brand hover:bg-rose-brand/10"
                                 }`}
                              >
-                                <Trash2 size={16} />
+                                <Trash2 size={18} />
                              </button>
                           </div>
                        </td>
@@ -222,8 +265,8 @@ const AdminProducts = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className={`px-8 py-20 text-center font-body text-sm uppercase tracking-widest italic transition-colors ${
-                      isDark ? "text-white/20" : "text-charcoal/60"
+                    <td colSpan={7} className={`px-8 py-24 text-center font-body text-base uppercase tracking-widest italic transition-colors ${
+                      isDark ? "text-white/40" : "text-charcoal/70"
                     }`}>
                       No rituals found in the sanctuary repository.
                     </td>

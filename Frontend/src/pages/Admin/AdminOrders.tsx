@@ -20,12 +20,15 @@ import {
 import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import OrderRitualModal from "@/components/Admin/OrderRitualModal.tsx";
 
 const AdminOrders = () => {
   const { isDark } = useAdminTheme();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchOrders = async () => {
     setLoading(true);
@@ -65,6 +68,11 @@ const AdminOrders = () => {
     }
   };
 
+  const openOrderModal = (order: any) => {
+    setSelectedOrder(order);
+    setIsModalOpen(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "delivered": return isDark ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : "text-emerald-600 bg-emerald-50 border-emerald-100";
@@ -73,6 +81,62 @@ const AdminOrders = () => {
       case "processing": return isDark ? "text-gold bg-gold/10 border-gold/20" : "text-gold bg-gold/5 border-gold/20";
       default: return isDark ? "text-white/40 bg-white/5 border-white/10" : "text-charcoal/40 bg-charcoal/5 border-charcoal/10";
     }
+  };
+
+  const StatusStepper = ({ currentStatus }: { currentStatus: string }) => {
+    const steps = [
+      { id: 'Processing', icon: Clock },
+      { id: 'Shipped', icon: Truck },
+      { id: 'Delivered', icon: CheckCircle }
+    ];
+    
+    const currentIndex = steps.findIndex(s => s.id.toLowerCase() === currentStatus.toLowerCase());
+    const isCancelled = currentStatus.toLowerCase() === 'cancelled';
+
+    if (isCancelled) {
+      return (
+        <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] border shadow-sm ${getStatusColor('cancelled')}`}>
+          Cancelled
+        </span>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-1.5">
+        {steps.map((step, index) => {
+          const StepIcon = step.icon;
+          const isActive = index <= currentIndex;
+          const isCurrent = index === currentIndex;
+          
+          let colorClass = "";
+          if (isActive) {
+            if (step.id === 'Delivered') colorClass = isDark ? "bg-emerald-400 border-emerald-400 text-charcoal" : "bg-emerald-500 border-emerald-500 text-white";
+            else if (step.id === 'Shipped') colorClass = isDark ? "bg-sky-400 border-sky-400 text-charcoal" : "bg-sky-500 border-sky-500 text-white";
+            else colorClass = "bg-gold border-gold text-charcoal";
+          } else {
+            colorClass = isDark ? "bg-white/10 border-white/10 text-white/30" : "bg-charcoal/10 border-charcoal/10 text-charcoal/30";
+          }
+
+          return (
+            <React.Fragment key={step.id}>
+              <div 
+                className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-500 ${colorClass} ${isCurrent ? "scale-110 shadow-lg" : "scale-100"}`}
+                title={step.id}
+              >
+                <StepIcon size={14} strokeWidth={isActive ? 3 : 2} />
+              </div>
+              {index < steps.length - 1 && (
+                <div className={`w-4 h-[2px] rounded-full transition-all duration-700 ${
+                  index < currentIndex 
+                    ? (steps[index + 1].id === 'Shipped' ? 'bg-sky-400/70' : 'bg-emerald-400/70') 
+                    : (isDark ? 'bg-white/10' : 'bg-charcoal/10')
+                }`} />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    );
   };
 
   const filteredOrders = orders.filter(o => 
@@ -126,13 +190,13 @@ const AdminOrders = () => {
       </div>
 
       {/* Order Table Ritual */}
-      <div className={`backdrop-blur-3xl border rounded-[3rem] overflow-hidden shadow-2xl transition-all duration-700 ${
+      <div className={`backdrop-blur-3xl border rounded-[3rem] shadow-2xl transition-all duration-700 ${
         isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-             <thead className={`border-b font-body text-xs font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${
-               isDark ? "bg-white/[0.02] border-white/5 text-white/30" : "bg-charcoal/[0.02] border-charcoal/5 text-charcoal/70"
+             <thead className={`border-b font-body text-[13px] font-extrabold uppercase tracking-[0.3em] transition-colors duration-700 ${
+               isDark ? "bg-white/[0.04] border-white/12 text-white/70" : "bg-charcoal/[0.04] border-charcoal/12 text-charcoal/90"
              }`}>
                 <tr>
                    <th className="px-8 py-6">Reference</th>
@@ -140,21 +204,21 @@ const AdminOrders = () => {
                    <th className="px-6 py-6">Total Amount</th>
                    <th className="px-6 py-6">Status</th>
                    <th className="px-6 py-6">Payment</th>
-                   <th className="px-6 py-6 text-right">Rituals</th>
+                   <th className="px-6 py-6 text-right pr-12">Actions</th>
                 </tr>
              </thead>
              <tbody className={`divide-y transition-colors duration-700 ${
-               isDark ? "divide-white/5" : "divide-charcoal/5"
+               isDark ? "divide-white/10" : "divide-charcoal/10"
              }`}>
                 {loading ? (
-                  Array(5).fill(0).map((_, i) => (
+                   Array(5).fill(0).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-8 py-6"><div className="h-6 w-32 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-8 w-24 bg-white/5 rounded-full" /></td>
-                      <td className="px-6 py-6"><div className="h-6 w-20 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-8 w-8 ml-auto bg-white/5 rounded-full" /></td>
+                      <td className="px-8 py-8"><div className="h-6 w-32 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-10 w-32 bg-white/5 rounded-full" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-20 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-10 w-10 ml-auto bg-white/5 rounded-full" /></td>
                     </tr>
                   ))
                 ) : filteredOrders.length > 0 ? (
@@ -163,81 +227,89 @@ const AdminOrders = () => {
                       key={o._id || o.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="group/row hover:bg-white/[0.02] transition-colors"
+                      className="group/row hover:bg-white/[0.03] transition-colors"
                     >
-                       <td className="px-8 py-6">
-                          <div className="flex items-center gap-3">
-                             <div className={`w-10 h-10 rounded-full flex items-center justify-center text-gold/40 border transition-colors ${
-                               isDark ? "bg-white/5 border-white/5" : "bg-charcoal/5 border-charcoal/5"
+                       <td className="px-8 py-8">
+                          <div className="flex items-center gap-4">
+                             <div className={`w-12 h-12 rounded-full flex items-center justify-center text-gold border transition-colors ${
+                               isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
                              }`}>
-                                <Package size={16} />
+                                <Package size={18} />
                              </div>
                              <div>
-                                <h4 className={`text-base font-bold transition-colors group-hover/row:text-gold ${
+                                <h4 className={`text-[15px] font-extrabold transition-colors group-hover/row:text-gold ${
                                   isDark ? "text-white" : "text-charcoal"
                                 }`}>{o.orderNumber}</h4>
-                                <p className={`text-\[11px\] font-bold uppercase tracking-widest transition-colors ${
-                                  isDark ? "text-white/20" : "text-charcoal/60"
+                                <p className={`text-[12px] font-extrabold uppercase tracking-widest transition-colors ${
+                                  isDark ? "text-white/60" : "text-charcoal/80"
                                 }`}>{o.createdAt}</p>
                              </div>
                           </div>
                        </td>
-                       <td className="px-6 py-6">
-                          <div className="flex flex-col">
-                             <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${
+                       <td className="px-6 py-8">
+                          <div className="flex flex-col gap-1">
+                             <span className={`text-[15px] font-extrabold uppercase tracking-wider transition-colors ${
                                isDark ? "text-white" : "text-charcoal"
                              }`}>{o.userMobile}</span>
-                             <span className={`text-\[11px\] font-medium uppercase tracking-widest italic transition-colors ${
-                               isDark ? "text-white/20" : "text-charcoal/60"
+                             <span className={`text-[13px] font-bold uppercase tracking-widest italic transition-colors ${
+                               isDark ? "text-white/60" : "text-charcoal/80"
                              }`}>{o.shippingAddress?.fullName || "Mysterious Seeker"}</span>
                           </div>
                        </td>
-                       <td className={`px-6 py-6 font-display text-lg font-medium italic transition-colors ${
+                       <td className={`px-6 py-8 font-display text-xl font-bold italic transition-colors ${
                          isDark ? "text-white" : "text-charcoal"
                        }`}>
                           ₹{o.totalAmount}
                        </td>
-                       <td className="px-6 py-6">
-                          <span className={`px-4 py-1.5 rounded-full text-\[11px\] font-bold uppercase tracking-[0.2em] border shadow-sm ${getStatusColor(o.status)}`}>
-                             {o.status}
-                          </span>
+                       <td className="px-6 py-8">
+                           <StatusStepper currentStatus={o.status} />
                        </td>
-                       <td className="px-6 py-6">
+                       <td className="px-6 py-8">
                           <div className="flex items-center gap-2">
-                             <CreditCard size={14} className={o.paymentStatus === 'SUCCESS' ? "text-emerald-400" : (isDark ? "text-white/20" : "text-charcoal/40")} />
-                             <span className={`text-xs font-bold uppercase tracking-widest ${o.paymentStatus === 'SUCCESS' ? "text-emerald-400" : (isDark ? "text-white/20" : "text-charcoal/40")}`}>
+                             <CreditCard size={18} className={o.paymentStatus === 'SUCCESS' ? "text-emerald-400" : (isDark ? "text-white/40" : "text-charcoal/60")} />
+                             <span className={`text-[13px] font-extrabold uppercase tracking-widest ${o.paymentStatus === 'SUCCESS' ? "text-emerald-400" : (isDark ? "text-white/80" : "text-charcoal/80")}`}>
                                 {o.paymentStatus}
                              </span>
                           </div>
                        </td>
-                       <td className="px-6 py-6 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                             <button className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-lg ${
+                       <td className="px-6 py-8 text-right pr-8">
+                          <div className="flex items-center justify-end gap-3">
+                             <button 
+                                onClick={() => openOrderModal(o)}
+                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
                                isDark ? "bg-white/5 text-white/40 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold hover:bg-gold/10"
                              }`}>
-                                <Eye size={16} />
+                                <Eye size={18} />
                              </button>
-                             <div className="relative group/actions ml-2">
-                                <button className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                             <div className="relative group/actions">
+                                <button className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
                                   isDark ? "bg-white/5 text-white/40 hover:text-white" : "bg-charcoal/5 text-charcoal/40 hover:text-charcoal"
                                 }`}>
-                                   <MoreVertical size={16} />
+                                   <MoreVertical size={18} />
                                 </button>
-                                <div className={`absolute right-0 top-full mt-2 w-48 border rounded-2xl shadow-2xl p-2 opacity-0 scale-95 pointer-events-none group-hover/actions:opacity-100 group-hover/actions:scale-100 group-hover/actions:pointer-events-auto transition-all duration-300 z-50 ${
+                                <div className={`absolute right-0 top-full mt-3 w-56 border rounded-2xl shadow-2xl p-2.5 opacity-0 scale-95 pointer-events-none group-hover/actions:opacity-100 group-hover/actions:scale-100 group-hover/actions:pointer-events-auto transition-all duration-300 z-50 ${
                                   isDark ? "bg-charcoal border-white/10" : "bg-white border-charcoal/10"
                                 }`}>
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Processing')} className="w-full text-left px-4 py-2 text-xs font-bold text-white/40 hover:text-gold hover:bg-white/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3">
-                                      <Clock size={14} /> Processing
+                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Processing')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-gold hover:bg-gold/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
+                                     isDark ? "text-white/60" : "text-charcoal/80"
+                                    }`}>
+                                      <Clock size={15} /> Processing
                                    </button>
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Shipped')} className="w-full text-left px-4 py-2 text-xs font-bold text-white/40 hover:text-sky-400 hover:bg-white/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3">
-                                      <Truck size={14} /> Shipped
+                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Shipped')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-sky-400 hover:bg-sky-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
+                                     isDark ? "text-white/60" : "text-charcoal/80"
+                                    }`}>
+                                      <Truck size={15} /> Shipped
                                    </button>
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Delivered')} className="w-full text-left px-4 py-2 text-xs font-bold text-white/40 hover:text-emerald-400 hover:bg-white/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3">
-                                      <CheckCircle size={14} /> Delivered
+                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Delivered')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-emerald-400 hover:bg-emerald-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
+                                     isDark ? "text-white/60" : "text-charcoal/80"
+                                    }`}>
+                                      <CheckCircle size={15} /> Delivered
                                    </button>
-                                   <div className="h-[1px] bg-white/5 my-2" />
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Cancelled')} className="w-full text-left px-4 py-2 text-xs font-bold text-white/40 hover:text-rose-400 hover:bg-white/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3">
-                                      <XCircle size={14} /> Cancel Ritual
+                                   <div className={`h-[1px] my-2.5 ${isDark ? "bg-white/5" : "bg-charcoal/5"}`} />
+                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Cancelled')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-rose-400 hover:bg-rose-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
+                                     isDark ? "text-white/60" : "text-charcoal/80"
+                                    }`}>
+                                      <XCircle size={15} /> Cancel Ritual
                                    </button>
                                 </div>
                              </div>
@@ -247,8 +319,8 @@ const AdminOrders = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className={`px-8 py-20 text-center font-body text-sm uppercase tracking-widest italic transition-colors ${
-                      isDark ? "text-white/20" : "text-charcoal/60"
+                    <td colSpan={6} className={`px-8 py-24 text-center font-body text-base font-extrabold uppercase tracking-widest italic transition-colors ${
+                      isDark ? "text-white/40" : "text-charcoal/70"
                     }`}>
                       No order rituals recorded in the repository.
                     </td>
@@ -256,6 +328,7 @@ const AdminOrders = () => {
                 )}
              </tbody>
           </table>
+
         </div>
 
         {/* Footer Ritual */}
@@ -275,6 +348,12 @@ const AdminOrders = () => {
            </div>
         </div>
       </div>
+      <OrderRitualModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        order={selectedOrder}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
   );
 };

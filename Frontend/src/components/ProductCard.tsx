@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { Product } from "@/data/products";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
+import { getAssetUrl } from "@/lib/api";
 
 interface ProductCardProps {
   product: Product;
@@ -72,7 +73,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
       <Link to={`/product/${productId}`}>
         <div className="aspect-square overflow-hidden bg-secondary relative">
           <img
-            src={product.image}
+            src={getAssetUrl(product.image)}
             alt={product.name}
             onError={(e) => {
               const target = e.target as HTMLImageElement;

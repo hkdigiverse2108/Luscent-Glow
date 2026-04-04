@@ -204,7 +204,11 @@ const TrackOrder = () => {
                     </p>
                   </div>
                   <button 
-                    onClick={() => setIsTracking(false)}
+                    onClick={() => {
+                      setIsTracking(false);
+                      setOrderId("");
+                      setEmail("");
+                    }}
                     className="p-3 md:p-4 rounded-full border border-gold/10 hover:bg-gold/5 transition-colors group"
                   >
                     <RefreshCw size={20} className="text-gold group-hover:rotate-180 transition-transform duration-700" />

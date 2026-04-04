@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
 import { 
+  Layout,
   LayoutDashboard, 
   ShoppingBag, 
   ClipboardList, 
@@ -10,15 +11,20 @@ import {
   Sparkles,
   ChevronRight,
   MessageSquare,
+  Palette,
   Sun,
-  Moon
+  Moon,
+  Ticket,
+  Package,
+  Phone,
+  HelpCircle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
 
 const AdminLayout = () => {
-  const { logout } = useAuth();
+  const { adminLogout } = useAuth();
   const location = useLocation();
   const { theme, isDark, toggleTheme } = useAdminTheme();
 
@@ -28,6 +34,12 @@ const AdminLayout = () => {
     { icon: ClipboardList, label: "Orders", path: "/admin/orders" },
     { icon: Users, label: "Subscribers", path: "/admin/newsletter" },
     { icon: MessageSquare, label: "Inquiries", path: "/admin/inquiries" },
+    { icon: Layout, label: "Header", path: "/admin/branding" },
+    { icon: Ticket, label: "Gift Cards", path: "/admin/gift-cards" },
+    { icon: Package, label: "Bulk Orders", path: "/admin/bulk-orders" },
+    { icon: Sparkles, label: "About Us", path: "/admin/about" },
+    { icon: Phone, label: "Contact Us", path: "/admin/contact" },
+    { icon: HelpCircle, label: "FAQ", path: "/admin/faq" },
     { icon: Settings, label: "Settings", path: "/admin/settings" },
   ];
 
@@ -67,8 +79,8 @@ const AdminLayout = () => {
               }`}>
                 Luscent <span className="text-gold">Glow</span>
               </h1>
-              <p className={`text-[11px] font-bold uppercase tracking-[0.4em] -mt-1 ml-0.5 transition-colors duration-700 ${
-                isDark ? "text-white/30" : "text-charcoal/60"
+              <p className={`text-[14px] font-extrabold uppercase tracking-[0.45em] -mt-1 ml-0.5 transition-colors duration-700 ${
+                isDark ? "text-white/70" : "text-charcoal/90"
               }`}>Sanctuary</p>
             </div>
           </Link>
@@ -82,8 +94,8 @@ const AdminLayout = () => {
               : "bg-gold/10 text-gold border border-gold/30 shadow-gold/5 shadow-lg";
             
             const inactiveClass = isDark
-              ? "text-white/30 hover:text-white hover:bg-white/5"
-              : "text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5";
+              ? "text-white/50 hover:text-white hover:bg-white/5"
+              : "text-charcoal/90 hover:text-indigo-600 hover:bg-charcoal/5";
 
             return (
               <Link 
@@ -94,8 +106,8 @@ const AdminLayout = () => {
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <item.icon size={18} className={isActive ? "text-gold" : "text-inherit"} />
-                  <span className="text-[0.95rem] font-bold tracking-wide uppercase">{item.label}</span>
+                  <item.icon size={20} className={isActive ? "text-gold" : "text-inherit"} />
+                  <span className="text-[1.05rem] font-extrabold tracking-wide uppercase">{item.label}</span>
                 </div>
                 {isActive && (
                   <motion.div layoutId="activeInd" className="text-gold">
@@ -130,7 +142,7 @@ const AdminLayout = () => {
           isDark ? "border-white/5" : "border-charcoal/5"
         }`}>
           <button 
-            onClick={logout}
+            onClick={adminLogout}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-500 group ${
               isDark 
               ? "text-white/30 hover:text-rose-light hover:bg-rose-light/5" 

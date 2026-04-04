@@ -40,6 +40,12 @@ import AdminNewsletter from "./pages/Admin/AdminNewsletter.tsx";
 import AdminInquiries from "./pages/Admin/AdminInquiries.tsx";
 import AdminSettings from "./pages/Admin/AdminSettings.tsx";
 import AdminLogin from "./pages/Admin/AdminLogin.tsx";
+import AdminBranding from "./pages/Admin/AdminBranding.tsx";
+import AdminGiftCards from "./pages/Admin/AdminGiftCards.tsx";
+import AdminBulkOrders from "./pages/Admin/AdminBulkOrders.tsx";
+import AdminAbout from "./pages/Admin/AdminAbout.tsx";
+import AdminContact from "./pages/Admin/AdminContact.tsx";
+import AdminFAQ from "./pages/Admin/AdminFAQ.tsx";
 import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute.tsx";
 import { AdminThemeProvider } from "./context/AdminThemeContext.tsx";
 
@@ -98,6 +104,12 @@ const App = () => (
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="newsletter" element={<AdminNewsletter />} />
                     <Route path="inquiries" element={<AdminInquiries />} />
+                    <Route path="branding" element={<AdminBranding />} />
+                    <Route path="gift-cards" element={<AdminGiftCards />} />
+                    <Route path="bulk-orders" element={<AdminBulkOrders />} />
+                    <Route path="about" element={<AdminAbout />} />
+                    <Route path="contact" element={<AdminContact />} />
+                    <Route path="faq" element={<AdminFAQ />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
                 </Route>

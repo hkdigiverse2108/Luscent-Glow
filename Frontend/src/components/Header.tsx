@@ -6,9 +6,12 @@ import { categories, Product, products } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { toast } from "sonner";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext.tsx";
 import LogoutConfirmation from "./auth/LogoutConfirmation.tsx";
+import AdminCategoryModal from "./Header/AdminCategoryModal.tsx";
+import AdminBrandingModal from "./Header/AdminBrandingModal.tsx";
+import { Edit2, Plus, Settings } from "lucide-react";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -24,6 +27,19 @@ const Header = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+
+  // Dynamic Content State
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
+  const [branding, setBranding] = useState<any>({
+    logoText: "Luscent Glow",
+    logoImage: null,
+    useImage: false
+  });
+
+  // Admin UI State
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isBrandingModalOpen, setIsBrandingModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<any>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
@@ -60,7 +76,29 @@ const Header = () => {
         setFetchedProducts(products);
       }
     };
+
+    const fetchHeaderData = async () => {
+      try {
+        const [catRes, brandRes] = await Promise.all([
+          fetch(getApiUrl("/api/categories/")),
+          fetch(getApiUrl("/api/branding/"))
+        ]);
+
+        if (catRes.ok) {
+          const cats = await catRes.json();
+          if (cats.length > 0) setDynamicCategories(cats);
+        }
+        if (brandRes.ok) {
+          const brand = await brandRes.json();
+          setBranding(brand);
+        }
+      } catch (err) {
+        console.error("Error fetching header data:", err);
+      }
+    };
+
     fetchSearchData();
+    fetchHeaderData();
   }, []);
 
   useEffect(() => {
@@ -136,11 +174,31 @@ const Header = () => {
 
             {/* Logo and Shop by Category */}
             <div className="flex items-center gap-3 md:gap-4 lg:gap-14">
-              <Link to="/" className="flex items-center gap-1.5 md:gap-2 transform active:scale-95 transition-transform">
-                <h1 className="font-display text-[17px] xs:text-xl md:text-2xl lg:text-3xl font-semibold tracking-wide text-foreground whitespace-nowrap">
-                  Luscent <span className="text-gold">Glow</span>
-                </h1>
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link to="/" className="flex items-center transform active:scale-95 transition-transform group">
+                  {branding.useImage && branding.logoImage ? (
+                    <img 
+                      src={getAssetUrl(branding.logoImage)} 
+                      alt={branding.logoText} 
+                      className="h-8 md:h-10 lg:h-12 w-auto object-contain"
+                    />
+                  ) : (
+                    <h1 className="font-display text-[17px] xs:text-xl md:text-2xl lg:text-3xl font-semibold tracking-wide text-foreground whitespace-nowrap">
+                      {branding.logoText.split(' ')[0]} <span className="text-gold">{branding.logoText.split(' ').slice(1).join(' ')}</span>
+                    </h1>
+                  )}
+                </Link>
+                
+                {user?.isAdmin && (
+                  <button 
+                    onClick={() => setIsBrandingModalOpen(true)}
+                    className="p-1.5 rounded-full bg-gold/10 text-gold hover:bg-gold hover:text-white transition-all duration-500 shadow-sm"
+                    title="Edit Brand Identity"
+                  >
+                    <Settings size={12} />
+                  </button>
+                )}
+              </div>
 
               {/* Shop by Category Hover Dropdown — Hidden until scrolled (Header-2) */}
               <AnimatePresence>
@@ -155,19 +213,38 @@ const Header = () => {
                       Categories                 
                     </button>
                     
-                    <div className="absolute top-full -left-4 w-64 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-[100]">
-                      <div className="bg-white border border-border/80 shadow-2xl rounded-2xl overflow-hidden py-3">
+                    <div className="absolute top-full -left-4 w-66 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-[100]">
+                      <div className="bg-white border border-gold/10 shadow-ethereal rounded-2xl overflow-hidden py-3">
                         <div className="space-y-0.5">
-                          {categories.map((cat) => (
-                            <Link
-                              key={cat.slug}
-                              to={`/products?category=${cat.slug}`}
-                              className="block px-6 py-3 text-[11px] font-body font-bold text-charcoal/80 uppercase tracking-widest hover:text-gold hover:bg-gold/5 transition-all duration-300"
-                            >
-                              {cat.name}
-                            </Link>
+                          {dynamicCategories.map((cat) => (
+                            <div key={cat.slug} className="group/item relative flex items-center">
+                              <Link
+                                to={`/products?category=${cat.slug}`}
+                                className="flex-1 block px-6 py-3 text-[11px] font-body font-bold text-charcoal/80 uppercase tracking-widest hover:text-gold hover:bg-gold/5 transition-all duration-300"
+                              >
+                                {cat.name}
+                              </Link>
+                              {user?.isAdmin && (
+                                <button 
+                                  onClick={() => { setSelectedCategory(cat); setIsCategoryModalOpen(true); }}
+                                  className="absolute right-4 p-1.5 opacity-0 group-hover/item:opacity-100 hover:text-gold transition-all"
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                              )}
+                            </div>
                           ))}
                         </div>
+                        {user?.isAdmin && (
+                          <div className="border-t border-gold/10 mt-2 pt-2 px-6">
+                            <button 
+                              onClick={() => { setSelectedCategory(null); setIsCategoryModalOpen(true); }}
+                              className="w-full flex items-center justify-center gap-2 py-2 border border-dashed border-gold/30 text-[9px] font-bold text-gold uppercase tracking-[0.2em] rounded-xl hover:bg-gold/5 transition-all"
+                            >
+                              <Plus size={12} /> Add Category
+                            </button>
+                          </div>
+                        )}
                         <div className="border-t border-border/60 mt-3 pt-2">
                           <Link
                             to="/products"
@@ -206,7 +283,7 @@ const Header = () => {
                     </div>
                     <div className="w-9 h-9 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-charcoal transition-all duration-500 shadow-sm overflow-hidden">
                       {user.profilePicture ? (
-                        <img src={user.profilePicture} alt={user.fullName} className="w-full h-full object-cover" />
+                        <img src={getAssetUrl(user.profilePicture)} alt={user.fullName} className="w-full h-full object-cover" />
                       ) : (
                         <span className="font-display font-medium text-sm">{user.fullName.charAt(0).toUpperCase()}</span>
                       )}
@@ -308,7 +385,7 @@ const Header = () => {
                               >
                                 <div className="w-16 h-16 rounded-xl overflow-hidden bg-secondary flex-shrink-0">
                                   <img 
-                                    src={product.image || "/placeholder-product.jpg"} 
+                                    src={getAssetUrl(product.image) || "/placeholder-product.jpg"} 
                                     alt={product.name || "Product"} 
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                                   />
@@ -355,15 +432,23 @@ const Header = () => {
             >
               <div className="container mx-auto px-4">
                 <div className="flex items-center justify-center gap-8 py-2">
-                  {categories.map((cat) => (
+                  {dynamicCategories.map((cat) => (
                     <Link
                       key={cat.slug}
                       to={`/products?category=${cat.slug}`}
-                      className="text-xs font-body font-medium text-muted-foreground hover:text-gold transition-colors tracking-wider uppercase"
+                      className="text-xs font-body font-medium text-muted-foreground hover:text-gold transition-colors tracking-wider uppercase flex items-center gap-2"
                     >
                       {cat.name}
                     </Link>
                   ))}
+                  {user?.isAdmin && (
+                     <button 
+                       onClick={() => { setSelectedCategory(null); setIsCategoryModalOpen(true); }}
+                       className="p-1 rounded-full bg-gold/10 text-gold hover:bg-gold hover:text-white transition-all shadow-sm"
+                     >
+                       <Plus size={12} />
+                     </button>
+                  )}
                   <Link
                     to="/offers"
                     className="text-sm font-body font-bold text-gold hover:text-gold/80 transition-all tracking-wide uppercase px-4 py-2 bg-gold/5 rounded-full border border-gold/20"
@@ -427,7 +512,7 @@ const Header = () => {
                     <div className="flex items-center gap-4 p-4 bg-gold/5 rounded-[1.5rem] border border-gold/10 overflow-hidden">
                       <div className="w-12 h-12 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold shadow-sm overflow-hidden flex-shrink-0 animate-in fade-in zoom-in duration-500">
                         {user.profilePicture ? (
-                          <img src={user.profilePicture} alt={user.fullName} className="w-full h-full object-cover" />
+                          <img src={getAssetUrl(user.profilePicture)} alt={user.fullName} className="w-full h-full object-cover" />
                         ) : (
                           <span className="font-display font-medium text-lg">{user.fullName.charAt(0).toUpperCase()}</span>
                         )}
@@ -463,18 +548,27 @@ const Header = () => {
                   <div>
                     <p className="text-[10px] font-bold text-gold uppercase tracking-[0.3em] mb-5">Shop By Category</p>
                     <div className="grid grid-cols-1 gap-1">
-                      {categories.map((cat) => (
-                        <Link
-                          key={cat.slug}
-                          to={`/products?category=${cat.slug}`}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center justify-between py-4 px-4 text-base font-body font-medium text-foreground hover:bg-gold/5 rounded-2xl transition-all border-b border-border/30 last:border-0 active:bg-gold/10"
-                        >
-                          {cat.name}
-                          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
-                            <ChevronDown size={14} className="-rotate-90 text-muted-foreground" />
-                          </div>
-                        </Link>
+                      {dynamicCategories.map((cat) => (
+                        <div key={cat.slug} className="flex items-center gap-3">
+                          <Link
+                            to={`/products?category=${cat.slug}`}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex-1 flex items-center justify-between py-4 px-4 text-base font-body font-medium text-foreground hover:bg-gold/5 rounded-2xl transition-all border-b border-border/30 last:border-0 active:bg-gold/10"
+                          >
+                            {cat.name}
+                            <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                              <ChevronDown size={14} className="-rotate-90 text-muted-foreground" />
+                            </div>
+                          </Link>
+                          {user?.isAdmin && (
+                            <button 
+                              onClick={() => { setMobileMenuOpen(false); setSelectedCategory(cat); setIsCategoryModalOpen(true); }}
+                              className="p-4 text-gold"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                          )}
+                        </div>
                       ))}
                       <Link
                         to="/products"
@@ -518,6 +612,52 @@ const Header = () => {
           </>
         )}
       </AnimatePresence>
+
+      {/* Admin CRDU Modals */}
+      <AdminCategoryModal 
+        isOpen={isCategoryModalOpen}
+        onClose={() => setIsCategoryModalOpen(false)}
+        category={selectedCategory}
+        onSuccess={() => {
+          // Trigger re-fetch or manual update
+          const fetchHeaderData = async () => {
+            try {
+              const [catRes, brandRes] = await Promise.all([
+                fetch(getApiUrl("/api/categories/")),
+                fetch(getApiUrl("/api/branding/"))
+              ]);
+      
+              if (catRes.ok) {
+                const cats = await catRes.json();
+                if (cats.length > 0) setDynamicCategories(cats);
+              }
+              if (brandRes.ok) {
+                const brand = await brandRes.json();
+                setBranding(brand);
+              }
+            } catch (err) {
+              console.error("Error fetching header data:", err);
+            }
+          };
+          fetchHeaderData();
+        }}
+      />
+
+      <AdminBrandingModal 
+        isOpen={isBrandingModalOpen}
+        onClose={() => setIsBrandingModalOpen(false)}
+        branding={branding}
+        onSuccess={() => {
+           const fetchBranding = async () => {
+             const res = await fetch(getApiUrl("/api/branding/"));
+             if (res.ok) {
+               const data = await res.json();
+               setBranding(data);
+             }
+           };
+           fetchBranding();
+        }}
+      />
     </>
   );
 };

@@ -3,20 +3,24 @@ import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { Product } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
+import { getApiUrl } from "@/lib/api";
 
 const TrendingSection = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [trending, setTrending] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const response = await fetch("/api/products/");
+        const response = await fetch(getApiUrl("/api/products/"));
         if (response.ok) {
           const data = await response.json();
-          if (data && data.length > 0) {
-            setTrending(data.filter((p: Product) => p.isTrending));
+          const filtered = data.filter((p: Product) => p.isTrending);
+          
+          if (filtered.length > 0) {
+            setTrending(filtered);
           } else {
             const { products } = await import("@/data/products");
             setTrending(products.filter(p => p.isTrending));
@@ -35,6 +39,27 @@ const TrendingSection = () => {
     };
     fetchTrending();
   }, []);
+
+  // Autoscroll Orchestration
+  useEffect(() => {
+    if (loading || trending.length === 0 || isPaused) return;
+
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        
+        // If we've reached near the end of the scrollable content, reset to start
+        if (scrollLeft + clientWidth >= scrollWidth - 20) {
+          scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+        } else {
+          // Scroll by one card width (roughly)
+          scrollRef.current.scrollBy({ left: 320, behavior: "smooth" });
+        }
+      }
+    }, 4000); // Relaxed 4s interval for a premium feel
+
+    return () => clearInterval(interval);
+  }, [loading, trending, isPaused]);
 
   const scroll = (dir: "left" | "right") => {
     if (scrollRef.current) {
@@ -104,6 +129,8 @@ const TrendingSection = () => {
 
           <div
             ref={scrollRef}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
             className="flex gap-4 md:gap-8 overflow-x-auto scrollbar-hide pb-8 -mx-4 px-4 md:-mx-6 md:px-6 snap-x snap-mandatory min-h-[400px] md:min-h-[450px]"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >

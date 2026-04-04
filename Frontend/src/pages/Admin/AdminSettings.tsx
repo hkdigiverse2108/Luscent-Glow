@@ -106,36 +106,36 @@ const AdminSettings = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className={`relative overflow-hidden backdrop-blur-3xl border rounded-[3rem] p-10 transition-all duration-700 ${
-              isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/10 shadow-charcoal/5"
+            className={`relative overflow-hidden backdrop-blur-3xl border rounded-[3rem] p-12 transition-all duration-700 ${
+              isDark ? "bg-charcoal/40 border-white/12 shadow-black/50" : "bg-white border-charcoal/12 shadow-charcoal/15"
             }`}
           >
             {/* Group Header */}
-            <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10 border-b pb-10 transition-colors duration-700 ${
-              isDark ? 'border-white/5' : 'border-charcoal/5'
-            }">
-              <div className="w-16 h-16 rounded-[1.5rem] bg-indigo-500/10 flex items-center justify-center text-indigo-500 shadow-lg">
-                <group.icon size={30} />
+            <div className={`flex flex-col md:flex-row md:items-center gap-8 mb-12 border-b pb-12 transition-colors duration-700 ${
+              isDark ? 'border-white/12' : 'border-charcoal/12'
+            }`}>
+              <div className="w-20 h-20 rounded-[2.2rem] bg-indigo-500/10 flex items-center justify-center text-indigo-500 shadow-2xl">
+                <group.icon size={40} />
               </div>
-              <div className="space-y-1">
-                <h3 className={`text-2xl font-bold uppercase tracking-tight transition-colors duration-700 ${
+              <div className="space-y-2">
+                <h3 className={`text-4xl font-extrabold uppercase tracking-tight transition-colors duration-700 ${
                   isDark ? "text-white" : "text-charcoal"
                 }`}>{group.title}</h3>
-                <p className={`text-sm font-medium transition-colors duration-700 ${
-                  isDark ? "text-white/30" : "text-charcoal/70"
+                <p className={`text-lg font-extrabold transition-colors duration-700 ${
+                  isDark ? "text-white/60" : "text-charcoal/80"
                 }`}>{group.description}</p>
               </div>
             </div>
 
             {/* Group Settings */}
-            <div className="space-y-10">
+            <div className="space-y-12">
               {group.settings.map((setting) => (
-                <div key={setting.label} className="flex flex-col md:flex-row md:items-center justify-between gap-6 group/item">
-                  <div className="space-y-1">
-                    <p className={`text-xs font-bold uppercase tracking-[0.2em] transition-colors duration-700 ${
-                      isDark ? "text-slate-500" : "text-charcoal/70"
+                <div key={setting.label} className="flex flex-col md:flex-row md:items-center justify-between gap-8 group/item">
+                  <div className="space-y-2">
+                    <p className={`text-[14px] font-extrabold uppercase tracking-[0.25em] transition-colors duration-700 ${
+                      isDark ? "text-slate-300" : "text-indigo-600"
                     }`}>{setting.label}</p>
-                    <p className={`text-lg font-bold uppercase tracking-widest transition-colors duration-700 ${
+                    <p className={`text-2xl font-extrabold uppercase tracking-widest transition-colors duration-700 ${
                       isDark ? "text-white" : "text-charcoal group-hover/item:text-indigo-600"
                     }`}>{setting.description}</p>
                   </div>
@@ -150,24 +150,24 @@ const AdminSettings = () => {
       </div>
 
       {/* System Status Footer */}
-      <div className={`mt-12 p-8 border rounded-[2rem] flex items-center justify-between transition-all duration-700 ${
-        isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
+      <div className={`mt-20 p-12 border rounded-[4rem] flex items-center justify-between transition-all duration-700 ${
+        isDark ? "bg-white/5 border-white/12 shadow-black/50" : "bg-charcoal/5 border-charcoal/12 shadow-charcoal/10"
       }`}>
-           <div className="flex items-center gap-4">
-             <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold">
-               <Sparkles size={20} />
+           <div className="flex items-center gap-8">
+             <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center text-gold shadow-2xl">
+               <Sparkles size={32} />
              </div>
              <div>
-               <p className={`text-\[11px\] font-bold uppercase tracking-widest transition-colors ${
-                 isDark ? "text-white/30" : "text-charcoal/60"
-               }`}>Systemic Health</p>
-               <p className={`text-xs font-bold uppercase tracking-widest transition-colors ${
+               <p className={`text-[14px] font-extrabold uppercase tracking-[0.3em] transition-colors ${
+                 isDark ? "text-white/50" : "text-charcoal/60"
+               }`}>Systemic Health Assessment</p>
+               <p className={`text-2xl font-extrabold uppercase tracking-[0.1em] transition-colors ${
                  isDark ? "text-white" : "text-charcoal"
-               }`}>Optimal Performance</p>
+               }`}>Optimal Industrial Performance</p>
              </div>
            </div>
-        <button className="flex items-center gap-2 text-xs font-bold text-gold uppercase tracking-widest hover:underline decoration-gold/30 underline-offset-4 transition-all">
-          View Detailed Logs <ExternalLink size={12} />
+        <button className="flex items-center gap-4 text-base font-extrabold text-gold uppercase tracking-[0.2em] hover:underline decoration-gold/40 underline-offset-8 transition-all">
+          View Detailed Logs Archive <ExternalLink size={20} />
         </button>
       </div>
     </div>

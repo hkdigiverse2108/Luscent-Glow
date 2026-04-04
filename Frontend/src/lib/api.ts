@@ -7,23 +7,31 @@
  */
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+const BASE_URL = API_BASE.includes('http') 
+  ? API_BASE.split('/api')[0] 
+  : ''; // Relative fallback
 
 /**
  * Builds a dynamic URL for the API.
  * @param path The relative path to the endpoint (e.g., "/auth/signin")
- * @returns The full URL string
  */
 export const getApiUrl = (path: string): string => {
-  // Ensure the base doesn't end with a slash if the path starts with one
+  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  if (API_BASE.startsWith('/')) return `${API_BASE}${cleanPath}`;
+  return `${API_BASE.replace(/\/$/, '')}${cleanPath}`;
+};
+
+/**
+ * Builds a dynamic URL for static assets (uploads).
+ */
+export const getAssetUrl = (path: string): string => {
+  if (!path) return "/placeholder.svg";
+  if (path.startsWith('http')) return path; // Already absolute
+  
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
   
-  // If API_BASE is relative (starts with /), just return concatenated strings
-  if (API_BASE.startsWith('/')) {
-    return `${API_BASE}${cleanPath}`;
-  }
-  
-  // If it's a full URL from .env, ensure no double slashes
-  return `${API_BASE.replace(/\/$/, '')}${cleanPath}`;
+  // Since we moved assets to Frontend/public/uploads, they are served relative to the frontend origin
+  return cleanPath;
 };
 
 /**

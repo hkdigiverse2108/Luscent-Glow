@@ -281,6 +281,38 @@ class GiftCardModel(BaseModel):
             }
         }
 
+class UpdateGiftCardModel(BaseModel):
+    """
+    Schema for updating gift card details.
+    """
+    currentBalance: Optional[float] = None
+    recipientName: Optional[str] = None
+    recipientMobile: Optional[str] = None
+    message: Optional[str] = None
+    theme: Optional[str] = None
+    isActive: Optional[bool] = None
+    expiryDate: Optional[str] = None
+
+class GiftCardSettingsModel(BaseModel):
+    """
+    Model for the dynamic content of the Gift Cards landing page.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    heroTitle: str = Field(default="Gift Radiance")
+    heroDescription: str = Field(default="Empower someone you love to choose their own ritual.")
+    heroImage: str = Field(default="/assets/gift-cards/hero.png")
+    themes: List[dict] = Field(default_factory=list) # {id, name, image, color}
+    amounts: List[int] = Field(default_factory=list) # [1000, 2500, 5000, 10000]
+    features: List[dict] = Field(default_factory=list) # {icon, title, desc}
+    benefitsTitle: str = Field(default="Because Beauty is a Personal Choice.")
+    benefitsDescription: str = Field(default="Choosing the perfect skincare ritual for someone else can be challenging.")
+    benefitsList: List[str] = Field(default_factory=list)
+    faqs: List[dict] = Field(default_factory=list) # {q, a}
+    updatedAt: str = Field(...)
+
+    class Config:
+        populate_by_name = True
+
 class PaymentRecordModel(BaseModel):
     """
     Detailed audit log for every payment transaction.
@@ -298,6 +330,128 @@ class PaymentRecordModel(BaseModel):
     data: Optional[dict] = Field(default=None)
     rawResponse: Optional[dict] = Field(default=None)
     createdAt: str = Field(...)
+    updatedAt: str = Field(...)
+
+    class Config:
+        populate_by_name = True
+
+class CategoryModel(BaseModel):
+    """
+    Model for product categories shown in the header and filters.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    name: str = Field(...)
+    slug: str = Field(...)
+    image: Optional[str] = Field(default=None)
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "name": "Skincare",
+                "slug": "skincare",
+                "image": "https://..."
+            }
+        }
+
+class UpdateCategoryModel(BaseModel):
+    """
+    Model for updating existing categories.
+    """
+    name: Optional[str] = None
+    slug: Optional[str] = None
+    image: Optional[str] = None
+
+class BulkOrderSettingsModel(BaseModel):
+    """
+    Model for the dynamic content of the Bulk Orders landing page.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    heroTitle: str = Field(default="Elevate Your Corporate Gifting.")
+    heroDescription: str = Field(default="Transform business relationships into lasting impressions.")
+    heroImage: str = Field(default="/assets/corporate-gifting.png")
+    heroBadge: str = Field(default="Corporate Concierge")
+    features: List[dict] = Field(default_factory=list) # {icon, title, desc}
+    stats: List[dict] = Field(default_factory=list) # {icon, label}
+    quantities: List[str] = Field(default_factory=list) # ["10-50", "50-100", ...]
+    inquiryTitle: str = Field(default="The Inquiry Portal")
+    inquiryDescription: str = Field(default="Share your requirements and our team will reach out.")
+    updatedAt: str = Field(...)
+
+    class Config:
+        populate_by_name = True
+
+class AboutSettingsModel(BaseModel):
+    """
+    Model for the dynamic content of the About Us landing page.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    heroImage: str = Field(default="/assets/about/hero-about.png")
+    heroBadge: str = Field(default="The Luscent Chronicle")
+    heroTitle: str = Field(default="Curating Radiance, Defying Convention.")
+    narrativeTitle: str = Field(default="Beauty is not a trend. It is a Quiet Revolution.")
+    narrativeParagraphs: List[str] = Field(default_factory=list)
+    values: List[dict] = Field(default_factory=list) # {icon, title, desc}
+    interludeImage: str = Field(default="/assets/about/values-botanical.png")
+    interludeTitle: str = Field(default="98% Natural Origins")
+    interludeSubtitle: str = Field(default="CRAFTED IN SMALL BATCHES FOR UNCOMPROMISED POTENCY")
+    curatorImage: str = Field(default="/assets/about/curator-portrait.png")
+    curatorBadge: str = Field(default="Our Founder")
+    curatorTitle: str = Field(default="A Vision of Subtle Luxury.")
+    curatorQuote: str = Field(default="I wanted to create a space where beauty wasn't about concealment, but about enhancement.")
+    curatorName: str = Field(default="Janvi Vasani, Founder & Curator")
+    commitments: List[str] = Field(default_factory=list)
+    updatedAt: str = Field(...)
+
+    class Config:
+        populate_by_name = True
+
+class ContactSettingsModel(BaseModel):
+    """
+    Model for the dynamic content of the Contact Us landing page.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    heroBadge: str = Field(default="The Glow Concierge")
+    heroTitle: str = Field(default="Your Radiance, Our Priority.")
+    heroDescription: str = Field(default="Whether you seek personalized product curation or require immediate support, our artisan team is here to illuminate your journey.")
+    formTitle: str = Field(default="Initiate a Conversation")
+    formSubjects: List[str] = Field(default_factory=list)
+    channels: List[dict] = Field(default_factory=list) # {icon, badge, value, desc}
+    boutiqueImage: str = Field(default="/assets/contact/boutique-storefront.png")
+    faqTitle: str = Field(default="Seeking Instant Curation?")
+    faqSubtitle: str = Field(default="Most inquiries are illuminated in our FAQ registry.")
+    faqLinks: List[str] = Field(default_factory=list)
+    updatedAt: str = Field(...)
+
+    class Config:
+        populate_by_name = True
+
+class FAQSettingsModel(BaseModel):
+    """
+    Model for the dynamic content of the FAQ landing page.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    heroBadge: str = Field(default="Concierge Services")
+    heroTitle: str = Field(default="How can we assist you?")
+    heroDescription: str = Field(default="Explore our curated guide to the most frequent inquiries regarding your journey to radiant skin.")
+    categories: List[dict] = Field(default_factory=list) # {id, icon, title, questions: [{id, question, answer}]}
+    supportTitle: str = Field(default="Still have questions?")
+    supportDescription: str = Field(default="Our Glow Concierge team is here to assist you with any personalized requests.")
+    supportButtonText: str = Field(default="Contact Concierge")
+    supportButtonLink: str = Field(default="/contact")
+    updatedAt: str = Field(...)
+
+    class Config:
+        populate_by_name = True
+
+class BrandingModel(BaseModel):
+    """
+    Model for site-wide branding settings like logo.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    logoText: str = Field(default="Luscent Glow")
+    logoImage: Optional[str] = Field(default=None)
+    useImage: bool = Field(default=False)
     updatedAt: str = Field(...)
 
     class Config:

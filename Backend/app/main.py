@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+import os
 from .database import connect_to_mongo, close_mongo_connection
 from .routes.products import router as product_router
 from .routes.auth import router as auth_router
@@ -11,16 +13,33 @@ from .routes.orders import router as orders_router
 from .routes.gift_cards import router as gift_cards_router
 from .routes.payments import router as payments_router
 from .routes.newsletter import router as newsletter_router
+from .routes.upload import router as upload_router
+from .routes.categories import router as category_router
+from .routes.branding import router as branding_router
+from .routes.bulk_orders import router as bulk_orders_router
+from .routes.about import router as about_router
+from .routes.contact_settings import router as contact_settings_router
+from .routes.faq import router as faq_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Connect to MongoDB
     await connect_to_mongo()
+    
+    # Ensure uploads directory exists
+    uploads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+    if not os.path.exists(uploads_dir):
+        os.makedirs(uploads_dir)
+        
     yield
     # Shutdown: Close MongoDB connection
     await close_mongo_connection()
 
 app = FastAPI(title="Lucsent Glow API", lifespan=lifespan)
+
+# Mount static files for uploads
+uploads_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
 
 # Add CORS middleware
 app.add_middleware(
@@ -41,6 +60,13 @@ app.include_router(orders_router, prefix="/api", tags=["Orders"])
 app.include_router(gift_cards_router, prefix="/api", tags=["Gift Cards"])
 app.include_router(payments_router, prefix="/api", tags=["Payments"])
 app.include_router(newsletter_router, prefix="/api", tags=["Newsletter"])
+app.include_router(upload_router, prefix="/api", tags=["Upload"])
+app.include_router(category_router, prefix="/api", tags=["Categories"])
+app.include_router(branding_router, prefix="/api", tags=["Branding"])
+app.include_router(bulk_orders_router, prefix="/api", tags=["Bulk Orders"])
+app.include_router(about_router, prefix="/api", tags=["About Us"])
+app.include_router(contact_settings_router, prefix="/api", tags=["Contact Settings"])
+app.include_router(faq_router, prefix="/api", tags=["FAQ"])
 
 @app.get("/", tags=["Root"])
 async def read_root():

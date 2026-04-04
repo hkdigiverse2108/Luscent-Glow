@@ -1,32 +1,48 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Mail, MapPin, Send, CheckCircle2, ChevronDown, Phone } from "lucide-react";
+import { MessageSquare, Mail, MapPin, Send, CheckCircle2, ChevronDown, Phone, Zap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 
-const boutiqueStorefront = "/assets/contact/boutique-storefront.png";
 const glowTexture = "/assets/contact/glow-texture.png";
 
 const Contact = () => {
-  const [formStep, setFormStep] = useState(1);
+  const [config, setConfig] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formState, setFormState] = useState({
+  
+  const initialFormState = {
     name: "",
     email: "",
     phoneNumber: "",
-    subject: "Curation Advice",
+    subject: "",
     message: ""
-  });
+  };
 
-  const subjects = [
-    "Curation Advice",
-    "Order Support",
-    "Partnership Inquiry",
-    "Press & Media",
-    "General Exploration"
-  ];
+  const [formState, setFormState] = useState(initialFormState);
+
+  const fetchConfig = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/contact-settings/settings"));
+      if (response.ok) {
+        const data = await response.json();
+        setConfig(data);
+        if (data.formSubjects?.length > 0) {
+          setFormState(prev => ({ ...prev, subject: data.formSubjects[0] }));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch Contact settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConfig();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,11 +54,21 @@ const Contact = () => {
       });
       if (response.ok) {
         setIsSubmitted(true);
+        setFormState({ ...initialFormState, subject: config?.formSubjects?.[0] || "" });
       } else {
         console.error("Failed to submit inquiry");
       }
     } catch (err) {
       console.error("Error submitting inquiry:", err);
+    }
+  };
+
+  const resolveIcon = (iconName: string) => {
+    switch (iconName) {
+      case "Phone": return <Phone size={24} className="group-hover:text-primary transition-colors text-gold" />;
+      case "Mail": return <Mail size={24} className="group-hover:text-primary transition-colors text-gold" />;
+      case "MapPin": return <MapPin size={24} className="group-hover:text-primary transition-colors text-gold" />;
+      default: return <MessageSquare size={24} className="group-hover:text-primary transition-colors text-gold" />;
     }
   };
 
@@ -54,10 +80,15 @@ const Contact = () => {
     }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
+  if (loading || !config) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="font-display text-xs uppercase tracking-[0.3em] text-gold animate-pulse">
+            Establishing Concierge Ritual...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background selection:bg-gold/30 overflow-x-hidden">
@@ -78,12 +109,16 @@ const Contact = () => {
               animate={{ opacity: 1, y: 0 }}
               className="max-w-3xl"
             >
-              <p className="text-[10px] md:text-sm font-body font-bold text-gold uppercase tracking-[0.4em] mb-4 md:mb-6">The Glow Concierge</p>
+              <p className="text-[10px] md:text-sm font-body font-bold text-gold uppercase tracking-[0.4em] mb-4 md:mb-6">{config.heroBadge}</p>
               <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 md:mb-8 text-glow-gold/30">
-                Your Radiance,<br />Our <span className="italic font-light text-gold/80">Priority.</span>
+                {config.heroTitle.split(' Priority. ').length > 1 ? (
+                   <>
+                      {config.heroTitle.split(' Priority. ')[0]}<br />Our <span className="italic font-light text-gold/80">Priority.</span>
+                   </>
+                ) : config.heroTitle}
               </h1>
               <p className="text-sm md:text-lg font-body text-white/60 leading-relaxed max-w-xl">
-                Whether you seek personalized product curation or require immediate support, our artisan team is here to illuminate your journey.
+                {config.heroDescription}
               </p>
             </motion.div>
           </div>
@@ -103,7 +138,7 @@ const Contact = () => {
                 className="space-y-12"
               >
                 <div className="space-y-4">
-                  <h2 className="font-display text-3xl font-bold text-foreground capitalize">Initiate a Conversation</h2>
+                  <h2 className="font-display text-3xl font-bold text-foreground capitalize">{config.formTitle}</h2>
                   <div className="h-1 w-20 bg-gold/30" />
                 </div>
 
@@ -169,7 +204,7 @@ const Contact = () => {
                     <div className="relative">
                       <p className="text-xs font-body font-bold text-gold uppercase tracking-widest mb-4">Nature of Inquiry</p>
                       <div className="flex flex-wrap gap-2 md:gap-3">
-                        {subjects.map((sub) => (
+                        {config.formSubjects.map((sub: string) => (
                           <button
                             key={sub}
                             type="button"
@@ -237,38 +272,29 @@ const Contact = () => {
               {/* Artisan Channels & Boutique */}
               <div className="space-y-20">
                 <motion.div 
-                  initial={{ opacity: 0, x: 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="space-y-12"
+                   initial={{ opacity: 0, x: 30 }}
+                   whileInView={{ opacity: 1, x: 0 }}
+                   viewport={{ once: true }}
+                   className="space-y-12"
                 >
                   <div className="space-y-10">
-                    <div className="flex gap-8 group">
-                      <div className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors">
-                        <Phone size={24} className="group-hover:text-primary transition-colors text-gold" />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-xs font-body font-bold text-gold uppercase tracking-widest">Digital Concierge</p>
-                        <p className="font-display text-2xl font-bold text-foreground">+91 97126 63607</p>
-                        <p className="text-sm font-body text-muted-foreground italic">Available for one-on-one WhatsApp curation.</p>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-8 group">
-                      <div className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors">
-                        <Mail size={24} className="group-hover:text-primary transition-colors text-gold" />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-xs font-body font-bold text-gold uppercase tracking-widest">Artisan Support</p>
-                        <p className="font-display text-2xl font-bold text-foreground">hello@luscentglow.com</p>
-                        <p className="text-sm font-body text-muted-foreground italic">For deeper inquiries and shared visions.</p>
-                      </div>
-                    </div>
+                    {config.channels.map((chan: any, i: number) => (
+                       <div key={i} className="flex gap-8 group">
+                         <div className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors">
+                            {resolveIcon(chan.icon)}
+                         </div>
+                         <div className="space-y-2">
+                           <p className="text-xs font-body font-bold text-gold uppercase tracking-widest">{chan.badge}</p>
+                           <p className="font-display text-2xl font-bold text-foreground">{chan.value}</p>
+                           <p className="text-sm font-body text-muted-foreground italic">{chan.desc}</p>
+                         </div>
+                       </div>
+                    ))}
                   </div>
 
                   {/* Boutique Preview */}
                   <div className="relative aspect-video rounded-[3rem] overflow-hidden shadow-2xl group">
-                    <img src={boutiqueStorefront} alt="Our Boutique" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                    <img src={getAssetUrl(config.boutiqueImage)} alt="Our Boutique" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   </div>
                 </motion.div>
               </div>
@@ -281,12 +307,12 @@ const Contact = () => {
         <section className="py-20 bg-primary">
           <div className="container mx-auto px-4">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-              <div className="space-y-2">
-                <h3 className="font-display text-2xl font-bold text-white uppercase tracking-wider">Seeking Instant Curation?</h3>
-                <p className="text-white/40 font-body italic text-sm">Most inquiries are illuminated in our FAQ registry.</p>
+              <div className="space-y-2 text-center lg:text-left">
+                <h3 className="font-display text-2xl font-bold text-white uppercase tracking-wider">{config.faqTitle}</h3>
+                <p className="text-white/40 font-body italic text-sm">{config.faqSubtitle}</p>
               </div>
-              <div className="flex flex-wrap gap-4">
-                {["Shipping Registry", "Return Rituals", "Authenticity Seal"].map((item) => (
+              <div className="flex flex-wrap justify-center gap-4">
+                {config.faqLinks.map((item: string) => (
                   <button key={item} className="px-8 py-3 border border-white/20 rounded-full text-[10px] font-body font-bold text-white uppercase tracking-widest hover:border-gold hover:text-gold transition-all">
                     {item}
                   </button>

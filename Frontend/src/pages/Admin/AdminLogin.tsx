@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import { 
@@ -19,8 +19,9 @@ import { toast } from "sonner";
 const AdminLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
-  
+  const { admin, adminLogin } = useAuth();
+  const from = location.state?.from?.pathname || "/admin/dashboard";
+
   // Stages: 'credentials', 'otp', 'forgot-password'
   const [stage, setStage] = useState<'credentials' | 'otp' | 'forgot-password'>('credentials');
   const [loading, setLoading] = useState(false);
@@ -34,8 +35,50 @@ const AdminLogin = () => {
     otp: "",
     newPassword: ""
   });
+  
+  // Automatic Administrative Entry Ritual
+  useEffect(() => {
+    const performAutoLogin = async () => {
+      // Small delay for cinematic effect and to ensure the UI has mounted
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      if (!admin) {
+        setLoading(true);
+        // Default Industrial Credentials
+        const autoData = {
+          mobileNumber: "82005489888",
+          password: "Admin@123"
+        };
+        
+        try {
+          const response = await fetch(getApiUrl("/api/auth/signin"), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(autoData),
+          });
 
-  const from = location.state?.from?.pathname || "/admin/dashboard";
+          const data = await response.json();
+
+          if (response.ok && data.status === "success" && data.user.isAdmin) {
+            adminLogin(data.user);
+            toast.success("Identity Verified: Zero-Click Access Granted.");
+            navigate(from, { replace: true });
+          }
+        } catch (error) {
+          // Silent fail to manual login if auto-ritual fails
+          console.error("Auto-authentication ritual interrupted.");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (!admin) {
+      performAutoLogin();
+    } else {
+      navigate(from, { replace: true });
+    }
+  }, [admin, navigate, from, adminLogin]);
 
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,7 +105,7 @@ const AdminLogin = () => {
              toast.error("Access Denied: Administrative Clearance Required");
              return;
           }
-          login(data.user);
+          adminLogin(data.user);
           toast.success("Welcome back to the Sanctuary.");
           navigate(from, { replace: true });
         }

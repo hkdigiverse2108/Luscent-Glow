@@ -34,38 +34,46 @@ const Products = () => {
   const [sortBy, setSortBy] = useState("relevance");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Sync state with URL search params (Fix for second category navigation)
   useEffect(() => {
-    const fetchProductsData = async () => {
+    setSelectedCategory(categoryParam);
+  }, [categoryParam]);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(getApiUrl("/api/products/"));
-        if (response.ok) {
-          const data = await response.json();
-          if (data && data.length > 0) {
-            setFetchedProducts(data);
-          } else {
-            const { products: localProducts } = await import("@/data/products");
-            setFetchedProducts(localProducts);
-          }
+        const [prodRes, catRes] = await Promise.all([
+          fetch(getApiUrl("/api/products/")),
+          fetch(getApiUrl("/api/categories/"))
+        ]);
+
+        if (prodRes.ok) {
+          const data = await prodRes.json();
+          setFetchedProducts(data.length > 0 ? data : products);
         } else {
-          const { products: localProducts } = await import("@/data/products");
-          setFetchedProducts(localProducts);
+          setFetchedProducts(products);
         }
+
+        if (catRes.ok) {
+          const cats = await catRes.json();
+          if (cats.length > 0) setDynamicCategories(cats);
+        }
+
         setError(null);
       } catch (err) {
-        console.error("Error fetching products, falling back to local data:", err);
-        const { products: localProducts } = await import("@/data/products");
-        setFetchedProducts(localProducts);
-        setError(null);
+        console.error("Error fetching project data:", err);
+        setFetchedProducts(products);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProductsData();
+    fetchInitialData();
   }, []);
 
   let filtered = fetchedProducts;
@@ -110,17 +118,21 @@ const Products = () => {
         <h3 className="font-display text-lg font-semibold mb-4 text-foreground">Categories</h3>
         <div className="space-y-2">
           <button
-            onClick={() => setSelectedCategory(null)}
+            onClick={() => {
+              const newParams = new URLSearchParams(searchParams);
+              newParams.delete("category");
+              setSearchParams(newParams);
+            }}
             className={`block w-full text-left text-sm font-body py-1.5 px-3 rounded-md transition-colors ${
               !selectedCategory ? "bg-gold/10 text-gold font-medium" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             All Products
           </button>
-          {categories.map((cat) => (
+          {dynamicCategories.map((cat) => (
             <button
               key={cat.slug}
-              onClick={() => setSelectedCategory(cat.slug)}
+              onClick={() => setSearchParams({ category: cat.slug })}
               className={`block w-full text-left text-sm font-body py-1.5 px-3 rounded-md transition-colors ${
                 selectedCategory === cat.slug ? "bg-gold/10 text-gold font-medium" : "text-muted-foreground hover:text-foreground"
               }`}
@@ -166,7 +178,7 @@ const Products = () => {
       <main className="container mx-auto px-4 py-6 md:py-8 lg:py-12">
         {/* Breadcrumb */}
         <p className="text-[10px] md:text-xs font-body text-muted-foreground mb-4 md:mb-6 uppercase tracking-widest opacity-70">
-          Home / {selectedCategory ? categories.find((c) => c.slug === selectedCategory)?.name : "All Products"}
+          Home / {selectedCategory ? dynamicCategories.find((c) => c.slug === selectedCategory)?.name : "All Products"}
           {searchParam && <span className="text-gold font-medium"> / Searching for "{searchParam}"</span>}
         </p>
 

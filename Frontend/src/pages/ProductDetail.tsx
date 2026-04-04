@@ -9,7 +9,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import { Product, products } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -165,7 +165,7 @@ const ProductDetail = () => {
           >
             <div className="aspect-square rounded-xl overflow-hidden bg-secondary cursor-zoom-in group">
               <img
-                src={product.image}
+                src={getAssetUrl(product.image)}
                 alt={product.name}
                 className="w-full h-full object-cover group-hover:scale-150 transition-transform duration-500 origin-center"
               />

@@ -1,32 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
-import { Gift, Sparkles, Send, CreditCard, CheckCircle2, ChevronDown, ArrowRight } from "lucide-react";
+import { 
+  Gift, 
+  Sparkles, 
+  Send, 
+  CreditCard, 
+  CheckCircle2, 
+  ChevronDown, 
+  ArrowRight,
+  Wallet,
+  Mail,
+  ShieldCheck,
+  Zap
+} from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
-const heroImg = "/assets/gift-cards/hero.png";
-const goldCard = "/assets/gift-cards/gold.png";
-const roseCard = "/assets/gift-cards/rose.png";
-const charcoalCard = "/assets/gift-cards/charcoal.png";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 
-const THEMES = [
-  { id: "gold", name: "Gold Radiance", image: goldCard, color: "#D4AF37" },
-  { id: "rose", name: "Rose Bloom", image: roseCard, color: "#E09DA0" },
-  { id: "charcoal", name: "Midnight Glow", image: charcoalCard, color: "#1A1A1A" }
-];
-
-const AMOUNTS = [1000, 2500, 5000, 10000];
+// Dynamic Icon Resolver
+const resolveIcon = (iconName: string) => {
+  switch (iconName) {
+    case 'Send': return <Send size={18} />;
+    case 'CreditCard': return <CreditCard size={18} />;
+    case 'Sparkles': return <Sparkles size={18} />;
+    case 'ShieldCheck': return <ShieldCheck size={18} />;
+    case 'Zap': return <Zap size={18} />;
+    case 'Mail': return <Mail size={18} />;
+    default: return <Gift size={18} />;
+  }
+};
 
 const GiftCards = () => {
-  const [selectedTheme, setSelectedTheme] = useState(THEMES[0]);
-  const [amount, setAmount] = useState(AMOUNTS[1]);
+  const [loading, setLoading] = useState(true);
+  const [config, setConfig] = useState<any>(null);
+  
+  const [selectedTheme, setSelectedTheme] = useState<any>(null);
+  const [amount, setAmount] = useState(2500);
   const [customAmount, setCustomAmount] = useState("");
   const [recipientName, setRecipientName] = useState("");
   const [recipientMobile, setRecipientMobile] = useState("");
   const [message, setMessage] = useState("");
   const [senderName, setSenderName] = useState("");
+  
   const { addItem } = useCart();
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch(getApiUrl("/api/gift-cards/settings"));
+        if (response.ok) {
+          const data = await response.json();
+          setConfig(data);
+          if (data.themes?.length > 0) setSelectedTheme(data.themes[0]);
+          if (data.amounts?.length > 0) setAmount(data.amounts[1] || data.amounts[0]);
+        }
+      } catch (error) {
+        toast.error("Could not reach the Gifting Sanctuary.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   const finalAmount = customAmount ? parseInt(customAmount) : amount;
 
@@ -37,24 +74,32 @@ const GiftCards = () => {
     }
     
     addItem({
-      id: `giftcard-${selectedTheme.id}-${Date.now()}`,
-      name: `Digital Gift Card — ${selectedTheme.name}`,
+      id: `giftcard-${selectedTheme?.id || 'default'}-${Date.now()}`,
+      name: `Digital Gift Card — ${selectedTheme?.name || 'Radiant'}`,
       price: finalAmount,
-      image: selectedTheme.image,
+      image: selectedTheme?.image || "/assets/gift-cards/gold.png",
       category: "Gift Cards",
       quantity: 1,
       metadata: { 
-        theme: selectedTheme.id, 
+        theme: selectedTheme?.id, 
         recipient: recipientName, 
         recipientMobile,
         message,
         price: finalAmount,
-        image: selectedTheme.image
+        image: selectedTheme?.image
       }
     });
     
     toast.success("Gift Card added to your bag");
   };
+
+  if (loading || !config) {
+    return (
+      <div className="min-h-screen bg-[#FDFCFB] flex items-center justify-center font-display text-xs uppercase tracking-widest text-gold animate-pulse">
+        Entering the Gifting Sanctuary...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#FDFCFB]">
@@ -64,7 +109,7 @@ const GiftCards = () => {
         {/* Hero Section */}
         <section className="relative h-[60vh] lg:h-[70vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0">
-            <img src={heroImg} alt="Gifting Luxury" className="w-full h-full object-cover" />
+            <img src={getAssetUrl(config.heroImage || "/assets/gift-cards/hero.png")} alt="Gifting Luxury" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-charcoal/40 backdrop-blur-[2px]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#FDFCFB] via-transparent to-transparent" />
           </div>
@@ -80,11 +125,11 @@ const GiftCards = () => {
                 <Gift size={16} className="text-gold" />
                 <span className="text-[10px] font-body font-bold text-white uppercase tracking-[0.25em]">The Ultimate Expression</span>
               </div>
-              <h1 className="font-display text-5xl lg:text-8xl font-bold text-white leading-tight">
-                Gift <span className="italic font-light text-gold/80">Radiance</span>
+              <h1 className="font-display text-5xl lg:text-8xl font-bold text-white leading-tight uppercase">
+                {config.heroTitle.split(' ')[0]} <span className="italic font-light text-gold/80">{config.heroTitle.split(' ').length > 1 ? config.heroTitle.split(' ').slice(1).join(' ') : "Gift"}</span>
               </h1>
               <p className="text-white/80 font-body text-lg lg:text-xl max-w-xl mx-auto font-light leading-relaxed">
-                Empower someone you love to choose their own ritual. A digital gateway to bespoke beauty and timeless elegance.
+                {config.heroDescription}
               </p>
             </motion.div>
           </div>
@@ -95,22 +140,21 @@ const GiftCards = () => {
           <div className="container mx-auto px-6 lg:px-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-start">
               
-              {/* Tooling / Form */}
               <div className="space-y-12">
                 <div className="space-y-6">
                   <h2 className="font-display text-4xl font-bold text-foreground flex items-center gap-4">
                     01. <span className="text-gold/60 italic font-light">Select Theme</span>
                   </h2>
-                  <div className="flex gap-4">
-                    {THEMES.map((theme) => (
+                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+                    {config.themes.map((theme: any) => (
                       <button
                         key={theme.id}
                         onClick={() => setSelectedTheme(theme)}
-                        className={`group relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all duration-500 ${
-                          selectedTheme.id === theme.id ? "border-gold shadow-lg scale-105" : "border-transparent opacity-60 grayscale hover:grayscale-0"
+                        className={`group relative w-20 h-20 rounded-2xl overflow-hidden border-2 flex-shrink-0 transition-all duration-500 ${
+                          selectedTheme?.id === theme.id ? "border-gold shadow-lg scale-105" : "border-transparent opacity-60 grayscale hover:grayscale-0"
                         }`}
                       >
-                        <img src={theme.image} alt={theme.name} className="w-full h-full object-cover" />
+                        <img src={getAssetUrl(theme.image)} alt={theme.name} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-charcoal/20 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </button>
                     ))}
@@ -122,7 +166,7 @@ const GiftCards = () => {
                     02. <span className="text-gold/60 italic font-light">Choose Amount</span>
                   </h2>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {AMOUNTS.map((amt) => (
+                    {config.amounts.map((amt: number) => (
                       <button
                         key={amt}
                         onClick={() => {
@@ -183,10 +227,6 @@ const GiftCards = () => {
                     onChange={(e) => setMessage(e.target.value)}
                     className="w-full py-4 px-6 bg-white border-2 border-border rounded-2xl font-body text-sm focus:outline-none focus:border-gold transition-colors resize-none"
                   />
-                  <div className="flex items-center gap-2 text-muted-foreground italic text-xs px-2">
-                    <Sparkles size={14} className="text-gold" />
-                    Max 150 characters for the best visual presentation.
-                  </div>
                 </div>
 
                 <motion.button
@@ -208,14 +248,12 @@ const GiftCards = () => {
                   </div>
                   
                   <motion.div
-                    key={selectedTheme.id}
+                    key={selectedTheme?.id}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="relative aspect-[16/10] bg-charcoal rounded-[2.5rem] overflow-hidden shadow-ethereal"
                   >
-                    <img src={selectedTheme.image} alt="Card Theme" className="absolute inset-0 w-full h-full object-cover" />
-                    
-                    {/* Content Overlay */}
+                    <img src={getAssetUrl(selectedTheme?.image)} alt="Card Theme" className="absolute inset-0 w-full h-full object-cover" />
                     <div className="absolute inset-0 p-8 lg:p-12 flex flex-col justify-between text-white">
                       <div className="flex justify-between items-start">
                         <div>
@@ -228,40 +266,36 @@ const GiftCards = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-4">
+                      <div className="space-y-4 font-bold">
                         <div className="h-[1px] bg-white/20" />
                         <div className="space-y-1">
-                          <p className="text-[10px] uppercase tracking-[0.2em] font-medium opacity-60">Prepared For</p>
-                          <p className="font-display text-2xl font-semibold italic">{recipientName || "Your Special Someone"}</p>
+                          <p className="text-[10px] uppercase tracking-[0.2em] font-medium opacity-60 font-bold">Prepared For</p>
+                          <p className="font-display text-2xl font-semibold italic font-bold">{recipientName || "Your Special Someone"}</p>
                         </div>
                         {message && (
-                          <p className="text-xs lg:text-sm font-body font-light italic text-white/80 line-clamp-2 max-w-sm">" {message} "</p>
+                          <p className="text-xs lg:text-sm font-body font-light italic text-white/80 line-clamp-2 max-w-sm font-bold">" {message} "</p>
                         )}
-                        <div className="flex justify-between items-center pt-2">
-                           <div className="flex gap-1.5">
-                              <div className="w-6 h-6 rounded-full glass-premium flex items-center justify-center">
+                        <div className="flex justify-between items-center pt-2 font-bold">
+                           <div className="flex gap-1.5 font-bold">
+                              <div className="w-6 h-6 rounded-full glass-premium flex items-center justify-center font-bold">
                                 <CheckCircle2 size={12} className="text-white" />
                               </div>
-                              <span className="text-[9px] uppercase tracking-widest font-bold pt-1">Authentic Digital Original</span>
+                              <span className="text-[9px] uppercase tracking-widest font-bold pt-1 font-bold">Authentic Digital Original</span>
                            </div>
-                           <p className="text-[9px] font-body opacity-40 uppercase tracking-widest">Valid for 365 Days</p>
+                           <p className="text-[9px] font-body opacity-40 uppercase tracking-widest font-bold">Valid for 365 Days</p>
                         </div>
                       </div>
                     </div>
                   </motion.div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-4">
-                    {[
-                      { icon: <Send size={18} />, title: "Instant Delivery", desc: "Sent straight to their inbox." },
-                      { icon: <CreditCard size={18} />, title: "Fully Secure", desc: "Encoded for safety." },
-                      { icon: <Sparkles size={18} />, title: "Any Ritual", desc: "Redeemable sitewide." }
-                    ].map((item, i) => (
-                      <div key={i} className="text-center space-y-2 p-4 rounded-3xl bg-secondary/30">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                    {config.features.map((item: any, i: number) => (
+                      <div key={i} className="text-center space-y-2 p-5 rounded-[2rem] bg-secondary/30 backdrop-blur-sm border border-secondary/20">
                         <div className="mx-auto w-10 h-10 rounded-full glass-premium flex items-center justify-center text-gold mb-2 shadow-sm">
-                          {item.icon}
+                          {resolveIcon(item.icon)}
                         </div>
-                        <h4 className="text-[10px] font-body font-bold uppercase tracking-widest">{item.title}</h4>
-                        <p className="text-[10px] text-muted-foreground font-body">{item.desc}</p>
+                        <h4 className="text-[10px] font-body font-bold uppercase tracking-widest text-[#2D2424]">{item.title}</h4>
+                        <p className="text-[10px] text-muted-foreground font-body leading-tight">{item.desc}</p>
                       </div>
                     ))}
                   </div>
@@ -279,18 +313,16 @@ const GiftCards = () => {
                  <div className="space-y-8">
                     <span className="text-gold font-body text-sm font-bold uppercase tracking-[0.4em] block">Redefining Gifting</span>
                     <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                       Because Beauty is a <span className="italic font-light text-gold/80 hover-lift">Personal Choice.</span>
+                       {config.benefitsTitle.includes(' is a ') ? config.benefitsTitle.split(' is a ')[0] : config.benefitsTitle} 
+                       {config.benefitsTitle.includes(' is a ') && (
+                         <span className="italic font-light text-gold/80"> is a {config.benefitsTitle.split(' is a ')[1]}</span>
+                       )}
                     </h2>
                     <p className="text-white/60 font-body text-lg leading-relaxed max-w-xl">
-                       Choosing the perfect skincare ritual for someone else can be challenging. Our digital gift cards bridge the gap between thoughtfulness and perfection, allowing your loved ones to curate their own path to radiance.
+                       {config.benefitsDescription}
                     </p>
                     <ul className="space-y-4">
-                       {[
-                         "No expiration for 12 months from purchase.",
-                         "Applicable on all collections including Limited Editions.",
-                         "Transferrable to any registered Luscent Glow account.",
-                         "Balance can be used across multiple purchases."
-                       ].map((item, i) => (
+                       {config.benefitsList.map((item: string, i: number) => (
                          <li key={i} className="flex items-center gap-3 text-sm font-body font-light">
                             <div className="w-1.5 h-1.5 rounded-full bg-gold" />
                             {item}
@@ -304,10 +336,7 @@ const GiftCards = () => {
                       transition={{ duration: 1 }}
                       className="relative z-10 aspect-square rounded-[3rem] overflow-hidden shadow-2xl"
                     >
-                       <img src={selectedTheme.image} alt="Gifting View" className="w-full h-full object-cover" />
-                       <div className="absolute inset-0 bg-charcoal/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <h4 className="text-gold font-display text-4xl italic font-bold -rotate-12">Pure Radiance</h4>
-                       </div>
+                       <img src={getAssetUrl(selectedTheme?.image)} alt="Gifting View" className="w-full h-full object-cover" />
                     </motion.div>
                     <div className="absolute -inset-10 bg-gold/10 rounded-full blur-[100px] animate-pulse" />
                  </div>
@@ -316,28 +345,24 @@ const GiftCards = () => {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-24 lg:py-32">
-           <div className="container mx-auto px-6 lg:px-12 max-w-4xl">
-              <div className="text-center mb-16">
-                 <h2 className="font-display text-4xl lg:text-6xl font-bold text-foreground">Gifting <span className="text-gold italic">Intelligence</span></h2>
-                 <p className="mt-4 text-muted-foreground font-body">Common inquiries about our digital gift certificates.</p>
+        <section className="py-24 lg:py-32 overflow-hidden">
+           <div className="container mx-auto px-6 lg:px-12 max-w-4xl font-bold">
+              <div className="text-center mb-16 font-bold">
+                 <h2 className="font-display text-4xl lg:text-6xl font-bold text-foreground font-bold">Gifting <span className="text-gold italic font-bold">Intelligence</span></h2>
+                 <p className="mt-4 text-muted-foreground font-body font-bold">Common inquiries about our digital gift certificates.</p>
               </div>
               
-              <div className="space-y-4">
-                {[
-                  { q: "How will the recipient receive the card?", a: "Instantly upon checkout, we will generate a secure unique code and send a beautiful digital certificate to the email address provided in the recipient field." },
-                  { q: "Can I use multiple gift cards on one order?", a: "Absolutely. At checkout, you can stack multiple gift codes to cover your ritual's total value." },
-                  { q: "Does the gift card cover shipping fees?", a: "Yes, the balance on a Luscent Glow gift card can be applied to the entire order total, including taxes and delivery charges." },
-                  { q: "What happens if I lose my gift card email?", a: "Do not worry. You can reach out to our Glow Concierge with your order ID, and we will resend the secure certificate to the original sender." }
-                ].map((item, i) => (
+              <div className="space-y-6 font-bold">
+                {config.faqs.map((item: any, i: number) => (
                   <motion.div 
                     key={i}
-                    className="p-8 bg-white border border-border/50 rounded-[2rem] hover:border-gold/30 hover:shadow-xl transition-all duration-500"
+                    whileHover={{ y: -5 }}
+                    className="p-8 bg-white border border-border/50 rounded-[2rem] hover:border-gold/30 hover:shadow-xl transition-all duration-500 font-bold"
                   >
-                    <h4 className="font-display text-xl font-bold text-foreground mb-3 flex items-center gap-3">
-                       <span className="text-gold">/</span> {item.q}
+                    <h4 className="font-display text-xl font-bold text-foreground mb-3 flex items-center gap-3 font-bold">
+                       <span className="text-gold font-bold">/</span> {item.q}
                     </h4>
-                    <p className="text-muted-foreground font-body text-sm leading-relaxed">{item.a}</p>
+                    <p className="text-muted-foreground font-body text-sm leading-relaxed font-bold">{item.a}</p>
                   </motion.div>
                 ))}
               </div>

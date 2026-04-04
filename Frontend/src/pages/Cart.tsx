@@ -30,7 +30,7 @@ import {
   DialogClose 
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -263,7 +263,7 @@ const Cart = () => {
                         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                         
                         <div className={`relative ${item.category === "Gift Cards" ? "aspect-[16/10] w-36 md:w-56" : "w-28 h-36 md:w-44 md:h-56"} bg-[#f8f8f8] rounded-2xl md:rounded-[2.5rem] overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-2xl transition-all duration-1000 group-hover:translate-x-2`}>
-                          <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                          <img src={getAssetUrl(item.image)} alt={item.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                         </div>
                         
                         <div className="flex-1 min-w-0 flex flex-col lg:flex-row lg:items-center justify-between gap-8 lg:gap-12 pl-2">
@@ -328,28 +328,6 @@ const Cart = () => {
                     </div>
                     
                     <div className="space-y-8 mb-12">
-                      <div className="mb-8 pt-6 border-t border-gold/10">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3 text-gold">
-                            <MapPin size={14} className="opacity-60" />
-                            <span className="text-[10px] font-body font-bold uppercase tracking-[0.4em]">Delivery Destination</span>
-                          </div>
-                          <Link to="/profile" className="text-[9px] font-body font-bold text-muted-foreground/40 hover:text-gold transition-colors flex items-center gap-1 group">
-                            <Settings size={10} /> CHANGE
-                          </Link>
-                        </div>
-                        
-                        {user?.shippingAddress?.street ? (
-                          <div className="p-5 rounded-2xl bg-white/40 border border-gold/5 space-y-1">
-                            <p className="text-[11px] font-body font-medium text-charcoal leading-relaxed">{user.shippingAddress.street}</p>
-                            <p className="text-[10px] font-body text-muted-foreground/60">{user.shippingAddress.city}, {user.shippingAddress.state} {user.shippingAddress.zipCode}</p>
-                          </div>
-                        ) : (
-                          <div className="p-5 rounded-2xl bg-rose-brand/5 border border-rose-brand/10">
-                            <p className="text-[10px] font-body font-bold text-rose-brand/60 italic leading-relaxed">No sanctuary address found. Please update your profile for seamless delivery.</p>
-                          </div>
-                        )}
-                      </div>
 
                       <div className="flex justify-between text-[11px] font-body font-bold text-muted-foreground/60 uppercase tracking-[0.3em] items-center">
                         <span>Subtotal</span>
@@ -415,6 +393,61 @@ const Cart = () => {
                              </div>
                           </DialogContent>
                         </Dialog>
+                      </div>
+
+                      {/* Apply Gift Card Section */}
+                      <div className="space-y-5 pt-2 border-t border-gold/10">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3 text-gold">
+                            <CreditCard size={14} className="opacity-60" />
+                            <span className="text-[10px] font-body font-bold uppercase tracking-[0.4em]">Apply Gift Card</span>
+                          </div>
+                          {receivedGiftCards.length > 0 && (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <button className="text-[9px] font-body font-bold text-gold hover:text-charcoal transition-colors px-3 py-1 bg-gold/10 rounded-full">QUICK SELECT</button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md w-[95vw] rounded-[3rem] p-8 border-white/10 shadow-2xl bg-[#fdfcfb]">
+                                <DialogHeader className="mb-8">
+                                  <DialogTitle className="font-display text-2xl font-bold text-charcoal lowercase">Your <span className="text-gold italic font-light">Received Cards</span></DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
+                                  {receivedGiftCards.map((card, idx) => (
+                                    <button 
+                                      key={idx}
+                                      onClick={() => { applyGiftCard(card.code); }}
+                                      className="w-full text-left p-5 rounded-2xl bg-white border border-gold/10 hover:border-gold/30 hover:shadow-lg transition-all group flex justify-between items-center"
+                                    >
+                                      <div className="space-y-1">
+                                        <p className="text-[10px] font-body font-bold text-gold uppercase tracking-widest">{card.code}</p>
+                                        <p className="text-xs font-display font-medium text-charcoal">Available Balance: ₹{card.balance.toLocaleString()}</p>
+                                      </div>
+                                      <div className="w-8 h-8 rounded-full bg-gold/5 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-white transition-all">
+                                        <ChevronRight size={14} />
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          )}
+                        </div>
+
+                        <div className="relative flex items-center bg-white/40 border border-gold/10 rounded-2xl overflow-hidden group focus-within:border-gold/30 transition-all shadow-sm">
+                           <input 
+                             type="text" 
+                             value={giftCardInput}
+                             onChange={(e) => setGiftCardInput(e.target.value.toUpperCase())}
+                             placeholder="ENTER GIFT CODE"
+                             className="flex-1 bg-transparent border-none px-6 py-4 text-[10px] font-body font-bold text-charcoal outline-none placeholder:text-muted-foreground/30 uppercase tracking-widest"
+                           />
+                           <button 
+                             onClick={handleApplyGiftCard}
+                             className="px-6 py-4 text-[10px] font-body font-bold text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em]"
+                           >
+                             Apply
+                           </button>
+                        </div>
                       </div>
 
                          <div className="space-y-6 pt-6 animate-in fade-in slide-in-from-top-4 border-t border-gold/10">

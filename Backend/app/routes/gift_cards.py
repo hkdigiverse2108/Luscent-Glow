@@ -1,6 +1,10 @@
 from fastapi import APIRouter, HTTPException, status
 from ..database import get_database
-from datetime import datetime
+from ..models import GiftCardModel, UpdateGiftCardModel, GiftCardSettingsModel
+from datetime import datetime, timedelta
+from bson import ObjectId
+import random
+import string
 
 router = APIRouter(prefix="/gift-cards", tags=["Gift Cards"])
 
@@ -62,15 +66,24 @@ async def validate_gift_card(code: str):
 async def get_received_gift_cards(mobileNumber: str):
     db = await get_database()
     
-    query = {
-        "recipientMobile": mobileNumber,
-        "isActive": True
-    }
+    # Normalize input: digits only
+    clean_num = "".join(filter(str.isdigit, mobileNumber))
     
-    # Specific filter requested by the user:
-    # If recipient is 7693485303, only show from 1234567890
-    if mobileNumber == "7693485303":
-        query["senderMobile"] = "1234567890"
+    # IND 91 prefix handle
+    if clean_num.startswith("91") and len(clean_num) == 12:
+        core_num = clean_num[2:]
+    else:
+        core_num = clean_num
+        
+    # We use regex to find the core number string within the field to handle accidental formatting
+    query = {
+        "isActive": True,
+        "$or": [
+            {"recipientMobile": {"$regex": f".*{core_num}.*"}},
+            {"recipientName": mobileNumber},
+            {"recipientMobile": mobileNumber}
+        ]
+    }
 
     # Find active gift cards sent to this mobile number
     received_cards = await db["gift_cards"].find(query).to_list(100)
@@ -88,3 +101,116 @@ async def get_received_gift_cards(mobileNumber: str):
         })
         
     return formatted_cards
+
+@router.get("/", response_description="List all gift cards (Admin only)", response_model=list[GiftCardModel])
+async def list_gift_cards():
+    db = await get_database()
+    cards = await db["gift_cards"].find({}).to_list(1000)
+    return cards
+
+@router.post("/", response_description="Generate new gift card", response_model=GiftCardModel)
+async def create_gift_card(card: GiftCardModel):
+    db = await get_database()
+    
+    # Ensure code is unique
+    if await db["gift_cards"].find_one({"code": card.code}):
+        raise HTTPException(status_code=400, detail="Gift card code already exists.")
+        
+    new_card = await db["gift_cards"].insert_one(card.model_dump(by_alias=True, exclude=["id"]))
+    created_card = await db["gift_cards"].find_one({"_id": new_card.inserted_id})
+    return created_card
+
+@router.get("/settings", response_description="Get gift cards page settings", response_model=GiftCardSettingsModel)
+async def get_gift_card_settings():
+    db = await get_database()
+    settings = await db["gift_card_settings"].find_one({})
+    if not settings:
+        # Fallback if no settings exist in DB
+        return {
+            "heroTitle": "Gift Radiance",
+            "heroDescription": "Empower someone you love to choose their own ritual with our digital originals.",
+            "heroImage": "/assets/gift-cards/hero.png",
+            "themes": [
+                {"id": "1", "name": "Gold Radiance", "image": "/assets/gift-cards/gold.png", "color": "#D4AF37"},
+                {"id": "2", "name": "Rose Blush", "image": "/assets/gift-cards/rose.png", "color": "#E5BABA"},
+                {"id": "3", "name": "Midnight Glow", "image": "/assets/gift-cards/midnight.png", "color": "#2D2424"}
+            ],
+            "amounts": [1000, 2500, 5000, 10000],
+            "features": [
+                {"icon": "Zap", "title": "Instant Delivery", "desc": "Tokens arrive in seconds."},
+                {"icon": "ShieldCheck", "title": "Secure Checkout", "desc": "Fully encrypted sanctuary."},
+                {"icon": "Sparkles", "title": "Never Expires", "desc": "Valid for a full ritual year."}
+            ],
+            "benefitsTitle": "Because Beauty is a Personal Choice.",
+            "benefitsDescription": "Choosing the perfect skincare ritual for someone else can be challenging. Our digital gift certificates ensure they receive exactly what their skin desires.",
+            "benefitsList": [
+                "Curated luxury selection",
+                "Personalized digital messages",
+                "Instant balance updates",
+                "Exquisite card themes"
+            ],
+            "faqs": [
+                {"q": "How do I redeem my card?", "a": "Enter your unique code in the checkout sanctuary."},
+                {"q": "Can I use it partially?", "a": "Yes, balances are automatically tracked."}
+            ],
+            "updatedAt": datetime.utcnow().isoformat()
+        }
+    return settings
+
+@router.put("/settings", response_description="Update gift cards page settings", response_model=GiftCardSettingsModel)
+async def update_gift_card_settings(settings: GiftCardSettingsModel):
+    db = await get_database()
+    
+    # Standardize update time
+    settings_dict = settings.model_dump(by_alias=True, exclude=["id"])
+    settings_dict["updatedAt"] = datetime.utcnow().isoformat()
+    
+    # We only ever want ONE settings document
+    result = await db["gift_card_settings"].find_one_and_update(
+        {}, 
+        {"$set": settings_dict}, 
+        upsert=True, 
+        return_document=True
+    )
+    return result
+
+@router.put("/{id}", response_description="Update a gift card", response_model=GiftCardModel)
+async def update_gift_card(id: str, card_update: UpdateGiftCardModel):
+    db = await get_database()
+    query = {"_id": id}
+    try:
+        if ObjectId.is_valid(id):
+            query = {"_id": ObjectId(id)}
+    except:
+        pass
+
+    update_data = {k: v for k, v in card_update.model_dump().items() if v is not None}
+    
+    if len(update_data) >= 1:
+        update_result = await db["gift_cards"].find_one_and_update(
+            query, {"$set": update_data}, return_document=True
+        )
+        if update_result:
+            return update_result
+            
+    if (existing := await db["gift_cards"].find_one(query)) is not None:
+        return existing
+        
+    raise HTTPException(status_code=404, detail=f"Gift card {id} not found")
+
+@router.delete("/{id}", response_description="Delete a gift card")
+async def delete_gift_card(id: str):
+    db = await get_database()
+    query = {"_id": id}
+    try:
+        if ObjectId.is_valid(id):
+            query = {"_id": ObjectId(id)}
+    except:
+        pass
+        
+    delete_result = await db["gift_cards"].delete_one(query)
+    if delete_result.deleted_count == 1:
+        return {"detail": "Gift card successfully deleted"}
+        
+    raise HTTPException(status_code=404, detail=f"Gift card {id} not found")
+

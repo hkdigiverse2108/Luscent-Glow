@@ -107,73 +107,73 @@ const AdminNewsletter = () => {
       }`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-             <thead className={`border-b font-body text-xs font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${
-               isDark ? "bg-white/[0.02] border-white/5 text-white/30" : "bg-charcoal/[0.02] border-charcoal/5 text-charcoal/70"
+             <thead className={`border-b font-body text-[12px] font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${
+               isDark ? "bg-white/[0.04] border-white/10 text-white/50" : "bg-charcoal/[0.04] border-charcoal/10 text-charcoal/80"
              }`}>
                 <tr>
-                   <th className="px-8 py-6">Subscriber</th>
-                   <th className="px-6 py-6">Status</th>
-                   <th className="px-6 py-6">Joined Ritual</th>
-                   <th className="px-6 py-6 text-right">Actions</th>
+                   <th className="px-8 py-6 font-extrabold uppercase tracking-[0.3em]">Subscriber</th>
+                   <th className="px-6 py-6 font-extrabold uppercase tracking-widest">Status</th>
+                   <th className="px-6 py-6 font-extrabold uppercase tracking-widest">Joined Ritual</th>
+                   <th className="px-6 py-6 text-right pr-12 font-extrabold uppercase tracking-widest">Actions</th>
                 </tr>
              </thead>
              <tbody className={`divide-y transition-colors duration-700 ${
-               isDark ? "divide-white/5" : "divide-charcoal/5"
+               isDark ? "divide-white/10" : "divide-charcoal/10"
              }`}>
                 {loading ? (
                    Array(5).fill(0).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-8 py-6"><div className="h-6 w-48 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-6 w-32 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-6"><div className="h-8 w-8 ml-auto bg-white/5 rounded-full" /></td>
+                      <td className="px-8 py-8"><div className="h-6 w-48 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-6 w-32 bg-white/5 rounded-lg" /></td>
+                      <td className="px-6 py-8"><div className="h-10 w-10 ml-auto bg-white/5 rounded-full" /></td>
                     </tr>
                   ))
                 ) : filteredSubs.length > 0 ? (
                   filteredSubs.map((s) => (
-                    <tr key={s.email} className="group/row hover:bg-white/[0.02] transition-colors">
-                        <td className="px-8 py-6">
-                           <div className="flex items-center gap-4">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-gold transition-colors ${
-                                isDark ? "bg-gold/10" : "bg-gold/5"
+                    <tr key={s.email} className="group/row hover:bg-white/[0.03] transition-colors">
+                        <td className="px-8 py-8">
+                           <div className="flex items-center gap-5">
+                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-gold transition-colors ${
+                                isDark ? "bg-gold/10" : "bg-gold/5 shadow-inner"
                               }`}>
-                                 <Mail size={16} />
+                                 <Mail size={18} />
                               </div>
-                              <span className={`text-base font-bold tracking-wide transition-colors ${
+                              <span className={`text-[15px] font-extrabold tracking-wide transition-colors ${
                                 isDark ? "text-white" : "text-charcoal"
                               }`}>{s.email}</span>
                            </div>
                         </td>
-                       <td className="px-6 py-6">
-                          <div className="flex items-center gap-2 text-emerald-400">
-                             <CheckCircle size={14} />
-                             <span className="text-xs font-bold uppercase tracking-widest">Acknowledged</span>
+                       <td className="px-6 py-8">
+                          <div className="flex items-center gap-2 text-emerald-500">
+                             <CheckCircle size={18} />
+                             <span className="text-[13px] font-extrabold uppercase tracking-widest">Acknowledged</span>
                           </div>
                        </td>
-                        <td className="px-6 py-6">
-                           <div className={`flex items-center gap-2 text-xs font-medium transition-colors ${
-                             isDark ? "text-white/30" : "text-charcoal/40"
+                        <td className="px-6 py-8">
+                           <div className={`flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-widest transition-colors ${
+                             isDark ? "text-white/60" : "text-charcoal/80"
                            }`}>
-                              <Calendar size={14} />
+                              <Calendar size={18} />
                               {new Date(s.subscribedAt).toLocaleDateString()}
                            </div>
                         </td>
-                        <td className="px-6 py-6 text-right">
+                        <td className="px-6 py-8 text-right pr-8">
                            <button 
                              onClick={() => handleDelete(s.email)}
-                             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover/row:opacity-100 ${
-                               isDark ? "bg-white/5 text-white/20 hover:text-rose-light hover:bg-rose-light/10" : "bg-charcoal/5 text-charcoal/60 hover:text-rose-brand hover:bg-rose-brand/10"
+                             className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
+                               isDark ? "bg-white/5 text-white/40 hover:text-rose-light hover:bg-rose-light/10" : "bg-charcoal/5 text-charcoal/40 hover:text-rose-brand hover:bg-rose-brand/10"
                              }`}
                            >
-                              <Trash2 size={16} />
+                              <Trash2 size={18} />
                            </button>
                         </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className={`px-8 py-20 text-center font-body text-sm uppercase tracking-widest italic transition-colors ${
-                      isDark ? "text-white/20" : "text-charcoal/60"
+                    <td colSpan={4} className={`px-8 py-24 text-center font-body text-base font-extrabold uppercase tracking-widest italic transition-colors ${
+                      isDark ? "text-white/40" : "text-charcoal/70"
                     }`}>
                        No subscribers found in the inner circle.
                     </td>

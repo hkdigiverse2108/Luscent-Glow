@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, 
@@ -8,7 +8,8 @@ import {
   ShieldCheck, 
   HelpCircle,
   Plus,
-  Minus
+  Minus,
+  Zap
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -19,87 +20,66 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-
-const faqData = [
-  {
-    category: "General",
-    icon: <HelpCircle className="w-5 h-5" />,
-    questions: [
-      {
-        id: "g1",
-        question: "What makes Luscent Glow unique?",
-        answer: "Luscent Glow bridges the gap between scientific precision and botanical poetry. Our formulas are crafted in small batches using rare botanical extracts and dermatologically-tested active ingredients to ensure maximum potency and safety."
-      },
-      {
-        id: "g2",
-        question: "Are your products suitable for sensitive skin?",
-        answer: "Yes, most of our products are formulated with dermal integrity in mind. However, we always recommend performing a patch test on a small area of skin before full application, or consulting with a dermatologist if you have specific concerns."
-      }
-    ]
-  },
-  {
-    category: "Orders & Shipping",
-    icon: <Truck className="w-5 h-5" />,
-    questions: [
-      {
-        id: "s1",
-        question: "How long does shipping take?",
-        answer: "Standard shipping typically takes 3-5 business days. For our 'Glow Priority' members, we offer expedited 1-2 day delivery. You will receive a tracking number via email as soon as your order is dispatched."
-      },
-      {
-        id: "s2",
-        question: "Do you ship internationally?",
-        answer: "Currently, we ship within the continental United States and select international locations. Please check our shipping calculator at checkout for specific availability and rates for your region."
-      }
-    ]
-  },
-  {
-    category: "Products",
-    icon: <Package className="w-5 h-5" />,
-    questions: [
-      {
-        id: "p1",
-        question: "Are your products vegan and cruelty-free?",
-        answer: "Absolutely. We are committed to ethical beauty. 100% of our products are vegan and we never test on animals at any stage of product development."
-      },
-      {
-        id: "p2",
-        question: "How should I store my skincare products?",
-        answer: "To maintain the integrity of our botanical extracts, store your products in a cool, dry place away from direct sunlight. Some users prefer refrigeration for our serums to enhance their soothing effect."
-      }
-    ]
-  },
-  {
-    category: "Returns & Exchanges",
-    icon: <RefreshCcw className="w-5 h-5" />,
-    questions: [
-      {
-        id: "r1",
-        question: "What is your return policy?",
-        answer: "We offer a 30-day satisfaction guarantee. If you are not completely satisfied with your purchase, you may return it for a full refund or exchange. The product must be at least 50% full to be eligible."
-      },
-      {
-        id: "r2",
-        question: "How do I start a return?",
-        answer: "Simply contact our 'Glow Concierge' via the Contact page or email us at support@luscentglow.com with your order number, and we will guide you through the process."
-      }
-    ]
-  }
-];
+import { getApiUrl } from "@/lib/api";
 
 const FAQ = () => {
-  const [activeCategory, setActiveCategory] = useState("General");
+  const [config, setConfig] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredFaqs = faqData
-    .filter(cat => cat.category === activeCategory)
-    .map(cat => ({
-      ...cat,
-      questions: cat.questions.filter(q => 
-        q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        q.answer.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    }));
+  const fetchConfig = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/faq/settings"));
+      if (response.ok) {
+        const data = await response.json();
+        setConfig(data);
+        if (data.categories?.length > 0) {
+          setActiveCategory(data.categories[0].category);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch FAQ settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConfig();
+  }, []);
+
+  const resolveIcon = (iconName: string) => {
+    switch (iconName) {
+      case 'HelpCircle': return <HelpCircle className="w-5 h-5" />;
+      case 'Truck': return <Truck className="w-5 h-5" />;
+      case 'Package': return <Package className="w-5 h-5" />;
+      case 'RefreshCcw': return <RefreshCcw className="w-5 h-5" />;
+      default: return <Zap className="w-5 h-5" />;
+    }
+  };
+
+  const filteredFaqs = config?.categories
+    ? config.categories
+        .filter((cat: any) => cat.category === activeCategory)
+        .map((cat: any) => ({
+          ...cat,
+          questions: cat.questions.filter((q: any) => 
+            q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            q.answer.toLowerCase().includes(searchQuery.toLowerCase())
+          )
+        }))
+    : [];
+
+  if (loading || !config) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="font-display text-xs uppercase tracking-[0.3em] text-gold animate-pulse">
+            Establishing Concierge Connection...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background selection:bg-gold/30">
@@ -114,7 +94,7 @@ const FAQ = () => {
               animate={{ opacity: 1, y: 0 }}
               className="text-gold font-body font-bold uppercase tracking-[0.3em] mb-4 text-[10px] md:text-xs"
             >
-              Concierge Services
+              {config.heroBadge}
             </motion.p>
             <motion.h1 
               initial={{ opacity: 0, y: 20 }}
@@ -122,7 +102,11 @@ const FAQ = () => {
               transition={{ delay: 0.1 }}
               className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 leading-tight md:leading-[1.1]"
             >
-              How can we <span className="italic font-light">assist you?</span>
+              {config.heroTitle.split(' assist you? ').length > 1 ? (
+                <>
+                  How can we <span className="italic font-light">assist you?</span>
+                </>
+              ) : config.heroTitle}
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0 }}
@@ -130,8 +114,7 @@ const FAQ = () => {
               transition={{ delay: 0.3 }}
               className="font-body text-muted-foreground text-sm md:text-lg italic"
             >
-              "Explore our curated guide to the most frequent inquiries regarding 
-              your journey to radiant skin."
+              "{config.heroDescription}"
             </motion.p>
           </div>
 
@@ -162,9 +145,9 @@ const FAQ = () => {
               transition={{ delay: 0.5 }}
               className="lg:w-1/3 flex lg:flex-col gap-2 overflow-x-auto pb-4 lg:pb-0 scrollbar-hide px-4 md:px-0"
             >
-              {faqData.map((cat) => (
+              {config.categories.map((cat: any) => (
                 <button
-                  key={cat.category}
+                  key={cat.id}
                   onClick={() => setActiveCategory(cat.category)}
                   className={`
                     flex items-center gap-3 md:gap-4 px-5 md:px-6 py-3 md:py-4 rounded-xl transition-all duration-300 whitespace-nowrap
@@ -174,7 +157,7 @@ const FAQ = () => {
                   `}
                 >
                   <span className={`${activeCategory === cat.category ? "text-gold" : "text-muted-foreground/50"} flex-shrink-0`}>
-                    {cat.icon}
+                    {resolveIcon(cat.icon)}
                   </span>
                   <span className="font-body font-bold uppercase tracking-wider text-[10px] md:text-xs">
                     {cat.category}
@@ -200,7 +183,7 @@ const FAQ = () => {
                 >
                   <Accordion type="single" collapsible className="space-y-4 px-4 md:px-0">
                     {filteredFaqs[0]?.questions.length > 0 ? (
-                      filteredFaqs[0].questions.map((q) => (
+                      filteredFaqs[0].questions.map((q: any) => (
                         <AccordionItem 
                           key={q.id} 
                           value={q.id}
@@ -235,16 +218,16 @@ const FAQ = () => {
                   <ShieldCheck className="w-10 h-10" />
                 </div>
                 <h3 className="font-display text-2xl font-bold text-foreground mb-2 uppercase tracking-wider">
-                  Still have questions?
+                  {config.supportTitle}
                 </h3>
                 <p className="font-body text-muted-foreground mb-6">
-                  Our Glow Concierge team is here to assist you with any personalized requests.
+                  {config.supportDescription}
                 </p>
                 <a 
-                  href="/contact"
+                  href={config.supportButtonLink}
                   className="inline-block px-10 py-4 bg-primary text-primary-foreground font-body font-bold uppercase tracking-widest text-xs rounded-full hover:bg-gold transition-all shadow-xl hover:shadow-gold/20"
                 >
-                  Contact Concierge
+                  {config.supportButtonText}
                 </a>
               </motion.div>
             </motion.div>

@@ -3,19 +3,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   User, Mail, Phone, ShieldCheck, 
   Settings, LogOut, ChevronRight, 
-  Camera, ShoppingBag, Heart, CreditCard,
+  Camera, ShoppingBag, Heart, CreditCard, Gift,
   Lock, CheckCircle2, AlertCircle, Plus,
   MapPin, Home, Globe, Building, Sparkles, ChevronDown
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { getApiUrl } from "@/lib/api";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import LogoutConfirmation from "@/components/auth/LogoutConfirmation";
 
-type ProfileView = "details" | "orders" | "wishlist" | "payments" | "password";
+type ProfileView = "details" | "orders" | "wishlist" | "payments" | "password" | "giftcards";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
@@ -52,6 +52,10 @@ const Profile = () => {
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
+  
+  // Gift Cards state
+  const [receivedCards, setReceivedCards] = useState<any[]>([]);
+  const [cardsLoading, setCardsLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -66,14 +70,52 @@ const Profile = () => {
     }
   }, [user]);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (activeView === "giftcards" && user?.mobileNumber) {
+      fetchReceivedCards();
+    }
+  }, [activeView, user]);
+
+  const fetchReceivedCards = async () => {
+    setCardsLoading(true);
+    try {
+      const response = await fetch(getApiUrl(`/api/gift-cards/received/${user?.mobileNumber}`));
+      if (response.ok) {
+        const data = await response.json();
+        setReceivedCards(data);
+      }
+    } catch (error) {
+      toast.error("Could not fetch the gifting sanctuary details.");
+    } finally {
+      setCardsLoading(false);
+    }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfilePicture(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    setLoading(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+
+    try {
+      const response = await fetch(getApiUrl("/api/upload"), {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setProfilePicture(data.url);
+        toast.success("Image uploaded. Please save changes to finalize.");
+      } else {
+        toast.error(data.detail || "Upload failed.");
+      }
+    } catch (error) {
+      toast.error("System connection error during upload.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,7 +133,7 @@ const Profile = () => {
           mobileNumber,
           fullName,
           email,
-          profilePicture: profilePicture || undefined,
+          profilePicture,
           shippingAddress: {
             street,
             city,
@@ -197,7 +239,7 @@ const Profile = () => {
               <div className="relative z-10 w-36 h-36 md:w-48 md:h-48 rounded-full p-1.5 bg-gradient-to-tr from-gold/40 via-gold/10 to-transparent">
                 <div className="w-full h-full rounded-full bg-white border border-gold/10 flex items-center justify-center text-gold overflow-hidden">
                   {profilePicture ? (
-                    <img src={profilePicture} alt={fullName} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
+                    <img src={getAssetUrl(profilePicture)} alt={fullName} className="w-full h-full object-cover transition-transform group-hover:scale-110 duration-700" />
                   ) : (
                     <span className="font-display text-5xl md:text-6xl font-light">{user.fullName.charAt(0).toUpperCase()}</span>
                   )}
@@ -250,6 +292,7 @@ const Profile = () => {
                   { id: "details", label: "Profile Details", icon: <User size={18} /> },
                   { id: "orders", label: "Order History", icon: <ShoppingBag size={18} /> },
                   { id: "wishlist", label: "My Wishlist", icon: <Heart size={18} /> },
+                  { id: "giftcards", label: "My Gift Cards", icon: <Gift size={18} /> },
                   { id: "payments", label: "Payment Methods", icon: <CreditCard size={18} /> },
                   { id: "password", label: "Security Settings", icon: <Lock size={18} /> },
                 ].map((item) => (
@@ -631,6 +674,74 @@ const Profile = () => {
                           Your payment details are protected within our <span className="text-charcoal font-bold">Secure Payment System</span>. We never retain full card details or CVVs on our physical architecture, ensuring your details remain safe and secure.
                         </p>
                       </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {activeView === "giftcards" && (
+                  <motion.div
+                    key="giftcards"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 lg:p-20 shadow-ethereal border border-white/50 relative overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                    
+                    <div className="relative space-y-12">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-gold">
+                          <Gift size={14} className="opacity-50" />
+                          <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Personal Sanctuary</span>
+                        </div>
+                        <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Gifting <span className="text-gold italic font-light">History</span></h3>
+                      </div>
+
+                      {cardsLoading ? (
+                        <div className="space-y-6">
+                            {[...Array(2)].map((_, i) => (
+                                <div key={i} className="h-48 bg-secondary/20 animate-pulse rounded-[2.5rem]" />
+                            ))}
+                        </div>
+                      ) : receivedCards.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          {receivedCards.map((card, idx) => (
+                            <motion.div
+                              key={idx}
+                              whileHover={{ y: -10 }}
+                              className="relative aspect-[16/10] bg-charcoal rounded-[2.5rem] overflow-hidden shadow-2xl group border border-gold/10"
+                            >
+                              <img src={getAssetUrl(card.image)} className="absolute inset-0 w-full h-full object-cover" />
+                              <div className="absolute inset-0 p-8 flex flex-col justify-between text-white bg-black/30 backdrop-blur-[2px]">
+                                <div className="flex justify-between items-start">
+                                  <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+                                    <span className="font-display text-[10px] tracking-widest uppercase font-bold text-white">{card.code}</span>
+                                  </div>
+                                  <div className="font-display text-2xl lg:text-3xl font-bold text-gold">₹{card.balance.toLocaleString()}</div>
+                                </div>
+                                <div className="space-y-2">
+                                  <div className="h-[1px] bg-white/20 w-full" />
+                                  <p className="text-[9px] uppercase tracking-[0.3em] font-medium opacity-60 text-white">Recipient</p>
+                                  <p className="font-display text-xl lg:text-2xl font-bold italic text-white">{card.recipientName}</p>
+                                  {card.message && (
+                                    <p className="text-xs font-body font-light italic mt-3 opacity-90 line-clamp-2 text-white/90">"{card.message}"</p>
+                                  )}
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-20 bg-secondary/5 rounded-[3rem] border border-dashed border-gold/20 flex flex-col items-center justify-center">
+                           <div className="w-20 h-20 bg-gold/5 rounded-full flex items-center justify-center mb-6 text-gold/20">
+                             <Gift size={40} />
+                           </div>
+                           <h4 className="font-display text-2xl font-bold text-charcoal opacity-60">No Gifting Rituals Found.</h4>
+                           <p className="text-[10px] font-body text-muted-foreground mt-4 italic max-w-xs leading-relaxed uppercase tracking-widest">
+                             Tokens added via the Admin Sanctuary will appear here for the registered recipient.
+                           </p>
+                        </div>
+                      )}
                     </div>
                   </motion.div>
                 )}

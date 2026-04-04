@@ -6,7 +6,8 @@ import {
   Users, 
   Activity,
   ArrowUpRight,
-  Sparkles
+  Sparkles,
+  MessageSquare
 } from "lucide-react";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 
@@ -16,6 +17,7 @@ const AdminDashboard = () => {
     { label: "Total Radiance", value: "₹1,42,850", icon: TrendingUp, change: "+12.5%", color: "text-gold" },
     { label: "Ritual Orders", value: "342", icon: ShoppingBag, change: "+8.2%", color: "text-rose-light" },
     { label: "Active Seekers", value: "1,205", icon: Users, change: "+15.3%", color: "text-emerald-400" },
+    { label: "Pending Rituals", value: "24", icon: MessageSquare, change: "Inquiries", color: "text-indigo-400" },
     { label: "Sanctuary Health", value: "99.9%", icon: Activity, change: "Optimal", color: "text-sky-400" },
   ];
 
@@ -29,22 +31,22 @@ const AdminDashboard = () => {
           }`}>
             Platform <span className="text-indigo-500">Governance</span>
           </h2>
-          <p className={`font-body text-xs tracking-widest uppercase font-bold transition-colors duration-700 ${
-            isDark ? "text-slate-500" : "text-charcoal/70"
+          <p className={`font-body text-[13px] tracking-widest uppercase font-bold transition-colors duration-700 ${
+            isDark ? "text-slate-400" : "text-charcoal/70"
           }`}>
             Live Administrative Intelligence and Metadata Sync
           </p>
         </div>
-        <div className={`flex items-center gap-4 text-sm font-bold uppercase tracking-widest transition-colors duration-700 ${
-          isDark ? "text-white/40" : "text-charcoal/60"
+        <div className={`flex items-center gap-6 text-[14px] font-extrabold uppercase tracking-widest transition-colors duration-700 ${
+          isDark ? "text-white/80" : "text-charcoal"
         }`}>
           <span>April 03, 2026</span>
-          <div className={`h-4 w-[1px] transition-colors ${
-            isDark ? "bg-white/10" : "bg-charcoal/10"
+          <div className={`h-5 w-[1.5px] transition-colors ${
+            isDark ? "bg-white/30" : "bg-charcoal/30"
           }`} />
-          <div className="flex items-center gap-2 text-emerald-400">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Live Sync
+          <div className="flex items-center gap-2.5 text-emerald-500">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            Live Database Sync
           </div>
         </div>
       </div>
@@ -72,14 +74,14 @@ const AdminDashboard = () => {
               } ${stat.color}`}>
                 <stat.icon size={22} strokeWidth={1.5} />
               </div>
-              <div className="text-[10px] font-bold text-gold uppercase tracking-widest flex items-center gap-1.5 opacity-60">
-                {stat.change} <ArrowUpRight size={12} />
+              <div className="text-[12px] font-extrabold text-gold uppercase tracking-widest flex items-center gap-2">
+                {stat.change} <ArrowUpRight size={14} />
               </div>
             </div>
 
             <div className="space-y-1 text-center md:text-left">
-              <p className={`text-[10px] font-bold uppercase tracking-[0.3em] font-body transition-colors duration-700 ${
-                isDark ? "text-slate-500" : "text-charcoal/70"
+              <p className={`text-[13px] font-extrabold uppercase tracking-[0.3em] font-body transition-colors duration-700 ${
+                isDark ? "text-slate-300" : "text-charcoal"
               }`}>
                 {stat.label}
               </p>

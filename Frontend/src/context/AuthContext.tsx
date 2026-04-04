@@ -21,23 +21,45 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  admin: User | null;
   login: (userData: User) => void;
+  adminLogin: (adminData: User) => void;
   logout: () => void;
+  adminLogout: () => void;
   isAuthenticated: boolean;
+  isAdminAuthenticated: boolean;
   syncUser: (userData: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem("user");
+    try {
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [admin, setAdmin] = useState<User | null>(() => {
+    const savedAdmin = localStorage.getItem("admin");
+    try {
+      return savedAdmin ? JSON.parse(savedAdmin) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const { syncCart, clearCart } = useCart();
   const { syncWithServer: syncWishlist, clearWishlist } = useWishlist();
 
+  // Handle server-side data sync on mount if logged in
   useEffect(() => {
-    const savedUser = localStorage.getItem("user");
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    if (user) {
+      syncCart();
+      syncWishlist();
     }
   }, []);
 
@@ -47,6 +69,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Trigger background syncs immediately
     syncCart();
     syncWishlist();
+  };
+
+  const adminLogin = (adminData: User) => {
+    setAdmin(adminData);
+    localStorage.setItem("admin", JSON.stringify(adminData));
   };
 
   const syncUser = (userData: User) => {
@@ -62,8 +89,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.success("Signed out of your sanctuary successfully");
   };
 
+  const adminLogout = () => {
+    setAdmin(null);
+    localStorage.removeItem("admin");
+    toast.success("Administrative clearance revoked.");
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, syncUser }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      admin, 
+      login, 
+      adminLogin, 
+      logout, 
+      adminLogout, 
+      isAuthenticated: !!user,
+      isAdminAuthenticated: !!admin,
+      syncUser 
+    }}>
       {children}
     </AuthContext.Provider>
   );

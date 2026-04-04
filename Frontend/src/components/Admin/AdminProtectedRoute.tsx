@@ -4,15 +4,15 @@ import { useAuth } from "../../context/AuthContext.tsx";
 import { toast } from "sonner";
 
 const AdminProtectedRoute = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { admin, isAdminAuthenticated } = useAuth();
   const location = useLocation();
 
-  if (!isAuthenticated) {
+  if (!isAdminAuthenticated) {
     // Save the intended destination for post-login redirect
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
-  if (!user?.isAdmin) {
+  if (!admin?.isAdmin) {
     toast.error("Access Denied: Admin Privileges Required");
     return <Navigate to="/" replace />;
   }
