@@ -1,11 +1,11 @@
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Calendar, Clock, User } from "lucide-react";
-import { BlogPost } from "@/data/blogData";
 import { Link } from "react-router-dom";
+import { getAssetUrl } from "@/lib/api";
 
 interface BlogCardProps {
-  post: BlogPost;
+  post: any;
   index: number;
 }
 
@@ -19,7 +19,7 @@ const BlogCard = forwardRef<HTMLDivElement, BlogCardProps>(({ post, index }, ref
       transition={{ delay: index * 0.1, duration: 0.8 }}
       className="group"
     >
-      <Link to={`/blogs/${post.id}`} className="block relative overflow-hidden rounded-[2.5rem] bg-secondary aspect-[4/5] mb-6 shadow-ethereal">
+      <Link to={`/blogs/${post._id || post.id}`} className="block relative overflow-hidden rounded-[2.5rem] bg-secondary aspect-[4/5] mb-6 shadow-ethereal">
         {/* Hover Icon */}
         <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
           <div className="w-16 h-16 bg-gold/90 rounded-full flex items-center justify-center text-primary transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
@@ -31,7 +31,7 @@ const BlogCard = forwardRef<HTMLDivElement, BlogCardProps>(({ post, index }, ref
         <motion.img
           whileHover={{ scale: 1.1 }}
           transition={{ duration: 1.5 }}
-          src={post.image}
+          src={getAssetUrl(post.image)}
           alt={post.title}
           className="w-full h-full object-cover transition-all duration-700 group-hover:blur-[2px]"
         />

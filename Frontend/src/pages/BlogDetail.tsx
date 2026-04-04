@@ -1,4 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { 
   ArrowLeft, Calendar, Clock, User, Share2, Facebook, Twitter, 
@@ -8,17 +9,30 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { blogPosts } from "@/data/blogData";
-import { products } from "@/data/products";
 import { toast } from "sonner";
-import ProductCard from "@/components/ProductCard";
-import { useEffect, useState } from "react";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 
 const BlogDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const post = blogPosts.find((p) => p.id === id);
-  
+  const [post, setPost] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(getApiUrl(`blogs/${id}`));
+        if (response.ok) {
+          setPost(await response.json());
+        }
+      } catch (error) {
+        console.error("Failed to fetch story:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPost();
+  }, [id]);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,
@@ -70,7 +84,7 @@ const BlogDetail = () => {
             initial={{ scale: 1.15, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.6 }}
             transition={{ duration: 1.8, ease: "easeOut" }}
-            src={post.image}
+            src={getAssetUrl(post.image)}
             alt={post.title}
             className="w-full h-full object-cover"
           />

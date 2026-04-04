@@ -308,7 +308,7 @@ class GiftCardSettingsModel(BaseModel):
     benefitsDescription: str = Field(default="Choosing the perfect skincare ritual for someone else can be challenging.")
     benefitsList: List[str] = Field(default_factory=list)
     faqs: List[dict] = Field(default_factory=list) # {q, a}
-    updatedAt: str = Field(...)
+    updatedAt: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -330,7 +330,7 @@ class PaymentRecordModel(BaseModel):
     data: Optional[dict] = Field(default=None)
     rawResponse: Optional[dict] = Field(default=None)
     createdAt: str = Field(...)
-    updatedAt: str = Field(...)
+    updatedAt: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -376,7 +376,7 @@ class BulkOrderSettingsModel(BaseModel):
     quantities: List[str] = Field(default_factory=list) # ["10-50", "50-100", ...]
     inquiryTitle: str = Field(default="The Inquiry Portal")
     inquiryDescription: str = Field(default="Share your requirements and our team will reach out.")
-    updatedAt: str = Field(...)
+    updatedAt: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -401,7 +401,7 @@ class AboutSettingsModel(BaseModel):
     curatorQuote: str = Field(default="I wanted to create a space where beauty wasn't about concealment, but about enhancement.")
     curatorName: str = Field(default="Janvi Vasani, Founder & Curator")
     commitments: List[str] = Field(default_factory=list)
-    updatedAt: str = Field(...)
+    updatedAt: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -421,7 +421,7 @@ class ContactSettingsModel(BaseModel):
     faqTitle: str = Field(default="Seeking Instant Curation?")
     faqSubtitle: str = Field(default="Most inquiries are illuminated in our FAQ registry.")
     faqLinks: List[str] = Field(default_factory=list)
-    updatedAt: str = Field(...)
+    updatedAt: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -439,7 +439,41 @@ class FAQSettingsModel(BaseModel):
     supportDescription: str = Field(default="Our Glow Concierge team is here to assist you with any personalized requests.")
     supportButtonText: str = Field(default="Contact Concierge")
     supportButtonLink: str = Field(default="/contact")
-    updatedAt: str = Field(...)
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+class BlogPostModel(BaseModel):
+    """
+    Model for an individual journal story (blog post).
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    title: str = Field(...)
+    excerpt: str = Field(...)
+    content: str = Field(...) # HTML content for rich storytelling
+    author: str = Field(default="Elena Vance")
+    date: str = Field(...)
+    category: str = Field(default="Rituals")
+    image: str = Field(...)
+    readTime: str = Field(default="5 min read")
+    featured: bool = Field(default=False)
+    relatedProducts: List[str] = Field(default_factory=list)
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+class BlogSettingsModel(BaseModel):
+    """
+    Model for editorial branding/titles on the Journal page.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    heroBadge: str = Field(default="The Journal")
+    heroTitle: str = Field(default="Glow Haven Chronicles")
+    finaleTitle: str = Field(default="Stay Inspired")
+    finaleSubtitle: str = Field(default="Ritual of Radiance")
+    updatedAt: Optional[str] = None
 
     class Config:
         populate_by_name = True
@@ -452,7 +486,7 @@ class BrandingModel(BaseModel):
     logoText: str = Field(default="Luscent Glow")
     logoImage: Optional[str] = Field(default=None)
     useImage: bool = Field(default=False)
-    updatedAt: str = Field(...)
+    updatedAt: Optional[str] = None
 
     class Config:
         populate_by_name = True

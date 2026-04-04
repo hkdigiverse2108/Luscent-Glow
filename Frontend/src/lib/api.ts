@@ -11,14 +11,20 @@ const BASE_URL = API_BASE.includes('http')
   ? API_BASE.split('/api')[0] 
   : ''; // Relative fallback
 
-/**
- * Builds a dynamic URL for the API.
- * @param path The relative path to the endpoint (e.g., "/auth/signin")
- */
 export const getApiUrl = (path: string): string => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  if (API_BASE.startsWith('/')) return `${API_BASE}${cleanPath}`;
-  return `${API_BASE.replace(/\/$/, '')}${cleanPath}`;
+  
+  // Ensure the path starts with /api if it doesn't already
+  const apiPath = cleanPath.startsWith('/api') ? cleanPath : `/api${cleanPath}`;
+  
+  if (API_BASE.startsWith('/')) {
+    // If API_BASE is relative (like '/api')
+    if (API_BASE === '/api') return apiPath;
+    return `${API_BASE}${apiPath.startsWith(API_BASE) ? apiPath.slice(API_BASE.length) : apiPath}`;
+  }
+  
+  // If API_BASE is absolute (like 'http://localhost:5172')
+  return `${API_BASE.replace(/\/$/, '')}${apiPath}`;
 };
 
 /**

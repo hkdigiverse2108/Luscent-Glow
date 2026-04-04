@@ -17,7 +17,8 @@ import {
   Ticket,
   Package,
   Phone,
-  HelpCircle
+  HelpCircle,
+  Edit2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -40,6 +41,7 @@ const AdminLayout = () => {
     { icon: Sparkles, label: "About Us", path: "/admin/about" },
     { icon: Phone, label: "Contact Us", path: "/admin/contact" },
     { icon: HelpCircle, label: "FAQ", path: "/admin/faq" },
+    { icon: Edit2, label: "Blogs", path: "/admin/blogs" },
     { icon: Settings, label: "Settings", path: "/admin/settings" },
   ];
 
