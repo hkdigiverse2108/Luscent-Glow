@@ -46,6 +46,7 @@ import AdminBulkOrders from "./pages/Admin/AdminBulkOrders.tsx";
 import AdminAbout from "./pages/Admin/AdminAbout.tsx";
 import AdminContact from "./pages/Admin/AdminContact.tsx";
 import AdminFAQ from "./pages/Admin/AdminFAQ.tsx";
+import AdminPolicies from "./pages/Admin/PoliciesAdmin.tsx";
 import AdminBlogs from "./pages/Admin/AdminBlogs.tsx";
 import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute.tsx";
 import { AdminThemeProvider } from "./context/AdminThemeContext.tsx";
@@ -111,6 +112,7 @@ const App = () => (
                     <Route path="about" element={<AdminAbout />} />
                     <Route path="contact" element={<AdminContact />} />
                     <Route path="faq" element={<AdminFAQ />} />
+                    <Route path="policies" element={<AdminPolicies />} />
                     <Route path="blogs" element={<AdminBlogs />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>

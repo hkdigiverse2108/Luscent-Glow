@@ -4,10 +4,31 @@ import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { LucideIcon } from "lucide-react";
+import { 
+  Shield, 
+  Eye, 
+  Lock, 
+  Globe, 
+  FileText, 
+  UserCheck, 
+  ShieldAlert, 
+  Award, 
+  RefreshCcw, 
+  Mail, 
+  HelpCircle, 
+  Truck, 
+  PackageCheck, 
+  Zap, 
+  Globe2, 
+  XCircle, 
+  Clock, 
+  CheckCircle2, 
+  CreditCard,
+  Sparkles
+} from "lucide-react";
 
 interface QuickInsight {
-  icon: React.ReactNode;
+  icon: React.ReactNode | string;
   title: string;
   description: string;
 }
@@ -25,6 +46,34 @@ interface PolicyLayoutProps {
   insights: QuickInsight[];
   sections: PolicySection[];
 }
+
+const resolveIcon = (iconName: string | any) => {
+  if (typeof iconName !== 'string') return iconName;
+  
+  const props = { size: 24 };
+  switch (iconName) {
+    case 'Shield': return <Shield {...props} />;
+    case 'Eye': return <Eye {...props} />;
+    case 'Lock': return <Lock {...props} />;
+    case 'Globe': return <Globe {...props} />;
+    case 'FileText': return <FileText {...props} />;
+    case 'UserCheck': return <UserCheck {...props} />;
+    case 'ShieldAlert': return <ShieldAlert {...props} />;
+    case 'Award': return <Award {...props} />;
+    case 'RefreshCcw': return <RefreshCcw {...props} />;
+    case 'Mail': return <Mail {...props} />;
+    case 'HelpCircle': return <HelpCircle {...props} />;
+    case 'Truck': return <Truck {...props} />;
+    case 'PackageCheck': return <PackageCheck {...props} />;
+    case 'Zap': return <Zap {...props} />;
+    case 'Globe2': return <Globe2 {...props} />;
+    case 'XCircle': return <XCircle {...props} />;
+    case 'Clock': return <Clock {...props} />;
+    case 'CheckCircle2': return <CheckCircle2 {...props} />;
+    case 'CreditCard': return <CreditCard {...props} />;
+    default: return <Sparkles {...props} />;
+  }
+};
 
 const PolicyLayout: React.FC<PolicyLayoutProps> = ({
   title,
@@ -86,7 +135,7 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
                 className="p-6 md:p-8 bg-white border border-gold/10 rounded-2xl md:rounded-[2rem] hover:border-gold/30 transition-all shadow-sm group text-center sm:text-left"
               >
                 <div className="w-12 h-12 bg-secondary/50 rounded-2xl flex items-center justify-center mb-4 md:mb-6 mx-auto sm:mx-0 group-hover:scale-110 transition-transform text-gold">
-                  {insight.icon}
+                  {resolveIcon(insight.icon)}
                 </div>
                 <h3 className="font-display text-lg md:text-xl font-bold text-primary mb-2 uppercase tracking-wider">
                   {insight.title}
@@ -114,9 +163,9 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
                   <h2 className="font-display text-2xl md:text-3xl font-bold text-primary border-b border-gold/10 pb-4">
                     {section.title}
                   </h2>
-                  <div className="font-body text-muted-foreground text-sm md:text-lg leading-relaxed space-y-4">
+                  <div className="font-body text-muted-foreground text-sm md:text-lg leading-relaxed space-y-4 policy-content">
                     {typeof section.content === "string" ? (
-                      <p>{section.content}</p>
+                      <div dangerouslySetInnerHTML={{ __html: section.content }} />
                     ) : (
                       section.content
                     )}

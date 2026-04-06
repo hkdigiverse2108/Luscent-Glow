@@ -18,6 +18,7 @@ import {
   Package,
   Phone,
   HelpCircle,
+  Shield,
   Edit2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,6 +42,7 @@ const AdminLayout = () => {
     { icon: Sparkles, label: "About Us", path: "/admin/about" },
     { icon: Phone, label: "Contact Us", path: "/admin/contact" },
     { icon: HelpCircle, label: "FAQ", path: "/admin/faq" },
+    { icon: Shield, label: "Policies", path: "/admin/policies" },
     { icon: Edit2, label: "Blogs", path: "/admin/blogs" },
     { icon: Settings, label: "Settings", path: "/admin/settings" },
   ];

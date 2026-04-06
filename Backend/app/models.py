@@ -490,3 +490,45 @@ class BrandingModel(BaseModel):
 
     class Config:
         populate_by_name = True
+
+class PolicyInsightModel(BaseModel):
+    """
+    Schema for a highlight/insight in a policy page.
+    """
+    icon: str = Field(...)
+    title: str = Field(...)
+    description: str = Field(...)
+
+class PolicySectionModel(BaseModel):
+    """
+    Schema for a section within a policy.
+    """
+    id: str = Field(...)
+    title: str = Field(...)
+    content: str = Field(...) # HTML content
+
+class PolicyModel(BaseModel):
+    """
+    Model for dynamic policy pages (Privacy, Terms, etc.).
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    type: str = Field(...) # unique identifier: privacy-policy, terms-of-service, etc.
+    title: str = Field(...)
+    subtitle: str = Field(...)
+    lastUpdated: str = Field(...)
+    insights: List[PolicyInsightModel] = Field(default_factory=list)
+    sections: List[PolicySectionModel] = Field(default_factory=list)
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "type": "privacy-policy",
+                "title": "Privacy Policy",
+                "subtitle": "Your trust is everything.",
+                "lastUpdated": "March 30, 2026",
+                "insights": [],
+                "sections": []
+            }
+        }

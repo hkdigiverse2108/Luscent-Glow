@@ -21,6 +21,7 @@ from .routes.about import router as about_router
 from .routes.contact_settings import router as contact_settings_router
 from .routes.faq import router as faq_router
 from .routes.blogs import router as blogs_router
+from .routes.policies import router as policy_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -69,6 +70,7 @@ app.include_router(about_router, prefix="/api", tags=["About Us"])
 app.include_router(contact_settings_router, prefix="/api", tags=["Contact Settings"])
 app.include_router(faq_router, prefix="/api", tags=["FAQ"])
 app.include_router(blogs_router, prefix="/api", tags=["Blogs"])
+app.include_router(policy_router, prefix="/api", tags=["Policies"])
 
 @app.get("/", tags=["Root"])
 async def read_root():
