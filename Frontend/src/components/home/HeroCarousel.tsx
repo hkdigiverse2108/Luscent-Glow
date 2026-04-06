@@ -2,19 +2,25 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, MousePointer2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { heroSlides } from "@/data/products";
+import { heroSlides as defaultSlides } from "@/data/products";
+import { getAssetUrl } from "@/lib/api";
 
-const HeroCarousel = () => {
+interface HeroCarouselProps {
+  slides?: any[];
+}
+
+const HeroCarousel = ({ slides }: HeroCarouselProps) => {
   const [current, setCurrent] = useState(0);
+  const activeSlides = slides && slides.length > 0 ? slides : defaultSlides;
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent((c) => (c + 1) % heroSlides.length);
+      setCurrent((c) => (c + 1) % activeSlides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [activeSlides.length]);
 
-  const slide = heroSlides[current];
+  const slide = activeSlides[current];
 
   return (
     <section className="relative h-[90vh] md:h-screen min-h-[600px] md:min-h-[700px] overflow-hidden bg-charcoal">
@@ -35,7 +41,7 @@ const HeroCarousel = () => {
             className="absolute inset-0"
           >
             <img
-              src={slide.image}
+              src={getAssetUrl(slide.image)}
               alt={slide.title}
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
@@ -105,7 +111,7 @@ const HeroCarousel = () => {
                     to={slide.link || "/products"}
                     className="group relative px-8 md:px-10 py-3.5 md:py-4 bg-gold text-charcoal font-body font-semibold text-xs md:text-sm uppercase tracking-widest rounded-full hover:bg-white transition-all duration-500 flex items-center gap-2 overflow-hidden"
                   >
-                    <span className="relative z-10">{slide.cta}</span>
+                    <span className="relative z-10">{slide.cta || "Shop Collection"}</span>
                     <ArrowRight size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </motion.div>
@@ -117,7 +123,7 @@ const HeroCarousel = () => {
 
       {/* Progress Indicators */}
       <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 flex flex-col gap-4 md:gap-6 items-center z-10">
-        {heroSlides.map((_, i) => (
+        {activeSlides.map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}

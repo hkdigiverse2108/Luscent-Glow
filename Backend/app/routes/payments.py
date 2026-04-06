@@ -7,6 +7,7 @@ from fastapi import APIRouter, Body, HTTPException, status, Request
 from fastapi.responses import RedirectResponse
 from ..config import settings
 from ..database import get_database
+from .settings import get_payment_credentials
 from datetime import datetime
 import random
 import string
@@ -26,7 +27,13 @@ async def initiate_payment(order_data: dict = Body(...)):
     5. Return the redirect URL to Frontend.
     """
     db = await get_database()
-    
+    # Load live credentials from DB (falls back to sandbox defaults)
+    creds = await get_payment_credentials()
+    phonepe_merchant_id = creds.get("merchantId", settings.PHONEPE_MERCHANT_ID)
+    phonepe_salt_key = creds.get("saltKey", settings.PHONEPE_SALT_KEY)
+    phonepe_salt_index = creds.get("saltIndex", settings.PHONEPE_SALT_INDEX)
+    phonepe_base_url = creds.get("baseUrl", settings.PHONEPE_BASE_URL)
+
     existing_order = await db["orders"].find_one({"orderNumber": order_data.get("orderNumber")})
     
     if existing_order:
@@ -48,7 +55,7 @@ async def initiate_payment(order_data: dict = Body(...)):
         
         # 2b. Initial Payment Audit Entry (STORES PENDING DATA)
         new_payment = {
-            "merchantId": settings.PHONEPE_MERCHANT_ID,
+            "merchantId": phonepe_merchant_id,
             "merchantTransactionId": merchant_txn_id,
             "orderNumber": order_number,
             "userMobile": order_data.get("userMobile") or "GUEST_USER",
@@ -71,7 +78,7 @@ async def initiate_payment(order_data: dict = Body(...)):
     base_domain = settings.BACKEND_URL
     
     payload = {
-        "merchantId": settings.PHONEPE_MERCHANT_ID,
+        "merchantId": phonepe_merchant_id,
         "merchantTransactionId": merchant_txn_id,
         "merchantUserId": order_data.get("userMobile") or "GUEST_USER",
         "amount": amount_paisa,
@@ -90,9 +97,9 @@ async def initiate_payment(order_data: dict = Body(...)):
     
     # SHA256(Base64_Payload + "/pg/v1/pay" + Salt_Key) + "###" + Salt_Index
     endpoint = "/pg/v1/pay"
-    data_to_hash = f"{payload_base64}{endpoint}{settings.PHONEPE_SALT_KEY}"
+    data_to_hash = f"{payload_base64}{endpoint}{phonepe_salt_key}"
     checksum = hashlib.sha256(data_to_hash.encode('utf-8')).hexdigest()
-    x_verify = f"{checksum}###{settings.PHONEPE_SALT_INDEX}"
+    x_verify = f"{checksum}###{phonepe_salt_index}"
     
     # Call PhonePe
     headers = {
@@ -103,7 +110,7 @@ async def initiate_payment(order_data: dict = Body(...)):
     
     try:
         response = requests.post(
-            f"{settings.PHONEPE_BASE_URL}{endpoint}",
+            f"{phonepe_base_url}{endpoint}",
             json={"request": payload_base64},
             headers=headers
         )
@@ -255,13 +262,19 @@ async def payment_redirect(merchantTransactionId: str = None):
     the callback was missed (common on localhost).
     """
     db = await get_database()
-    
+    # Load live credentials from DB
+    creds = await get_payment_credentials()
+    phonepe_merchant_id = creds.get("merchantId", settings.PHONEPE_MERCHANT_ID)
+    phonepe_salt_key = creds.get("saltKey", settings.PHONEPE_SALT_KEY)
+    phonepe_salt_index = creds.get("saltIndex", settings.PHONEPE_SALT_INDEX)
+    phonepe_base_url = creds.get("baseUrl", settings.PHONEPE_BASE_URL)
+
     # 1. Manually Check Status with PhonePe
-    merchant_id = settings.PHONEPE_MERCHANT_ID
+    merchant_id = phonepe_merchant_id
     endpoint = f"/pg/v1/status/{merchant_id}/{merchantTransactionId}"
-    data_to_hash = f"{endpoint}{settings.PHONEPE_SALT_KEY}"
+    data_to_hash = f"{endpoint}{phonepe_salt_key}"
     checksum = hashlib.sha256(data_to_hash.encode('utf-8')).hexdigest()
-    x_verify = f"{checksum}###{settings.PHONEPE_SALT_INDEX}"
+    x_verify = f"{checksum}###{phonepe_salt_index}"
     
     headers = {
         "Content-Type": "application/json",
@@ -272,7 +285,7 @@ async def payment_redirect(merchantTransactionId: str = None):
     
     try:
         response = requests.get(
-            f"{settings.PHONEPE_BASE_URL}{endpoint}",
+            f"{phonepe_base_url}{endpoint}",
             headers=headers
         )
         res_data = response.json()

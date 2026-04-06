@@ -530,6 +530,7 @@ class PolicySectionModel(BaseModel):
     id: str = Field(...)
     title: str = Field(...)
     content: str = Field(...) # HTML content
+    icon: Optional[str] = Field(default="FileText")
 
 class PolicyModel(BaseModel):
     """
@@ -540,6 +541,7 @@ class PolicyModel(BaseModel):
     title: str = Field(...)
     subtitle: str = Field(...)
     lastUpdated: str = Field(...)
+    heroIcon: Optional[str] = Field(default="Shield")
     insights: List[PolicyInsightModel] = Field(default_factory=list)
     sections: List[PolicySectionModel] = Field(default_factory=list)
     updatedAt: Optional[str] = None
@@ -556,3 +558,213 @@ class PolicyModel(BaseModel):
                 "sections": []
             }
         }
+
+class FooterSocial(BaseModel):
+    platform: str
+    url: str
+    icon: str
+
+class FooterLink(BaseModel):
+    label: str
+    path: str
+
+class FooterColumn(BaseModel):
+    title: str
+    links: List[FooterLink]
+
+class FooterModel(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    brandDescription: str
+    socials: List[FooterSocial]
+    email: str
+    phone: str
+    columns: List[FooterColumn]
+    newsletterTitle: str
+    newsletterSubtitle: str
+    copyrightText: str
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "brandDescription": "Elevate your beauty routine with our premium, cruelty-free cosmetics.",
+                "socials": [{"platform": "Instagram", "url": "https://...", "icon": "Instagram"}],
+                "email": "hello@luscentglow.com",
+                "phone": "+91 97126 63607",
+                "columns": [
+                    {
+                        "title": "Information",
+                        "links": [{"label": "About Us", "path": "/about"}]
+                    }
+                ],
+                "newsletterTitle": "Beauty Line",
+                "newsletterSubtitle": "Curated aesthetics & beauty tips straight to your inbox.",
+                "copyrightText": "© 2026 Luscent Glow. All rights reserved."
+            }
+        }
+
+class GlobalSettingsModel(BaseModel):
+    """
+    Model for platform-wide configurations like WhatsApp number.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    whatsappNumber: str = Field(default="919537150942")
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "whatsappNumber": "919537150942",
+                "updatedAt": "2026-04-06T09:53:06Z"
+            }
+        }
+
+class PaymentCredentialsModel(BaseModel):
+    """
+    Model for PhonePe payment gateway credentials stored in the database.
+    These override the .env defaults at runtime.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    merchantId: str = Field(default="PGTESTPAYUAT86")
+    saltKey: str = Field(default="96434309-7796-489d-8924-ab56988a6076")
+    saltIndex: str = Field(default="1")
+    baseUrl: str = Field(default="https://api-preprod.phonepe.com/apis/pg-sandbox")
+    mode: str = Field(default="sandbox")  # "sandbox" or "production"
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "merchantId": "PGTESTPAYUAT86",
+                "saltKey": "96434309-7796-489d-8924-ab56988a6076",
+                "saltIndex": "1",
+                "baseUrl": "https://api-preprod.phonepe.com/apis/pg-sandbox",
+                "mode": "sandbox"
+            }
+        }
+
+class OfferModel(BaseModel):
+    """
+    Model for individual promotional offers, flash deals, and bundles.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    type: str = Field(...) # flash, bundle, tier
+    title: str = Field(...)
+    discount: Optional[str] = Field(default=None)
+    category: Optional[str] = Field(default=None)
+    image: Optional[str] = Field(default=None)
+    endTime: Optional[str] = Field(default=None) # ISO string or countdown time
+    price: Optional[float] = Field(default=None)
+    originalPrice: Optional[float] = Field(default=None)
+    items: List[str] = Field(default_factory=list)
+    tag: Optional[str] = Field(default=None)
+    threshold: Optional[float] = Field(default=None)
+    reward: Optional[str] = Field(default=None)
+    isActive: bool = Field(default=True)
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "type": "flash",
+                "title": "Midnight Radiance Flash Sale",
+                "discount": "FLAT 40% OFF",
+                "category": "Skincare Essentials",
+                "image": "https://...",
+                "endTime": "2026-04-07T00:00:00Z"
+            }
+        }
+
+class UpdateOfferModel(BaseModel):
+    """
+    Schema for updating individual offers.
+    """
+    type: Optional[str] = None
+    title: Optional[str] = None
+    discount: Optional[str] = None
+    category: Optional[str] = None
+    image: Optional[str] = None
+    endTime: Optional[str] = None
+    price: Optional[float] = None
+    originalPrice: Optional[float] = None
+    items: Optional[List[str]] = None
+    tag: Optional[str] = None
+    threshold: Optional[float] = None
+    reward: Optional[str] = None
+    isActive: Optional[bool] = None
+
+class OfferSettingsModel(BaseModel):
+    """
+    Model for the dynamic content of the Offers landing page.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    heroTitle: str = Field(default="Exclusive Treasures Waiting For You")
+    heroDescription: str = Field(default="Unlock limited-time discounts on our premium, cruelty-free collection.")
+    heroImage: str = Field(default="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1600&h=900&fit=crop")
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+class HeroSlideModel(BaseModel):
+    """
+    Schema for a single slide in the cinematic hero carousel.
+    """
+    image: str = Field(...)
+    title: str = Field(...)
+    subtitle: str = Field(...)
+    cta: str = Field(default="Shop Collection")
+    link: str = Field(default="/products")
+
+class HomeBrandStoryModel(BaseModel):
+    """
+    Schema for the philosophical 'Our Story' section on the homepage.
+    """
+    badge: str = Field(default="Our Philosophy")
+    title: str = Field(default="The Alchemy of Radiance")
+    description: str = Field(...)
+    image: str = Field(default="/assets/hero/brand-story.png")
+    buttonText: str = Field(default="Read Our Full Story")
+    buttonLink: str = Field(default="/about")
+
+class HomeDiscountBannerModel(BaseModel):
+    """
+    Schema for the promotional highlight banner on the homepage.
+    """
+    image: str = Field(default="/assets/home/discount-banner.png")
+    title: str = Field(default="Season of Radiance")
+    subtitle: str = Field(default="Limited time offers on our signature collections.")
+    discountText: str = Field(default="UP TO 50% OFF")
+    buttonText: str = Field(default="Claim Offer")
+    buttonLink: str = Field(default="/offers")
+    endDate: Optional[str] = Field(default=None)
+
+class HomeInstagramModel(BaseModel):
+    """
+    Schema for the Instagram feed integration.
+    """
+    profileHandle: str = Field(default="@hk_digiverse")
+    widgetId: str = Field(default="YOUR_LIGHTWIDGET_ID_HERE")
+    description: str = Field(default="Explore our latest innovations and milestones.")
+
+class HomeSettingsModel(BaseModel):
+    """
+    Unified model for all homepage settings and dynamic content.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    heroSlides: List[HeroSlideModel] = Field(default_factory=list)
+    trendingTitle: str = Field(default="Trending Now")
+    trendingSubtitle: str = Field(default="Curated selection of our most sought-after rituals.")
+    categoriesTitle: str = Field(default="Shop by Category")
+    newArrivalsTitle: str = Field(default="New Arrivals")
+    newArrivalsSubtitle: str = Field(default="The latest additions to our sanctuary.")
+    brandStory: HomeBrandStoryModel = Field(...)
+    discountBanner: HomeDiscountBannerModel = Field(...)
+    instagram: HomeInstagramModel = Field(...)
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True

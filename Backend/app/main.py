@@ -22,6 +22,11 @@ from .routes.contact_settings import router as contact_settings_router
 from .routes.faq import router as faq_router
 from .routes.blogs import router as blogs_router
 from .routes.policies import router as policy_router
+from .routes.users import router as users_router
+from .routes.footer import router as footer_router
+from .routes.settings import router as settings_router
+from .routes.offers import router as offers_router
+from .routes.home import router as home_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,11 +48,11 @@ app = FastAPI(title="Lucsent Glow API", lifespan=lifespan)
 uploads_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
 app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
 
-# Add CORS middleware
+# Enhanced CORS Sanctuary for local interoperability
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False, # Standard for Bearer-token rituals to avoid origin conflicts
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -71,6 +76,11 @@ app.include_router(contact_settings_router, prefix="/api", tags=["Contact Settin
 app.include_router(faq_router, prefix="/api", tags=["FAQ"])
 app.include_router(blogs_router, prefix="/api", tags=["Blogs"])
 app.include_router(policy_router, prefix="/api", tags=["Policies"])
+app.include_router(users_router, prefix="/api", tags=["Users"])
+app.include_router(footer_router, prefix="/api", tags=["Footer"])
+app.include_router(settings_router, prefix="/api", tags=["Global Settings"])
+app.include_router(offers_router, prefix="/api", tags=["Offers"])
+app.include_router(home_router, prefix="/api", tags=["Home Page"])
 
 @app.get("/", tags=["Root"])
 async def read_root():

@@ -21,6 +21,7 @@ import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import OrderRitualModal from "@/components/Admin/OrderRitualModal.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminOrders = () => {
   const { isDark } = useAdminTheme();
@@ -75,8 +76,8 @@ const AdminOrders = () => {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "delivered": return isDark ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : "text-emerald-600 bg-emerald-50 border-emerald-100";
-      case "shipped": return isDark ? "text-sky-400 bg-sky-400/10 border-sky-400/20" : "text-sky-600 bg-sky-50 border-sky-100";
+      case "delivered": return isDark ? "text-gold-400 bg-gold-400/10 border-gold-400/20" : "text-gold-600 bg-gold-50 border-gold-100";
+      case "shipped": return isDark ? "text-gold-400 bg-gold-400/10 border-gold-400/20" : "text-gold-600 bg-gold-50 border-gold-100";
       case "cancelled": return isDark ? "text-rose-400 bg-rose-400/10 border-rose-400/20" : "text-rose-600 bg-rose-50 border-rose-100";
       case "processing": return isDark ? "text-gold bg-gold/10 border-gold/20" : "text-gold bg-gold/5 border-gold/20";
       default: return isDark ? "text-white/40 bg-white/5 border-white/10" : "text-charcoal/40 bg-charcoal/5 border-charcoal/10";
@@ -110,8 +111,8 @@ const AdminOrders = () => {
           
           let colorClass = "";
           if (isActive) {
-            if (step.id === 'Delivered') colorClass = isDark ? "bg-emerald-400 border-emerald-400 text-charcoal" : "bg-emerald-500 border-emerald-500 text-white";
-            else if (step.id === 'Shipped') colorClass = isDark ? "bg-sky-400 border-sky-400 text-charcoal" : "bg-sky-500 border-sky-500 text-white";
+            if (step.id === 'Delivered') colorClass = isDark ? "bg-gold-400 border-gold-400 text-charcoal" : "bg-gold-500 border-gold-500 text-white";
+            else if (step.id === 'Shipped') colorClass = isDark ? "bg-gold-400 border-gold-400 text-charcoal" : "bg-gold-500 border-gold-500 text-white";
             else colorClass = "bg-gold border-gold text-charcoal";
           } else {
             colorClass = isDark ? "bg-white/10 border-white/10 text-white/30" : "bg-charcoal/10 border-charcoal/10 text-charcoal/30";
@@ -128,7 +129,7 @@ const AdminOrders = () => {
               {index < steps.length - 1 && (
                 <div className={`w-4 h-[2px] rounded-full transition-all duration-700 ${
                   index < currentIndex 
-                    ? (steps[index + 1].id === 'Shipped' ? 'bg-sky-400/70' : 'bg-emerald-400/70') 
+                    ? (steps[index + 1].id === 'Shipped' ? 'bg-gold-400/70' : 'bg-gold-400/70') 
                     : (isDark ? 'bg-white/10' : 'bg-charcoal/10')
                 }`} />
               )}
@@ -146,21 +147,12 @@ const AdminOrders = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      {/* Header Ritual */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-indigo-600/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-body text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${
-            isDark ? "text-white" : "text-charcoal"
-          }`}>
-            Order <span className="text-indigo-500">Repository</span>
-          </h2>
-          <p className={`font-body text-xs tracking-widest uppercase font-bold transition-colors duration-700 ${
-            isDark ? "text-slate-500" : "text-charcoal/40"
-          }`}>
-            Live tracking and management of sanctuary data transitions
-          </p>
-        </div>
-      </div>
+      <AdminHeader 
+        title="Order"
+        highlightedWord="Concierge"
+        subtitle="Live tracking and management of sanctuary data transitions"
+        isDark={isDark}
+      />
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1 group">
@@ -266,8 +258,8 @@ const AdminOrders = () => {
                        </td>
                        <td className="px-4 py-1.5">
                           <div className="flex items-center gap-2">
-                             <CreditCard size={18} className={o.paymentStatus === 'SUCCESS' ? "text-emerald-400" : (isDark ? "text-white/40" : "text-charcoal/60")} />
-                             <span className={`text-[13px] font-extrabold uppercase tracking-widest ${o.paymentStatus === 'SUCCESS' ? "text-emerald-400" : (isDark ? "text-white/80" : "text-charcoal/80")}`}>
+                             <CreditCard size={18} className={o.paymentStatus === 'SUCCESS' ? "text-gold-400" : (isDark ? "text-white/40" : "text-charcoal/60")} />
+                             <span className={`text-[13px] font-extrabold uppercase tracking-widest ${o.paymentStatus === 'SUCCESS' ? "text-gold-400" : (isDark ? "text-white/80" : "text-charcoal/80")}`}>
                                 {o.paymentStatus}
                              </span>
                           </div>
@@ -295,12 +287,12 @@ const AdminOrders = () => {
                                     }`}>
                                       <Clock size={15} /> Processing
                                    </button>
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Shipped')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-sky-400 hover:bg-sky-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
+                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Shipped')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-gold-400 hover:bg-gold-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
                                      isDark ? "text-white/60" : "text-charcoal/80"
                                     }`}>
                                       <Truck size={15} /> Shipped
                                    </button>
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Delivered')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-emerald-400 hover:bg-emerald-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
+                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Delivered')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-gold-400 hover:bg-gold-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
                                      isDark ? "text-white/60" : "text-charcoal/80"
                                     }`}>
                                       <CheckCircle size={15} /> Delivered
@@ -344,7 +336,7 @@ const AdminOrders = () => {
              isDark ? "text-white/40" : "text-charcoal/40"
            }`}>
               <span>Real-time Sync Enabled</span>
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" />
            </div>
         </div>
       </div>

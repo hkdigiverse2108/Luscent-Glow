@@ -6,10 +6,10 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
-# Get the absolute path to the uploads directory in Frontend/public
+# Get the absolute path to the uploads directory inside Backend/
+# This matches the StaticFiles mount in main.py: app.mount("/uploads", ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-PROJECT_ROOT = os.path.dirname(BASE_DIR)
-UPLOAD_DIR = os.path.join(PROJECT_ROOT, "Frontend", "public", "uploads")
+UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 
 @router.post("/", response_description="Upload a file")
 async def upload_file(file: UploadFile = File(...)):

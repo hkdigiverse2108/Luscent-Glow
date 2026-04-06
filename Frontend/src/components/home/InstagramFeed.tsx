@@ -2,9 +2,19 @@ import { motion } from "framer-motion";
 import { Instagram } from "lucide-react";
 import { instagramPosts } from "@/data/products";
 
-const InstagramFeed = () => {
-  const widgetId = import.meta.env.VITE_LIGHTWIDGET_ID || "YOUR_LIGHTWIDGET_ID_HERE";
+interface InstagramFeedProps {
+  settings?: {
+    profileHandle: string;
+    widgetId: string;
+    description: string;
+  };
+}
+
+const InstagramFeed = ({ settings }: InstagramFeedProps) => {
+  const widgetId = settings?.widgetId || import.meta.env.VITE_LIGHTWIDGET_ID || "YOUR_LIGHTWIDGET_ID_HERE";
   const hasWidget = widgetId !== "YOUR_LIGHTWIDGET_ID_HERE";
+  const profileHandle = settings?.profileHandle || "@hk_digiverse";
+  const description = settings?.description || "Explore our latest innovations and milestones. Follow @hk_digiverse for daily tech inspiration.";
 
   return (
     <section className="py-24 lg:py-32 bg-white overflow-hidden">
@@ -19,7 +29,7 @@ const InstagramFeed = () => {
             >
               <Instagram size={18} className="text-gold" />
               <p className="text-sm font-body font-bold text-gold uppercase tracking-[0.3em]">
-                @hk_digiverse
+                {profileHandle}
               </p>
             </motion.div>
             <motion.h2
@@ -38,7 +48,7 @@ const InstagramFeed = () => {
             className="hidden md:block"
           >
             <p className="text-muted-foreground font-body max-w-xs text-right">
-              Explore our latest innovations and milestones. Follow @hk_digiverse for daily tech inspiration.
+              {description}
             </p>
           </motion.div>
         </div>
@@ -75,7 +85,7 @@ const InstagramFeed = () => {
                   </div>
                   <h3 className="font-display text-2xl font-bold text-foreground mb-4">Live Feed Pending</h3>
                   <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
-                    Setting up your automatic Instagram feed from <span className="text-gold font-semibold">@hk_digiverse</span>. Once connected, your posts will appear here instantly.
+                    Setting up your automatic Instagram feed from <span className="text-gold font-semibold">{profileHandle}</span>. Once connected, your posts will appear here instantly.
                   </p>
                   <a 
                     href="https://lightwidget.com/" 

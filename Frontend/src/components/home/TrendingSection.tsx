@@ -5,11 +5,18 @@ import { Product } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import { getApiUrl } from "@/lib/api";
 
-const TrendingSection = () => {
+interface TrendingSectionProps {
+  title?: string;
+  subtitle?: string;
+}
+
+const TrendingSection = ({ title, subtitle }: TrendingSectionProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [trending, setTrending] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
+
+  // ... (rest of the component logic)
 
   useEffect(() => {
     const fetchTrending = async () => {
@@ -93,7 +100,7 @@ const TrendingSection = () => {
               transition={{ delay: 0.1 }}
               className="font-display text-3xl md:text-4xl lg:text-6xl font-bold text-foreground leading-tight"
             >
-              Trending <span className="italic font-light text-gold/80">Essence</span>
+              {title || "Trending Essence"}
             </motion.h2>
             
             <motion.p
@@ -103,7 +110,7 @@ const TrendingSection = () => {
               transition={{ delay: 0.2 }}
               className="mt-4 text-muted-foreground font-body text-sm md:text-base lg:text-lg max-w-lg"
             >
-              Curated by our beauty experts, these are the formulas everyone is talking about this season.
+              {subtitle || "Curated by our beauty experts, these are the formulas everyone is talking about this season."}
             </motion.p>
           </div>
 

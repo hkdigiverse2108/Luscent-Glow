@@ -2,7 +2,16 @@ import subprocess
 import sys
 import os
 import time
-import signal
+import threading
+
+def log_output(process, name):
+    """Function to print output from a process in a separate thread"""
+    try:
+        for line in iter(process.stdout.readline, ""):
+            if line:
+                print(f"[{name}] {line.strip()}")
+    except Exception as e:
+        print(f"[!] Error in {name} log sanctuary: {e}")
 
 def start_services():
     print("--- Starting Glow Haven Services ---")
@@ -12,10 +21,12 @@ def start_services():
     frontend_dir = os.path.join(root_dir, "Frontend")
     backend_dir = os.path.join(root_dir, "Backend")
 
-    # Commands
-    # Use 'shell=True' for Windows compatibility with npm/uvicorn
+    # Commands - Use 'shell=True' for Windows compatibility with npm/uvicorn
     frontend_cmd = ["npm", "run", "dev"]
     backend_cmd = ["uvicorn", "app.main:app", "--reload", "--port", "5172"]
+
+    p_frontend = None
+    p_backend = None
 
     try:
         # Start Frontend
@@ -42,35 +53,41 @@ def start_services():
             bufsize=1
         )
 
+        # Start logging threads
+        t_frontend = threading.Thread(target=log_output, args=(p_frontend, "FRONTEND"), daemon=True)
+        t_backend = threading.Thread(target=log_output, args=(p_backend, "BACKEND"), daemon=True)
+        
+        t_frontend.start()
+        t_backend.start()
+
         print("\n[✔] Both services are starting up!")
         print("    Frontend: http://localhost:5173")
         print("    Backend:  http://localhost:5172/docs (Swagger UI)")
         print("\nPress Ctrl+C to stop both services.\n")
 
-        # Function to print output from a process in a separate thread (simplified for script)
-        def log_output(process, name):
-            for line in iter(process.stdout.readline, ""):
-                print(f"[{name}] {line.strip()}")
-
-        # We'll just wait for them to finish here
+        # Keep the script running and monitor processes
         while True:
             time.sleep(1)
             if p_frontend.poll() is not None:
-                print("[!] Frontend process exited.")
+                print("[!] Frontend process exited. Check dimensional logs above.")
                 break
             if p_backend.poll() is not None:
-                print("[!] Backend process exited.")
+                print("[!] Backend process exited. Check dimensional logs above.")
                 break
 
     except KeyboardInterrupt:
-        print("\n[!] Received stop signal. Cleaning up...")
+        print("\n[!] Received stop signal. Cleaning up Sanctuary state...")
+    except Exception as e:
+        print(f"\n[!] Sanctuary Critical Failure: {e}")
     finally:
         # Kill both processes on exit
-        if 'p_frontend' in locals():
+        if p_frontend:
+            print("[*] Terminating Frontend...")
             p_frontend.terminate()
-        if 'p_backend' in locals():
+        if p_backend:
+            print("[*] Terminating Backend...")
             p_backend.terminate()
-        print("[✔] Services stopped.")
+        print("[✔] Sanctuary services have returned to dormancy.")
 
 if __name__ == "__main__":
     start_services()

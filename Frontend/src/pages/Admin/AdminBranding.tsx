@@ -20,6 +20,7 @@ import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import AdminCategoryModal from "../../components/Header/AdminCategoryModal.tsx";
 import AdminBrandingModal from "../../components/Header/AdminBrandingModal.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminBranding = () => {
   const { isDark } = useAdminTheme();
@@ -78,25 +79,17 @@ const AdminBranding = () => {
       animate="visible"
       className="space-y-4 pb-4"
     >
-      {/* Dynamic Identity Title */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-body text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
-            Header <span className="text-gold">Governance</span>
-          </h2>
-          <p className={`font-body text-[10px] tracking-[0.4em] uppercase font-bold ${isDark ? "text-slate-500" : "text-charcoal/60"}`}>
-            Manage the visual hallmarks and taxonomy of your Sanctuary
-          </p>
-        </div>
-        <div className="flex gap-4">
-            <button 
-                onClick={() => setIsBrandingModalOpen(true)}
-                className="px-8 py-4 bg-gold text-charcoal rounded-2xl font-bold text-[10px] uppercase tracking-widest shadow-xl shadow-gold/20 hover:scale-105 transition-transform flex items-center gap-3"
-            >
-                <Layout size={14} /> Update Header
-            </button>
-        </div>
-      </div>
+      <AdminHeader 
+        title="Branding"
+        highlightedWord="Concierge"
+        subtitle="Manage the visual hallmarks and taxonomy of your Sanctuary"
+        isDark={isDark}
+        action={{
+          label: "Update Header",
+          onClick: () => setIsBrandingModalOpen(true),
+          icon: Layout
+        }}
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Branding Presence Card */}

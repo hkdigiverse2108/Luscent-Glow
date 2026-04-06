@@ -18,6 +18,7 @@ import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminAbout = () => {
   const { isDark } = useAdminTheme();
@@ -89,25 +90,18 @@ const AdminAbout = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
-            About Us <span className="text-gold italic text-8xl">Sanctuary</span>
-          </h2>
-          <p className="text-xs font-bold uppercase tracking-[0.3em] opacity-40">Narrative & Philosophy Management</p>
-        </div>
-        
-        <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleSaveConfig}
-          disabled={isConfigSaving}
-          className="flex items-center gap-3 bg-gold hover:bg-gold/80 text-charcoal px-8 py-4 rounded-full font-body font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 shadow-lg shadow-gold/20"
-        >
-          {isConfigSaving ? <Sparkles className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
-          <span>{isConfigSaving ? "Synchronizing..." : "Commit Settings"}</span>
-        </motion.button>
-      </div>
+      <AdminHeader 
+        title="About Us"
+        highlightedWord="Concierge"
+        subtitle="Narrative & Philosophy Management"
+        isDark={isDark}
+        action={{
+          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          onClick: handleSaveConfig,
+          icon: isConfigSaving ? Sparkles : CheckCircle2,
+          disabled: isConfigSaving
+        }}
+      />
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Hero & Narrative Settings */}

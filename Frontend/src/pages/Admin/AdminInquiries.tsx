@@ -21,6 +21,7 @@ import {
 import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: boolean, onClose: () => void, inquiry: any, isDark: boolean }) => {
   if (!isOpen || !inquiry) return null;
@@ -44,7 +45,7 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
               </div>
               <div>
                 <h3 className={`text-xl font-bold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
-                  Ritual <span className="text-indigo-500 italic">Specification</span>
+                  Ritual <span className="text-gold italic">Specification</span>
                 </h3>
                 <p className="text-[13px] font-extrabold uppercase tracking-[0.3em] opacity-80 italic">Seeker Metadata Analysis</p>
               </div>
@@ -59,7 +60,7 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
                  <p className="text-sm font-bold opacity-80 break-all transition-opacity hover:opacity-100">{inquiry.email}</p>
               </div>
               <div className={`p-6 rounded-2xl border ${isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"}`}>
-                 <p className="text-[12px] font-extrabold uppercase text-indigo-500 tracking-widest mb-2 flex items-center gap-2"><Calendar size={13} /> Ritual Context</p>
+                 <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><Calendar size={13} /> Ritual Context</p>
                  <p className={`text-base font-extrabold ${isDark ? "text-white" : "text-charcoal"}`}>{new Date(inquiry.createdAt).toLocaleString()}</p>
                  <p className="text-sm font-bold opacity-80 italic transition-opacity">Broadcasted from sanctuary</p>
               </div>
@@ -67,7 +68,7 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
             {(inquiry.phoneNumber || inquiry.companyName) && (
               <div className="flex gap-4">
                 {inquiry.phoneNumber && <div className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[12px] font-extrabold uppercase tracking-widest border transition-all ${isDark ? "bg-rose-light/10 text-rose-light border-rose-light/20" : "bg-rose-600/10 text-rose-700 border-rose-600/20 shadow-sm"}`}><Phone size={14} /> {inquiry.phoneNumber}</div>}
-                {inquiry.companyName && <div className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[12px] font-extrabold uppercase tracking-widest border transition-all ${isDark ? "bg-sky-400/10 text-sky-400 border-sky-400/20" : "bg-indigo-600/10 text-indigo-700 border-indigo-600/20 shadow-sm"}`}><Building size={14} /> {inquiry.companyName}</div>}
+                {inquiry.companyName && <div className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[12px] font-extrabold uppercase tracking-widest border transition-all ${isDark ? "bg-sky-400/10 text-sky-400 border-sky-400/20" : "bg-gold/10 text-gold border-gold/20 shadow-sm"}`}><Building size={14} /> {inquiry.companyName}</div>}
               </div>
             )}
             <div className="space-y-4">
@@ -143,20 +144,17 @@ const AdminInquiries = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-indigo-600/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-body text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${isDark ? "text-white" : "text-charcoal"}`}>
-            Seeker <span className="text-indigo-500 italic">Inquiries</span>
-          </h2>
-          <p className={`font-body text-[13px] tracking-[0.4em] uppercase font-bold transition-colors duration-700 ${isDark ? "text-slate-400" : "text-charcoal/80"}`}>
-            Real-time management of sanctuary outreach rituals
-          </p>
-        </div>
-        <div className={`p-1.5 backdrop-blur-2xl rounded-2xl flex items-center gap-2 border ${isDark ? "bg-white/[0.05] border-white/5 shadow-2xl" : "bg-charcoal/[0.05] border-charcoal/5 shadow-lg"}`}>
+      <AdminHeader
+        title="Inquiry"
+        highlightedWord="Concierge"
+        subtitle="Real-time management of sanctuary outreach rituals"
+        isDark={isDark}
+      >
+        <div className={`p-1.5 backdrop-blur-2xl rounded-2xl flex items-center gap-2 border mt-2 w-fit ${isDark ? "bg-white/[0.05] border-white/5 shadow-2xl" : "bg-charcoal/[0.05] border-charcoal/5 shadow-lg"}`}>
           <button onClick={() => setActiveTab('standard')} className={`px-8 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-500 ${activeTab === 'standard' ? "bg-gold text-charcoal shadow-lg" : "text-inherit opacity-40 hover:opacity-100"}`}>General</button>
           <button onClick={() => setActiveTab('bulk')} className={`px-8 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-500 ${activeTab === 'bulk' ? "bg-gold text-charcoal shadow-lg" : "text-inherit opacity-40 hover:opacity-100"}`}>Corporate</button>
         </div>
-      </div>
+      </AdminHeader>
 
       <div className="relative max-w-xl group">
         <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors ${isDark ? "text-white/20 group-focus-within:text-gold" : "text-charcoal/40 group-focus-within:text-gold"}`} size={18} />
@@ -202,7 +200,7 @@ const AdminInquiries = () => {
                       {activeTab === 'bulk' && (
                         <td className="px-4 py-1.5">
                            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-widest border transition-all ${
-                               isDark ? "bg-sky-400/10 text-sky-400 border-sky-400/20" : "bg-indigo-600/10 text-indigo-700 border-indigo-600/20"
+                               isDark ? "bg-sky-400/10 text-sky-400 border-sky-400/20" : "bg-gold/10 text-gold border-gold/20"
                              } w-fit`}>
                               <Building size={12} /> {inq.companyName || "N/A"}
                            </div>
@@ -220,7 +218,7 @@ const AdminInquiries = () => {
                       <td className="px-6 py-5 text-right pr-8">
                          <div className="flex items-center justify-end gap-3">
                             <button onClick={() => openInquiryModal(inq)} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isDark ? "bg-white/5 text-white/40 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold hover:bg-gold/10"}`}><Eye size={16} /></button>
-                            <button onClick={() => handleAcknowledge(inq._id)} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isDark ? "bg-white/5 text-white/40 hover:text-emerald-400 hover:bg-emerald-400/10" : "bg-charcoal/5 text-charcoal/40 hover:text-emerald-400 hover:bg-emerald-400/10"}`}><CheckCircle size={16} /></button>
+                            <button onClick={() => handleAcknowledge(inq._id)} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isDark ? "bg-white/5 text-white/40 hover:text-gold-400 hover:bg-gold-400/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold-400 hover:bg-gold-400/10"}`}><CheckCircle size={16} /></button>
                          </div>
                       </td>
                     </motion.tr>

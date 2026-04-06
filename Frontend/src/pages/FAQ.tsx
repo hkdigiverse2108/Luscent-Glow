@@ -99,7 +99,7 @@ const FAQ = () => {
                 <>
                   How can we <span className="italic font-light">assist you?</span>
                 </>
-              ) : config.heroTitle}
+              ) : config.heroTitle} <span className="text-gold italic font-light">Concierge</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0 }}

@@ -17,6 +17,7 @@ import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import ProductFormModal from "@/components/Admin/ProductFormModal.tsx";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminProducts = () => {
   const { isDark } = useAdminTheme();
@@ -80,31 +81,17 @@ const AdminProducts = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      {/* Header Ritual */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-indigo-600/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-body text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${
-            isDark ? "text-white" : "text-charcoal"
-          }`}>
-            Product <span className="text-indigo-500">Inventory</span>
-          </h2>
-          <p className={`font-body text-sm tracking-widest uppercase font-bold transition-colors duration-700 ${
-            isDark ? "text-slate-500" : "text-charcoal/70"
-          }`}>
-            Live database management for industrial product rituals
-          </p>
-        </div>
-        
-        <motion.button 
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={openAddModal}
-          className="flex items-center gap-3 px-8 py-4 bg-gold text-charcoal font-bold rounded-2xl shadow-lg shadow-gold/10 hover:bg-white transition-all duration-500 uppercase tracking-widest text-xs"
-        >
-          <Plus size={18} />
-          <span>Add New Ritual</span>
-        </motion.button>
-      </div>
+      <AdminHeader 
+        title="Inventory"
+        highlightedWord="Concierge"
+        subtitle="Live database management for industrial product rituals"
+        isDark={isDark}
+        action={{
+          label: "Add New Ritual",
+          onClick: openAddModal,
+          icon: Plus
+        }}
+      />
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1 group">
@@ -234,7 +221,7 @@ const AdminProducts = () => {
                                <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[12px] font-extrabold uppercase tracking-widest border border-emerald-500/30 shadow-sm">New</span>
                              )}
                              {p.isTrending && (
-                               <span className="px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-500 text-[12px] font-extrabold uppercase tracking-widest border border-indigo-500/30 shadow-sm">Trending</span>
+                               <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[12px] font-extrabold uppercase tracking-widest border border-gold/30 shadow-sm">Trending</span>
                              )}
                              {p.isBestSeller && (
                                <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[12px] font-extrabold uppercase tracking-widest border border-gold/30 shadow-sm">Elite</span>

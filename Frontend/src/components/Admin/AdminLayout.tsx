@@ -1,7 +1,6 @@
 import React from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
 import { 
-  Layout,
   LayoutDashboard, 
   ShoppingBag, 
   ClipboardList, 
@@ -19,33 +18,72 @@ import {
   Phone,
   HelpCircle,
   Shield,
-  Edit2
+  Edit2,
+  Percent,
+  Layout,
+  Rss,
+  Globe,
+  UserCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
 
+const menuGroups = [
+  {
+    label: "Overview",
+    items: [
+      { icon: LayoutDashboard, label: "Dashboard",     path: "/admin/dashboard" },
+    ]
+  },
+  {
+    label: "Content",
+    items: [
+      { icon: Layout,          label: "Home Page",     path: "/admin/home" },
+      { icon: ShoppingBag,     label: "Products",      path: "/admin/products" },
+      { icon: Edit2,           label: "Blogs",         path: "/admin/blogs" },
+      { icon: Percent,         label: "Offers",        path: "/admin/offers" },
+    ]
+  },
+  {
+    label: "Commerce",
+    items: [
+      { icon: ClipboardList,   label: "Orders",        path: "/admin/orders" },
+      { icon: Ticket,          label: "Gift Cards",    path: "/admin/gift-cards" },
+      { icon: Package,         label: "Bulk Orders",   path: "/admin/bulk-orders" },
+    ]
+  },
+  {
+    label: "Audience",
+    items: [
+      { icon: Users,           label: "Users",         path: "/admin/users" },
+      { icon: Rss,             label: "Subscribers",   path: "/admin/newsletter" },
+      { icon: MessageSquare,   label: "Inquiries",     path: "/admin/inquiries" },
+    ]
+  },
+  {
+    label: "Site",
+    items: [
+      { icon: UserCheck,       label: "Header",        path: "/admin/branding" },
+      { icon: Sparkles,        label: "About Us",      path: "/admin/about" },
+      { icon: Phone,           label: "Contact Us",    path: "/admin/contact" },
+      { icon: HelpCircle,      label: "FAQ",           path: "/admin/faq" },
+      { icon: Shield,          label: "Policies",      path: "/admin/policies" },
+      { icon: Globe,           label: "Global Footer", path: "/admin/footer" },
+    ]
+  },
+  {
+    label: "System",
+    items: [
+      { icon: Settings,        label: "Settings",      path: "/admin/settings" },
+    ]
+  },
+];
+
 const AdminLayout = () => {
   const { adminLogout } = useAuth();
   const location = useLocation();
-  const { theme, isDark, toggleTheme } = useAdminTheme();
-
-  const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
-    { icon: ShoppingBag, label: "Products", path: "/admin/products" },
-    { icon: ClipboardList, label: "Orders", path: "/admin/orders" },
-    { icon: Users, label: "Subscribers", path: "/admin/newsletter" },
-    { icon: MessageSquare, label: "Inquiries", path: "/admin/inquiries" },
-    { icon: Layout, label: "Header", path: "/admin/branding" },
-    { icon: Ticket, label: "Gift Cards", path: "/admin/gift-cards" },
-    { icon: Package, label: "Bulk Orders", path: "/admin/bulk-orders" },
-    { icon: Sparkles, label: "About Us", path: "/admin/about" },
-    { icon: Phone, label: "Contact Us", path: "/admin/contact" },
-    { icon: HelpCircle, label: "FAQ", path: "/admin/faq" },
-    { icon: Shield, label: "Policies", path: "/admin/policies" },
-    { icon: Edit2, label: "Blogs", path: "/admin/blogs" },
-    { icon: Settings, label: "Settings", path: "/admin/settings" },
-  ];
+  const { isDark, toggleTheme } = useAdminTheme();
 
   return (
     <div className={`min-h-screen flex overflow-hidden font-body relative transition-colors duration-700 ${
@@ -54,7 +92,7 @@ const AdminLayout = () => {
       {/* Cinematic Backdrop Glow */}
       <AnimatePresence>
         {isDark && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -66,115 +104,149 @@ const AdminLayout = () => {
         )}
       </AnimatePresence>
 
-      {/* Premium Brand Sidebar */}
-      <aside className={`w-64 backdrop-blur-3xl border-r flex flex-col relative z-20 shadow-[0_0_50px_rgba(0,0,0,0.1)] transition-all duration-700 ${
-        isDark 
-        ? "bg-charcoal/80 border-white/5 shadow-black/40" 
-        : "bg-white/90 border-gold/10 shadow-charcoal/5"
+      {/* ── Sidebar ────────────────────────────────────────────────────────── */}
+      <aside className={`w-[230px] flex-shrink-0 backdrop-blur-3xl border-r flex flex-col relative z-20 transition-all duration-700 ${
+        isDark
+          ? "bg-charcoal/80 border-white/5 shadow-[0_0_60px_rgba(0,0,0,0.4)]"
+          : "bg-white/95 border-gold/10 shadow-[0_0_40px_rgba(0,0,0,0.06)]"
       }`}>
-        <div className="p-3 pb-3">
-          <Link to="/" className="flex items-center gap-3.5 group">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-gold to-rose-light flex items-center justify-center shadow-[0_8px_20px_rgba(212,175,55,0.25)] group-hover:scale-110 group-hover:shadow-[0_12px_25px_rgba(212,175,55,0.35)] transition-all duration-500">
-              <Sparkles className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" size={24} />
+
+        {/* Brand Mark */}
+        <div className="px-5 pt-6 pb-5">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-gold to-rose-light flex items-center justify-center shadow-[0_6px_18px_rgba(212,175,55,0.3)] group-hover:scale-110 transition-all duration-500 flex-shrink-0">
+              <Sparkles className="text-white" size={18} />
             </div>
-            <div>
-              <h1 className={`font-display text-2xl font-bold tracking-tight italic transition-colors duration-700 ${
+            <div className="leading-none">
+              <h1 className={`font-display text-[1.05rem] font-bold tracking-tight italic transition-colors duration-700 ${
                 isDark ? "text-white" : "text-charcoal"
               }`}>
                 Luscent <span className="text-gold">Glow</span>
               </h1>
-              <p className={`text-[10px] font-black uppercase tracking-[0.6em] -mt-1 opacity-40 transition-colors duration-700 ${
-                isDark ? "text-white" : "text-charcoal"
-              }`}>S A N C T U A R Y</p>
+              <p className={`text-[8px] font-black uppercase tracking-[0.5em] mt-0.5 transition-colors duration-700 ${
+                isDark ? "text-white/30" : "text-charcoal/35"
+              }`}>Sanctuary</p>
             </div>
           </Link>
         </div>
 
-        <nav className="flex-1 px-3 space-y-1.5 mt-4">
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            const activeClass = isDark 
-              ? "bg-gold/10 text-gold border border-gold/20 shadow-gold/5 shadow-lg" 
-              : "bg-gold/10 text-gold border border-gold/30 shadow-gold/5 shadow-lg";
-            
-            const inactiveClass = isDark
-              ? "text-white/50 hover:text-white hover:bg-white/5"
-              : "text-charcoal/90 hover:text-indigo-600 hover:bg-charcoal/5";
+        {/* Divider */}
+        <div className={`mx-5 h-px mb-3 ${isDark ? "bg-white/5" : "bg-charcoal/8"}`} />
 
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-3 pb-3 scrollbar-hide space-y-4">
+          {menuGroups.map((group) => {
             return (
-              <motion.div
-                key={item.path}
-                whileHover={{ x: 6 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Link 
-                  to={item.path}
-                  className={`group flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition-all duration-500 relative overflow-hidden ${
-                    isActive ? activeClass : inactiveClass
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div 
-                      layoutId="activeIndicatorGlow"
-                      className="absolute inset-0 bg-gold/5 blur-xl"
-                    />
-                  )}
-                  <div className="flex items-center gap-3.5 relative z-10">
-                    <item.icon size={19} className={isActive ? "text-gold" : "text-inherit group-hover:text-gold transition-colors"} />
-                    <span className={`text-[0.95rem] font-bold tracking-wide uppercase ${isActive ? "text-gold" : "text-inherit"}`}>{item.label}</span>
-                  </div>
-                  {isActive && (
-                    <motion.div layoutId="activeInd" className="text-gold relative z-10">
-                      <ChevronRight size={14} className="animate-pulse" />
-                    </motion.div>
-                  )}
-                </Link>
-              </motion.div>
+              <div key={group.label}>
+                {/* Group Label */}
+                <p className={`px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.35em] ${
+                  isDark ? "text-white/20" : "text-charcoal/30"
+                }`}>
+                  {group.label}
+                </p>
+
+                {/* Items */}
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const isActive = location.pathname === item.path;
+
+                    return (
+                      <motion.div
+                        key={item.path}
+                        whileHover={{ x: 3 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <Link
+                          to={item.path}
+                          className={`group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 relative overflow-hidden ${
+                            isActive
+                              ? isDark
+                                ? "bg-gold/12 border border-gold/25"
+                                : "bg-gold/10 border border-gold/25"
+                              : isDark
+                                ? "text-white/45 hover:text-white hover:bg-white/5 border border-transparent"
+                                : "text-charcoal/60 hover:text-charcoal hover:bg-charcoal/5 border border-transparent"
+                          }`}
+                        >
+                          {isActive && (
+                            <motion.div
+                              layoutId="activeGlow"
+                              className="absolute inset-0 bg-gold/5 blur-lg"
+                            />
+                          )}
+
+                          <div className="flex items-center gap-2.5 relative z-10">
+                            <item.icon
+                              size={15}
+                              className={`flex-shrink-0 transition-colors ${
+                                isActive
+                                  ? "text-gold"
+                                  : "text-inherit group-hover:text-gold"
+                              }`}
+                            />
+                            <span className={`text-[0.78rem] font-semibold tracking-wide transition-colors leading-none ${
+                              isActive
+                                ? isDark ? "text-white" : "text-charcoal"
+                                : "text-inherit"
+                            }`}>
+                              {item.label}
+                            </span>
+                          </div>
+
+                          {isActive && (
+                            <ChevronRight
+                              size={11}
+                              className="text-gold/60 relative z-10 flex-shrink-0"
+                            />
+                          )}
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>
 
-        {/* Theme Toggle Ritual */}
-        <div className="px-3 py-2">
-          <button 
-            onClick={toggleTheme}
-            className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border transition-all duration-500 ${
-              isDark 
-              ? "bg-white/5 border-white/10 text-white/40 hover:text-gold hover:border-gold/30" 
-              : "bg-charcoal/5 border-charcoal/10 text-charcoal/70 hover:text-gold hover:border-gold/30"
-            }`}
-          >
-            <span className="text-xs font-bold uppercase tracking-widest">
-              {isDark ? "Obsidian State" : "Radiant State"}
-            </span>
-            <div className="flex items-center gap-2">
-              {isDark ? <Moon size={14} /> : <Sun size={14} />}
-            </div>
-          </button>
-        </div>
-
-        <div className={`p-4 border-t transition-colors duration-700 ${
-          isDark ? "border-white/5" : "border-charcoal/5"
+        {/* ── Footer ───────────────────────────────────────────────────────── */}
+        <div className={`px-3 pt-2 pb-3 border-t space-y-1 transition-colors duration-700 ${
+          isDark ? "border-white/5" : "border-charcoal/6"
         }`}>
-          <button 
-            onClick={adminLogout}
-            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all duration-500 group ${
-              isDark 
-              ? "text-white/30 hover:text-rose-light hover:bg-rose-light/5" 
-              : "text-charcoal/70 hover:text-rose-brand hover:bg-rose-brand/5"
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all duration-400 group ${
+              isDark
+                ? "bg-white/3 border-white/8 text-white/35 hover:text-gold hover:border-gold/25 hover:bg-gold/5"
+                : "bg-charcoal/4 border-charcoal/8 text-charcoal/50 hover:text-gold hover:border-gold/25 hover:bg-gold/5"
             }`}
           >
-            <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className={`text-[0.95rem] font-bold tracking-wide uppercase transition-colors ${
-              isDark ? "group-hover:text-rose-light" : "group-hover:text-rose-brand"
-            }`}>Logout</span>
+            <span className="text-[0.7rem] font-bold uppercase tracking-widest leading-none">
+              {isDark ? "Obsidian Mode" : "Radiant Mode"}
+            </span>
+            {isDark ? <Moon size={13} /> : <Sun size={13} />}
+          </button>
+
+          {/* Logout */}
+          <button
+            onClick={adminLogout}
+            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-300 group ${
+              isDark
+                ? "text-white/30 hover:text-rose-light hover:bg-rose-light/8"
+                : "text-charcoal/45 hover:text-rose-600 hover:bg-rose-50"
+            }`}
+          >
+            <LogOut size={14} className="group-hover:-translate-x-0.5 transition-transform flex-shrink-0" />
+            <span className="text-[0.78rem] font-semibold tracking-wide">Logout</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Stage */}
+      {/* ── Main Stage ─────────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide">
-        <div className="relative z-10 p-2 md:p-4">
+        <div className="relative z-10 p-4 md:p-6 max-w-[1600px] mx-auto w-full">
           <Outlet />
         </div>
       </main>

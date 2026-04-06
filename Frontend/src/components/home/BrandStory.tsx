@@ -1,15 +1,37 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-const brandStoryImg = "/assets/hero/brand-story.png";
+import { getAssetUrl } from "@/lib/api";
 
-const BrandStory = () => {
+interface BrandStoryProps {
+  story?: {
+    badge: string;
+    title: string;
+    description: string;
+    image: string;
+    buttonText: string;
+    buttonLink: string;
+  };
+}
+
+const BrandStory = ({ story }: BrandStoryProps) => {
+  const defaultStory = {
+    badge: "Our Philosophy",
+    title: "The Alchemy of Radiance",
+    description: "We believe skincare is more than a routine; it is a sacred ritual. By merging ancient botanical wisdom with cutting-edge molecular science, we create formulas that don't just sit on the surface — they transform from within.",
+    image: "/assets/hero/brand-story.png",
+    buttonText: "Read Our Full Story",
+    buttonLink: "/about"
+  };
+
+  const activeStory = story || defaultStory;
+
   return (
     <section className="relative py-20 md:py-32 lg:py-48 overflow-hidden bg-charcoal">
       {/* Background Image with Fixed Effect */}
       <div className="absolute inset-0 z-0">
         <img
-          src={brandStoryImg}
+          src={getAssetUrl(activeStory.image)}
           alt="Brand Story"
           className="w-full h-full object-cover opacity-60 md:mix-blend-luminosity"
         />
@@ -25,23 +47,23 @@ const BrandStory = () => {
             className="space-y-8"
           >
             <span className="text-gold font-body text-sm font-bold uppercase tracking-[0.4em] block">
-              Our Philosophy
+              {activeStory.badge}
             </span>
             
             <h2 className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-tight">
-              The <span className="italic font-light text-gold/80">Alchemy</span> of Radiance
+              {activeStory.title}
             </h2>
             
             <p className="text-white/80 font-body text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed font-light">
-              We believe skincare is more than a routine; it is a sacred ritual. By merging ancient botanical wisdom with cutting-edge molecular science, we create formulas that don't just sit on the surface — they transform from within.
+              {activeStory.description}
             </p>
 
             <div className="pt-6">
               <Link
-                to="/about"
+                to={activeStory.buttonLink}
                 className="group inline-flex items-center gap-4 text-white hover:text-gold transition-colors duration-500"
               >
-                <span className="font-body font-bold uppercase tracking-widest text-sm">Read Our Full Story</span>
+                <span className="font-body font-bold uppercase tracking-widest text-sm">{activeStory.buttonText}</span>
                 <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-gold group-hover:bg-gold transition-all duration-500">
                   <ArrowRight size={20} className="group-hover:text-charcoal transition-colors" />
                 </div>

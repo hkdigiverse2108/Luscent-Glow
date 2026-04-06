@@ -26,6 +26,7 @@ import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminGiftCards = () => {
   const { isDark } = useAdminTheme();
@@ -224,56 +225,41 @@ const AdminGiftCards = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
-            Gift Card <span className="text-gold italic">Sanctuary</span>
-          </h2>
-          <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
-            <button 
-              onClick={() => setActiveTab("ledger")}
-              className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === "ledger" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Ledger
-            </button>
-            <button 
-              onClick={() => setActiveTab("config")}
-              className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === "config" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Page Settings
-            </button>
-          </div>
+      <AdminHeader 
+        title="Gift Card"
+        highlightedWord="Concierge"
+        subtitle="Managing the gift card ledger and storefront presence"
+        isDark={isDark}
+        action={activeTab === "ledger" ? {
+          label: "Mint Token",
+          onClick: openCreateModal,
+          icon: Plus
+        } : {
+          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          onClick: handleSaveConfig,
+          icon: isConfigSaving ? Sparkles : CheckCircle2,
+          disabled: isConfigSaving
+        }}
+      >
+        <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
+          <button 
+            onClick={() => setActiveTab("ledger")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "ledger" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Ledger
+          </button>
+          <button 
+            onClick={() => setActiveTab("config")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "config" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Page Settings
+          </button>
         </div>
-        
-        <div className="flex items-center gap-4">
-          {activeTab === "ledger" ? (
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={openCreateModal}
-              className="flex items-center gap-3 bg-gold hover:bg-gold/90 text-charcoal px-8 py-4 rounded-full font-body font-bold text-xs uppercase tracking-widest transition-all shadow-lg"
-            >
-              <Plus size={18} />
-              <span>Mint Token</span>
-            </motion.button>
-          ) : (
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleSaveConfig}
-              disabled={isConfigSaving}
-              className="flex items-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-full font-body font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50"
-            >
-              {isConfigSaving ? <Sparkles className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
-              <span>{isConfigSaving ? "Synchronizing..." : "Commit Settings"}</span>
-            </motion.button>
-          )}
-        </div>
-      </div>
+      </AdminHeader>
 
       <AnimatePresence mode="wait">
         {activeTab === "ledger" ? (
@@ -281,8 +267,8 @@ const AdminGiftCards = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {[
                 { label: "Active Tokens", value: giftCards.filter(c => c.isActive).length, icon: Ticket, tint: "text-gold" },
-                { label: "Circulating Value", value: `₹${giftCards.reduce((acc, c) => acc + (c.currentBalance || 0), 0).toLocaleString()}`, icon: Wallet, tint: "text-emerald-500" },
-                { label: "Total Issued", value: giftCards.length, icon: CheckCircle2, tint: "text-blue-500" }
+                { label: "Circulating Value", value: `₹${giftCards.reduce((acc, c) => acc + (c.currentBalance || 0), 0).toLocaleString()}`, icon: Wallet, tint: "text-gold/60" },
+                { label: "Total Issued", value: giftCards.length, icon: CheckCircle2, tint: "text-gold/40" }
               ].map((stat, i) => (
                 <div key={i} className={`p-3 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5"}`}>
                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">{stat.label}</p>
@@ -319,7 +305,7 @@ const AdminGiftCards = () => {
                          <p className="text-sm font-semibold">{card.recipientName}</p>
                          <p className="text-[10px] text-muted-foreground">{card.recipientMobile}</p>
                       </td>
-                      <td className="px-4 py-1.5 text-sm font-bold text-emerald-500">₹{(card.currentBalance || 0).toLocaleString()}</td>
+                      <td className="px-4 py-1.5 text-sm font-bold text-gold">₹{(card.currentBalance || 0).toLocaleString()}</td>
                       <td className="px-6 py-3 text-right">
                         <div className="flex justify-end gap-2 text-muted-foreground">
                           <button onClick={() => handleDeleteToken(card._id)} className="p-2 hover:text-rose-500"><Trash2 size={14} /></button>
@@ -489,7 +475,7 @@ const AdminGiftCards = () => {
                           <button onClick={() => setConfig({ ...config, features: config.features.filter((_: any, idx: number) => idx !== i) })} className="absolute top-4 right-4 text-rose-500 opacity-0 group-hover:opacity-100"><Trash2 size={14} /></button>
                           <div className="flex gap-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-secondary/50 rounded-xl flex items-center justify-center text-gold">
+                                <div className="w-10 h-10 bg-gold/10 rounded-xl flex items-center justify-center text-gold">
                                    <DynamicIcon name={feat.icon} size={18} />
                                 </div>
                                 <input 

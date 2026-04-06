@@ -109,7 +109,7 @@ const Contact = () => {
                    <>
                       {config.heroTitle.split(' Priority. ')[0]}<br />Our <span className="italic font-light text-gold/80">Priority.</span>
                    </>
-                ) : config.heroTitle}
+                ) : config.heroTitle} <span className="text-gold italic font-light">Concierge</span>
               </h1>
               <p className="text-sm md:text-lg font-body text-white/60 leading-relaxed max-w-xl">
                 {config.heroDescription}

@@ -25,6 +25,7 @@ import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminBulkOrders = () => {
   const { isDark } = useAdminTheme();
@@ -130,46 +131,37 @@ const AdminBulkOrders = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
-            Bulk Order <span className="text-gold italic">Concierge</span>
-          </h2>
-          <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
-            <button 
-              onClick={() => setActiveTab("inquiries")}
-              className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === "inquiries" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Inquiry Ledger
-            </button>
-            <button 
-              onClick={() => setActiveTab("config")}
-              className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === "config" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Page Settings
-            </button>
-          </div>
+      <AdminHeader 
+        title="Bulk Order"
+        highlightedWord="Concierge"
+        subtitle="Managing the corporate gifting ledger and portal presence"
+        isDark={isDark}
+        action={activeTab === "config" ? {
+          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          onClick: handleSaveConfig,
+          icon: isConfigSaving ? Sparkles : CheckCircle2,
+          disabled: isConfigSaving
+        } : undefined}
+      >
+        <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
+          <button 
+            onClick={() => setActiveTab("inquiries")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "inquiries" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Inquiry Ledger
+          </button>
+          <button 
+            onClick={() => setActiveTab("config")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "config" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Page Settings
+          </button>
         </div>
-        
-        <div className="flex items-center gap-4">
-          {activeTab === "config" && (
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleSaveConfig}
-              disabled={isConfigSaving}
-              className="flex items-center gap-3 bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-full font-body font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20"
-            >
-              {isConfigSaving ? <Sparkles className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
-              <span>{isConfigSaving ? "Synchronizing..." : "Commit Settings"}</span>
-            </motion.button>
-          )}
-        </div>
-      </div>
+      </AdminHeader>
 
       <AnimatePresence mode="wait">
         {activeTab === "inquiries" ? (
@@ -177,8 +169,8 @@ const AdminBulkOrders = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 font-bold">
               {[
                 { label: "Active Inquiries", value: inquiries.length, icon: ClipboardList, tint: "text-gold" },
-                { label: "Partner Companies", value: new Set(inquiries.map(i => i.companyName)).size, icon: Building2, tint: "text-blue-500" },
-                { label: "Conversion Rate", value: "84%", icon: Sparkles, tint: "text-emerald-500" }
+                { label: "Partner Companies", value: new Set(inquiries.map(i => i.companyName)).size, icon: Building2, tint: "text-gold" },
+                { label: "Conversion Rate", value: "84%", icon: Sparkles, tint: "text-gold/60" }
               ].map((stat, i) => (
                 <div key={i} className={`p-3 rounded-3xl border transition-all hover:scale-105 duration-500 ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5 shadow-sm"}`}>
                   <div className="flex items-center justify-between mb-2">

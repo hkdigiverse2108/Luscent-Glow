@@ -24,6 +24,7 @@ import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: boolean, onClose: () => void, inquiry: any, isDark: boolean }) => {
   if (!isOpen || !inquiry) return null;
@@ -199,44 +200,37 @@ const AdminContact = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
-            Concierge <span className="text-gold italic text-8xl">Registry</span>
-          </h2>
-          <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
-            <button 
-              onClick={() => setActiveTab("inquiries")}
-              className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === "inquiries" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Inquiry Ledger
-            </button>
-            <button 
-              onClick={() => setActiveTab("settings")}
-              className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === "settings" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Page Settings
-            </button>
-          </div>
-        </div>
-        
-        {activeTab === "settings" && (
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleSaveConfig}
-            disabled={isConfigSaving}
-            className="flex items-center gap-3 bg-gold hover:bg-gold/80 text-charcoal px-8 py-4 rounded-full font-body font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 shadow-lg shadow-gold/20"
+      <AdminHeader 
+        title="Contact"
+        highlightedWord="Concierge"
+        subtitle="Managing the seeker inquiries and storefront presence"
+        isDark={isDark}
+        action={activeTab === "settings" ? {
+          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          onClick: handleSaveConfig,
+          icon: isConfigSaving ? Sparkles : CheckCircle2,
+          disabled: isConfigSaving
+        } : undefined}
+      >
+        <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
+          <button 
+            onClick={() => setActiveTab("inquiries")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "inquiries" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
           >
-            {isConfigSaving ? <Sparkles className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
-            <span>{isConfigSaving ? "Synchronizing..." : "Commit Settings"}</span>
-          </motion.button>
-        )}
-      </div>
+            Inquiry Ledger
+          </button>
+          <button 
+            onClick={() => setActiveTab("settings")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "settings" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Page Settings
+          </button>
+        </div>
+      </AdminHeader>
 
       <AnimatePresence mode="wait">
         {activeTab === "inquiries" ? (

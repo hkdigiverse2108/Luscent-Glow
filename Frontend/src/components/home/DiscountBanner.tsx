@@ -2,13 +2,48 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, TicketPercent } from "lucide-react";
 import { Link } from "react-router-dom";
+import { getAssetUrl } from "@/lib/api";
 
-const DiscountBanner = () => {
-  const endDate = new Date();
-  endDate.setDate(endDate.getDate() + 3);
+interface DiscountBannerProps {
+  banner?: {
+    image: string;
+    title: string;
+    subtitle: string;
+    discountText: string;
+    buttonText: string;
+    buttonLink: string;
+    endDate?: string;
+  };
+}
+
+const DiscountBanner = ({ banner }: DiscountBannerProps) => {
+  const defaultBanner = {
+    image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1600&h=600&fit=crop",
+    title: "Save 40% on All Essential Radiance.",
+    subtitle: "Exclusive Invitation",
+    discountText: "40% OFF",
+    buttonText: "Retrieve Offer",
+    buttonLink: "/offers",
+    endDate: ""
+  };
+
+  const activeBanner = banner || defaultBanner;
+  
+  // Dynamic Target Date Calculation
+  const getTargetDate = () => {
+    if (activeBanner.endDate && activeBanner.endDate !== "") {
+      return new Date(activeBanner.endDate);
+    }
+    // Universal Fallback: 72-hour sliding window protocol
+    const fallback = new Date();
+    fallback.setDate(fallback.getDate() + 3);
+    return fallback;
+  };
+
+  const [targetDate, setTargetDate] = useState(getTargetDate());
 
   const calcTimeLeft = () => {
-    const diff = endDate.getTime() - Date.now();
+    const diff = targetDate.getTime() - Date.now();
     if (diff <= 0) return { hours: 0, minutes: 0, seconds: 0 };
     return {
       hours: Math.floor(diff / (1000 * 60 * 60)),
@@ -20,9 +55,13 @@ const DiscountBanner = () => {
   const [timeLeft, setTimeLeft] = useState(calcTimeLeft());
 
   useEffect(() => {
+    setTargetDate(getTargetDate());
+  }, [activeBanner.endDate]);
+
+  useEffect(() => {
     const timer = setInterval(() => setTimeLeft(calcTimeLeft()), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [targetDate]);
 
   return (
     <section className="py-16 md:py-24">
@@ -36,8 +75,8 @@ const DiscountBanner = () => {
           {/* Background Image with Mask */}
           <div className="absolute inset-0">
             <img
-              src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1600&h=600&fit=crop"
-              alt="Sale banner"
+              src={getAssetUrl(activeBanner.image)}
+              alt={activeBanner.title}
               className="w-full h-full object-cover opacity-60 md:opacity-60"
             />
             <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-charcoal via-charcoal/80 to-charcoal/60 md:to-transparent" />
@@ -47,11 +86,11 @@ const DiscountBanner = () => {
             <div className="max-w-xl space-y-8">
               <div className="flex items-center gap-3 text-gold">
                 <TicketPercent size={20} />
-                <span className="text-sm font-body font-bold uppercase tracking-[0.3em]">Exclusive Invitation</span>
+                <span className="text-sm font-body font-bold uppercase tracking-[0.3em]">{activeBanner.subtitle}</span>
               </div>
               
-              <h3 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white leading-tight">
-                Save <span className="text-gold italic">40%</span> on All <br className="hidden md:block"/> Essential Radiance.
+              <h3 className="font-display text-4xl sm:text-4xl md:text-5xl lg:text-7xl font-bold text-white leading-tight">
+                {activeBanner.title}
               </h3>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 md:gap-8">
@@ -73,10 +112,10 @@ const DiscountBanner = () => {
                 <div className="h-10 w-[1px] bg-white/20 mx-2 hidden lg:block" />
                 
                 <Link
-                  to="/offers"
+                  to={activeBanner.buttonLink}
                   className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-gold text-charcoal font-body font-bold text-xs md:text-sm uppercase tracking-widest rounded-full hover:bg-white transition-all duration-500 shadow-2xl flex items-center justify-center gap-3"
                 >
-                  Retrieve Offer <ArrowRight size={18} />
+                  {activeBanner.buttonText} <ArrowRight size={18} />
                 </Link>
               </div>
             </div>

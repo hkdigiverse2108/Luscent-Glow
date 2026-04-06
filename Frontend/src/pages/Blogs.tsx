@@ -198,7 +198,7 @@ const Blogs = () => {
                 >
                   {settings.heroTitle.split(' Chronicles').length > 1 ? (
                     <>
-                      {settings.heroTitle.split(' Chronicles')[0]} <span className="text-gradient-gold italic font-light">Chronicles</span>
+                      {settings.heroTitle.split(' Chronicles')[0]} <span className="text-gradient-gold italic font-light">Concierge</span>
                     </>
                   ) : settings.heroTitle}
                 </motion.h2>

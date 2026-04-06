@@ -6,7 +6,12 @@ import { ArrowRight, Sparkle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 
-const NewArrivals = () => {
+interface NewArrivalsProps {
+  title?: string;
+  subtitle?: string;
+}
+
+const NewArrivals = ({ title, subtitle }: NewArrivalsProps) => {
   const [newProducts, setNewProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -61,7 +66,7 @@ const NewArrivals = () => {
             viewport={{ once: true }}
             className="font-display text-3xl md:text-5xl lg:text-7xl font-bold text-foreground mb-4 md:mb-6"
           >
-            Spring <span className="text-gradient-gold italic font-light">Newcomers</span>
+            {title || "Spring Newcomers"}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -70,7 +75,7 @@ const NewArrivals = () => {
             transition={{ delay: 0.1 }}
             className="text-muted-foreground font-body text-sm md:text-base lg:text-lg max-w-2xl mx-auto"
           >
-            Introducing the latest breakthrough formulas, curated specifically for the modern aesthetic and timed for the season of rebirth.
+            {subtitle || "Introducing the latest breakthrough formulas, curated specifically for the modern aesthetic and timed for the season of rebirth."}
           </motion.p>
         </div>
 
@@ -86,7 +91,7 @@ const NewArrivals = () => {
               className={`flex flex-col ${i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-8 md:gap-12 lg:gap-20`}
             >
               {/* Product Image Stage */}
-              <div className="relative w-full lg:w-[45%]">
+              <div className="relative w-full lg:w-[30%]">
                 <div className="relative aspect-[4/4.5] rounded-[2.5rem] overflow-hidden shadow-ethereal">
                   <motion.img
                     whileHover={{ scale: 1.05 }}

@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import BlogPostModal from "../../components/Admin/BlogPostModal";
 import EditorialVoiceModal from "../../components/Admin/EditorialVoiceModal";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminBlogs = () => {
   const { isDark } = useAdminTheme();
@@ -135,51 +136,39 @@ const AdminBlogs = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
-            Journal <span className="text-gold italic">Ledger</span>
-          </h2>
-          <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
-            <button 
-              onClick={() => setActiveTab("posts")}
-              className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === "posts" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Story Chronicles
-            </button>
-            <button 
-              onClick={() => setActiveTab("voices")}
-              className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-                activeTab === "voices" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Editorial Authority
-            </button>
-          </div>
+      <AdminHeader
+        title="Journal"
+        highlightedWord="Concierge"
+        subtitle="Editorial authority and chronicled narratives"
+        isDark={isDark}
+        action={{
+          label: activeTab === "posts" ? "Compose Story" : "Archive Voice",
+          onClick: () => {
+            if (activeTab === "posts") { setSelectedPost(null); setIsModalOpen(true); }
+            else { setSelectedVoice(null); setIsVoiceModalOpen(true); }
+          },
+          icon: Plus
+        }}
+      >
+        <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
+          <button 
+            onClick={() => setActiveTab("posts")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "posts" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Story Chronicles
+          </button>
+          <button 
+            onClick={() => setActiveTab("voices")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "voices" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Editorial Authority
+          </button>
         </div>
-        
-        <div className="flex gap-4">
-           {activeTab === "posts" ? (
-             <button 
-               onClick={() => { setSelectedPost(null); setIsModalOpen(true); }}
-               className="flex items-center gap-3 bg-gold hover:bg-gold/80 text-charcoal px-6 py-3 rounded-full font-body font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-gold/20"
-             >
-               <Plus size={18} />
-               <span>Compose Story</span>
-             </button>
-           ) : (
-             <button 
-               onClick={() => { setSelectedVoice(null); setIsVoiceModalOpen(true); }}
-               className="flex items-center gap-3 bg-gold hover:bg-gold/80 text-charcoal px-6 py-3 rounded-full font-body font-bold text-xs uppercase tracking-widest transition-all shadow-lg shadow-gold/20"
-             >
-               <Plus size={18} />
-               <span>Archive Voice</span>
-             </button>
-           )}
-        </div>
-      </div>
+      </AdminHeader>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-4">
         {/* Sidebar Settings - Static in both tabs for branding */}
@@ -225,7 +214,7 @@ const AdminBlogs = () => {
                 <button 
                   onClick={handleSaveSettings}
                   disabled={isSettingsSaving}
-                  className="w-full flex items-center justify-center gap-3 bg-secondary/50 hover:bg-gold text-gold hover:text-primary py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-3 bg-gold/10 hover:bg-gold text-gold hover:text-charcoal py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
                 >
                   {isSettingsSaving ? "Saving..." : "Update Brand Finale"}
                 </button>
@@ -287,7 +276,7 @@ const AdminBlogs = () => {
                           <div className="flex lg:flex-col gap-3">
                              <button 
                                onClick={() => { setSelectedPost(post); setIsModalOpen(true); }}
-                               className="p-3 rounded-2xl bg-secondary/50 text-gold hover:bg-gold hover:text-primary transition-all"
+                               className="p-3 rounded-2xl bg-gold/10 text-gold hover:bg-gold hover:text-charcoal transition-all"
                              >
                                <Edit2 size={18} />
                              </button>
@@ -301,7 +290,7 @@ const AdminBlogs = () => {
                                href={`/blogs/${post.id || post._id}`} 
                                target="_blank" 
                                rel="noreferrer"
-                               className="p-3 rounded-2xl bg-secondary/50 text-gold/50 hover:text-gold transition-all"
+                               className="p-3 rounded-2xl bg-gold/10 text-gold/50 hover:text-gold transition-all"
                              >
                                <Eye size={18} />
                              </a>
@@ -348,7 +337,7 @@ const AdminBlogs = () => {
                           <div className="flex lg:flex-col gap-3">
                              <button 
                                onClick={() => { setSelectedVoice(voice); setIsVoiceModalOpen(true); }}
-                               className="p-3 rounded-2xl bg-secondary/50 text-gold hover:bg-gold hover:text-primary transition-all"
+                               className="p-3 rounded-2xl bg-gold/10 text-gold hover:bg-gold hover:text-charcoal transition-all"
                              >
                                <Edit2 size={18} />
                              </button>

@@ -19,6 +19,7 @@ interface PolicySection {
   id: string;
   title: string;
   content: string | React.ReactNode;
+  icon?: string;
 }
 
 interface PolicyLayoutProps {
@@ -27,6 +28,7 @@ interface PolicyLayoutProps {
   lastUpdated: string;
   insights: QuickInsight[];
   sections: PolicySection[];
+  heroIcon?: string;
 }
 
 // resolveIcon removed in favor of DynamicIcon component
@@ -36,7 +38,8 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
   subtitle,
   lastUpdated,
   insights,
-  sections
+  sections,
+  heroIcon
 }) => {
   return (
     <div className="min-h-screen bg-[#FDFBF9] selection:bg-gold/30">
@@ -47,6 +50,13 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
           
           {/* Editorial Hero */}
           <div className="max-w-4xl mx-auto text-center mb-12 md:mb-20 px-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="w-16 h-16 md:w-24 md:h-24 bg-gold/10 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-gold shadow-lg shadow-gold/5"
+            >
+              <DynamicIcon name={heroIcon || "Shield"} size={48} className="md:w-12 md:h-12" />
+            </motion.div>
             <motion.p 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -60,7 +70,7 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
               transition={{ delay: 0.1 }}
               className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-primary mb-6 leading-tight md:leading-[1.1]"
             >
-              {title}
+              {title} <span className="text-gold italic">Concierge</span>
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0 }}
@@ -81,6 +91,7 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
           </div>
 
           {/* Quick Insights Cards */}
+          {/* ... (insights cards content remains unchanged) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto mb-16 md:mb-24 px-4">
             {insights.map((insight, i) => (
               <motion.div
@@ -116,7 +127,10 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
                   transition={{ delay: 0.1 }}
                   className="space-y-4 md:space-y-6"
                 >
-                  <h2 className="font-display text-2xl md:text-3xl font-bold text-primary border-b border-gold/10 pb-4">
+                  <h2 className="font-display text-2xl md:text-3xl font-bold text-primary border-b border-gold/10 pb-4 flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gold/5 rounded-xl flex items-center justify-center text-gold shrink-0">
+                      <DynamicIcon name={section.icon || "FileText"} size={20} />
+                    </div>
                     {section.title}
                   </h2>
                   <div className="font-body text-muted-foreground text-sm md:text-lg leading-relaxed space-y-4 policy-content">

@@ -89,7 +89,7 @@ const About = () => {
                   {config.heroTitle.split(' Convention. ')[0]}<br className="hidden md:block" />
                   Defying <span className="italic font-light text-gold/80">Convention.</span>
                 </>
-              ) : config.heroTitle}
+              ) : config.heroTitle} <span className="text-gold italic font-light">Concierge</span>
             </motion.h1>
           </div>
         </section>

@@ -1,12 +1,63 @@
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Youtube, Twitter, Mail, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Instagram, Facebook, Youtube, Twitter, Mail, Loader2, Phone } from "lucide-react";
+import { useState, useEffect } from "react";
 import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [footer, setFooter] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFooter();
+  }, []);
+
+  const fetchFooter = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/footer/"));
+      if (!response.ok) throw new Error("Failed to load");
+      const data = await response.json();
+      setFooter(data);
+    } catch (error) {
+      console.error("Footer fetch failed:", error);
+      // Fallback structure to prevent perpetual loading
+      setFooter({
+        brandDescription: "Elevate your beauty routine with our premium, cruelty-free cosmetics. Crafted with love, powered by nature.",
+        socials: [
+          { platform: "Instagram", url: "https://instagram.com/hk_digiverse" },
+          { platform: "Facebook", url: "https://facebook.com/luscentglow" },
+          { platform: "Youtube", url: "https://youtube.com/luscentglow" },
+          { platform: "Twitter", url: "https://twitter.com/luscentglow" }
+        ],
+        email: "hello@luscentglow.com",
+        phone: "+91 97126 63607",
+        columns: [
+          {
+            title: "Information",
+            links: [
+              { label: "About Us", path: "/about" },
+              { label: "Contact Us", path: "/contact" },
+              { label: "FAQ's", path: "/faq" }
+            ]
+          },
+          {
+            title: "Policies",
+            links: [
+              { label: "Privacy Policy", path: "/privacy-policy" },
+              { label: "Terms & Conditions", path: "/terms-and-conditions" }
+            ]
+          }
+        ],
+        newsletterTitle: "Beauty Line",
+        newsletterSubtitle: "Curated aesthetics & beauty tips straight to your inbox.",
+        copyrightText: `© ${new Date().getFullYear()} Luscent Glow. All rights reserved.`
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +85,16 @@ const Footer = () => {
     }
   };
 
+  if (loading || !footer) {
+    return (
+      <footer className="bg-primary text-primary-foreground py-16">
+        <div className="container mx-auto px-4 flex items-center justify-center">
+           <Loader2 className="animate-spin text-gold/30" size={32} />
+        </div>
+      </footer>
+    );
+  }
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-16">
@@ -44,50 +105,56 @@ const Footer = () => {
               Luscent <span className="text-gold">Glow</span>
             </h3>
             <p className="text-sm text-primary-foreground/60 leading-relaxed max-w-sm font-body">
-              Elevate your beauty routine with our premium, cruelty-free cosmetics. 
-              Crafted with love, powered by nature.
+              {footer.brandDescription}
             </p>
             <div className="flex items-center gap-4 pt-2">
-              <a href="https://instagram.com/hk_digiverse" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Instagram size={18} /></a>
-              <a href="https://facebook.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Facebook size={18} /></a>
-              <a href="https://youtube.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Youtube size={18} /></a>
-              <a href="https://twitter.com/luscentglow" target="_blank" rel="noreferrer" className="text-primary-foreground/50 hover:text-gold transition-colors"><Twitter size={18} /></a>
+              {footer.socials.map((social: any) => (
+                <a 
+                  key={social.platform}
+                  href={social.url} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="text-primary-foreground/50 hover:text-gold transition-colors"
+                >
+                  {social.platform === "Instagram" && <Instagram size={18} />}
+                  {social.platform === "Facebook" && <Facebook size={18} />}
+                  {social.platform === "Youtube" && <Youtube size={18} />}
+                  {social.platform === "Twitter" && <Twitter size={18} />}
+                </a>
+              ))}
             </div>
             <div className="pt-2 space-y-2 text-sm text-primary-foreground/50 font-body">
-              <a href="mailto:hello@luscentglow.com" className="hover:text-gold transition-colors flex items-center gap-2">📧 hello@luscentglow.com</a>
-              <a href="tel:+919712663607" className="hover:text-gold transition-colors flex items-center gap-2">📞 +91 97126 63607</a>
+              <a href={`mailto:${footer.email}`} className="hover:text-gold transition-colors flex items-center gap-2">
+                <Mail size={14} className="opacity-60" /> {footer.email}
+              </a>
+              <a href={`tel:${footer.phone}`} className="hover:text-gold transition-colors flex items-center gap-2">
+                <Phone size={14} className="opacity-60" /> {footer.phone}
+              </a>
             </div>
           </div>
 
-          {/* Information */}
-          <div className="space-y-4">
-            <h4 className="font-display text-lg font-semibold">Information</h4>
-            <nav className="space-y-2 text-sm font-body">
-              <Link to="/about" className="block text-primary-foreground/60 hover:text-gold transition-colors">About Us</Link>
-              <Link to="/contact" className="block text-primary-foreground/60 hover:text-gold transition-colors">Contact Us</Link>
-              <Link to="/faq" className="block text-primary-foreground/60 hover:text-gold transition-colors">FAQ's</Link>
-              <Link to="/offers" className="block text-primary-foreground/60 hover:text-gold transition-colors">Special Offers</Link>
-              <Link to="/blogs" className="block text-primary-foreground/60 hover:text-gold transition-colors">Blogs</Link>
-              <Link to="/track-order" className="block text-primary-foreground/60 hover:text-gold transition-colors">Track Your Order</Link>
-              <Link to="/contact" className="block text-primary-foreground/60 hover:text-gold transition-colors">Careers</Link>
-            </nav>
-          </div>
+          {/* Dynamic Columns */}
+          {footer.columns.map((column: any) => (
+            <div key={column.title} className="space-y-4">
+              <h4 className="font-display text-lg font-semibold">{column.title}</h4>
+              <nav className="space-y-2 text-sm font-body">
+                {column.links.map((link: any) => (
+                  <Link 
+                    key={link.label}
+                    to={link.path} 
+                    className="block text-primary-foreground/60 hover:text-gold transition-colors"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            </div>
+          ))}
 
-          {/* Policies */}
+          {/* Newsletter Section */}
           <div className="space-y-4">
-            <h4 className="font-display text-lg font-semibold">Policies</h4>
-            <nav className="space-y-2 text-sm font-body">
-              <Link to="/return-policy" className="block text-primary-foreground/60 hover:text-gold transition-colors">Return & Refund</Link>
-              <Link to="/privacy-policy" className="block text-primary-foreground/60 hover:text-gold transition-colors">Privacy Policy</Link>
-              <Link to="/terms-and-conditions" className="block text-primary-foreground/60 hover:text-gold transition-colors">Terms & Conditions</Link>
-              <Link to="/shipping-policy" className="block text-primary-foreground/60 hover:text-gold transition-colors">Shipping Policy</Link>
-              <Link to="/cancellation-policy" className="block text-primary-foreground/60 hover:text-gold transition-colors">Cancellation Policy</Link>
-            </nav>
-          </div>
-
-          <div className="space-y-4">
-            <h4 className="font-display text-lg font-semibold italic text-gold">Beauty Line</h4>
-            <p className="text-sm text-primary-foreground/60 font-body italic">Curated aesthetics & beauty tips straight to your inbox.</p>
+            <h4 className="font-display text-lg font-semibold italic text-gold">{footer.newsletterTitle}</h4>
+            <p className="text-sm text-primary-foreground/60 font-body italic">{footer.newsletterSubtitle}</p>
             <form onSubmit={handleSubscribe} className="flex gap-0">
               <input
                 type="email"
@@ -109,7 +176,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center text-xs text-primary-foreground/40 font-body">
-          © {new Date().getFullYear()} Luscent Glow. All rights reserved.
+          {footer.copyrightText}
         </div>
       </div>
     </footer>

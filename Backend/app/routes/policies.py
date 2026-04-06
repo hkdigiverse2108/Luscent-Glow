@@ -199,6 +199,36 @@ def get_default_policy(policy_type: str) -> Dict:
     }
     return defaults.get(policy_type)
 
+@router.get("/", response_description="List all policies", response_model=list[PolicyModel])
+async def list_policies():
+    db = await get_database()
+    policies_cursor = db["policies"].find({})
+    policies = await policies_cursor.to_list(length=100)
+    
+    # Process for visualization
+    for p in policies:
+        p["id"] = str(p["_id"])
+        if "_id" in p:
+            del p["_id"]
+        
+    # Merge with defaults that aren't in the DB yet
+    db_types = {p["type"] for p in policies}
+    defaults = {
+        "privacy-policy", 
+        "terms-and-conditions", 
+        "return-policy", 
+        "shipping-policy", 
+        "cancellation-policy"
+    }
+    
+    for d_type in defaults:
+        if d_type not in db_types:
+            default_p = get_default_policy(d_type)
+            if default_p:
+                policies.append(default_p)
+                
+    return policies
+
 @router.get("/{policy_type}", response_description="Get a specific policy", response_model=PolicyModel)
 async def get_policy(policy_type: str):
     db = await get_database()
@@ -208,6 +238,10 @@ async def get_policy(policy_type: str):
         if not default_policy:
             raise HTTPException(status_code=404, detail=f"Policy type '{policy_type}' not found")
         return default_policy
+    
+    policy["id"] = str(policy["_id"])
+    if "_id" in policy:
+        del policy["_id"]
     return policy
 
 @router.put("/{policy_type}", response_description="Update or create a policy", response_model=PolicyModel)
@@ -224,4 +258,19 @@ async def update_policy(policy_type: str, policy: PolicyModel):
         upsert=True, 
         return_document=True
     )
+    if result:
+        result["id"] = str(result["_id"])
+        if "_id" in result:
+            del result["_id"]
     return result
+
+@router.delete("/{policy_type}", response_description="Delete a policy")
+async def delete_policy(policy_type: str):
+    db = await get_database()
+    
+    result = await db["policies"].delete_one({"type": policy_type})
+    
+    if result.deleted_count == 1:
+        return {"message": f"Policy '{policy_type}' has been purged from the sanctuary."}
+    
+    raise HTTPException(status_code=404, detail=f"Policy '{policy_type}' not found in archives.")

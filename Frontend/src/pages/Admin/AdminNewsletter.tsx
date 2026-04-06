@@ -12,6 +12,7 @@ import {
 import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminNewsletter = () => {
   const { isDark } = useAdminTheme();
@@ -62,28 +63,17 @@ const AdminNewsletter = () => {
 
   return (
     <div className="space-y-2 pb-4">
-      {/* Header Ritual */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-indigo-600/10 pb-1.5">
-        <div className="space-y-1">
-          <h2 className={`font-body text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${
-            isDark ? "text-white" : "text-charcoal"
-          }`}>
-            Inner <span className="text-indigo-500">Circle</span>
-          </h2>
-          <p className={`font-body text-xs tracking-widest uppercase font-bold transition-colors duration-700 ${
-            isDark ? "text-slate-500" : "text-charcoal/70"
-          }`}>
-            Managing the newsletter subscriber repository
-          </p>
-        </div>
-        
-        <button className={`flex items-center gap-3 px-8 py-4 border font-bold rounded-2xl transition-all duration-500 uppercase tracking-widest text-xs ${
-          isDark ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-charcoal/5 border-charcoal/10 text-charcoal hover:bg-charcoal/10"
-        }`}>
-          <Download size={18} />
-          <span>Export List</span>
-        </button>
-      </div>
+      <AdminHeader 
+        title="Newsletter"
+        highlightedWord="Concierge"
+        subtitle="Managing the newsletter subscriber repository"
+        isDark={isDark}
+        action={{
+          label: "Export List",
+          onClick: () => { /* Export logic if any */ },
+          icon: Download
+        }}
+      />
 
       <div className="relative max-w-xl group">
         <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors ${

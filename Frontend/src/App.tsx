@@ -22,6 +22,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsAndConditions from "./pages/TermsAndConditions.tsx";
 import ShippingPolicy from "./pages/ShippingPolicy.tsx";
 import CancellationPolicy from "./pages/CancellationPolicy.tsx";
+import DynamicPolicy from "./pages/DynamicPolicy.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import BulkOrders from "./pages/BulkOrders.tsx";
 import GiftCards from "./pages/GiftCards.tsx";
@@ -34,8 +35,10 @@ import OrderSuccess from "./pages/OrderSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLayout from "./components/Admin/AdminLayout.tsx";
 import AdminDashboard from "./pages/Admin/AdminDashboard.tsx";
+import AdminHome from "./pages/Admin/AdminHome.tsx";
 import AdminProducts from "./pages/Admin/AdminProducts.tsx";
 import AdminOrders from "./pages/Admin/AdminOrders.tsx";
+import AdminUsers from "./pages/Admin/AdminUsers.tsx";
 import AdminNewsletter from "./pages/Admin/AdminNewsletter.tsx";
 import AdminInquiries from "./pages/Admin/AdminInquiries.tsx";
 import AdminSettings from "./pages/Admin/AdminSettings.tsx";
@@ -48,6 +51,8 @@ import AdminContact from "./pages/Admin/AdminContact.tsx";
 import AdminFAQ from "./pages/Admin/AdminFAQ.tsx";
 import AdminPolicies from "./pages/Admin/PoliciesAdmin.tsx";
 import AdminBlogs from "./pages/Admin/AdminBlogs.tsx";
+import AdminOffers from "./pages/Admin/AdminOffers.tsx";
+import AdminFooter from "./pages/Admin/AdminFooter.tsx";
 import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute.tsx";
 import { AdminThemeProvider } from "./context/AdminThemeContext.tsx";
 
@@ -75,11 +80,6 @@ const App = () => (
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/faq" element={<FAQ />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/return-policy" element={<ReturnPolicy />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-                <Route path="/shipping-policy" element={<ShippingPolicy />} />
-                <Route path="/cancellation-policy" element={<CancellationPolicy />} />
                 <Route path="/bulk-orders" element={<BulkOrders />} />
                 <Route path="/gift-cards" element={<GiftCards />} />
                 <Route path="/blogs" element={<Blogs />} />
@@ -89,6 +89,9 @@ const App = () => (
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/order-success" element={<OrderSuccess />} />
                 
+                {/* Dynamic Legal Sanctuary (Root-Level) */}
+                <Route path="/:type" element={<DynamicPolicy />} />
+
                 {/* Admin Sanctuary Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 
@@ -102,8 +105,10 @@ const App = () => (
                   }>
                     <Route index element={<AdminDashboard />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="home" element={<AdminHome />} />
                     <Route path="products" element={<AdminProducts />} />
                     <Route path="orders" element={<AdminOrders />} />
+                    <Route path="users" element={<AdminUsers />} />
                     <Route path="newsletter" element={<AdminNewsletter />} />
                     <Route path="inquiries" element={<AdminInquiries />} />
                     <Route path="branding" element={<AdminBranding />} />
@@ -114,6 +119,8 @@ const App = () => (
                     <Route path="faq" element={<AdminFAQ />} />
                     <Route path="policies" element={<AdminPolicies />} />
                     <Route path="blogs" element={<AdminBlogs />} />
+                    <Route path="offers" element={<AdminOffers />} />
+                    <Route path="footer" element={<AdminFooter />} />
                     <Route path="settings" element={<AdminSettings />} />
                   </Route>
                 </Route>

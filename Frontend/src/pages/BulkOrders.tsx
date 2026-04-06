@@ -113,7 +113,7 @@ const BulkOrders = () => {
                     <>
                       {config.heroTitle.split(' Corporate ')[0]} <span className="italic font-light text-gold">Corporate</span> {config.heroTitle.split(' Corporate ')[1]}
                     </>
-                  ) : config.heroTitle}
+                  ) : config.heroTitle} <span className="text-gold italic font-light">Concierge</span>
                 </h1>
                 <p className="text-base md:text-lg font-body text-muted-foreground leading-relaxed mb-8 md:mb-12 max-w-lg mx-auto lg:mx-0 italic">
                   "{config.heroDescription}"
