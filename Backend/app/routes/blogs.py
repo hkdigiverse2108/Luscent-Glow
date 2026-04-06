@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Body
 from ..database import get_database
-from ..models import BlogPostModel, BlogSettingsModel
+from ..models import BlogPostModel, BlogSettingsModel, EditorialVoiceModel
 from datetime import datetime
 from typing import List, Optional
 from bson import ObjectId
@@ -36,6 +36,61 @@ async def update_blog_settings(settings: BlogSettingsModel):
         return_document=True
     )
     return result
+
+# --- Editorial Voice Endpoints ---
+
+@router.get("/editorial-voices", response_description="List all editorial voices", response_model=List[EditorialVoiceModel])
+async def list_editorial_voices():
+    db = await get_database()
+    voices = await db["editorial_voices"].find().to_list(100)
+    return voices
+
+@router.post("/editorial-voices", response_description="Create a new editorial voice", response_model=EditorialVoiceModel)
+async def create_editorial_voice(voice: EditorialVoiceModel):
+    db = await get_database()
+    voice_dict = voice.model_dump(by_alias=True, exclude=["id"])
+    voice_dict["updatedAt"] = datetime.utcnow().isoformat()
+    
+    # If this is active, deactivate others
+    if voice_dict.get("isActive"):
+        await db["editorial_voices"].update_many({"isActive": True}, {"$set": {"isActive": False}})
+        
+    new_voice = await db["editorial_voices"].insert_one(voice_dict)
+    created_voice = await db["editorial_voices"].find_one({"_id": new_voice.inserted_id})
+    return created_voice
+
+@router.put("/editorial-voices/{id}", response_description="Update an editorial voice", response_model=EditorialVoiceModel)
+async def update_editorial_voice(id: str, voice: EditorialVoiceModel):
+    db = await get_database()
+    voice_dict = voice.model_dump(by_alias=True, exclude=["id"])
+    voice_dict["updatedAt"] = datetime.utcnow().isoformat()
+    
+    # If setting to active, deactivate others
+    if voice_dict.get("isActive"):
+        await db["editorial_voices"].update_many({"_id": {"$ne": ObjectId(id) if ObjectId.is_valid(id) else id}, "isActive": True}, {"$set": {"isActive": False}})
+        
+    query = {"_id": ObjectId(id)} if ObjectId.is_valid(id) else {"id": id}
+    
+    result = await db["editorial_voices"].find_one_and_update(
+        query, 
+        {"$set": voice_dict}, 
+        return_document=True
+    )
+    
+    if not result:
+        raise HTTPException(status_code=404, detail=f"Voice with ID {id} not found")
+    return result
+
+@router.delete("/editorial-voices/{id}", response_description="Delete an editorial voice")
+async def delete_editorial_voice(id: str):
+    db = await get_database()
+    query = {"_id": ObjectId(id)} if ObjectId.is_valid(id) else {"id": id}
+    
+    delete_result = await db["editorial_voices"].delete_one(query)
+    if delete_result.deleted_count == 1:
+        return {"message": "Editorial voice removed from journal"}
+    
+    raise HTTPException(status_code=404, detail=f"Voice with ID {id} not found")
 
 # --- Blog Post Endpoints ---
 

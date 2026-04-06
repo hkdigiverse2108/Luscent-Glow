@@ -16,22 +16,43 @@ const BlogDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState<any>(null);
+  const [activeVoice, setActiveVoice] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPost = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(getApiUrl(`blogs/${id}`));
-        if (response.ok) {
-          setPost(await response.json());
+        const [postRes, voicesRes] = await Promise.all([
+          fetch(getApiUrl(`blogs/${id}`)),
+          fetch(getApiUrl("blogs/editorial-voices"))
+        ]);
+        
+        let postData = null;
+        if (postRes.ok) {
+          postData = await postRes.json();
+          setPost(postData);
+        }
+
+        if (voicesRes.ok) {
+          const voicesData = await voicesRes.json();
+          // Find the specific voice matching this post's author
+          const matchedVoice = voicesData.find((v: any) => v.name === postData?.author);
+          
+          if (matchedVoice) {
+            setActiveVoice(matchedVoice);
+          } else {
+            // Fallback: Use the 'active' featured voice or the first available
+            const active = voicesData.find((v: any) => v.isActive);
+            setActiveVoice(active || (voicesData.length > 0 ? voicesData[0] : null));
+          }
         }
       } catch (error) {
-        console.error("Failed to fetch story:", error);
+        console.error("Failed to fetch story details:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchPost();
+    fetchData();
   }, [id]);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -202,17 +223,21 @@ const BlogDetail = () => {
                   <div className="relative group">
                     <div className="absolute -inset-2 bg-gradient-to-tr from-gold to-rose-light rounded-full blur-[10px] opacity-20 group-hover:opacity-40 transition-opacity" />
                     <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-secondary overflow-hidden border-2 border-white shadow-xl flex items-center justify-center">
-                      <User size={44} className="text-gold/40" />
+                      {activeVoice?.image ? (
+                        <img src={getAssetUrl(activeVoice.image)} alt={activeVoice.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={44} className="text-gold/40" />
+                      )}
                     </div>
                   </div>
                   <div className="flex-1 space-y-4">
                     <div className="flex items-center justify-center md:justify-start gap-3">
-                      <span className="text-[10px] font-body font-bold text-gold uppercase tracking-[0.3em]">Editorial Voice</span>
+                      <span className="text-[10px] font-body font-bold text-gold uppercase tracking-[0.3em]">{activeVoice?.badge || "Editorial Voice"}</span>
                       <div className="h-[1px] hidden md:block flex-1 bg-gold/10" />
                     </div>
-                    <h3 className="font-display text-3xl md:text-4xl font-bold text-foreground italic">{post.author}</h3>
+                    <h3 className="font-display text-3xl md:text-4xl font-bold text-foreground italic">{activeVoice?.name || post.author}</h3>
                     <p className="text-muted-foreground font-body text-base md:text-lg leading-relaxed max-w-2xl italic">
-                      "A voice of authority in modern radiance, Elena curates our Journal with a focus on where clinical excellence meets spiritual wellness. Her philosophy: Beauty is the outward reflection of a harmonious soul."
+                      "{activeVoice?.quote || "A voice of authority in modern radiance..."}"
                     </p>
                   </div>
                 </div>

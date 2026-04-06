@@ -478,6 +478,30 @@ class BlogSettingsModel(BaseModel):
     class Config:
         populate_by_name = True
 
+class EditorialVoiceModel(BaseModel):
+    """
+    Model for an authoritative editorial voice/profile.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    name: str = Field(...)
+    badge: str = Field(default="EDITORIAL VOICE")
+    quote: str = Field(...)
+    image: str = Field(...)
+    isActive: bool = Field(default=False)
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "name": "Dr. Marcus Chen",
+                "badge": "EDITORIAL VOICE",
+                "quote": "Beauty is the outward reflection of a harmonious soul.",
+                "image": "/assets/blog/authors/marcus.png",
+                "isActive": True
+            }
+        }
+
 class BrandingModel(BaseModel):
     """
     Model for site-wide branding settings like logo.

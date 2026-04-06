@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Sparkles, Calendar, Clock, User, ArrowRight, Mail } from "lucide-react";
+import { Sparkles, Calendar, Clock, User, ArrowRight, Mail, Quote } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BlogCard from "@/components/BlogCard";
@@ -12,33 +12,32 @@ import { toast } from "sonner";
 const Blogs = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
+  const [voices, setVoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchData = async () => {
     try {
-      const [postsRes, settingsRes] = await Promise.all([
+      const [postsRes, settingsRes, voicesRes] = await Promise.all([
         fetch(getApiUrl("blogs")),
-        fetch(getApiUrl("blogs/settings"))
+        fetch(getApiUrl("blogs/settings")),
+        fetch(getApiUrl("blogs/editorial-voices"))
       ]);
       
       if (postsRes.ok) {
           const postsData = await postsRes.json();
-          console.log("Journal posts unearthed:", postsData);
           setPosts(postsData);
-      } else {
-          console.error("The journal records are sealed:", await postsRes.text());
-          toast.error("Resource fetch ritual failed for chronicles.");
       }
       
       if (settingsRes.ok) {
           const settingsData = await settingsRes.json();
-          console.log("Editorial settings obtained:", settingsData);
           setSettings(settingsData);
-      } else {
-          console.error("Editorial patterns lost:", await settingsRes.text());
-          toast.error("Editorial sync failed.");
+      }
+
+      if (voicesRes.ok) {
+          const voicesData = await voicesRes.json();
+          setVoices(voicesData);
       }
     } catch (error) {
       console.error("Failed to fetch journal chronicles:", error);
@@ -222,6 +221,78 @@ const Blogs = () => {
             </div>
           </div>
         </section>
+
+        {/* Editorial Board Gallery */}
+        {voices.length > 0 && (
+          <section className="py-20 md:py-32 bg-white/40">
+            <div className="container mx-auto px-4 md:px-6 lg:px-12">
+              <div className="text-center mb-20 space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="flex items-center justify-center gap-3 text-gold"
+                >
+                  <div className="h-[1px] w-8 bg-gold/30" />
+                  <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em]">The Curator Circle</span>
+                  <div className="h-[1px] w-8 bg-gold/30" />
+                </motion.div>
+                <motion.h2 
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 }}
+                  className="font-display text-4xl md:text-5xl lg:text-6xl font-bold text-charcoal italic"
+                >
+                  Editorial <span className="text-gold not-italic">Board</span>
+                </motion.h2>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-12 lg:gap-20 max-w-7xl mx-auto">
+                {voices.map((voice, idx) => (
+                  <motion.div 
+                    key={voice._id || voice.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex flex-col sm:flex-row items-center sm:items-start gap-8 lg:gap-12 group"
+                  >
+                    <div className="relative shrink-0">
+                      <div className={`absolute -inset-4 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 ${voice.isActive ? "bg-gold/20" : "bg-black/5"}`} />
+                      <div className={`relative w-32 h-32 md:w-40 md:h-40 rounded-full border-2 overflow-hidden transition-all duration-700 ${voice.isActive ? "border-gold scale-105 shadow-2xl" : "border-white/50 group-hover:border-gold/30 grayscale-[50%] group-hover:grayscale-0"}`}>
+                        <img src={getAssetUrl(voice.image)} alt={voice.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      </div>
+                      {voice.isActive && (
+                        <div className="absolute -bottom-2 -right-2 bg-gold text-charcoal p-2 rounded-full shadow-xl border-4 border-white animate-bounce-slow">
+                          <Sparkles size={16} />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-4 text-center sm:text-left pt-2 md:pt-4">
+                      <div className="flex items-center justify-center sm:justify-start gap-4">
+                        <span className={`text-[10px] font-body font-bold uppercase tracking-[0.3em] ${voice.isActive ? "text-gold" : "text-charcoal/40"}`}>{voice.badge}</span>
+                        {voice.isActive && <span className="px-2 py-0.5 bg-gold/10 text-gold text-[8px] font-bold rounded-full border border-gold/20 uppercase tracking-widest">Active Curator</span>}
+                      </div>
+                      
+                      <h3 className="font-display text-3xl md:text-4xl font-bold text-charcoal italic group-hover:text-gold transition-colors">
+                        {voice.name}
+                      </h3>
+                      
+                      <div className="relative">
+                        <Quote className="absolute -left-6 -top-2 opacity-5 text-gold hidden lg:block" size={32} />
+                        <p className="text-charcoal/60 font-body text-sm md:text-base leading-relaxed italic line-clamp-3">
+                          "{voice.quote}"
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Cinematic Brand Finale */}
         <section className="relative py-12 md:py-16 overflow-hidden">

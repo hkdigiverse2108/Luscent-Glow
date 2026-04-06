@@ -4,6 +4,7 @@ import { Leaf, Heart, Globe, Shield, Sparkles, Zap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import DynamicIcon from "@/components/DynamicIcon";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 
 const About = () => {
@@ -35,15 +36,7 @@ const About = () => {
     transition: { duration: 0.8 }
   };
 
-  const resolveIcon = (iconName: string) => {
-    switch (iconName) {
-      case "Leaf": return <Leaf className="text-gold" />;
-      case "Heart": return <Heart className="text-gold" />;
-      case "Globe": return <Globe className="text-gold" />;
-      case "Shield": return <Shield className="text-gold" />;
-      default: return <Zap className="text-gold" />;
-    }
-  };
+  // resolveIcon removed in favor of DynamicIcon component
 
   if (loading || !config) {
     return (
@@ -137,8 +130,8 @@ const About = () => {
                   transition={{ delay: i * 0.1 }}
                   className="p-8 bg-background border border-gold/10 rounded-[2rem] hover:border-gold/30 transition-colors group"
                 >
-                  <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                    {resolveIcon(value.icon)}
+                  <div className="w-12 h-12 bg-secondary rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform text-gold">
+                    <DynamicIcon name={value.icon} size={24} />
                   </div>
                   <h3 className="font-display text-xl font-bold text-foreground mb-4 uppercase tracking-wider">{value.title}</h3>
                   <p className="font-body text-sm text-muted-foreground leading-loose">{value.desc}</p>

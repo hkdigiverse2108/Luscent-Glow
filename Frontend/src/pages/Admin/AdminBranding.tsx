@@ -76,10 +76,10 @@ const AdminBranding = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-12 pb-20"
+      className="space-y-4 pb-4"
     >
       {/* Dynamic Identity Title */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gold/10 pb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
         <div className="space-y-1">
           <h2 className={`font-body text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
             Header <span className="text-gold">Governance</span>
@@ -98,17 +98,17 @@ const AdminBranding = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Branding Presence Card */}
-        <motion.div variants={itemVariants} className="lg:col-span-5 space-y-6">
-            <div className={`p-8 rounded-[2.5rem] border shadow-2xl relative overflow-hidden ${isDark ? "bg-charcoal/40 border-gold/10" : "bg-white border-gold/20"}`}>
-                <div className="flex items-center gap-3 mb-8">
+        <motion.div variants={itemVariants} className="lg:col-span-5 space-y-4">
+            <div className={`p-4 rounded-3xl border shadow-2xl relative overflow-hidden ${isDark ? "bg-charcoal/40 border-gold/10" : "bg-white border-gold/20"}`}>
+                <div className="flex items-center gap-3 mb-2">
                     <Sparkles size={18} className="text-gold" />
                     <h3 className="font-display text-xl font-bold uppercase tracking-tight">Active Header Identity</h3>
                 </div>
 
-                <div className="space-y-8">
-                    <div className="p-10 rounded-3xl bg-secondary/30 border border-gold/10 flex items-center justify-center relative group">
+                <div className="space-y-4">
+                    <div className="p-6 rounded-3xl bg-secondary/30 border border-gold/10 flex items-center justify-center relative group">
                         {branding?.useImage && branding?.logoImage ? (
                             <img 
                                 src={getAssetUrl(branding.logoImage)} 
@@ -146,7 +146,7 @@ const AdminBranding = () => {
             </div>
 
             {/* Quick Context Tip */}
-            <div className={`p-6 rounded-3xl border ${isDark ? "border-gold/5 bg-gold/5" : "border-gold/10 bg-gold/5"}`}>
+            <div className={`p-4 rounded-3xl border ${isDark ? "border-gold/5 bg-gold/5" : "border-gold/10 bg-gold/5"}`}>
                 <div className="flex gap-4">
                     <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center shrink-0">
                         <Shield size={18} className="text-gold" />
@@ -159,9 +159,9 @@ const AdminBranding = () => {
         </motion.div>
 
         {/* Category Taxonomy Section */}
-        <motion.div variants={itemVariants} className="lg:col-span-7 space-y-6">
-            <div className={`p-8 rounded-[2.5rem] border shadow-2xl ${isDark ? "bg-charcoal/40 border-gold/10" : "bg-white border-gold/20"}`}>
-                <div className="flex items-center justify-between mb-10">
+        <motion.div variants={itemVariants} className="lg:col-span-7 space-y-4">
+            <div className={`p-4 rounded-3xl border shadow-2xl ${isDark ? "bg-charcoal/40 border-gold/10" : "bg-white border-gold/20"}`}>
+                <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-3">
                         <Layout size={18} className="text-gold" />
                         <h3 className="font-display text-xl font-bold uppercase tracking-tight">Taxonomy (Categories)</h3>
@@ -179,7 +179,7 @@ const AdminBranding = () => {
                         <div 
                             key={cat._id}
                             onClick={() => navigate(`/products?category=${cat.slug}`)}
-                            className={`group flex items-center justify-between p-5 rounded-2xl border cursor-pointer transition-all duration-300 ${isDark ? "bg-white/5 border-white/5 hover:border-gold/30" : "bg-charcoal/5 border-charcoal/5 hover:border-gold/30 "}`}
+                            className={`group flex items-center justify-between p-3 rounded-2xl border cursor-pointer transition-all duration-300 ${isDark ? "bg-white/5 border-white/5 hover:border-gold/30" : "bg-charcoal/5 border-charcoal/5 hover:border-gold/30 "}`}
                         >
                             <div className="flex items-center gap-5">
                                 <div className="w-12 h-12 rounded-xl bg-gold/5 flex items-center justify-center border border-gold/10 group-hover:bg-gold/10 transition-colors">

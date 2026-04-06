@@ -15,22 +15,12 @@ import {
   ShieldCheck,
   Zap
 } from "lucide-react";
+import DynamicIcon from "@/components/DynamicIcon";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 
-// Dynamic Icon Resolver
-const resolveIcon = (iconName: string) => {
-  switch (iconName) {
-    case 'Send': return <Send size={18} />;
-    case 'CreditCard': return <CreditCard size={18} />;
-    case 'Sparkles': return <Sparkles size={18} />;
-    case 'ShieldCheck': return <ShieldCheck size={18} />;
-    case 'Zap': return <Zap size={18} />;
-    case 'Mail': return <Mail size={18} />;
-    default: return <Gift size={18} />;
-  }
-};
+// Dynamic Icon Resolver removed in favor of DynamicIcon component
 
 const GiftCards = () => {
   const [loading, setLoading] = useState(true);
@@ -292,7 +282,7 @@ const GiftCards = () => {
                     {config.features.map((item: any, i: number) => (
                       <div key={i} className="text-center space-y-2 p-5 rounded-[2rem] bg-secondary/30 backdrop-blur-sm border border-secondary/20">
                         <div className="mx-auto w-10 h-10 rounded-full glass-premium flex items-center justify-center text-gold mb-2 shadow-sm">
-                          {resolveIcon(item.icon)}
+                          <DynamicIcon name={item.icon} size={18} />
                         </div>
                         <h4 className="text-[10px] font-body font-bold uppercase tracking-widest text-[#2D2424]">{item.title}</h4>
                         <p className="text-[10px] text-muted-foreground font-body leading-tight">{item.desc}</p>

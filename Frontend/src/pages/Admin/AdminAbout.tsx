@@ -14,6 +14,7 @@ import {
   MessageSquare,
   Image as ImageIcon
 } from "lucide-react";
+import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -80,23 +81,15 @@ const AdminAbout = () => {
     }
   };
 
-  const resolveIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Leaf': return <Leaf size={18} />;
-      case 'Heart': return <Heart size={18} />;
-      case 'Globe': return <Globe size={18} />;
-      case 'Shield': return <Shield size={18} />;
-      default: return <Zap size={18} />;
-    }
-  };
+  // Removed hardcoded resolveIcon in favor of DynamicIcon component
 
   if (loading || !config) {
     return <div className="py-20 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing Ritual Connection...</div>;
   }
 
   return (
-    <div className="space-y-12 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gold/10 pb-8">
+    <div className="space-y-2 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
         <div className="space-y-1">
           <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
             About Us <span className="text-gold italic text-8xl">Sanctuary</span>
@@ -116,11 +109,11 @@ const AdminAbout = () => {
         </motion.button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Hero & Narrative Settings */}
-        <div className="space-y-8">
-          <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-            <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+        <div className="space-y-6">
+          <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+            <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
               <Sparkles size={20} className="text-gold" /> Hero Sanctuary
             </h3>
             <div className="grid gap-6">
@@ -156,8 +149,8 @@ const AdminAbout = () => {
             </div>
           </div>
 
-          <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-            <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+          <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+            <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
               <MessageSquare size={20} className="text-gold" /> Editorial Narrative
             </h3>
             <div className="space-y-6">
@@ -192,9 +185,9 @@ const AdminAbout = () => {
         </div>
 
         {/* Values & Founder */}
-        <div className="space-y-8">
-           <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-              <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+        <div className="space-y-6">
+          <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+              <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                 <Leaf size={20} className="text-gold" /> Philosophy Values
               </h3>
               <div className="space-y-4">
@@ -202,20 +195,19 @@ const AdminAbout = () => {
                   <div key={i} className="p-5 rounded-2xl border border-white/5 bg-white/5 space-y-3 relative group">
                      <button onClick={() => setConfig({ ...config, values: config.values.filter((_:any, idx:number) => idx !== i) })} className="absolute top-4 right-4 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 size={16} /></button>
                      <div className="flex gap-4 items-center">
-                        <select 
+                        <div className="w-10 h-10 bg-secondary/50 rounded-xl flex items-center justify-center text-gold">
+                           <DynamicIcon name={val.icon} size={18} />
+                        </div>
+                        <input 
+                          placeholder="Icon (e.g. Leaf)"
                           value={val.icon}
                           onChange={(e) => {
                             const newVals = [...config.values];
                             newVals[i].icon = e.target.value;
                             setConfig({ ...config, values: newVals });
                           }}
-                          className="bg-transparent border rounded-lg p-2 text-[10px] uppercase font-bold"
-                        >
-                           <option value="Leaf">Leaf</option>
-                           <option value="Heart">Heart</option>
-                           <option value="Globe">Globe</option>
-                           <option value="Shield">Shield</option>
-                        </select>
+                          className="bg-transparent border rounded-lg p-2 text-[10px] uppercase font-bold w-24"
+                        />
                         <input 
                           placeholder="Value Title"
                           value={val.title}
@@ -244,8 +236,8 @@ const AdminAbout = () => {
               </div>
            </div>
 
-           <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-              <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+          <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+              <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                 <Leaf size={20} className="text-gold" /> Visual Interlude
               </h3>
               <div className="grid gap-6">
@@ -280,10 +272,10 @@ const AdminAbout = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
          {/* Curator Settings */}
-         <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-            <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+         <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+            <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
               <ImageIcon size={20} className="text-gold" /> Founder Vision
             </h3>
             <div className="flex flex-col md:flex-row gap-10">
@@ -321,8 +313,8 @@ const AdminAbout = () => {
          </div>
 
          {/* Commitments Section */}
-         <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-            <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+         <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+            <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
               <CheckCircle2 size={20} className="text-gold" /> Site Commitments
             </h3>
             <div className="space-y-4">

@@ -15,6 +15,7 @@ import {
   ChevronDown,
   Layout
 } from "lucide-react";
+import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -67,23 +68,15 @@ const AdminFAQ = () => {
     }
   };
 
-  const resolveIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'HelpCircle': return <HelpCircle size={18} />;
-      case 'Truck': return <Truck size={18} />;
-      case 'Package': return <Package size={18} />;
-      case 'RefreshCcw': return <RefreshCcw size={18} />;
-      default: return <Zap size={18} />;
-    }
-  };
+  // resolveIcon removed in favor of DynamicIcon component
 
   if (loading || !config) {
-    return <div className="py-20 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing Concierge Connection...</div>;
+    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing Concierge Connection...</div>;
   }
 
   return (
-    <div className="space-y-12 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gold/10 pb-8">
+    <div className="space-y-2 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
         <div className="space-y-1">
           <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
             FAQ <span className="text-gold italic text-8xl">Concierge</span>
@@ -103,11 +96,11 @@ const AdminFAQ = () => {
         </motion.button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Hero & Support sections */}
-        <div className="space-y-8">
-          <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-            <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+        <div className="space-y-4">
+          <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+            <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
               <Sparkles size={20} className="text-gold" /> Hero Sanctuary
             </h3>
             <div className="space-y-6">
@@ -138,8 +131,8 @@ const AdminFAQ = () => {
             </div>
           </div>
 
-          <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-            <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+          <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+            <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
               <Plus size={20} className="text-gold" /> Support Registry (Bottom Card)
             </h3>
             <div className="space-y-6">
@@ -174,8 +167,8 @@ const AdminFAQ = () => {
         </div>
 
         {/* Categories & Questions Management */}
-        <div className={`p-8 rounded-[2.5rem] border h-fit ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-          <div className="flex items-center justify-between mb-8">
+        <div className={`p-4 rounded-3xl border h-fit ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+          <div className="flex items-center justify-between mb-2">
             <h3 className="font-display text-xl font-bold flex items-center gap-3">
               <Layout size={20} className="text-gold" /> Registry Repository
             </h3>
@@ -194,13 +187,13 @@ const AdminFAQ = () => {
           <div className="space-y-4">
             {config.categories.map((cat: any) => (
               <div key={cat.id} className={`rounded-3xl border transition-all ${expandedCategory === cat.id ? "border-gold/30" : "border-white/5"}`}>
-                <div 
+                  <div 
                   onClick={() => setExpandedCategory(expandedCategory === cat.id ? null : cat.id)}
-                  className="p-5 flex items-center justify-between cursor-pointer group"
+                  className="p-3 flex items-center justify-between cursor-pointer group"
                 >
                    <div className="flex items-center gap-4">
                       <div className="w-10 h-10 bg-secondary/50 rounded-xl flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-primary transition-all">
-                        {resolveIcon(cat.icon)}
+                        <DynamicIcon name={cat.icon} size={18} />
                       </div>
                       <div className="space-y-1 text-left">
                         <input 
@@ -217,22 +210,39 @@ const AdminFAQ = () => {
                       </div>
                    </div>
                    <div className="flex items-center gap-4">
-                      <select 
-                         value={cat.icon}
-                         onClick={(e) => e.stopPropagation()}
-                         onChange={(e) => {
-                           const newCats = [...config.categories];
-                           const idx = newCats.findIndex(c => c.id === cat.id);
-                           newCats[idx].icon = e.target.value;
-                           setConfig({ ...config, categories: newCats });
-                         }}
-                         className="bg-transparent border-none text-[10px] font-bold uppercase tracking-widest focus:ring-0"
-                      >
-                         <option value="HelpCircle">Help</option>
-                         <option value="Truck">Shipping</option>
-                         <option value="Package">Products</option>
-                         <option value="RefreshCcw">Returns</option>
-                      </select>
+                      <div className="flex items-center gap-3">
+
+                         <div className="w-8 h-8 bg-gold/10 rounded-lg flex items-center justify-center text-gold">
+
+                            <DynamicIcon name={cat.icon} size={14} />
+
+                         </div>
+
+                         <input 
+
+                            placeholder="Icon Name"
+
+                            value={cat.icon}
+
+                            onClick={(e) => e.stopPropagation()}
+
+                            onChange={(e) => {
+
+                              const newCats = [...config.categories];
+
+                              const idx = newCats.findIndex(c => c.id === cat.id);
+
+                              newCats[idx].icon = e.target.value;
+
+                              setConfig({ ...config, categories: newCats });
+
+                            }}
+
+                            className="bg-transparent border rounded-lg p-1 text-[9px] uppercase font-bold w-20"
+
+                         />
+
+                      </div>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -255,10 +265,10 @@ const AdminFAQ = () => {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="p-6 pt-0 border-t border-white/5 space-y-6">
+                      <div className="p-4 pt-0 border-t border-white/5 space-y-4">
                          <div className="space-y-4">
                             {cat.questions.map((q: any, qIdx: number) => (
-                              <div key={q.id} className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4 relative group/q">
+                              <div key={q.id} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2 relative group/q">
                                  <button 
                                    onClick={() => {
                                       const newCats = [...config.categories];

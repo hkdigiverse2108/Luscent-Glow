@@ -25,6 +25,7 @@ import {
   X,
   Type
 } from "lucide-react";
+import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -37,11 +38,7 @@ const POLICY_TYPES = [
   { id: "cancellation-policy", label: "Cancellation Policy" }
 ];
 
-const ICON_OPTIONS = [
-  "Shield", "Eye", "Lock", "Globe", "FileText", "UserCheck", 
-  "ShieldAlert", "Award", "RefreshCcw", "Zap", "PackageCheck", 
-  "Truck", "Globe2", "Clock", "XCircle", "CreditCard", "HelpCircle"
-];
+  // ICON_OPTIONS removed in favor of dynamic Lucide icon names
 
 const PoliciesAdmin = () => {
   const { isDark } = useAdminTheme();
@@ -90,36 +87,15 @@ const PoliciesAdmin = () => {
     }
   };
 
-  const resolveIcon = (iconName: string) => {
-    const props = { size: 18 };
-    switch (iconName) {
-      case 'Shield': return <Shield {...props} />;
-      case 'Eye': return <Eye {...props} />;
-      case 'Lock': return <Lock {...props} />;
-      case 'Globe': return <Globe {...props} />;
-      case 'FileText': return <FileText {...props} />;
-      case 'UserCheck': return <UserCheck {...props} />;
-      case 'ShieldAlert': return <ShieldAlert {...props} />;
-      case 'Award': return <Award {...props} />;
-      case 'RefreshCcw': return <RefreshCcw {...props} />;
-      case 'Zap': return <Zap {...props} />;
-      case 'PackageCheck': return <PackageCheck {...props} />;
-      case 'Truck': return <Truck {...props} />;
-      case 'Globe2': return <Globe2 {...props} />;
-      case 'Clock': return <Clock {...props} />;
-      case 'XCircle': return <XCircle {...props} />;
-      case 'CreditCard': return <CreditCard {...props} />;
-      default: return <Sparkles {...props} />;
-    }
-  };
+  // resolveIcon removed in favor of DynamicIcon component
 
   if (loading || !policy) {
-    return <div className="py-20 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Illuminating Policy Registry...</div>;
+    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Illuminating Policy Registry...</div>;
   }
 
   return (
-    <div className="space-y-12 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gold/10 pb-8">
+    <div className="space-y-2 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
         <div className="space-y-1">
           <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
             Policy <span className="text-gold italic text-8xl">Editor</span>
@@ -150,11 +126,11 @@ const PoliciesAdmin = () => {
         </motion.button>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-12">
-        <div className="space-y-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+        <div className="space-y-4">
           {/* Header Metadata */}
-          <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-            <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+          <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+            <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
               <Type size={20} className="text-gold" /> Header Sanctuary
             </h3>
             <div className="space-y-6">
@@ -186,8 +162,8 @@ const PoliciesAdmin = () => {
           </div>
 
           {/* Insights Sanctuary */}
-          <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-            <div className="flex items-center justify-between mb-8">
+          <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+            <div className="flex items-center justify-between mb-2">
               <h3 className="font-display text-xl font-bold flex items-center gap-3">
                 <Sparkles size={20} className="text-gold" /> Critical Insights
               </h3>
@@ -206,7 +182,7 @@ const PoliciesAdmin = () => {
             
             <div className="space-y-6">
               {policy.insights.map((insight: any, idx: number) => (
-                <div key={idx} className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4 relative group">
+                <div key={idx} className="p-4 rounded-3xl bg-white/5 border border-white/5 space-y-4 relative group">
                   <button 
                     onClick={() => {
                       const newInsights = policy.insights.filter((_: any, i: number) => i !== idx);
@@ -220,20 +196,33 @@ const PoliciesAdmin = () => {
                     <div className="space-y-2 w-1/3">
                       <label className="text-[10px] font-bold uppercase tracking-widest opacity-30">Icon</label>
                       <div className="flex items-center gap-3">
+
                         <div className="w-10 h-10 bg-gold/10 rounded-xl flex items-center justify-center text-gold">
-                          {resolveIcon(insight.icon)}
+
+                          <DynamicIcon name={insight.icon} size={18} />
+
                         </div>
-                        <select 
+
+                        <input 
+
+                          placeholder="Icon (e.g. Shield)"
+
                           value={insight.icon}
+
                           onChange={(e) => {
+
                             const newInsights = [...policy.insights];
+
                             newInsights[idx].icon = e.target.value;
+
                             setPolicy({ ...policy, insights: newInsights });
+
                           }}
-                          className="bg-transparent border-none text-[10px] font-bold uppercase tracking-widest focus:ring-0 p-0"
-                        >
-                          {ICON_OPTIONS.map(opt => <option key={opt} value={opt} className="bg-charcoal">{opt}</option>)}
-                        </select>
+
+                          className="bg-transparent border rounded-lg p-1 text-[9px] uppercase font-bold w-20"
+
+                        />
+
                       </div>
                     </div>
                     <div className="space-y-2 flex-1">
@@ -268,8 +257,8 @@ const PoliciesAdmin = () => {
         </div>
 
         {/* Policy Sections */}
-        <div className={`p-8 rounded-[2.5rem] border h-fit ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-          <div className="flex items-center justify-between mb-8">
+        <div className={`p-4 rounded-3xl border h-fit ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+          <div className="flex items-center justify-between mb-2">
             <h3 className="font-display text-xl font-bold flex items-center gap-3">
               <FileText size={20} className="text-gold" /> Policy Framework
             </h3>
@@ -291,7 +280,7 @@ const PoliciesAdmin = () => {
               <div key={section.id} className={`rounded-3xl border transition-all ${expandedSection === section.id ? "border-gold/30" : "border-white/5"}`}>
                 <div 
                   onClick={() => setExpandedSection(expandedSection === section.id ? null : section.id)}
-                  className="p-5 flex items-center justify-between cursor-pointer group"
+                  className="p-3 flex items-center justify-between cursor-pointer group"
                 >
                   <div className="flex items-center gap-4 flex-1">
                     <div className="w-10 h-10 bg-secondary/50 rounded-xl flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-primary transition-all">
@@ -329,7 +318,7 @@ const PoliciesAdmin = () => {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="p-6 pt-0 border-t border-white/5 space-y-4">
+                      <div className="p-4 pt-0 border-t border-white/5 space-y-4">
                         <div className="space-y-2">
                            <label className="text-[10px] font-bold uppercase tracking-widest opacity-30">Anchor ID (lowercase, no spaces)</label>
                            <input 

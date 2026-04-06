@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, Mail, MapPin, Send, CheckCircle2, ChevronDown, Phone, Zap } from "lucide-react";
+import DynamicIcon from "@/components/DynamicIcon";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -63,14 +64,7 @@ const Contact = () => {
     }
   };
 
-  const resolveIcon = (iconName: string) => {
-    switch (iconName) {
-      case "Phone": return <Phone size={24} className="group-hover:text-primary transition-colors text-gold" />;
-      case "Mail": return <Mail size={24} className="group-hover:text-primary transition-colors text-gold" />;
-      case "MapPin": return <MapPin size={24} className="group-hover:text-primary transition-colors text-gold" />;
-      default: return <MessageSquare size={24} className="group-hover:text-primary transition-colors text-gold" />;
-    }
-  };
+  // resolveIcon removed in favor of DynamicIcon component
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -280,8 +274,8 @@ const Contact = () => {
                   <div className="space-y-10">
                     {config.channels.map((chan: any, i: number) => (
                        <div key={i} className="flex gap-8 group">
-                         <div className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors">
-                            {resolveIcon(chan.icon)}
+                         <div className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors text-gold group-hover:text-primary">
+                            <DynamicIcon name={chan.icon} size={24} />
                          </div>
                          <div className="space-y-2">
                            <p className="text-xs font-body font-bold text-gold uppercase tracking-widest">{chan.badge}</p>

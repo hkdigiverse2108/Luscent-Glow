@@ -172,7 +172,7 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-6 relative overflow-hidden font-body text-white">
+    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center p-2 relative overflow-hidden font-body text-white">
       {/* Cinematic Backdrop */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-gold/10 rounded-full blur-[150px] animate-pulse" />
@@ -184,14 +184,14 @@ const AdminLogin = () => {
         animate={{ opacity: 1, y: 0 }}
         className="relative w-full max-w-lg z-10"
       >
-        <div className="backdrop-blur-3xl bg-charcoal/40 border border-white/5 rounded-[3rem] p-12 shadow-2xl shadow-black/80 space-y-12">
+        <div className="backdrop-blur-3xl bg-charcoal/40 border border-white/5 rounded-3xl p-5 shadow-2xl shadow-black/80 space-y-4">
           
           {/* Brand Header */}
           <div className="text-center space-y-4">
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-gold to-rose-light flex items-center justify-center shadow-2xl shadow-gold/20 mx-auto mb-8">
-              <Sparkles className="text-white" size={40} />
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-gold to-rose-light flex items-center justify-center shadow-2xl shadow-gold/20 mx-auto mb-4">
+              <Sparkles className="text-white" size={24} />
             </div>
-            <h1 className="font-display text-4xl font-bold tracking-tight italic">
+            <h1 className="font-display text-2xl font-bold tracking-tight italic">
               Admin <span className="text-gold">Login</span>
             </h1>
             <p className="text-white/30 text-xs font-bold uppercase tracking-[0.4em] pt-2">Secure Management Portal</p>
@@ -205,7 +205,7 @@ const AdminLogin = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
                 onSubmit={handleCredentialsSubmit} 
-                className="space-y-8"
+                className="space-y-4"
               >
                 <div className="space-y-6">
                   <div className="space-y-4">
@@ -220,7 +220,7 @@ const AdminLogin = () => {
                         onFocus={() => setIsMobileFocused(true)}
                         onBlur={() => setIsMobileFocused(false)}
                         placeholder={isMobileFocused ? "" : "e.g. 8200549898"}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-16 pr-6 text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all font-body"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-16 pr-6 text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all font-body"
                       />
                     </div>
                   </div>
@@ -246,7 +246,7 @@ const AdminLogin = () => {
                         onFocus={() => setIsFocused(true)}
                         onBlur={() => setIsFocused(false)}
                         placeholder={isFocused ? "" : "••••••••"}
-                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-16 pr-16 text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all font-body"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-16 pr-16 text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all font-body"
                       />
                       <button 
                          type="button"
@@ -261,7 +261,7 @@ const AdminLogin = () => {
 
                 <button 
                   disabled={loading}
-                  className="w-full bg-gold hover:bg-white text-charcoal font-bold py-5 rounded-2xl shadow-xl shadow-gold/10 transition-all duration-500 uppercase tracking-widest text-sm flex items-center justify-center gap-3 group disabled:opacity-50"
+                  className="w-full bg-gold hover:bg-white text-charcoal font-bold py-4 rounded-2xl shadow-xl shadow-gold/10 transition-all duration-500 uppercase tracking-widest text-sm flex items-center justify-center gap-3 group disabled:opacity-50"
                 >
                   {loading ? "Authenticating..." : (
                     <>
@@ -280,7 +280,7 @@ const AdminLogin = () => {
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -20 }}
                 onSubmit={handleOTPSubmit} 
-                className="space-y-10"
+                className="space-y-6"
               >
                 <div className="text-center space-y-4">
                    <ShieldCheck className="text-gold mx-auto" size={48} />
@@ -318,7 +318,7 @@ const AdminLogin = () => {
                   </button>
                   <button 
                     disabled={loading}
-                    className="bg-gold hover:bg-white text-charcoal font-bold py-4 rounded-2xl transition-all uppercase tracking-widest text-xs disabled:opacity-50"
+                    className="bg-gold hover:bg-white text-charcoal font-bold py-3 rounded-2xl transition-all uppercase tracking-widest text-xs disabled:opacity-50"
                   >
                     {loading ? "Verifying..." : "Verify OTP"}
                   </button>
@@ -366,7 +366,7 @@ const AdminLogin = () => {
                   </button>
                   <button 
                     disabled={loading}
-                    className="bg-gold hover:bg-white text-charcoal font-bold py-4 rounded-2xl transition-all uppercase tracking-widest text-xs disabled:opacity-50"
+                    className="bg-gold hover:bg-white text-charcoal font-bold py-3 rounded-2xl transition-all uppercase tracking-widest text-xs disabled:opacity-50"
                   >
                     Send Reset Link
                   </button>

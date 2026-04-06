@@ -33,11 +33,11 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
         />
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }}
-          className={`relative w-full max-w-2xl border rounded-[2.5rem] shadow-2xl overflow-hidden ${
+          className={`relative w-full max-w-2xl border rounded-3xl shadow-2xl overflow-hidden ${
             isDark ? "bg-charcoal/95 border-white/10" : "bg-white/95 border-charcoal/10"
           }`}
         >
-          <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-lg">
                 <MessageSquare size={24} />
@@ -51,7 +51,7 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
             </div>
             <button onClick={onClose} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "hover:bg-white/5 text-white/40" : "hover:bg-charcoal/5 text-charcoal/40"}`}><XCircle size={20} /></button>
           </div>
-          <div className="p-10 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
+          <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className={`p-6 rounded-2xl border ${isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"}`}>
                  <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><User size={13} /> Seeker Identity</p>
@@ -72,12 +72,12 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
             )}
             <div className="space-y-4">
               <h4 className="text-[12px] font-extrabold uppercase text-gold tracking-[0.3em]">The Message Ritual</h4>
-              <div className={`p-8 rounded-3xl border italic font-body text-base leading-relaxed ${isDark ? "bg-gold/5 border-gold/10 text-white/80" : "bg-gold/5 border-gold/10 text-charcoal/80"}`}>
+              <div className={`p-6 rounded-3xl border italic font-body text-base leading-relaxed ${isDark ? "bg-gold/5 border-gold/10 text-white/80" : "bg-gold/5 border-gold/10 text-charcoal/80"}`}>
                  "{inquiry.message}"
               </div>
             </div>
           </div>
-          <div className={`p-8 border-t flex justify-end bg-white/[0.02] ${isDark ? "border-white/5" : "border-charcoal/5"}`}>
+          <div className={`p-6 border-t flex justify-end bg-white/[0.02] ${isDark ? "border-white/5" : "border-charcoal/5"}`}>
              <button onClick={onClose} className="px-10 py-4 bg-charcoal text-white font-extrabold rounded-2xl shadow-2xl hover:bg-gold hover:text-charcoal transition-all duration-500 uppercase tracking-[0.2em] text-[12px] border border-white/10">Archive Review</button>
           </div>
         </motion.div>
@@ -142,8 +142,8 @@ const AdminInquiries = () => {
   );
 
   return (
-    <div className="space-y-12 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-indigo-600/10 pb-10">
+    <div className="space-y-2 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-indigo-600/10 pb-1.5">
         <div className="space-y-1">
           <h2 className={`font-body text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${isDark ? "text-white" : "text-charcoal"}`}>
             Seeker <span className="text-indigo-500 italic">Inquiries</span>
@@ -164,19 +164,19 @@ const AdminInquiries = () => {
           type="text" 
           placeholder="Search inquiries by seeker name, email, or subject..."
           value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-          className={`w-full backdrop-blur-2xl border rounded-2xl py-5 pl-16 pr-6 font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all font-bold text-xs ${isDark ? "bg-charcoal/40 border-white/5 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"}`}
+          className={`w-full backdrop-blur-2xl border rounded-2xl py-3 pl-16 pr-6 font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all font-bold text-xs ${isDark ? "bg-charcoal/40 border-white/5 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"}`}
         />
       </div>
 
-      <div className={`backdrop-blur-3xl border rounded-[3rem] shadow-2xl overflow-hidden transition-all duration-700 ${isDark ? "bg-charcoal/40 border-white/5 shadow-black/80" : "bg-white border-charcoal/5 shadow-charcoal/5"}`}>
+      <div className={`backdrop-blur-3xl border rounded-3xl shadow-2xl overflow-hidden transition-all duration-700 ${isDark ? "bg-charcoal/40 border-white/5 shadow-black/80" : "bg-white border-charcoal/5 shadow-charcoal/5"}`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
              <thead className={`border-b font-body text-[12px] font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${isDark ? "bg-white/[0.04] border-white/10 text-white/60" : "bg-charcoal/[0.04] border-charcoal/10 text-charcoal/80"}`}>
                 <tr>
-                   <th className="px-8 py-6">Seeker Information</th>
+                   <th className="px-4 py-2">Seeker Information</th>
                    {activeTab === 'bulk' && <th className="px-6 py-6 font-bold uppercase tracking-widest">Entity</th>}
-                   <th className="px-6 py-6">Inquiry Ritual</th>
-                   <th className="px-6 py-6">Timeline</th>
+                   <th className="px-4 py-2">Inquiry Ritual</th>
+                   <th className="px-4 py-2">Timeline</th>
                    <th className="px-6 py-6 text-right pr-12">Actions</th>
                 </tr>
              </thead>
@@ -184,23 +184,23 @@ const AdminInquiries = () => {
                 {loading ? (
                    Array(5).fill(0).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-8 py-8"><div className="h-6 w-48 bg-white/5 rounded-lg" /></td>
-                      {activeTab === 'bulk' && <td className="px-6 py-8"><div className="h-6 w-32 bg-white/5 rounded-lg" /></td>}
-                      <td className="px-6 py-8"><div className="h-6 w-40 bg-white/5 rounded-lg" /></td>
-                      <td className="px-8 py-8"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
+                      <td className="px-8 py-5"><div className="h-6 w-48 bg-white/5 rounded-lg" /></td>
+                      {activeTab === 'bulk' && <td className="px-6 py-5"><div className="h-6 w-32 bg-white/5 rounded-lg" /></td>}
+                      <td className="px-6 py-5"><div className="h-6 w-40 bg-white/5 rounded-lg" /></td>
+                      <td className="px-8 py-5"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
                     </tr>
                   ))
                 ) : filteredInquiries.length > 0 ? (
                   filteredInquiries.map((inq) => (
                     <motion.tr key={inq._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="group/row hover:bg-white/[0.01] transition-colors">
-                      <td className="px-8 py-7">
+                      <td className="px-4 py-1.5">
                         <div className="flex flex-col">
                            <span className={`text-[15px] font-extrabold tracking-wide transition-colors ${isDark ? "text-white group-hover/row:text-gold" : "text-charcoal group-hover/row:text-gold"}`}>{inq.name}</span>
                            <span className={`text-[13px] font-bold uppercase tracking-widest transition-opacity mt-1 ${isDark ? "opacity-60" : "opacity-80"}`}>{inq.email}</span>
                         </div>
                       </td>
                       {activeTab === 'bulk' && (
-                        <td className="px-6 py-7">
+                        <td className="px-4 py-1.5">
                            <div className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-widest border transition-all ${
                                isDark ? "bg-sky-400/10 text-sky-400 border-sky-400/20" : "bg-indigo-600/10 text-indigo-700 border-indigo-600/20"
                              } w-fit`}>
@@ -208,16 +208,16 @@ const AdminInquiries = () => {
                            </div>
                         </td>
                       )}
-                      <td className="px-6 py-7">
+                      <td className="px-6 py-5">
                          <div className="flex flex-col max-w-xs">
                             <span className={`text-[11px] font-bold uppercase tracking-widest ${isDark ? "text-white/60" : "text-charcoal/60"}`}>{inq.subject || "No Subject Specified"}</span>
                             <span className="text-[11px] italic opacity-70 mt-1 line-clamp-1">"{inq.message}"</span>
                          </div>
                       </td>
-                      <td className={`px-6 py-7 text-[13px] font-extrabold uppercase tracking-[0.2em] font-body ${isDark ? "text-white/60" : "text-charcoal/80"}`}>
+                      <td className={`px-6 py-5 text-[13px] font-extrabold uppercase tracking-[0.2em] font-body ${isDark ? "text-white/60" : "text-charcoal/80"}`}>
                         {new Date(inq.createdAt).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-7 text-right pr-8">
+                      <td className="px-6 py-5 text-right pr-8">
                          <div className="flex items-center justify-end gap-3">
                             <button onClick={() => openInquiryModal(inq)} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isDark ? "bg-white/5 text-white/40 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold hover:bg-gold/10"}`}><Eye size={16} /></button>
                             <button onClick={() => handleAcknowledge(inq._id)} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${isDark ? "bg-white/5 text-white/40 hover:text-emerald-400 hover:bg-emerald-400/10" : "bg-charcoal/5 text-charcoal/40 hover:text-emerald-400 hover:bg-emerald-400/10"}`}><CheckCircle size={16} /></button>
@@ -227,7 +227,7 @@ const AdminInquiries = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={activeTab === 'bulk' ? 5 : 4} className={`px-8 py-24 text-center text-[10px] font-bold uppercase tracking-[0.4em] italic opacity-20`}>No seeker rituals currently logged in the sanctuary repository.</td>
+                    <td colSpan={activeTab === 'bulk' ? 5 : 4} className={`px-4 py-10 text-center text-[10px] font-bold uppercase tracking-[0.4em] italic opacity-20`}>No seeker rituals currently logged in the sanctuary repository.</td>
                   </tr>
                 )}
              </tbody>

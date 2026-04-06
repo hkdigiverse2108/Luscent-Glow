@@ -21,6 +21,7 @@ import {
   Mail,
   Phone
 } from "lucide-react";
+import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -125,26 +126,16 @@ const AdminBulkOrders = () => {
     i.email?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const resolveIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'Layers': return <Layers size={18} />;
-      case 'Truck': return <Truck size={18} />;
-      case 'ShieldCheck': return <ShieldCheck size={18} />;
-      case 'Building2': return <Building2 size={18} />;
-      case 'Users': return <Users size={18} />;
-      case 'Package': return <Package size={18} />;
-      default: return <Zap size={18} />;
-    }
-  };
+  // resolveIcon removed in favor of DynamicIcon component
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gold/10 pb-8">
+    <div className="space-y-2 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
         <div className="space-y-1">
           <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
             Bulk Order <span className="text-gold italic">Concierge</span>
           </h2>
-          <div className="flex p-1 rounded-full border mt-4 w-fit bg-white/5 border-white/10">
+          <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
             <button 
               onClick={() => setActiveTab("inquiries")}
               className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
@@ -182,15 +173,15 @@ const AdminBulkOrders = () => {
 
       <AnimatePresence mode="wait">
         {activeTab === "inquiries" ? (
-          <motion.div key="inquiries" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-bold">
+          <motion.div key="inquiries" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 font-bold">
               {[
                 { label: "Active Inquiries", value: inquiries.length, icon: ClipboardList, tint: "text-gold" },
                 { label: "Partner Companies", value: new Set(inquiries.map(i => i.companyName)).size, icon: Building2, tint: "text-blue-500" },
                 { label: "Conversion Rate", value: "84%", icon: Sparkles, tint: "text-emerald-500" }
               ].map((stat, i) => (
-                <div key={i} className={`p-6 rounded-3xl border transition-all hover:scale-105 duration-500 ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5 shadow-sm"}`}>
-                  <div className="flex items-center justify-between mb-4">
+                <div key={i} className={`p-3 rounded-3xl border transition-all hover:scale-105 duration-500 ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5 shadow-sm"}`}>
+                  <div className="flex items-center justify-between mb-2">
                     <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">{stat.label}</p>
                     <stat.icon size={16} className={stat.tint} />
                   </div>
@@ -209,21 +200,21 @@ const AdminBulkOrders = () => {
               />
             </div>
 
-            <div className={`rounded-3xl border overflow-hidden transition-all duration-700 ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl shadow-charcoal/5"}`}>
+            <div className={`rounded-2xl border overflow-hidden transition-all duration-700 ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl shadow-charcoal/5"}`}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead className={isDark ? "bg-white/5" : "bg-charcoal/5"}>
                     <tr>
-                      <th className="px-6 py-5 text-[10px] uppercase font-bold tracking-widest opacity-60">Company & Contact</th>
-                      <th className="px-6 py-5 text-[10px] uppercase font-bold tracking-widest opacity-60">Requirement</th>
-                      <th className="px-6 py-5 text-[10px] uppercase font-bold tracking-widest opacity-60">Date</th>
-                      <th className="px-6 py-5 text-[10px] uppercase font-bold tracking-widest opacity-60 text-right">Actions</th>
+                      <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest opacity-60">Company & Contact</th>
+                      <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest opacity-60">Requirement</th>
+                      <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest opacity-60">Date</th>
+                      <th className="px-6 py-3 text-[10px] uppercase font-bold tracking-widest opacity-60 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {filteredInquiries.length > 0 ? filteredInquiries.map((inquiry, idx) => (
                       <tr key={inquiry._id || idx} className="hover:bg-gold/5 transition-colors group">
-                        <td className="px-6 py-6">
+                        <td className="px-4 py-1.5">
                            <div className="flex flex-col gap-1.5">
                               <p className="text-sm font-bold tracking-tight uppercase">{inquiry.companyName}</p>
                               <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-bold uppercase tracking-wider">
@@ -233,22 +224,22 @@ const AdminBulkOrders = () => {
                               </div>
                            </div>
                         </td>
-                        <td className="px-6 py-6">
+                        <td className="px-4 py-1.5">
                            <div className="space-y-1">
                               <span className="px-2 py-0.5 bg-gold/10 text-gold text-[9px] font-bold uppercase tracking-widest rounded-full">{inquiry.estimatedQuantity} Units</span>
                               <p className="text-xs text-muted-foreground line-clamp-1 italic mt-1 font-bold">"{inquiry.message}"</p>
                            </div>
                         </td>
-                        <td className="px-6 py-6 font-body text-xs opacity-60 font-bold whitespace-nowrap">
+                        <td className="px-6 py-3 font-body text-xs opacity-60 font-bold whitespace-nowrap">
                           {new Date(inquiry.createdAt || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </td>
-                        <td className="px-6 py-6 text-right">
+                        <td className="px-6 py-3 text-right">
                           <button onClick={() => handleDeleteInquiry(inquiry._id)} className="p-2.5 text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all"><Trash2 size={16} /></button>
                         </td>
                       </tr>
                     )) : (
                       <tr>
-                        <td colSpan={4} className="px-6 py-20 text-center text-muted-foreground font-bold uppercase tracking-[0.2em] text-xs">No corporate briefs found.</td>
+                        <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground font-bold uppercase tracking-[0.2em] text-xs">No corporate briefs found.</td>
                       </tr>
                     )}
                   </tbody>
@@ -257,15 +248,15 @@ const AdminBulkOrders = () => {
             </div>
           </motion.div>
         ) : (
-          <motion.div key="config" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-12">
+          <motion.div key="config" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
             {config ? (
               <>
                 {/* Hero Section Configuration */}
-                <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl shadow-charcoal/5"}`}>
-                  <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+                <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl shadow-charcoal/5"}`}>
+                  <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                     <Sparkles size={20} className="text-gold" /> Hero Sanctuary Settings
                   </h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-6">
                        <div className="space-y-2">
                           <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Hero Badge</label>
@@ -313,8 +304,8 @@ const AdminBulkOrders = () => {
 
                 {/* Brand Pillars & Stats */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                   <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                      <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+                   <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                      <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                         <Layers size={20} className="text-gold" /> Trust Features
                       </h3>
                       <div className="space-y-4 font-bold">
@@ -322,21 +313,35 @@ const AdminBulkOrders = () => {
                           <div key={i} className="p-5 rounded-2xl border border-white/5 bg-white/5 space-y-3 relative group font-bold">
                              <button onClick={() => setConfig({ ...config, features: config.features.filter((_: any, idx: number) => idx !== i) })} className="absolute top-4 right-4 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity font-bold"><Trash2 size={16} /></button>
                              <div className="flex gap-4 font-bold">
-                                <select 
-                                  value={feat.icon}
-                                  onChange={(e) => {
-                                    const newFeats = [...config.features];
-                                    newFeats[i].icon = e.target.value;
-                                    setConfig({ ...config, features: newFeats });
-                                  }}
-                                  className="bg-transparent border rounded-lg p-2 text-xs font-bold"
-                                >
-                                   <option value="Layers">Layers</option>
-                                   <option value="Truck">Logistics</option>
-                                   <option value="ShieldCheck">Security</option>
-                                   <option value="Building2">Corporate</option>
-                                   <option value="Zap">Instant</option>
-                                </select>
+                                <div className="flex items-center gap-3">
+
+                                   <div className="w-10 h-10 bg-secondary/50 rounded-xl flex items-center justify-center text-gold">
+
+                                      <DynamicIcon name={feat.icon} size={18} />
+
+                                   </div>
+
+                                   <input 
+
+                                     placeholder="Icon (e.g. Layers)"
+
+                                     value={feat.icon}
+
+                                     onChange={(e) => {
+
+                                       const newFeats = [...config.features];
+
+                                       newFeats[i].icon = e.target.value;
+
+                                       setConfig({ ...config, features: newFeats });
+
+                                     }}
+
+                                     className="bg-transparent border rounded-lg p-2 text-[10px] uppercase font-bold w-24"
+
+                                   />
+
+                                </div>
                                 <input 
                                   placeholder="Feature Title"
                                   value={feat.title}
@@ -365,27 +370,29 @@ const AdminBulkOrders = () => {
                       </div>
                    </div>
 
-                   <div className="space-y-8">
-                      <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                         <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+                   <div className="space-y-6">
+                      <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                         <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                            <Users size={20} className="text-gold" /> Trust Indicators (Stats)
                          </h3>
                          <div className="space-y-4">
                             {config.stats.map((stat: any, i: number) => (
                               <div key={i} className="flex gap-4 items-center bg-white/5 p-4 rounded-xl border border-white/5 relative group">
-                                 <select 
-                                    value={stat.icon}
-                                    onChange={(e) => {
-                                      const newStats = [...config.stats];
-                                      newStats[i].icon = e.target.value;
-                                      setConfig({ ...config, stats: newStats });
-                                    }}
-                                    className="bg-transparent border rounded-lg p-2 text-xs font-bold"
-                                  >
-                                     <option value="Users">Users</option>
-                                     <option value="Package">Package</option>
-                                     <option value="CheckCircle2">Success</option>
-                                  </select>
+                                 <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-secondary/50 rounded-xl flex items-center justify-center text-gold">
+                                       <DynamicIcon name={stat.icon} size={18} />
+                                    </div>
+                                    <input 
+                                      placeholder="Icon (e.g. Users)"
+                                      value={stat.icon}
+                                      onChange={(e) => {
+                                        const newStats = [...config.stats];
+                                        newStats[i].icon = e.target.value;
+                                        setConfig({ ...config, stats: newStats });
+                                      }}
+                                      className="bg-transparent border rounded-lg p-2 text-[10px] uppercase font-bold w-24"
+                                    />
+                                 </div>
                                  <input 
                                     value={stat.label}
                                     onChange={(e) => {
@@ -402,8 +409,8 @@ const AdminBulkOrders = () => {
                          </div>
                       </div>
 
-                      <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                         <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+                      <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                         <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                            <Zap size={20} className="text-gold" /> Form Quantities
                          </h3>
                          <div className="flex flex-wrap gap-2">
@@ -428,8 +435,8 @@ const AdminBulkOrders = () => {
                 </div>
 
                 {/* Portal Metadata */}
-                <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                   <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+                <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                   <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                      <Mail size={20} className="text-gold" /> Portal Narrative
                    </h3>
                    <div className="grid gap-6">

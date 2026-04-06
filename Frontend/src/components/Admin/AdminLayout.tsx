@@ -67,30 +67,30 @@ const AdminLayout = () => {
       </AnimatePresence>
 
       {/* Premium Brand Sidebar */}
-      <aside className={`w-72 backdrop-blur-3xl border-r flex flex-col relative z-20 shadow-2xl transition-all duration-700 ${
+      <aside className={`w-64 backdrop-blur-3xl border-r flex flex-col relative z-20 shadow-[0_0_50px_rgba(0,0,0,0.1)] transition-all duration-700 ${
         isDark 
-        ? "bg-charcoal/80 border-gold/10" 
-        : "bg-white/90 border-gold/20"
+        ? "bg-charcoal/80 border-white/5 shadow-black/40" 
+        : "bg-white/90 border-gold/10 shadow-charcoal/5"
       }`}>
-        <div className="p-8 pb-12">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-gold to-rose-light flex items-center justify-center shadow-lg shadow-gold/20 group-hover:scale-110 transition-transform duration-500">
-              <Sparkles className="text-white" size={22} />
+        <div className="p-3 pb-3">
+          <Link to="/" className="flex items-center gap-3.5 group">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-gold to-rose-light flex items-center justify-center shadow-[0_8px_20px_rgba(212,175,55,0.25)] group-hover:scale-110 group-hover:shadow-[0_12px_25px_rgba(212,175,55,0.35)] transition-all duration-500">
+              <Sparkles className="text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.2)]" size={24} />
             </div>
             <div>
-              <h1 className={`font-display text-xl font-semibold tracking-wide italic transition-colors duration-700 ${
+              <h1 className={`font-display text-2xl font-bold tracking-tight italic transition-colors duration-700 ${
                 isDark ? "text-white" : "text-charcoal"
               }`}>
                 Luscent <span className="text-gold">Glow</span>
               </h1>
-              <p className={`text-[14px] font-extrabold uppercase tracking-[0.45em] -mt-1 ml-0.5 transition-colors duration-700 ${
-                isDark ? "text-white/70" : "text-charcoal/90"
-              }`}>Sanctuary</p>
+              <p className={`text-[10px] font-black uppercase tracking-[0.6em] -mt-1 opacity-40 transition-colors duration-700 ${
+                isDark ? "text-white" : "text-charcoal"
+              }`}>S A N C T U A R Y</p>
             </div>
           </Link>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2">
+        <nav className="flex-1 px-3 space-y-1.5 mt-4">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             const activeClass = isDark 
@@ -102,29 +102,40 @@ const AdminLayout = () => {
               : "text-charcoal/90 hover:text-indigo-600 hover:bg-charcoal/5";
 
             return (
-              <Link 
+              <motion.div
                 key={item.path}
-                to={item.path}
-                className={`group flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-500 ${
-                  isActive ? activeClass : inactiveClass
-                }`}
+                whileHover={{ x: 6 }}
+                whileTap={{ scale: 0.98 }}
               >
-                <div className="flex items-center gap-3">
-                  <item.icon size={20} className={isActive ? "text-gold" : "text-inherit"} />
-                  <span className="text-[1.05rem] font-extrabold tracking-wide uppercase">{item.label}</span>
-                </div>
-                {isActive && (
-                  <motion.div layoutId="activeInd" className="text-gold">
-                    <ChevronRight size={14} />
-                  </motion.div>
-                )}
-              </Link>
+                <Link 
+                  to={item.path}
+                  className={`group flex items-center justify-between px-3.5 py-2.5 rounded-2xl transition-all duration-500 relative overflow-hidden ${
+                    isActive ? activeClass : inactiveClass
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div 
+                      layoutId="activeIndicatorGlow"
+                      className="absolute inset-0 bg-gold/5 blur-xl"
+                    />
+                  )}
+                  <div className="flex items-center gap-3.5 relative z-10">
+                    <item.icon size={19} className={isActive ? "text-gold" : "text-inherit group-hover:text-gold transition-colors"} />
+                    <span className={`text-[0.95rem] font-bold tracking-wide uppercase ${isActive ? "text-gold" : "text-inherit"}`}>{item.label}</span>
+                  </div>
+                  {isActive && (
+                    <motion.div layoutId="activeInd" className="text-gold relative z-10">
+                      <ChevronRight size={14} className="animate-pulse" />
+                    </motion.div>
+                  )}
+                </Link>
+              </motion.div>
             );
           })}
         </nav>
 
         {/* Theme Toggle Ritual */}
-        <div className="px-6 py-4">
+        <div className="px-3 py-2">
           <button 
             onClick={toggleTheme}
             className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border transition-all duration-500 ${
@@ -142,12 +153,12 @@ const AdminLayout = () => {
           </button>
         </div>
 
-        <div className={`p-6 border-t transition-colors duration-700 ${
+        <div className={`p-4 border-t transition-colors duration-700 ${
           isDark ? "border-white/5" : "border-charcoal/5"
         }`}>
           <button 
             onClick={adminLogout}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-500 group ${
+            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-2xl transition-all duration-500 group ${
               isDark 
               ? "text-white/30 hover:text-rose-light hover:bg-rose-light/5" 
               : "text-charcoal/70 hover:text-rose-brand hover:bg-rose-brand/5"
@@ -163,7 +174,7 @@ const AdminLayout = () => {
 
       {/* Main Stage */}
       <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide">
-        <div className="relative z-10 p-8 md:p-12">
+        <div className="relative z-10 p-2 md:p-4">
           <Outlet />
         </div>
       </main>

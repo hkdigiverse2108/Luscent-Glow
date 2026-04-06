@@ -13,6 +13,7 @@ import {
   Layers,
   Zap
 } from "lucide-react";
+import DynamicIcon from "@/components/DynamicIcon";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -73,17 +74,7 @@ const BulkOrders = () => {
     }
   };
 
-  const resolveIcon = (iconName: string, size = 24) => {
-    switch (iconName) {
-      case 'Layers': return <Layers size={size} />;
-      case 'Truck': return <Truck size={size} />;
-      case 'ShieldCheck': return <ShieldCheck size={size} />;
-      case 'Building2': return <Building2 size={size} />;
-      case 'Users': return <Users size={size} />;
-      case 'Package': return <Package size={size} />;
-      default: return <Zap size={size} />;
-    }
-  };
+  // resolveIcon removed in favor of DynamicIcon component
 
   if (loading || !config) {
     return (
@@ -168,7 +159,7 @@ const BulkOrders = () => {
                   className="space-y-4 flex flex-col items-center sm:items-start"
                 >
                   <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gold shadow-sm group-hover:scale-110 transition-transform">
-                    {resolveIcon(feature.icon)}
+                    <DynamicIcon name={feature.icon} size={24} />
                   </div>
                   <h3 className="font-display text-lg md:text-xl font-bold text-foreground uppercase tracking-wider">{feature.title}</h3>
                   <p className="text-xs md:text-sm font-body text-muted-foreground leading-relaxed">{feature.desc}</p>
@@ -199,7 +190,7 @@ const BulkOrders = () => {
                   <div className="p-6 md:p-8 bg-primary rounded-[2rem] md:rounded-[2.5rem] text-white flex flex-col sm:flex-row lg:flex-col gap-6 md:gap-6">
                     {config.stats.map((stat: any, i: number) => (
                       <div key={i} className="flex items-center justify-center lg:justify-start gap-4">
-                        {resolveIcon(stat.icon, 20)}
+                        <DynamicIcon name={stat.icon} size={20} />
                         <p className="text-xs md:text-sm font-body font-bold uppercase tracking-widest">{stat.label}</p>
                       </div>
                     ))}

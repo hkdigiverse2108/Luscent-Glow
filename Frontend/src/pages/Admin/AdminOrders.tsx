@@ -145,9 +145,9 @@ const AdminOrders = () => {
   );
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-2 pb-4">
       {/* Header Ritual */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-indigo-600/10 pb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-indigo-600/10 pb-1.5">
         <div className="space-y-1">
           <h2 className={`font-body text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${
             isDark ? "text-white" : "text-charcoal"
@@ -172,14 +172,14 @@ const AdminOrders = () => {
             placeholder="Search orders by number or mobile..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full backdrop-blur-2xl border rounded-2xl py-4 pl-16 pr-6 font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all ${
+            className={`w-full backdrop-blur-2xl border rounded-2xl py-3 pl-16 pr-6 font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all ${
               isDark 
               ? "bg-charcoal/40 border-white/5 text-white placeholder:text-white/10" 
               : "bg-white border-charcoal/5 text-charcoal placeholder:text-charcoal/60 shadow-sm"
             }`}
           />
         </div>
-        <button className={`flex items-center gap-3 px-6 py-4 backdrop-blur-2xl border rounded-2xl transition-all duration-500 font-bold uppercase tracking-widest text-xs ${
+        <button className={`flex items-center gap-3 px-6 py-3 backdrop-blur-2xl border rounded-2xl transition-all duration-500 font-bold uppercase tracking-widest text-xs ${
           isDark 
           ? "bg-charcoal/40 border-white/5 text-white/40 hover:text-white hover:border-white/10" 
           : "bg-white border-charcoal/5 text-charcoal/40 hover:text-charcoal hover:border-charcoal/10 shadow-sm"
@@ -190,7 +190,7 @@ const AdminOrders = () => {
       </div>
 
       {/* Order Table Ritual */}
-      <div className={`backdrop-blur-3xl border rounded-[3rem] shadow-2xl transition-all duration-700 ${
+      <div className={`backdrop-blur-3xl border rounded-3xl shadow-2xl transition-all duration-700 ${
         isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
         <div className="overflow-x-auto">
@@ -199,12 +199,12 @@ const AdminOrders = () => {
                isDark ? "bg-white/[0.04] border-white/12 text-white/70" : "bg-charcoal/[0.04] border-charcoal/12 text-charcoal/90"
              }`}>
                 <tr>
-                   <th className="px-8 py-6">Reference</th>
-                   <th className="px-6 py-6">Seeker</th>
-                   <th className="px-6 py-6">Total Amount</th>
-                   <th className="px-6 py-6">Status</th>
-                   <th className="px-6 py-6">Payment</th>
-                   <th className="px-6 py-6 text-right pr-12">Actions</th>
+                   <th className="px-4 py-2">Reference</th>
+                    <th className="px-4 py-2">Seeker</th>
+                    <th className="px-4 py-2">Total Amount</th>
+                    <th className="px-4 py-2">Status</th>
+                    <th className="px-4 py-2">Payment</th>
+                   <th className="px-4 py-2 text-right pr-12">Actions</th>
                 </tr>
              </thead>
              <tbody className={`divide-y transition-colors duration-700 ${
@@ -213,12 +213,12 @@ const AdminOrders = () => {
                 {loading ? (
                    Array(5).fill(0).map((_, i) => (
                     <tr key={i} className="animate-pulse">
-                      <td className="px-8 py-8"><div className="h-6 w-32 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-8"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-8"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-8"><div className="h-10 w-32 bg-white/5 rounded-full" /></td>
-                      <td className="px-6 py-8"><div className="h-6 w-20 bg-white/5 rounded-lg" /></td>
-                      <td className="px-6 py-8"><div className="h-10 w-10 ml-auto bg-white/5 rounded-full" /></td>
+                      <td className="px-4 py-1.5"><div className="h-6 w-32 bg-white/5 rounded-lg" /></td>
+                      <td className="px-4 py-1.5"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
+                      <td className="px-4 py-1.5"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
+                      <td className="px-4 py-1.5"><div className="h-10 w-32 bg-white/5 rounded-full" /></td>
+                      <td className="px-4 py-1.5"><div className="h-6 w-20 bg-white/5 rounded-lg" /></td>
+                      <td className="px-4 py-1.5"><div className="h-10 w-10 ml-auto bg-white/5 rounded-full" /></td>
                     </tr>
                   ))
                 ) : filteredOrders.length > 0 ? (
@@ -229,7 +229,7 @@ const AdminOrders = () => {
                       animate={{ opacity: 1 }}
                       className="group/row hover:bg-white/[0.03] transition-colors"
                     >
-                       <td className="px-8 py-8">
+                       <td className="px-4 py-1.5">
                           <div className="flex items-center gap-4">
                              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-gold border transition-colors ${
                                isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
@@ -246,7 +246,7 @@ const AdminOrders = () => {
                              </div>
                           </div>
                        </td>
-                       <td className="px-6 py-8">
+                       <td className="px-4 py-1.5">
                           <div className="flex flex-col gap-1">
                              <span className={`text-[15px] font-extrabold uppercase tracking-wider transition-colors ${
                                isDark ? "text-white" : "text-charcoal"
@@ -256,15 +256,15 @@ const AdminOrders = () => {
                              }`}>{o.shippingAddress?.fullName || "Mysterious Seeker"}</span>
                           </div>
                        </td>
-                       <td className={`px-6 py-8 font-display text-xl font-bold italic transition-colors ${
+                       <td className={`px-6 py-5 font-display text-xl font-bold italic transition-colors ${
                          isDark ? "text-white" : "text-charcoal"
                        }`}>
                           ₹{o.totalAmount}
                        </td>
-                       <td className="px-6 py-8">
+                       <td className="px-4 py-1.5">
                            <StatusStepper currentStatus={o.status} />
                        </td>
-                       <td className="px-6 py-8">
+                       <td className="px-4 py-1.5">
                           <div className="flex items-center gap-2">
                              <CreditCard size={18} className={o.paymentStatus === 'SUCCESS' ? "text-emerald-400" : (isDark ? "text-white/40" : "text-charcoal/60")} />
                              <span className={`text-[13px] font-extrabold uppercase tracking-widest ${o.paymentStatus === 'SUCCESS' ? "text-emerald-400" : (isDark ? "text-white/80" : "text-charcoal/80")}`}>
@@ -272,7 +272,7 @@ const AdminOrders = () => {
                              </span>
                           </div>
                        </td>
-                       <td className="px-6 py-8 text-right pr-8">
+                       <td className="px-6 py-5 text-right pr-8">
                           <div className="flex items-center justify-end gap-3">
                              <button 
                                 onClick={() => openOrderModal(o)}
@@ -332,7 +332,7 @@ const AdminOrders = () => {
         </div>
 
         {/* Footer Ritual */}
-        <div className={`px-8 py-6 border-t flex items-center justify-between transition-colors duration-700 ${
+        <div className={`px-8 py-4 border-t flex items-center justify-between transition-colors duration-700 ${
           isDark ? "bg-white/[0.01] border-white/5" : "bg-charcoal/[0.01] border-charcoal/5"
         }`}>
            <p className={`text-xs font-bold uppercase tracking-widest transition-colors duration-700 ${

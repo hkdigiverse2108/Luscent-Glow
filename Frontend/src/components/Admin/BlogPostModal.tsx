@@ -9,13 +9,14 @@ import {
   Clock,
   Layout,
   Star,
-  Plus
+  Plus,
+  Sparkles
 } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 
-const BlogPostModal = ({ isOpen, onClose, post, onSuccess }: any) => {
+const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) => {
   const { isDark } = useAdminTheme();
   const [formData, setFormData] = useState<any>({
     title: "",
@@ -30,12 +31,13 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess }: any) => {
     relatedProducts: []
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (post) {
       setFormData({
         ...post,
-        relatedProducts: post.relatedProducts || []
+        relatedProducts: (post as any).relatedProducts || []
       });
     } else {
       setFormData({
@@ -52,6 +54,34 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess }: any) => {
       });
     }
   }, [post, isOpen]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    const formDataUpload = new FormData();
+    formDataUpload.append("file", file);
+
+    try {
+      const response = await fetch(getApiUrl("upload"), {
+        method: "POST",
+        body: formDataUpload,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFormData({ ...formData, image: data.url });
+        toast.success("Story visual archived in the project.");
+      } else {
+        toast.error("Failed to archive visual.");
+      }
+    } catch (error) {
+      toast.error("Network synchronization failed.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,14 +171,19 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess }: any) => {
 
                   <div className="lg:col-span-4 space-y-6">
                       <div className="aspect-video rounded-3xl bg-secondary/30 border-2 border-dashed border-gold/20 flex flex-col items-center justify-center relative group overflow-hidden">
-                         {formData.image ? (
+                         {isUploading ? (
+                           <div className="flex flex-col items-center animate-pulse">
+                              <Sparkles size={32} className="text-gold/40 mb-2" />
+                              <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Archiving Visual...</p>
+                           </div>
+                         ) : formData.image ? (
                            <>
                              <img src={getAssetUrl(formData.image)} alt="Preview" className="w-full h-full object-cover" />
                              <div className="absolute inset-0 bg-charcoal/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                <button 
                                  type="button" 
                                  onClick={() => setFormData({...formData, image: ""})} 
-                                 className="p-3 bg-rose-500 text-white rounded-xl shadow-xl"
+                                 className="p-3 bg-rose-500 text-white rounded-xl shadow-xl hover:scale-110 transition-transform"
                                >
                                  <X size={16} />
                                </button>
@@ -157,10 +192,11 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess }: any) => {
                          ) : (
                            <>
                              <ImageIcon size={32} className="text-gold/30 mb-2" />
-                             <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Paste Image URL</p>
+                             <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Archive Visual</p>
                              <input 
-                               type="text" 
-                               onChange={(e) => setFormData({...formData, image: e.target.value})}
+                               type="file" 
+                               accept="image/*"
+                               onChange={handleFileChange}
                                className="absolute inset-0 opacity-0 cursor-pointer"
                              />
                            </>
@@ -187,7 +223,20 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess }: any) => {
                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div className="space-y-2">
                      <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 flex items-center gap-2"><UserIcon size={12} /> Author</label>
-                     <input value={formData.author} onChange={(e) => setFormData({...formData, author: e.target.value})} className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold" />
+                     {voices && voices.length > 0 ? (
+                       <select 
+                         value={formData.author} 
+                         onChange={(e) => setFormData({...formData, author: e.target.value})} 
+                         className={`w-full p-4 rounded-xl border bg-secondary/30 text-sm font-bold appearance-none outline-none focus:border-gold transition-all ${isDark ? "border-white/10" : "border-gold/20"}`}
+                       >
+                         <option value="">Select Authority</option>
+                         {voices.map((v: any) => (
+                           <option key={v._id || v.id} value={v.name}>{v.name}</option>
+                         ))}
+                       </select>
+                     ) : (
+                       <input value={formData.author} onChange={(e) => setFormData({...formData, author: e.target.value})} className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold" />
+                     )}
                   </div>
                   <div className="space-y-2">
                      <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 flex items-center gap-2"><Calendar size={12} /> Published Date</label>

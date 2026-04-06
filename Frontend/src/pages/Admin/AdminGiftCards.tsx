@@ -18,8 +18,11 @@ import {
   Send,
   CreditCard,
   ChevronRight,
-  Upload, Zap
+  Upload, 
+  Zap,
+  Image as ImageIcon
 } from "lucide-react";
+import DynamicIcon from "../../components/DynamicIcon.tsx";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -220,13 +223,13 @@ const AdminGiftCards = () => {
   );
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-gold/10 pb-8">
+    <div className="space-y-2 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gold/10 pb-1.5">
         <div className="space-y-1">
           <h2 className={`font-display text-4xl font-bold tracking-tight uppercase ${isDark ? "text-white" : "text-charcoal"}`}>
             Gift Card <span className="text-gold italic">Sanctuary</span>
           </h2>
-          <div className="flex p-1 rounded-full border mt-4 w-fit bg-white/5 border-white/10">
+          <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
             <button 
               onClick={() => setActiveTab("ledger")}
               className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
@@ -274,14 +277,14 @@ const AdminGiftCards = () => {
 
       <AnimatePresence mode="wait">
         {activeTab === "ledger" ? (
-          <motion.div key="ledger" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div key="ledger" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {[
                 { label: "Active Tokens", value: giftCards.filter(c => c.isActive).length, icon: Ticket, tint: "text-gold" },
                 { label: "Circulating Value", value: `₹${giftCards.reduce((acc, c) => acc + (c.currentBalance || 0), 0).toLocaleString()}`, icon: Wallet, tint: "text-emerald-500" },
                 { label: "Total Issued", value: giftCards.length, icon: CheckCircle2, tint: "text-blue-500" }
               ].map((stat, i) => (
-                <div key={i} className={`p-6 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5"}`}>
+                <div key={i} className={`p-3 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5"}`}>
                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">{stat.label}</p>
                   <h4 className="text-2xl font-display font-bold mt-1">{stat.value}</h4>
                 </div>
@@ -298,26 +301,26 @@ const AdminGiftCards = () => {
               />
             </div>
 
-            <div className={`rounded-3xl border overflow-hidden ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+            <div className={`rounded-2xl border overflow-hidden ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
               <table className="w-full text-left border-collapse">
                 <thead className={isDark ? "bg-white/5" : "bg-charcoal/5"}>
                   <tr>
-                    <th className="px-6 py-4 text-[10px] uppercase font-bold tracking-widest">Token</th>
-                    <th className="px-6 py-4 text-[10px] uppercase font-bold tracking-widest">Recipient</th>
-                    <th className="px-6 py-4 text-[10px] uppercase font-bold tracking-widest">Balance</th>
-                    <th className="px-6 py-4 text-[10px] uppercase font-bold tracking-widest text-right">Rituals</th>
+                    <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Token</th>
+                    <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Recipient</th>
+                    <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Balance</th>
+                    <th className="px-6 py-3 text-[10px] uppercase font-bold tracking-widest text-right">Rituals</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {filteredCards.map(card => (
                     <tr key={card._id} className="hover:bg-gold/5 transition-colors">
-                      <td className="px-6 py-5 font-bold tracking-widest text-xs uppercase">{card.code}</td>
-                      <td className="px-6 py-5">
+                      <td className="px-6 py-3 font-bold tracking-widest text-xs uppercase">{card.code}</td>
+                      <td className="px-6 py-3">
                          <p className="text-sm font-semibold">{card.recipientName}</p>
                          <p className="text-[10px] text-muted-foreground">{card.recipientMobile}</p>
                       </td>
-                      <td className="px-6 py-5 text-sm font-bold text-emerald-500">₹{(card.currentBalance || 0).toLocaleString()}</td>
-                      <td className="px-6 py-5 text-right">
+                      <td className="px-4 py-1.5 text-sm font-bold text-emerald-500">₹{(card.currentBalance || 0).toLocaleString()}</td>
+                      <td className="px-6 py-3 text-right">
                         <div className="flex justify-end gap-2 text-muted-foreground">
                           <button onClick={() => handleDeleteToken(card._id)} className="p-2 hover:text-rose-500"><Trash2 size={14} /></button>
                         </div>
@@ -329,16 +332,16 @@ const AdminGiftCards = () => {
             </div>
           </motion.div>
         ) : (
-          <motion.div key="config" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-12">
+          <motion.div key="config" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3">
             {config ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                    <h3 className="font-display text-xl font-bold mb-6 flex items-center gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                    <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                       <Sparkles size={20} className="text-gold" /> Hero Settings
                     </h3>
                     <div className="space-y-4">
-                       <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-white/10 group mb-4">
+                       <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-white/10 group mb-2">
                           <img src={getAssetUrl(config.heroImage)} className="w-full h-full object-cover" />
                           <label className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition-opacity">
                              <Upload size={24} />
@@ -349,19 +352,19 @@ const AdminGiftCards = () => {
                          placeholder="Hero Title"
                          value={config.heroTitle}
                          onChange={(e) => setConfig({ ...config, heroTitle: e.target.value })}
-                         className="w-full p-4 rounded-xl border bg-transparent text-sm"
+                         className="w-full p-3 rounded-xl border bg-transparent text-sm"
                        />
                        <textarea 
                          placeholder="Hero Description"
                          value={config.heroDescription}
                          onChange={(e) => setConfig({ ...config, heroDescription: e.target.value })}
-                         className="w-full p-4 rounded-xl border bg-transparent text-sm min-h-[100px]"
+                         className="w-full p-3 rounded-xl border bg-transparent text-sm min-h-[100px]"
                        />
                     </div>
                   </div>
 
-                  <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                    <h3 className="font-display text-xl font-bold mb-6 flex items-center gap-3">
+                  <div className={`p-6 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                    <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
                       <Wallet size={20} className="text-gold" /> Pricing Chips
                     </h3>
                     <div className="flex flex-wrap gap-2">
@@ -388,8 +391,8 @@ const AdminGiftCards = () => {
                 </div>
 
                 {/* Benefits Settings */}
-                <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                  <h3 className="font-display text-xl font-bold mb-6 flex items-center gap-3">
+                <div className={`p-6 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                  <h3 className="font-display text-xl font-bold mb-4 flex items-center gap-3">
                     <Sparkles size={20} className="text-gold" /> Benefits Section
                   </h3>
                   <div className="space-y-4">
@@ -428,11 +431,11 @@ const AdminGiftCards = () => {
                   </div>
                 </div>
 
-                <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                  <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3 font-bold">
+                <div className={`p-6 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                  <h3 className="font-display text-xl font-bold mb-6 flex items-center gap-3 font-bold">
                     <Palette size={20} className="text-gold" /> Card Themes
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-bold">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-bold">
                      {config.themes.map((theme: any, idx: number) => (
                        <div key={idx} className="p-4 rounded-2xl border border-white/10 bg-white/5 space-y-4 relative group font-bold">
                           <button 
@@ -467,7 +470,7 @@ const AdminGiftCards = () => {
                          const newThemes = [...config.themes, { id: Date.now().toString(), name: "New Theme", image: "", color: "#D4AF37" }];
                          setConfig({ ...config, themes: newThemes });
                        }}
-                       className="aspect-[16/10] rounded-[2rem] border-2 border-dashed border-gold/30 flex flex-col items-center justify-center text-gold hover:bg-gold/5 transition-all font-bold"
+                       className="aspect-[16/10] rounded-2xl border-2 border-dashed border-gold/30 flex flex-col items-center justify-center text-gold hover:bg-gold/5 transition-all font-bold"
                      >
                         <Plus size={24} />
                         <span className="text-[10px] font-bold uppercase tracking-widest mt-2 font-bold">Add Theme</span>
@@ -476,8 +479,8 @@ const AdminGiftCards = () => {
                 </div>
 
                 {/* Features Settings */}
-                <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                  <h3 className="font-display text-xl font-bold mb-6 flex items-center gap-3">
+                <div className={`p-6 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                  <h3 className="font-display text-xl font-bold mb-4 flex items-center gap-3">
                     <Zap size={20} className="text-gold" /> Trust Features
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -485,22 +488,21 @@ const AdminGiftCards = () => {
                        <div key={i} className="p-5 rounded-2xl border border-white/5 bg-white/5 space-y-3 relative group">
                           <button onClick={() => setConfig({ ...config, features: config.features.filter((_: any, idx: number) => idx !== i) })} className="absolute top-4 right-4 text-rose-500 opacity-0 group-hover:opacity-100"><Trash2 size={14} /></button>
                           <div className="flex gap-4">
-                             <select 
-                               value={feat.icon}
-                               onChange={(e) => {
-                                 const newFeats = [...config.features];
-                                 newFeats[i].icon = e.target.value;
-                                 setConfig({ ...config, features: newFeats });
-                               }}
-                               className="bg-transparent border rounded-lg p-2 text-xs"
-                             >
-                                <option value="Send">Send</option>
-                                <option value="CreditCard">Payment</option>
-                                <option value="Sparkles">Sparkle</option>
-                                <option value="ShieldCheck">Secure</option>
-                                <option value="Zap">Instant</option>
-                                <option value="Mail">Mail</option>
-                             </select>
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-secondary/50 rounded-xl flex items-center justify-center text-gold">
+                                   <DynamicIcon name={feat.icon} size={18} />
+                                </div>
+                                <input 
+                                  placeholder="Icon (e.g. Zap)"
+                                  value={feat.icon}
+                                  onChange={(e) => {
+                                    const newFeats = [...config.features];
+                                    newFeats[i].icon = e.target.value;
+                                    setConfig({ ...config, features: newFeats });
+                                  }}
+                                  className="bg-transparent border rounded-lg p-2 text-[10px] uppercase font-bold w-24"
+                                />
+                              </div>
                              <input 
                                placeholder="Title"
                                value={feat.title}
@@ -529,8 +531,8 @@ const AdminGiftCards = () => {
                   </div>
                 </div>
 
-                <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-                   <h3 className="font-display text-xl font-bold mb-8 flex items-center gap-3">
+                <div className={`p-6 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
+                   <h3 className="font-display text-xl font-bold mb-6 flex items-center gap-3">
                      <MessageSquare size={20} className="text-gold" /> FAQ Management
                    </h3>
                    <div className="space-y-4">
@@ -585,8 +587,8 @@ const AdminGiftCards = () => {
         {isModalOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-charcoal/60 backdrop-blur-md" />
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className={`relative w-full max-w-2xl rounded-[2.5rem] p-8 overflow-hidden border ${isDark ? "bg-charcoal border-white/10" : "bg-white border-charcoal/10"}`}>
-               <div className="flex justify-between items-center mb-8">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className={`relative w-full max-w-2xl rounded-3xl p-6 overflow-hidden border ${isDark ? "bg-charcoal border-white/10" : "bg-white border-charcoal/10"}`}>
+               <div className="flex justify-between items-center mb-6">
                   <h3 className="font-display text-2xl font-bold uppercase flex items-center gap-3"><Sparkles size={24} className="text-gold" /> Mint Gift Card</h3>
                   <button onClick={() => setIsModalOpen(false)}><X size={20} /></button>
                </div>

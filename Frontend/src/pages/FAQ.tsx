@@ -11,6 +11,7 @@ import {
   Minus,
   Zap
 } from "lucide-react";
+import DynamicIcon from "@/components/DynamicIcon";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -49,15 +50,7 @@ const FAQ = () => {
     fetchConfig();
   }, []);
 
-  const resolveIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'HelpCircle': return <HelpCircle className="w-5 h-5" />;
-      case 'Truck': return <Truck className="w-5 h-5" />;
-      case 'Package': return <Package className="w-5 h-5" />;
-      case 'RefreshCcw': return <RefreshCcw className="w-5 h-5" />;
-      default: return <Zap className="w-5 h-5" />;
-    }
-  };
+  // resolveIcon removed in favor of DynamicIcon component
 
   const filteredFaqs = config?.categories
     ? config.categories
@@ -157,7 +150,7 @@ const FAQ = () => {
                   `}
                 >
                   <span className={`${activeCategory === cat.category ? "text-gold" : "text-muted-foreground/50"} flex-shrink-0`}>
-                    {resolveIcon(cat.icon)}
+                    <DynamicIcon name={cat.icon} size={20} />
                   </span>
                   <span className="font-body font-bold uppercase tracking-wider text-[10px] md:text-xs">
                     {cat.category}

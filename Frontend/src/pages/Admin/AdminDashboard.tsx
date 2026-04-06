@@ -22,9 +22,9 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-4">
       {/* Header Ritual */}
-      <div className="flex items-center justify-between border-b border-indigo-600/10 pb-8">
+      <div className="flex items-center justify-between border-b border-indigo-600/10 pb-2">
         <div className="space-y-1">
           <h2 className={`font-body text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${
             isDark ? "text-white" : "text-charcoal"
@@ -52,14 +52,14 @@ const AdminDashboard = () => {
       </div>
 
       {/* Stats Ritual Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1, duration: 0.8 }}
-            className={`group relative overflow-hidden backdrop-blur-3xl border rounded-[2.5rem] p-8 transition-all duration-700 ${
+            className={`group relative overflow-hidden backdrop-blur-3xl border rounded-3xl p-4 transition-all duration-700 ${
               isDark 
               ? "bg-charcoal/40 border-white/5 hover:border-gold/20" 
               : "bg-white border-charcoal/5 hover:border-gold/30 shadow-xl shadow-charcoal/5"
@@ -68,7 +68,7 @@ const AdminDashboard = () => {
             {/* Background Glow */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-2">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 ${
                 isDark ? "bg-white/5" : "bg-charcoal/5 shadow-inner"
               } ${stat.color}`}>
@@ -85,7 +85,7 @@ const AdminDashboard = () => {
               }`}>
                 {stat.label}
               </p>
-              <h3 className={`font-body text-4xl font-bold transition-colors duration-500 tabular-nums ${
+              <h3 className={`font-body text-2xl font-bold transition-colors duration-500 tabular-nums ${
                 isDark ? "text-white group-hover:text-indigo-500" : "text-charcoal group-hover:text-indigo-600"
               }`}>
                 {stat.value}
@@ -96,7 +96,7 @@ const AdminDashboard = () => {
       </div>
 
           <div className="space-y-4">
-            <h3 className={`font-body text-3xl font-bold uppercase tracking-tight transition-colors duration-700 ${
+            <h3 className={`font-body text-xl font-bold uppercase tracking-tight transition-colors duration-700 ${
               isDark ? "text-white" : "text-charcoal"
             }`}>
               Operational <span className="text-indigo-600">Integrity</span>
@@ -107,7 +107,7 @@ const AdminDashboard = () => {
               Systemic intelligence is currently at optimal performance. All database transactions, seeker interactions, and repository synchronizations are functioning within premium industrial parameters.
             </p>
           </div>
-          <div className={`p-8 border rounded-[2.5rem] flex items-center gap-6 group hover:translate-y-[-4px] shadow-2xl transition-all duration-700 ${
+          <div className={`p-4 border rounded-3xl flex items-center gap-4 group hover:translate-y-[-4px] shadow-2xl transition-all duration-700 ${
             isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
           }`}>
              <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center text-gold shadow-lg group-hover:scale-110 transition-transform">
