@@ -106,6 +106,35 @@ class UserModel(BaseModel):
             }
         }
 
+class ReviewModel(BaseModel):
+    """
+    Model for product reviews submitted by users.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    productId: str = Field(...)
+    userMobile: str = Field(...)
+    userName: str = Field(...)
+    rating: int = Field(..., ge=1, le=5)
+    comment: str = Field(...)
+    title: Optional[str] = Field(default=None)
+    images: Optional[List[str]] = Field(default_factory=list)
+    selectedVariant: Optional[str] = Field(default=None)
+    createdAt: str = Field(...)
+    orderNumber: Optional[str] = Field(default=None)
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "productId": "65f123...",
+                "userMobile": "9123456789",
+                "userName": "Jane Doe",
+                "rating": 5,
+                "comment": "Absolutely love the texture and longevity of this lipstick!",
+                "createdAt": "2026-04-07T14:18:19Z"
+            }
+        }
+
 class UserAuthModel(BaseModel):
     """
     Schema for login credentials.
@@ -218,7 +247,7 @@ class OrderItem(BaseModel):
     """
     Schema for an item within an order.
     """
-    productId: str = Field(...)
+    productId: Optional[str] = Field(default=None)
     name: str = Field(...)
     price: float = Field(...)
     quantity: int = Field(..., ge=1)

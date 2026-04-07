@@ -23,7 +23,8 @@ import {
   Layout,
   Rss,
   Globe,
-  UserCheck
+  UserCheck,
+  Star
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -57,6 +58,7 @@ const menuGroups = [
     label: "Audience",
     items: [
       { icon: Users,           label: "Users",         path: "/admin/users" },
+      { icon: Star,            label: "Reviews",       path: "/admin/reviews" },
       { icon: Rss,             label: "Subscribers",   path: "/admin/newsletter" },
       { icon: MessageSquare,   label: "Inquiries",     path: "/admin/inquiries" },
     ]

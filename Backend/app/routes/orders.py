@@ -1,10 +1,26 @@
 from fastapi import APIRouter, Body, HTTPException, status, Query
+from fastapi.responses import JSONResponse
 from typing import List, Optional
 from ..models import OrderModel
 from ..database import get_database
 from datetime import datetime
+from bson import ObjectId
 import random
 import string
+
+def serialize_order(o: dict) -> dict:
+    """Convert a MongoDB order document to a JSON-serializable dict."""
+    o["id"] = str(o.get("_id", ""))
+    o["_id"] = str(o.get("_id", ""))
+    # Ensure required fields have fallbacks
+    o.setdefault("orderNumber", "LG-UNKNOWN")
+    o.setdefault("userMobile", "Unknown")
+    o.setdefault("totalAmount", 0)
+    o.setdefault("status", "Processing")
+    o.setdefault("paymentStatus", "Pending")
+    o.setdefault("items", [])
+    o.setdefault("createdAt", datetime.utcnow().isoformat())
+    return o
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
@@ -87,7 +103,7 @@ async def create_order(order_data: dict = Body(...)):
     
     return created_order
 
-@router.get("/", response_description="List all systemic orders", response_model=List[OrderModel])
+@router.get("/", response_description="List all systemic orders")
 async def list_orders(userMobile: Optional[str] = Query(None), guestId: Optional[str] = Query(None)):
     db = await get_database()
     
@@ -99,27 +115,41 @@ async def list_orders(userMobile: Optional[str] = Query(None), guestId: Optional
         if guestId:
             query["$or"].append({"userMobile": guestId})
             
-    orders = await db["orders"].find(query).sort("createdAt", -1).to_list(100)
-    return orders
+    orders = await db["orders"].find(query).sort("createdAt", -1).to_list(500)
+    return [serialize_order(o) for o in orders]
 
-@router.get("/{id}", response_description="Get a single order", response_model=OrderModel)
+@router.get("/{id}", response_description="Get a single order")
 async def get_order(id: str):
     db = await get_database()
-    if (order := await db["orders"].find_one({"_id": id})) is not None:
-        return order
     
-    # Check if querying by orderNumber
-    if (order := await db["orders"].find_one({"orderNumber": id})) is not None:
-        return order
+    # Try by ObjectId first, then string _id, then orderNumber
+    order = None
+    if ObjectId.is_valid(id):
+        order = await db["orders"].find_one({"_id": ObjectId(id)})
+    if not order:
+        order = await db["orders"].find_one({"_id": id})
+    if not order:
+        order = await db["orders"].find_one({"orderNumber": id})
+    if order:
+        return serialize_order(order)
         
     raise HTTPException(status_code=404, detail=f"Order {id} not found")
 
 @router.put("/{id}/status", response_description="Update order status")
-async def update_order_status(id: str, status: str = Body(...)):
+async def update_order_status(id: str, body: dict = Body(...)):
     db = await get_database()
-    update_result = await db["orders"].update_one(
-        {"_id": id}, {"$set": {"status": status}}
-    )
-    if update_result.modified_count == 1:
+    new_status = body.get("status") if isinstance(body, dict) else body
+    
+    # Try ObjectId first, then string
+    update_result = None
+    if ObjectId.is_valid(id):
+        update_result = await db["orders"].update_one(
+            {"_id": ObjectId(id)}, {"$set": {"status": new_status}}
+        )
+    if not update_result or update_result.modified_count == 0:
+        update_result = await db["orders"].update_one(
+            {"_id": id}, {"$set": {"status": new_status}}
+        )
+    if update_result and update_result.modified_count == 1:
         return {"message": "Status updated successfully"}
     raise HTTPException(status_code=404, detail=f"Order {id} not found")

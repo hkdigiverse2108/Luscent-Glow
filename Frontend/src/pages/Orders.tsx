@@ -4,7 +4,7 @@ import {
   ShoppingBag, ChevronRight, Package, 
   Truck, CheckCircle2, Clock, 
   ExternalLink, Search, Archive,
-  ArrowRight, ChevronLeft, Sparkles
+  ArrowRight, ChevronLeft, Sparkles, Star
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
@@ -13,6 +13,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import ProductCard from "@/components/ProductCard";
 import { useNavigate } from "react-router-dom";
+import ReviewModal from "@/components/ReviewModal";
 
 interface OrderItem {
   productId: string;
@@ -48,11 +49,26 @@ const Orders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Review Modal State
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedProductForReview, setSelectedProductForReview] = useState<{id: string, name: string, image: string} | null>(null);
+  const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch(getApiUrl("/api/orders/"));
+        const guestId = localStorage.getItem("luscent-glow-guest-id");
+        const identifier = user?.mobileNumber || guestId;
+        
+        // If no identifier, we can't fetch guest/user specific orders
+        if (!identifier) {
+          setOrders([]);
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(getApiUrl(`/api/orders/?userMobile=${identifier}`));
         if (response.ok) {
           const data = await response.json();
           // Ensure data is an array
@@ -67,6 +83,16 @@ const Orders = () => {
 
     fetchOrders();
   }, [user]);
+
+  const handleOpenReview = (item: OrderItem, orderNumber: string) => {
+    setSelectedProductForReview({
+      id: item.productId,
+      name: item.name,
+      image: item.image
+    });
+    setSelectedOrderNumber(orderNumber);
+    setIsReviewModalOpen(true);
+  };
 
   const filteredOrders = orders.filter(order => 
     order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -171,6 +197,19 @@ const Orders = () => {
                                 {item.selectedShade && <span className="mx-2">•</span>}
                                 {item.selectedShade}
                               </p>
+                              
+                              {order.status === "Delivered" && (
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleOpenReview(item, order.orderNumber);
+                                  }}
+                                  className="mt-2 flex items-center gap-2 text-[10px] font-body font-bold text-gold uppercase tracking-widest hover:text-charcoal transition-colors group/rev"
+                                >
+                                  <Star size={10} className="fill-gold group-hover/rev:fill-charcoal transition-colors" />
+                                  Write Review
+                                </button>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -264,6 +303,23 @@ const Orders = () => {
 
       <Footer />
       <WhatsAppButton />
+
+      {selectedProductForReview && user && (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          product={selectedProductForReview}
+          user={{
+            mobileNumber: user.mobileNumber,
+            fullName: user.fullName || "Guest User"
+          }}
+          orderNumber={selectedOrderNumber}
+          onSuccess={() => {
+            // Optional: Show a toast or success message
+            console.log("Review submitted successfully");
+          }}
+        />
+      )}
     </div>
   );
 };

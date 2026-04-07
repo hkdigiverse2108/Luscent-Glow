@@ -7,6 +7,7 @@ import {
   Package,
   IndianRupee,
   MessageSquare,
+  Star,
   Rss,
   Ticket,
   TrendingUp,
@@ -66,7 +67,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [ordersRes, usersRes, productsRes, inquiriesRes, newsletterRes, giftCardsRes] =
+        const [ordersRes, usersRes, productsRes, inquiriesRes, newsletterRes, giftCardsRes, reviewsRes] =
           await Promise.allSettled([
             fetch(getApiUrl("/api/orders/")),
             fetch(getApiUrl("/api/users/")),
@@ -74,6 +75,7 @@ const AdminDashboard = () => {
             fetch(getApiUrl("/api/contact/inquiries")),
             fetch(getApiUrl("/api/newsletter/")),
             fetch(getApiUrl("/api/gift-cards/")),
+            fetch(getApiUrl("/api/reviews/")),
           ]);
 
         const orders: any[]       = ordersRes.status === "fulfilled" && ordersRes.value.ok ? await ordersRes.value.json() : [];
@@ -82,6 +84,7 @@ const AdminDashboard = () => {
         const inquiries: any[]    = inquiriesRes.status === "fulfilled" && inquiriesRes.value.ok ? await inquiriesRes.value.json() : [];
         const newsletter: any[]   = newsletterRes.status === "fulfilled" && newsletterRes.value.ok ? await newsletterRes.value.json() : [];
         const giftCards: any[]    = giftCardsRes.status === "fulfilled" && giftCardsRes.value.ok ? await giftCardsRes.value.json() : [];
+        const reviews: any[]      = reviewsRes.status === "fulfilled" && reviewsRes.value.ok ? await reviewsRes.value.json() : [];
 
         const totalRevenue = orders
           .filter((o) => o.paymentStatus === "Paid")
@@ -146,6 +149,14 @@ const AdminDashboard = () => {
             icon: Ticket,
             accent: "from-pink-400/20 to-pink-400/5 border-pink-400/20 text-pink-400",
             href: "/admin/gift-cards",
+          },
+          {
+            label: "Total Reviews",
+            value: String(reviews.length),
+            sub: `${reviews.filter((r) => r.rating >= 4).length} positive`,
+            icon: Star,
+            accent: "from-amber-400/20 to-amber-400/5 border-amber-400/20 text-amber-400",
+            href: "/admin/reviews",
           },
           {
             label: "Catalogue",
