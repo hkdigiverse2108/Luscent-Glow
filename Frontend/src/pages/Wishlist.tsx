@@ -16,7 +16,7 @@ const Wishlist = () => {
   const moveAllToBag = () => {
     wishlist.forEach(product => {
       addItem({
-        id: product.id,
+        id: product._id || product.id,
         name: product.name,
         price: product.price,
         image: product.image,
@@ -24,7 +24,8 @@ const Wishlist = () => {
         quantity: 1
       });
     });
-    // Optional: clearWishlist(); 
+    // Clear wishlist after moving
+    clearWishlist(); 
   };
 
   return (
@@ -85,7 +86,7 @@ const Wishlist = () => {
               <AnimatePresence mode="popLayout">
                 {wishlist.map((product) => (
                   <motion.div
-                    key={product.id}
+                    key={product._id || product.id}
                     layout
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -107,7 +108,7 @@ const Wishlist = () => {
                     <button 
                       onClick={() => {
                         addItem({
-                          id: product.id,
+                          id: product._id || product.id,
                           name: product.name,
                           price: product.price,
                           image: product.image,

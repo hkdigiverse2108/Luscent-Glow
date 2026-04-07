@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { Star, Heart, Minus, Plus, ShoppingBag, Truck, RotateCcw, Shield, ChevronDown } from "lucide-react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { Star, Heart, Minus, Plus, ShoppingBag, Truck, RotateCcw, Shield, ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -30,6 +30,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     const fetchProduct = async () => {
+      setSelectedImage(0); // Reset image gallery on new product
       try {
         setLoading(true);
         const response = await fetch(getApiUrl(`/api/products/${id}`));
@@ -97,6 +98,10 @@ const ProductDetail = () => {
       selectedShade: product.shades ? product.shades[selectedShade] : undefined,
       selectedSize: product.sizes ? product.sizes[selectedSize] : undefined,
     });
+    
+    if (isWishlisted) {
+      toggleWishlist(product);
+    }
   };
 
   const handleBuyNow = () => {
@@ -152,24 +157,88 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <p className="text-[10px] md:text-sm font-body text-muted-foreground mb-4 md:mb-6 uppercase tracking-widest opacity-70">
-          Home / {product.category || "Collection"} / {product.name || "Treasure Detail"}
-        </p>
+        <nav className="text-[10px] md:text-sm font-body text-muted-foreground mb-4 md:mb-6 uppercase tracking-widest flex items-center gap-2 flex-wrap">
+          <Link to="/" className="hover:text-gold transition-colors opacity-70 hover:opacity-100">Home</Link>
+          <span className="opacity-30">/</span>
+          <Link 
+            to={`/products?category=${product.category?.toLowerCase()}`} 
+            className="hover:text-gold transition-colors opacity-70 hover:opacity-100"
+          >
+            {product.category || "Collection"}
+          </Link>
+          <span className="opacity-30">/</span>
+          <span className="text-foreground opacity-90">{product.name || "Treasure Detail"}</span>
+        </nav>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
           {/* Images */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="space-y-4"
+            className="flex flex-col sm:flex-row gap-5 xl:gap-8 items-start w-full"
           >
-            <div className="aspect-square rounded-xl overflow-hidden bg-secondary cursor-zoom-in group">
+            {/* Desktop Vertical Thumbnails */}
+            {product.images && product.images.length > 1 && (
+              <div className="hidden sm:flex flex-col items-center flex-shrink-0 w-16 xl:w-20">
+                <div 
+                  id="thumbnail-list" 
+                  className="flex flex-col gap-3 overflow-y-auto max-h-[500px] scrollbar-hide scroll-smooth py-1 px-1 w-full"
+                >
+                  {product.images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedImage(idx)}
+                      className={`relative w-full aspect-square rounded-xl overflow-hidden border transition-all duration-300 ${
+                        selectedImage === idx ? "border-charcoal shadow-md scale-105" : "border-transparent opacity-50 hover:opacity-100"
+                      }`}
+                    >
+                      <img src={getAssetUrl(img)} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+                {/* Scroll Controls */}
+                <div className="flex flex-col gap-1 mt-3">
+                  <button 
+                    onClick={() => document.getElementById('thumbnail-list')?.scrollBy({ top: -100, behavior: 'smooth' })}
+                    className="p-1 rounded-full text-muted-foreground/60 hover:text-charcoal transition-colors hover:bg-gold/5"
+                  >
+                    <ChevronUp size={20} className="mx-auto" strokeWidth={1.5} />
+                  </button>
+                  <button 
+                    onClick={() => document.getElementById('thumbnail-list')?.scrollBy({ top: 100, behavior: 'smooth' })}
+                    className="p-1 rounded-full text-muted-foreground/60 hover:text-charcoal transition-colors hover:bg-gold/5"
+                  >
+                    <ChevronDown size={20} className="mx-auto" strokeWidth={1.5} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Main Image */}
+            <div className="w-full flex-1 aspect-square rounded-[2rem] overflow-hidden bg-[#faf9f6] cursor-zoom-in group relative shadow-lg border border-gold/5">
               <img
-                src={getAssetUrl(product.image)}
+                src={getAssetUrl(product.images?.[selectedImage] || product.image)}
                 alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-150 transition-transform duration-500 origin-center"
+                className="w-full h-full object-cover object-center group-hover:scale-[1.35] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center bg-white"
               />
             </div>
+            
+            {/* Mobile Horizontal Thumbnails */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex sm:hidden gap-3 overflow-x-auto w-full pb-2 pt-4 scrollbar-hide">
+                {product.images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImage(idx)}
+                    className={`relative w-16 h-16 rounded-xl overflow-hidden border transition-all duration-300 flex-shrink-0 ${
+                      selectedImage === idx ? "border-charcoal shadow-sm" : "border-transparent opacity-50 hover:opacity-100"
+                    }`}
+                  >
+                    <img src={getAssetUrl(img)} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
 
           {/* Details */}

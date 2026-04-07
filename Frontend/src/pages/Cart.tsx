@@ -36,6 +36,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { load } from '@cashfreepayments/cashfree-js';
 
 const Cart = () => {
   const { 
@@ -84,6 +85,7 @@ const Cart = () => {
     try {
       const orderData = {
         userMobile: identifier,
+        userName: user?.fullName || "Guest",
         items: items.map(item => ({
           productId: item.id,
           name: item.name,
@@ -97,7 +99,7 @@ const Cart = () => {
         totalAmount: subtotal + shipping - discountAmount - giftCardDiscount,
         appliedGiftCardCode: appliedGiftCard?.code || null,
         giftCardDiscount: giftCardDiscount || 0,
-        paymentStatus: "Paid",
+        paymentStatus: "Pending",
         shippingAddress: user?.shippingAddress || { street: "Not Provided", city: "Update in Profile", state: "N/A", zipCode: "000000" }
       };
 
@@ -109,17 +111,121 @@ const Cart = () => {
 
       const data = await response.json();
 
-      if (response.ok && data.paymentUrl) {
-        // Redirection to PhonePe
-        window.location.href = data.paymentUrl;
+      if (response.ok) {
+        if (data.gateway === "cashfree" && data.paymentSessionId) {
+          // Initialize Cashfree
+          try {
+            // First fetch the creds to know mode, or we can assume we check the current URL
+            // A more robust way is for initiate API to return mode. I'll just use sandbox for now or if data.mode is returned.
+            const cashfree = await load({ mode: "sandbox" }); // Can be dynamic if we return it from API
+            let checkoutOptions = {
+                paymentSessionId: data.paymentSessionId,
+                redirectTarget: "_modal",
+            };
+            
+            cashfree.checkout(checkoutOptions).then(async (result: any) => {
+                if(result.error){
+                    toast.error(result.error.message || "Payment was cancelled or failed.");
+                    setIsPlacingOrder(false);
+                }
+                if(result.redirect){
+                    console.log("Redirection...");
+                }
+                if(result.paymentDetails){
+                    // verify cashfree payment on our backend
+                    const verifyResponse = await fetch(getApiUrl("/api/payments/verify"), {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            gateway: "cashfree",
+                            merchantTransactionId: data.merchantTransactionId
+                        }),
+                    });
+
+                    const verifyData = await verifyResponse.json();
+                    if (verifyResponse.ok && verifyData.success) {
+                        toast.success("Payment successful! Curating your ritual...");
+                        clearCart();
+                        navigate(`/order-success?orderNumber=${data.orderNumber}`);
+                    } else {
+                        toast.error("Signature verification failed. Please contact support.");
+                        setIsPlacingOrder(false);
+                    }
+                }
+            });
+          } catch(err) {
+             console.error("Cashfree init error:", err);
+             toast.error("Failed to load payment portal.");
+             setIsPlacingOrder(false);
+          }
+        } 
+        else if (data.gateway === "razorpay" && data.razorpayOrderId) {
+          const options = {
+            key: data.keyId,
+            amount: data.amount,
+            currency: "INR",
+            name: "Luscent Glow",
+            description: "Ritual Selection Purchase",
+            image: "/logo.png",
+            order_id: data.razorpayOrderId,
+            handler: async function (response: any) {
+              try {
+                const verifyResponse = await fetch(getApiUrl("/api/payments/verify"), {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    gateway: "razorpay",
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    merchantTransactionId: data.merchantTransactionId
+                  }),
+                });
+
+                const verifyData = await verifyResponse.json();
+                if (verifyResponse.ok && verifyData.success) {
+                  toast.success("Payment successful! Curating your ritual...");
+                  clearCart();
+                  navigate(`/order-success?orderNumber=${data.orderNumber}`);
+                } else {
+                  toast.error("Signature verification failed. Please contact support.");
+                  setIsPlacingOrder(false);
+                }
+              } catch (err) {
+                console.error("Verification error:", err);
+                toast.error("Could not verify your payment ritual.");
+                setIsPlacingOrder(false);
+              }
+            },
+            prefill: {
+              name: user?.fullName || "",
+              email: user?.email || "",
+              contact: user?.mobileNumber || ""
+            },
+            theme: {
+              color: "#B68F4C"
+            },
+            modal: {
+              ondismiss: function() {
+                 setIsPlacingOrder(false);
+              }
+            }
+          };
+
+          const rzp = new (window as any).Razorpay(options);
+          rzp.open();
+        } else {
+          console.error("Payment initiation error:", data);
+          toast.error("Payment gateway is currently offline.");
+          setIsPlacingOrder(false);
+        }
       } else {
-        console.error("Payment error:", data);
-        toast.error("Payment gateway is currently offline.");
+        toast.error(data.message || "Payment initiation failed.");
+        setIsPlacingOrder(false);
       }
     } catch (error) {
       console.error("Purchase error:", error);
       toast.error("Could not reach our fulfillment center.");
-    } finally {
       setIsPlacingOrder(false);
     }
   };
@@ -259,10 +365,10 @@ const Cart = () => {
                       transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                       className="group relative"
                     >
-                      <div className="flex gap-8 lg:gap-14 items-center p-8 md:p-10 bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[3.5rem] border border-white/50 shadow-ethereal hover:shadow-2xl transition-all duration-700 relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                      <div className="flex gap-6 lg:gap-10 items-center p-6 md:p-8 bg-white/70 backdrop-blur-3xl rounded-[2rem] md:rounded-[2.5rem] border border-white/50 shadow-ethereal hover:shadow-2xl transition-all duration-700 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                         
-                        <div className={`relative ${item.category === "Gift Cards" ? "aspect-[16/10] w-36 md:w-56" : "w-28 h-36 md:w-44 md:h-56"} bg-[#f8f8f8] rounded-2xl md:rounded-[2.5rem] overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-2xl transition-all duration-1000 group-hover:translate-x-2`}>
+                        <div className={`relative ${item.category === "Gift Cards" ? "aspect-[16/10] w-28 md:w-48" : "w-24 h-32 md:w-36 md:h-48"} bg-[#f8f8f8] rounded-xl md:rounded-2xl overflow-hidden flex-shrink-0 shadow-lg group-hover:shadow-2xl transition-all duration-1000 group-hover:translate-x-2`}>
                           <img src={getAssetUrl(item.image)} alt={item.name} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                         </div>
                         
@@ -288,13 +394,13 @@ const Cart = () => {
                             </div>
 
                             <div className="flex items-center gap-6 mt-6">
-                              <div className="flex items-center bg-white/40 backdrop-blur-md border border-gold/5 rounded-2xl p-1 shadow-sm">
-                                <button onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedShade, item.selectedSize, item.metadata)} className="w-10 h-10 flex items-center justify-center text-muted-foreground/60 hover:text-gold transition-all hover:bg-gold/5 rounded-xl"><Minus size={14} /></button>
-                                <span className="w-10 text-sm font-bold font-body text-charcoal text-center">{item.quantity}</span>
-                                <button onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedShade, item.selectedSize, item.metadata)} className="w-10 h-10 flex items-center justify-center text-muted-foreground/60 hover:text-gold transition-all hover:bg-gold/5 rounded-xl"><Plus size={14} /></button>
+                              <div className="flex items-center bg-white/40 backdrop-blur-md border border-gold/5 rounded-xl p-1 shadow-sm">
+                                <button onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedShade, item.selectedSize, item.metadata)} className="w-8 h-8 flex items-center justify-center text-muted-foreground/60 hover:text-gold transition-all hover:bg-gold/5 rounded-lg"><Minus size={12} /></button>
+                                <span className="w-8 text-xs font-bold font-body text-charcoal text-center">{item.quantity}</span>
+                                <button onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedShade, item.selectedSize, item.metadata)} className="w-8 h-8 flex items-center justify-center text-muted-foreground/60 hover:text-gold transition-all hover:bg-gold/5 rounded-lg"><Plus size={12} /></button>
                               </div>
-                              <button onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)} className="group/del flex items-center gap-3 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-rose-brand transition-all">
-                                <div className="w-10 h-10 flex items-center justify-center rounded-2xl bg-rose-brand/5 group-hover/del:bg-rose-brand group-hover/del:text-white transition-all duration-500"><Trash2 size={16} strokeWidth={1.5} /></div>
+                              <button onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)} className="group/del flex items-center gap-2 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-rose-brand transition-all">
+                                <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-rose-brand/5 group-hover/del:bg-rose-brand group-hover/del:text-white transition-all duration-500"><Trash2 size={14} strokeWidth={1.5} /></div>
                                 <span className="hidden md:inline">Remove</span>
                               </button>
                             </div>

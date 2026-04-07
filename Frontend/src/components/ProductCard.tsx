@@ -26,6 +26,11 @@ const ProductCard = ({ product }: ProductCardProps) => {
       category: product.category,
       quantity: 1
     });
+    
+    // Remove from wishlist if it is wishlisted
+    if (isWishlisted) {
+      toggleWishlist(product);
+    }
   };
 
   return (

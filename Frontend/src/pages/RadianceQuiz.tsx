@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { products, Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 const steps = [
   {
@@ -47,6 +48,7 @@ const RadianceQuiz = () => {
   const [recommendations, setRecommendations] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const { addItem } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
 
   const handleOptionSelect = (optionId: string) => {
     setAnswers({ ...answers, [steps[currentStep].id]: optionId });
@@ -182,14 +184,17 @@ const RadianceQuiz = () => {
                       <h3 className="font-display text-xl font-normal text-foreground group-hover:text-gold transition-colors">{product.name}</h3>
                     </div>
                     <button 
-                      onClick={() => addItem({
-                        id: product._id || product.id,
-                        name: product.name,
-                        price: product.price,
-                        image: product.image,
-                        category: product.category,
-                        quantity: 1
-                      })}
+                      onClick={() => {
+                        addItem({
+                          id: product._id || product.id,
+                          name: product.name,
+                          price: product.price,
+                          image: product.image,
+                          category: product.category,
+                          quantity: 1
+                        });
+                        if (isInWishlist(product._id || product.id)) toggleWishlist(product);
+                      }}
                       className="w-full py-3 bg-primary text-primary-foreground rounded-full text-[10px] font-body font-bold uppercase tracking-widest hover:bg-gold transition-colors flex items-center justify-center gap-2"
                     >
                       <ShoppingBag size={14} /> Add to Ritual

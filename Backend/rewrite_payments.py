@@ -1,0 +1,287 @@
+import os
+import re
+
+file_path = r"c:\Users\HP\Downloads\Lucsent_glow\Backend\app\routes\payments.py"
+with open(file_path, "r", encoding="utf-8") as f:
+    content = f.read()
+
+# Replace Razorpay specific initialization in `/initiate` and branch for active gateways
+new_initiate = """@router.post("/initiate")
+async def initiate_payment(order_data: dict = Body(...)):
+    \"\"\"
+    1. Create a Pending Payment Record in MongoDB.
+    2. Create an Order in active gateway (Razorpay or Cashfree).
+    3. Return gateway payload to Frontend.
+    \"\"\"
+    db = await get_database()
+    creds = await get_payment_credentials()
+    active_gateway = creds.get("activeGateway", "razorpay")
+
+    existing_order = await db["orders"].find_one({"orderNumber": order_data.get("orderNumber")})
+    
+    if existing_order:
+        if existing_order.get("paymentStatus") == "Paid":
+             return {"success": False, "message": "This order has already been secured.", "orderNumber": existing_order["orderNumber"]}
+        
+        order_number = existing_order["orderNumber"]
+        merchant_txn_id = existing_order["merchantTransactionId"]
+        created_at = existing_order["createdAt"]
+    else:
+        merchant_txn_id = f"TXN_{uuid.uuid4().hex[:10].upper()}"
+        order_number = order_data.get("orderNumber") or generate_order_number()
+        created_at = datetime.utcnow().isoformat()
+        
+        # Initial Payment Audit Entry
+        new_payment = {
+            "merchantId": active_gateway.upper(),
+            "merchantTransactionId": merchant_txn_id,
+            "orderNumber": order_number,
+            "userMobile": order_data.get("userMobile") or "GUEST_USER",
+            "amount": float(order_data.get("totalAmount")),
+            "status": "INITIATED",
+            "pendingOrderData": order_data,
+            "createdAt": created_at,
+            "updatedAt": created_at
+        }
+        await db["payments"].insert_one(new_payment)
+
+    amount_float = float(order_data.get("totalAmount"))
+
+    if active_gateway == "razorpay":
+        key_id = creds.get("keyId", settings.RAZORPAY_KEY_ID)
+        key_secret = creds.get("keySecret", settings.RAZORPAY_KEY_SECRET)
+        client = razorpay.Client(auth=(key_id, key_secret))
+        amount_paisa = int(amount_float * 100)
+        
+        try:
+            razorpay_order = client.order.create({
+                "amount": amount_paisa,
+                "currency": "INR",
+                "receipt": order_number,
+                "notes": {
+                    "merchantTransactionId": merchant_txn_id,
+                    "orderNumber": order_number
+                }
+            })
+            
+            await db["payments"].update_one(
+                {"merchantTransactionId": merchant_txn_id},
+                {"$set": {"razorpayOrderId": razorpay_order["id"], "merchantId": "RAZORPAY"}}
+            )
+
+            return {
+                "success": True, 
+                "gateway": "razorpay",
+                "razorpayOrderId": razorpay_order["id"],
+                "amount": amount_paisa,
+                "keyId": key_id,
+                "orderNumber": order_number,
+                "merchantTransactionId": merchant_txn_id
+            }
+                
+        except Exception as e:
+            print("Razorpay Order Creation Error:", str(e))
+            raise HTTPException(status_code=500, detail="Razorpay Gateway unavailable.")
+
+    elif active_gateway == "cashfree":
+        cf_mode = creds.get("cashfreeMode", "sandbox")
+        cf_app_id = creds.get("cashfreeAppId")
+        cf_secret = creds.get("cashfreeSecretKey")
+        
+        url = "https://sandbox.cashfree.com/pg/orders" if cf_mode == "sandbox" else "https://api.cashfree.com/pg/orders"
+        
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "x-api-version": "2023-08-01",
+            "x-client-id": cf_app_id,
+            "x-client-secret": cf_secret
+        }
+        
+        customer_id = order_data.get("userMobile", "guest")
+        customer_id = ''.join(e for e in customer_id if e.isalnum()) or "guest"
+        if len(customer_id) > 40: customer_id = customer_id[:40]
+
+        payload = {
+            "order_id": merchant_txn_id,
+            "order_amount": amount_float,
+            "order_currency": "INR",
+            "customer_details": {
+                "customer_id": customer_id,
+                "customer_phone": order_data.get("userMobile", "9999999999")[:10],
+                "customer_name": order_data.get("userName", "Guest User")
+            }
+        }
+        
+        try:
+            cf_res = requests.post(url, json=payload, headers=headers)
+            cf_data = cf_res.json()
+            
+            if cf_res.status_code == 200 and "payment_session_id" in cf_data:
+                await db["payments"].update_one(
+                    {"merchantTransactionId": merchant_txn_id},
+                    {"$set": {"cashfreeOrderId": merchant_txn_id, "merchantId": "CASHFREE"}}
+                )
+                
+                return {
+                    "success": True,
+                    "gateway": "cashfree",
+                    "paymentSessionId": cf_data["payment_session_id"],
+                    "orderId": merchant_txn_id,
+                    "orderNumber": order_number,
+                    "merchantTransactionId": merchant_txn_id
+                }
+            else:
+                print("Cashfree Error:", cf_data)
+                raise Exception("Failed to initiate Cashfree order")
+        except Exception as e:
+            print("Cashfree Order Creation Error:", str(e))
+            raise HTTPException(status_code=500, detail="Cashfree Gateway unavailable.")
+
+    raise HTTPException(status_code=400, detail="Invalid Gateway configuration")"""
+
+new_verify = """@router.post("/verify")
+async def verify_payment(payload: dict = Body(...)):
+    \"\"\"
+    Verifies Gateway Signature and finalizes the order.
+    \"\"\"
+    db = await get_database()
+    creds = await get_payment_credentials()
+    gateway = payload.get("gateway", "razorpay")
+    merchant_txn_id = payload.get("merchantTransactionId")
+
+    provider_reference_id = None
+    is_verified = False
+
+    try:
+        if gateway == "razorpay":
+            key_id = creds.get("keyId", settings.RAZORPAY_KEY_ID)
+            key_secret = creds.get("keySecret", settings.RAZORPAY_KEY_SECRET)
+            client = razorpay.Client(auth=(key_id, key_secret))
+
+            razorpay_payment_id = payload.get("razorpay_payment_id")
+            razorpay_order_id = payload.get("razorpay_order_id")
+            razorpay_signature = payload.get("razorpay_signature")
+
+            params_dict = {
+                'razorpay_order_id': razorpay_order_id,
+                'razorpay_payment_id': razorpay_payment_id,
+                'razorpay_signature': razorpay_signature
+            }
+            client.utility.verify_payment_signature(params_dict)
+            provider_reference_id = razorpay_payment_id
+            is_verified = True
+
+        elif gateway == "cashfree":
+            cf_mode = creds.get("cashfreeMode", "sandbox")
+            cf_app_id = creds.get("cashfreeAppId")
+            cf_secret = creds.get("cashfreeSecretKey")
+            
+            url = f"https://sandbox.cashfree.com/pg/orders/{merchant_txn_id}" if cf_mode == "sandbox" else f"https://api.cashfree.com/pg/orders/{merchant_txn_id}"
+            headers = {
+                "accept": "application/json",
+                "x-api-version": "2023-08-01",
+                "x-client-id": cf_app_id,
+                "x-client-secret": cf_secret
+            }
+            res = requests.get(url, headers=headers)
+            data = res.json()
+            
+            if data.get("order_status") == "PAID":
+                is_verified = True
+                provider_reference_id = data.get("cf_order_id", merchant_txn_id)
+            else:
+                raise Exception("Cashfree order status not PAID")
+
+        if is_verified:
+            existing_order = await db["orders"].find_one({"merchantTransactionId": merchant_txn_id})
+            
+            if not existing_order:
+                payment_record = await db["payments"].find_one({"merchantTransactionId": merchant_txn_id})
+                if payment_record and "pendingOrderData" in payment_record:
+                    order_data = payment_record["pendingOrderData"]
+                    
+                    new_order = {
+                        "userMobile": order_data.get("userMobile"),
+                        "items": order_data.get("items"),
+                        "totalAmount": order_data.get("totalAmount"),
+                        "status": "Processing",
+                        "paymentStatus": "Paid",
+                        "shippingAddress": order_data.get("shippingAddress"),
+                        "createdAt": payment_record["createdAt"],
+                        "orderNumber": payment_record["orderNumber"],
+                        "merchantTransactionId": merchant_txn_id,
+                        "providerReferenceId": provider_reference_id
+                    }
+                    await db["orders"].insert_one(new_order)
+                    
+                    applied_gc_code = order_data.get("appliedGiftCardCode")
+                    gc_discount = order_data.get("giftCardDiscount", 0)
+                    if applied_gc_code and gc_discount > 0:
+                        gc = await db["gift_cards"].find_one({"code": applied_gc_code.upper()})
+                        if gc:
+                            new_balance = max(0, gc.get("currentBalance", 0) - gc_discount)
+                            await db["gift_cards"].update_one(
+                                {"_id": gc["_id"]},
+                                {"$set": {
+                                    "currentBalance": new_balance,
+                                    "isActive": new_balance > 0,
+                                    "lastUsedAt": datetime.utcnow().isoformat(),
+                                    "lastOrderNumber": payment_record["orderNumber"]
+                                }}
+                            )
+
+                    for item in order_data.get("items", []):
+                        if item.get("productId", "").startswith("giftcard-") or item.get("category") == "Gift Cards":
+                            gift_code = "LG-GIFT-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)) + "-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4))
+                            from datetime import timedelta
+                            expiry_date = (datetime.utcnow() + timedelta(days=365)).isoformat()
+                            metadata = item.get("metadata", {})
+                            
+                            gift_card = {
+                                "code": gift_code,
+                                "initialBalance": item.get("price", 0),
+                                "currentBalance": item.get("price", 0),
+                                "senderMobile": order_data.get("userMobile"),
+                                "recipientName": metadata.get("recipient", "Valued Customer"),
+                                "recipientMobile": metadata.get("recipientMobile"),
+                                "message": metadata.get("message"),
+                                "theme": metadata.get("theme", "Gold Radiance"),
+                                "isActive": True,
+                                "expiryDate": expiry_date,
+                                "createdAt": datetime.utcnow().isoformat(),
+                                "orderNumber": payment_record["orderNumber"]
+                            }
+                            await db["gift_cards"].insert_one(gift_card)
+
+                    identifier = order_data.get("userMobile")
+                    if identifier:
+                        await db["cart"].delete_many({"$or": [{"userMobile": identifier}, {"guestId": identifier}]})
+            
+            await db["payments"].update_one(
+                {"merchantTransactionId": merchant_txn_id},
+                {"$set": {
+                    "status": "SUCCESS", 
+                    "providerReferenceId": provider_reference_id,
+                    "updatedAt": datetime.utcnow().isoformat()
+                }}
+            )
+            
+            return {"success": True, "message": "Payment verified and order placed."}
+
+    except Exception as e:
+        print("Signature Verification Error:", str(e))
+        await db["payments"].update_one(
+            {"merchantTransactionId": merchant_txn_id},
+            {"$set": {
+                "status": "FAILED", 
+                "updatedAt": datetime.utcnow().isoformat()
+            }}
+        )
+        raise HTTPException(status_code=400, detail="Invalid payment signature.")"""
+
+content = re.sub(r'@router\.post\("/initiate"\).*?@router\.post\("/verify"\)', f'{new_initiate}\n\n@router.post("/verify")', content, flags=re.DOTALL)
+content = re.sub(r'@router\.post\("/verify"\).*?# Gone are the PhonePe callback/redirect rituals', f'{new_verify}\n\n# Gone are the PhonePe callback/redirect rituals', content, flags=re.DOTALL)
+
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(content)

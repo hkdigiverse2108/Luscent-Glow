@@ -18,6 +18,7 @@ class ProductModel(BaseModel):
     rating: float = Field(..., ge=0, le=5)
     reviewCount: int = Field(..., ge=0)
     image: str = Field(...)
+    images: Optional[List[str]] = Field(default=None)
     category: str = Field(...)
     tags: List[str] = Field(default_factory=list)
     shades: Optional[List[str]] = Field(default=None)
@@ -58,6 +59,7 @@ class UpdateProductModel(BaseModel):
     rating: Optional[float] = None
     reviewCount: Optional[int] = None
     image: Optional[str] = None
+    images: Optional[List[str]] = None
     category: Optional[str] = None
     tags: Optional[List[str]] = None
     shades: Optional[List[str]] = None
@@ -623,26 +625,35 @@ class GlobalSettingsModel(BaseModel):
 
 class PaymentCredentialsModel(BaseModel):
     """
-    Model for PhonePe payment gateway credentials stored in the database.
+    Model for payment gateway credentials stored in the database.
     These override the .env defaults at runtime.
     """
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    merchantId: str = Field(default="PGTESTPAYUAT86")
-    saltKey: str = Field(default="96434309-7796-489d-8924-ab56988a6076")
-    saltIndex: str = Field(default="1")
-    baseUrl: str = Field(default="https://api-preprod.phonepe.com/apis/pg-sandbox")
-    mode: str = Field(default="sandbox")  # "sandbox" or "production"
+    activeGateway: str = Field(default="razorpay") # "razorpay" or "cashfree"
+    
+    # Razorpay Credentials
+    keyId: str = Field(default="")
+    keySecret: str = Field(default="")
+    mode: str = Field(default="sandbox")  # "sandbox" or "live"
+    
+    # Cashfree Credentials
+    cashfreeAppId: str = Field(default="")
+    cashfreeSecretKey: str = Field(default="")
+    cashfreeMode: str = Field(default="sandbox") # "sandbox" or "live"
+    
     updatedAt: Optional[str] = None
 
     class Config:
         populate_by_name = True
         json_schema_extra = {
             "example": {
-                "merchantId": "PGTESTPAYUAT86",
-                "saltKey": "96434309-7796-489d-8924-ab56988a6076",
-                "saltIndex": "1",
-                "baseUrl": "https://api-preprod.phonepe.com/apis/pg-sandbox",
-                "mode": "sandbox"
+                "activeGateway": "razorpay",
+                "keyId": "",
+                "keySecret": "",
+                "mode": "sandbox",
+                "cashfreeAppId": "",
+                "cashfreeSecretKey": "",
+                "cashfreeMode": "sandbox"
             }
         }
 

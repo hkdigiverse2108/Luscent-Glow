@@ -9,6 +9,7 @@ export interface Product {
   rating: number;
   reviewCount: number;
   image: string;
+  images?: string[];
   category: string;
   tags: string[];
   shades?: string[];
@@ -37,6 +38,11 @@ export const products: Product[] = [
     id: "1", name: "Velvet Matte Lipstick", brand: "Luscent Glow", price: 899, originalPrice: 1299, discount: 31,
     rating: 4.5, reviewCount: 2341, category: "makeup", tags: ["lips", "matte"],
     image: "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=500&h=500&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=800&h=800&fit=crop"
+    ],
     shades: ["Rose Petal", "Berry Crush", "Nude Bliss", "Crimson Red"],
     isTrending: true, isBestSeller: true,
     description: "A luxuriously smooth matte lipstick that glides on effortlessly, delivering rich, full-coverage color that lasts all day.",
@@ -99,6 +105,12 @@ export const products: Product[] = [
     id: "10", name: "Precision Brow Pencil", brand: "Luscent Glow", price: 499, originalPrice: 699, discount: 29,
     rating: 4.5, reviewCount: 2789, category: "makeup", tags: ["brows", "pencil"],
     image: "https://images.unsplash.com/photo-1597225244660-1cd128c64284?w=500&h=500&fit=crop",
+    images: [
+      "https://images.unsplash.com/photo-1597225244660-1cd128c64284?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1599305090598-fe179d501227?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1583241801650-8b1114b74bd4?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1627384113743-6bd5a479fffd?w=800&h=800&fit=crop"
+    ],
     shades: ["Blonde", "Brunette", "Dark Brown", "Black"], isBestSeller: true,
   },
   {

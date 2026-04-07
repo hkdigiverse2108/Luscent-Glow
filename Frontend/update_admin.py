@@ -1,29 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Smartphone,
-  Save,
-  CheckCircle2,
-  RefreshCcw,
-  Sparkles,
-  MessageCircle,
-  CreditCard,
-  Key,
-  Hash,
-  Globe,
-  AlertTriangle,
-  Eye,
-  EyeOff,
-  RotateCcw,
-  ShieldCheck,
-  FlaskConical
-} from "lucide-react";
-import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
-import { getApiUrl } from "../../lib/api";
-import { toast } from "sonner";
-import AdminHeader from "../../components/Admin/AdminHeader.tsx";
+import re
 
-type PaymentCreds = {
+file_path = r"c:\Users\HP\Downloads\Lucsent_glow\Frontend\src\pages\Admin\AdminSettings.tsx"
+
+with open(file_path, "r", encoding="utf-8") as f:
+    content = f.read()
+
+type_def = """type PaymentCreds = {
   activeGateway: "razorpay" | "cashfree";
   keyId: string;
   keySecret: string;
@@ -41,71 +23,15 @@ const DEFAULT_CREDS: PaymentCreds = {
   cashfreeAppId: "",
   cashfreeSecretKey: "",
   cashfreeMode: "sandbox",
-};
+};"""
 
-const AdminSettings = () => {
-  const { isDark } = useAdminTheme();
-  const [whatsappNumber, setWhatsappNumber] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+content = re.sub(r'type PaymentCreds = \{.*?\};.*?const DEFAULT_CREDS: PaymentCreds = \{.*?\};', type_def, content, flags=re.DOTALL)
 
-  // Payment credentials state
-  const [creds, setCreds] = useState<PaymentCreds>(DEFAULT_CREDS);
-  const [credsLoading, setCredsLoading] = useState(true);
-  const [credsSaving, setCredsSaving] = useState(false);
-  const [credsResetting, setCredsResetting] = useState(false);
-  const [showKeySecret, setShowKeySecret] = useState(false);
-  const [showCashfreeSecret, setShowCashfreeSecret] = useState(false);
-  const [hasStoredCreds, setHasStoredCreds] = useState(false);
+# Add showCashfreeSecret state
+content = re.sub(r'const \[showKeySecret, setShowKeySecret\] = useState\(false\);', r'const [showKeySecret, setShowKeySecret] = useState(false);\n  const [showCashfreeSecret, setShowCashfreeSecret] = useState(false);', content)
 
-  // ── Fetch WhatsApp ──────────────────────────────────────────────────────────
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(getApiUrl("/api/settings/global/"));
-      if (response.ok) {
-        const data = await response.json();
-        setWhatsappNumber(data.whatsappNumber);
-      }
-    } catch (error) {
-      toast.error("Could not reach the Settings Registry.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpdate = async () => {
-    if (!whatsappNumber) {
-      toast.error("WhatsApp number cannot be null.");
-      return;
-    }
-    try {
-      setSaving(true);
-      const response = await fetch(getApiUrl("/api/settings/global/"), {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsappNumber })
-      });
-      if (response.ok) {
-        toast.success("WhatsApp Concierge registry updated.");
-      } else {
-        toast.error("Failed to update configuration.");
-      }
-    } catch {
-      toast.error("Systemic update failure.");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // ── Fetch Payment Credentials ───────────────────────────────────────────────
-  const fetchCreds = async () => {
-    try {
-      setCredsLoading(true);
-      const res = await fetch(getApiUrl("/api/settings/global/payment-credentials"));
-      if (res.ok) {
-        const data = await res.json();
-        setCreds({
+# update fetchCreds mapping
+new_fetch_creds = """        setCreds({
           activeGateway: data.activeGateway || "razorpay",
           keyId: data.keyId || "",
           keySecret: data.keySecret || "",
@@ -113,184 +39,24 @@ const AdminSettings = () => {
           cashfreeAppId: data.cashfreeAppId || "",
           cashfreeSecretKey: data.cashfreeSecretKey || "",
           cashfreeMode: data.cashfreeMode || "sandbox",
-        });
-        setHasStoredCreds(!!data.keyId || !!data.cashfreeAppId);
-      }
-    } catch {
-      toast.error("Could not load payment credentials.");
-    } finally {
-      setCredsLoading(false);
-    }
-  };
+        });"""
 
-  const handleSaveCreds = async () => {
-    try {
-      setCredsSaving(true);
-      const res = await fetch(getApiUrl("/api/settings/global/payment-credentials"), {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(creds),
-      });
-      if (res.ok) {
-        toast.success("Payment credentials committed to the sanctuary.");
-        setHasStoredCreds(true);
-      } else {
-        toast.error("Failed to save payment credentials.");
-      }
-    } catch {
-      toast.error("Payment credential sync failed.");
-    } finally {
-      setCredsSaving(false);
-    }
-  };
+content = re.sub(r'setCreds\(\{.*?keyId: data\.keyId \|\| "",.*?keySecret: data\.keySecret \|\| "",.*?mode: data\.mode \|\| "sandbox",\n\s*\}\);', new_fetch_creds, content, flags=re.DOTALL)
 
-  const handleResetCreds = async () => {
-    if (!confirm("This will reset all payment credentials to defaults. Are you sure?")) return;
-    try {
-      setCredsResetting(true);
-      const res = await fetch(getApiUrl("/api/settings/global/payment-credentials"), {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        toast.success("Payment credentials reset to defaults.");
-        setCreds(DEFAULT_CREDS);
-        setHasStoredCreds(false);
-        await fetchCreds();
-      } else {
-        toast.error("Reset failed.");
-      }
-    } catch {
-      toast.error("Could not reach the API.");
-    } finally {
-      setCredsResetting(false);
-    }
-  };
+# update UI:
+# from: `{/* Mode badge */}` to the end of payment card
 
-  useEffect(() => {
-    fetchSettings();
-    fetchCreds();
-  }, []);
-
-  const cardClass = `relative overflow-hidden backdrop-blur-3xl border rounded-[2.5rem] p-8 md:p-10 transition-all duration-700 ${
-    isDark ? "bg-charcoal/40 border-white/12 shadow-2xl" : "bg-white border-charcoal/12 shadow-xl"
-  }`;
-
-  const inputClass = `w-full pr-6 py-4 rounded-2xl border-2 font-body text-sm font-semibold outline-none transition-all duration-300 ${
-    isDark
-      ? "bg-white/5 border-white/10 text-white focus:border-gold focus:bg-white/10 placeholder:text-white/20"
-      : "bg-charcoal/5 border-charcoal/10 text-charcoal focus:border-gold focus:bg-white placeholder:text-charcoal/30"
-  }`;
-
-  if (loading && credsLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="font-body text-xs uppercase tracking-[0.3em] text-gold animate-pulse">
-          Synchronizing Settings Concierge...
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-8 pb-16">
-      <AdminHeader
-        title="Settings"
-        highlightedWord="Concierge"
-        subtitle="Manage platform connectivity, payment gateway, and outreach channels."
-        isDark={isDark}
-      />
-
-      <div className="max-w-4xl space-y-8">
-
-        {/* ── WhatsApp Section ── */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className={cardClass}
-        >
-          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10 border-b pb-8 border-gold/10">
-            <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-xl">
-              <Smartphone size={28} />
-            </div>
-            <div className="space-y-1">
-              <h3 className={`text-xl font-extrabold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
-                WhatsApp Concierge
-              </h3>
-              <p className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-charcoal/60"}`}>
-                Primary communication channel for seeker outreach and curation advice.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-end">
-            <div className="space-y-4">
-              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
-                WhatsApp Number
-              </label>
-              <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
-                  <MessageCircle size={18} />
-                </div>
-                <input
-                  type="text"
-                  value={whatsappNumber}
-                  onChange={(e) => setWhatsappNumber(e.target.value)}
-                  className={`${inputClass} pl-12`}
-                  placeholder="e.g. 919537150942"
-                />
-              </div>
-              <p className={`text-[10px] font-semibold uppercase tracking-wide leading-relaxed ${isDark ? "text-white/25" : "text-charcoal/35"}`}>
-                Format: [Country Code][Number] — no symbols. Used globally for the floating WhatsApp button.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={handleUpdate}
-                disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold/80 transition-all shadow-lg shadow-gold/20 disabled:opacity-50"
-              >
-                {saving ? <RefreshCcw size={14} className="animate-spin" /> : <Save size={14} />}
-                {saving ? "Saving..." : "Update"}
-              </button>
-              <button
-                onClick={fetchSettings}
-                className={`flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold uppercase tracking-[0.15em] text-xs border transition-all ${
-                  isDark ? "border-white/10 text-white/50 hover:bg-white/5" : "border-charcoal/10 text-charcoal/50 hover:bg-charcoal/5"
-                }`}
-              >
-                <RefreshCcw size={14} />
-                Sync
-              </button>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* ── Payment Gateway Credentials ── */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className={cardClass}
-        >
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-start gap-6 mb-10 border-b pb-8 border-gold/10">
-            <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-xl flex-shrink-0">
-              <CreditCard size={28} />
-            </div>
-            <div className="flex-1 space-y-1">
-              <div className="flex flex-wrap items-center gap-3">
-                <h3 className={`text-xl font-extrabold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
+new_payment_ui = """                <h3 className={`text-xl font-extrabold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
                   Payment Gateway
                 </h3>
-                {creds.activeGateway === "cashfree" ? (
-                  <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 bg-purple-500/15 text-purple-400 border border-purple-500/30`}>
-                    Cashfree Active
-                  </span>
-                ) : (
-                  <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 bg-blue-500/15 text-blue-400 border border-blue-500/30`}>
-                    Razorpay Active
-                  </span>
-                )}
+                {/* Gateway badge */}
+                <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1 ${
+                  creds.activeGateway === "cashfree"
+                    ? "bg-purple-500/15 text-purple-400 border border-purple-500/30"
+                    : "bg-blue-500/15 text-blue-400 border border-blue-500/30"
+                }`}>
+                  {creds.activeGateway === "cashfree" ? "Cashfree" : "Razorpay"} Active
+                </span>
                 {hasStoredCreds && (
                   <span className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-gold/10 text-gold border border-gold/20 flex items-center gap-1">
                     <CheckCircle2 size={10} />
@@ -433,7 +199,7 @@ const AdminSettings = () => {
                         value={creds.cashfreeAppId}
                         onChange={(e) => setCreds({ ...creds, cashfreeAppId: e.target.value })}
                         className={`${inputClass} px-4`}
-                        placeholder="TEST..."
+                        placeholder="TEST1049..."
                       />
                     </div>
                     <div className="md:col-span-2 space-y-3">
@@ -487,33 +253,13 @@ const AdminSettings = () => {
               </div>
             </div>
           )}
-        </motion.section>
+        </motion.section>"""
 
-        {/* ── System Health ── */}
-        <div className={`p-6 border rounded-[2rem] flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-700 ${
-          isDark ? "bg-white/5 border-white/12" : "bg-charcoal/5 border-charcoal/12"
-        }`}>
-          <div className="flex items-center gap-5">
-            <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold shadow-xl">
-              <Sparkles size={22} />
-            </div>
-            <div>
-              <p className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-white/40" : "text-charcoal/60"}`}>
-                Systemic Registry Health
-              </p>
-              <p className={`text-lg font-extrabold uppercase tracking-[0.08em] ${isDark ? "text-white" : "text-charcoal"}`}>
-                Connectivity Optimized
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-gold font-bold uppercase tracking-widest text-[10px]">
-            <CheckCircle2 size={14} />
-            Cloud Synchronization Active
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+content = re.sub(
+    r'<h3 className=\{`text-xl font-extrabold uppercase tracking-tight \$\{isDark \? "text-white" : "text-charcoal"\}[\s\S]*?(?=<div className=\{`p-6 border rounded-\[2rem\])',
+    new_payment_ui + "\n\n        ",
+    content
+)
 
-export default AdminSettings;
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(content)

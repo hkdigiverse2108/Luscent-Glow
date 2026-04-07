@@ -36,11 +36,13 @@ async def update_global_settings(settings: GlobalSettingsModel):
 # ─── Payment Credentials CRUD ───────────────────────────────────────────────
 
 _DEFAULT_PAYMENT_CREDENTIALS = {
-    "merchantId": "PGTESTPAYUAT86",
-    "saltKey": "96434309-7796-489d-8924-ab56988a6076",
-    "saltIndex": "1",
-    "baseUrl": "https://api-preprod.phonepe.com/apis/pg-sandbox",
+    "activeGateway": "razorpay",
+    "keyId": "",
+    "keySecret": "",
     "mode": "sandbox",
+    "cashfreeAppId": "",
+    "cashfreeSecretKey": "",
+    "cashfreeMode": "sandbox",
 }
 
 async def get_payment_credentials() -> dict:
