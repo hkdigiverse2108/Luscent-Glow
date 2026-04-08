@@ -73,7 +73,7 @@ async def chat_with_lumina(request: ChatRequest = Body(...)):
 
         # Create chat session and send message
         chat = client.chats.create(
-            model="gemini-2.5-flash",
+            model="gemini-2.5-flash-lite",
             config=types.GenerateContentConfig(
                 system_instruction=SYSTEM_PROMPT,
                 temperature=0.8,
@@ -87,7 +87,7 @@ async def chat_with_lumina(request: ChatRequest = Body(...)):
 
         return {
             "reply": reply,
-            "model": "gemini-2.5-flash"
+            "model": "gemini-2.5-flash-lite"
         }
 
     except HTTPException:
