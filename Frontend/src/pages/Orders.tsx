@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ShoppingBag, ChevronRight, Package, 
-  Truck, CheckCircle2, Clock, 
-  ExternalLink, Search, Archive,
-  ArrowRight, ChevronLeft, Sparkles, Star
+  ChevronLeft, Search, Star, 
+  MapPin, Package, Truck, 
+  CheckCircle2, Clock, Archive,
+  Info, Navigation, Sparkles,
+  SearchIcon, Calendar, Filter
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import ProductCard from "@/components/ProductCard";
 import { useNavigate } from "react-router-dom";
 import ReviewModal from "@/components/ReviewModal";
+import OrderDetailsModal from "@/components/OrderDetailsModal";
 
 interface OrderItem {
   productId: string;
@@ -35,63 +36,106 @@ interface Order {
 }
 
 const statusConfig = {
-  "Processing": { icon: <Clock size={16} />, color: "text-blue-500", bg: "bg-blue-500/10", step: 1 },
-  "Quality Check": { icon: <Archive size={16} />, color: "text-purple-500", bg: "bg-purple-500/10", step: 2 },
-  "Shipped": { icon: <Truck size={16} />, color: "text-gold", bg: "bg-gold/10", step: 3 },
-  "Delivered": { icon: <CheckCircle2 size={16} />, color: "text-green-500", bg: "bg-green-500/10", step: 4 },
-  "Cancelled": { icon: <Package size={16} />, color: "text-rose-500", bg: "bg-rose-500/10", step: 0 },
-  "Pending Payment": { icon: <Clock size={16} />, color: "text-amber-500", bg: "bg-amber-500/10", step: 0 },
+  "Processing": { color: "text-muted-foreground", bg: "bg-muted/50", border: "border-muted-foreground/10" },
+  "Quality Check": { color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+  "Shipped": { color: "text-gold", bg: "bg-gold/5", border: "border-gold/20" },
+  "Delivered": { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-100" },
+  "Cancelled": { color: "text-destructive", bg: "bg-destructive/5", border: "border-destructive/10" },
+  "Pending Payment": { color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
 };
 
 const Orders = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [userReviews, setUserReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Review Modal State
+  // Modal States
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [selectedProductForReview, setSelectedProductForReview] = useState<{id: string, name: string, image: string} | null>(null);
   const [selectedOrderNumber, setSelectedOrderNumber] = useState<string | undefined>(undefined);
+  const [existingReview, setExistingReview] = useState<any | null>(null);
+  
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedOrderForDetails, setSelectedOrderForDetails] = useState<Order | null>(null);
+
+  const fetchData = async () => {
+    try {
+      const guestId = localStorage.getItem("luscent-glow-guest-id");
+      const identifier = user?.mobileNumber || guestId;
+      
+      if (!identifier) {
+        setOrders([]);
+        setLoading(false);
+        return;
+      }
+
+      // Fetch Orders
+      const orderRes = await fetch(getApiUrl(`/api/orders/?userMobile=${identifier}`));
+      if (orderRes.ok) {
+        const data = await orderRes.json();
+        setOrders(Array.isArray(data) ? data : []);
+      }
+
+      // Fetch User Reviews
+      if (user?.mobileNumber) {
+        const reviewRes = await fetch(getApiUrl(`/api/reviews/user/${user.mobileNumber}`));
+        if (reviewRes.ok) {
+          const reviews = await reviewRes.json();
+          setUserReviews(Array.isArray(reviews) ? reviews : []);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const guestId = localStorage.getItem("luscent-glow-guest-id");
-        const identifier = user?.mobileNumber || guestId;
-        
-        // If no identifier, we can't fetch guest/user specific orders
-        if (!identifier) {
-          setOrders([]);
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch(getApiUrl(`/api/orders/?userMobile=${identifier}`));
-        if (response.ok) {
-          const data = await response.json();
-          // Ensure data is an array
-          setOrders(Array.isArray(data) ? data : []);
-        }
-      } catch (error) {
-        console.error("Error fetching orders:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrders();
+    fetchData();
   }, [user]);
 
   const handleOpenReview = (item: OrderItem, orderNumber: string) => {
+    const review = getReviewForItem(item.productId, orderNumber);
     setSelectedProductForReview({
       id: item.productId,
       name: item.name,
       image: item.image
     });
     setSelectedOrderNumber(orderNumber);
+    setExistingReview(review);
     setIsReviewModalOpen(true);
+  };
+
+  const getReviewForItem = (productId: string, orderNumber: string, productName?: string) => {
+    const strProductId = productId.toString();
+    const cleanItemName = productName?.toLowerCase().trim();
+    
+    // 1. Try perfect match (Product + this specific Order)
+    const exactMatch = userReviews.find(r => 
+      (r.productId === strProductId || r.productId?.toString() === strProductId) && 
+      (r.orderNumber === orderNumber)
+    );
+    if (exactMatch) return exactMatch;
+
+    // 2. Try ID match regardless of Order (Product-Centric)
+    const idMatch = userReviews.find(r => 
+      (r.productId === strProductId || r.productId?.toString() === strProductId)
+    );
+    if (idMatch) return idMatch;
+
+    // 3. ULTIMATE FALLBACK: Name-Based matching (Handling Legacy/Technical ID mismatches)
+    if (cleanItemName) {
+      return userReviews.find(r => 
+        r.productName?.toLowerCase().trim() === cleanItemName ||
+        r.productId?.toString().toLowerCase().trim() === cleanItemName
+      );
+    }
+
+    return null;
   };
 
   const filteredOrders = orders.filter(order => 
@@ -100,160 +144,131 @@ const Orders = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#faf9f6]">
+    <div className="min-h-screen bg-[#fafaf9]">
       <Header />
       
-      <main className="container mx-auto px-6 py-12 md:py-20 lg:py-32">
-        <div className="max-w-6xl mx-auto">
-          {/* Nav Back */}
-          <button 
-            onClick={() => navigate("/profile")} 
-            className="flex items-center gap-4 text-muted-foreground hover:text-gold transition-all group mb-12 md:mb-16"
-          >
-            <div className="w-12 h-12 rounded-full bg-white border border-gold/10 flex items-center justify-center group-hover:border-gold/30 transition-all shadow-ethereal">
-              <ChevronLeft size={20} />
-            </div>
-            <div className="flex flex-col items-start">
-              <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em] leading-none mb-1">Return</span>
-              <span className="text-xs font-display font-medium text-charcoal">Back to Profile</span>
-            </div>
-          </button>
-
-          {/* Page Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-10 mb-16 md:mb-24">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 text-gold">
-                <Sparkles size={14} className="opacity-50" />
-                <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Transaction Archive</span>
-              </div>
-              <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-charcoal tracking-tight lowercase leading-[0.9]">
-                Your <span className="text-gold italic font-light">Orders</span>
-              </h1>
+      <main className="pt-28 pb-32 md:pt-36">
+        <div className="max-w-4xl mx-auto px-6">
+          
+          {/* Professional Header Section */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+            <div className="space-y-1">
+              <h1 className="text-3xl md:text-5xl font-display font-bold text-charcoal">Your Orders</h1>
+              <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">Track and manage your rituals</p>
             </div>
 
-            <div className="relative group w-full md:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-gold transition-colors" size={18} />
+            <div className="relative w-full md:w-80">
+              <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
               <input
                 type="text"
-                placeholder="Search order number or product..."
+                placeholder="Search by order ID or product..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-gold/10 rounded-2xl py-4 pl-12 pr-4 font-body text-sm outline-none focus:border-gold/30 transition-all shadow-sm"
+                className="w-full bg-white border border-border rounded-xl py-3.5 pl-11 pr-4 text-sm outline-none focus:ring-1 ring-gold/20 focus:border-gold transition-all shadow-sm"
               />
             </div>
           </div>
 
           {loading ? (
-            <div className="space-y-8">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-64 bg-secondary/40 animate-pulse rounded-[2.5rem]" />
-              ))}
-            </div>
+             <div className="space-y-6">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-48 bg-white border border-border animate-pulse rounded-2xl" />
+                ))}
+             </div>
           ) : filteredOrders.length > 0 ? (
-            <div className="space-y-10">
+            <div className="space-y-8">
               {filteredOrders.map((order, idx) => (
                 <motion.div
                   key={order.id}
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.1 }}
-                  className="bg-white rounded-[2.5rem] border border-gold/10 shadow-ethereal overflow-hidden group"
+                  transition={{ delay: idx * 0.05 }}
+                  className="bg-white border border-border rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_4px_6px_-2px_rgba(0,0,0,0.05)] overflow-hidden hover:shadow-lg transition-shadow"
                 >
-                  {/* Order Top Bar */}
-                  <div className="p-8 lg:px-12 border-b border-gold/5 flex flex-wrap items-center justify-between gap-6">
-                    <div className="flex items-center gap-8">
-                      <div>
-                        <p className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest mb-1">Order Number</p>
-                        <p className="font-display text-lg font-semibold text-charcoal">{order.orderNumber}</p>
+                  {/* Card Header Strip */}
+                  <div className="px-6 py-4 bg-muted/20 border-b border-border flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-6">
+                      <div className="space-y-0.5">
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Order Placed</p>
+                        <p className="text-xs font-bold text-charcoal">{new Date(order.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>
                       </div>
-                      <div className="hidden sm:block h-8 w-[1px] bg-gold/10" />
-                      <div>
-                        <p className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest mb-1">Ritual Date</p>
-                        <p className="font-body text-sm text-charcoal">
-                          {new Date(order.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
-                        </p>
+                      <div className="h-8 w-px bg-border hidden sm:block" />
+                      <div className="space-y-0.5">
+                        <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Amount</p>
+                        <p className="text-xs font-bold text-charcoal">₹{order.totalAmount.toLocaleString()}</p>
                       </div>
                     </div>
-
-                    <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${statusConfig[order.status]?.bg || "bg-secondary"} ${statusConfig[order.status]?.color || "text-charcoal"}`}>
-                      {statusConfig[order.status]?.icon}
-                      <span className="text-[10px] font-body font-bold uppercase tracking-widest">{order.status}</span>
+                    <div className="text-right">
+                      <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-1 text-right">Order ID</p>
+                      <p className="text-xs font-bold text-charcoal tracking-wide">#{order.orderNumber}</p>
                     </div>
                   </div>
 
-                  {/* Order Content */}
-                  <div className="p-8 lg:p-12">
-                    <div className="grid lg:grid-cols-2 gap-12 items-center">
-                      <div className="space-y-6">
-                        {order.items.map((item, i) => (
-                          <div key={i} className="flex items-center gap-6 group/item cursor-pointer">
-                            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-secondary flex-shrink-0">
-                              <img src={item.image} alt={item.name} className="w-full h-full object-cover transition-transform group-hover/item:scale-110 duration-500" />
+                  {/* Order Body */}
+                  <div className="p-6 md:p-8">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                      {/* Products List - Left Span */}
+                      <div className="md:col-span-8 space-y-8">
+                        {order.items.map((item, i) => {
+                          const hasReview = !!getReviewForItem(item.productId, order.orderNumber, item.name);
+                          return (
+                            <div key={i} className="flex gap-6 sm:gap-8 group/item">
+                              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-muted rounded-xl border border-border overflow-hidden p-2 flex-shrink-0 transition-transform group-hover/item:scale-105">
+                                <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                              </div>
+                              <div className="flex-1 space-y-2">
+                                {i === 0 && (
+                                  <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border ${statusConfig[order.status]?.border} ${statusConfig[order.status]?.bg} ${statusConfig[order.status]?.color} mb-1`}>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">{order.status}</span>
+                                  </div>
+                                )}
+                                <h3 className="text-lg font-display font-bold text-charcoal line-clamp-1 group-hover/item:text-gold transition-colors">{item.name}</h3>
+                                <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium">
+                                  <span className="flex items-center gap-1"><Package size={14} /> Qty: {item.quantity}</span>
+                                  <span className="text-charcoal font-bold">₹{item.price.toLocaleString()}</span>
+                                </div>
+                                {order.status === "Delivered" && (
+                                  <button 
+                                    onClick={() => handleOpenReview(item, order.orderNumber)}
+                                    className={`text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-1 mt-1 ${
+                                      hasReview ? "text-gold hover:text-charcoal" : "text-muted-foreground hover:text-gold"
+                                    }`}
+                                  >
+                                    <Star size={12} className={hasReview ? "fill-gold" : ""} /> 
+                                    {hasReview ? "Edit Review" : "Review Item"}
+                                  </button>
+                                )}
+                              </div>
                             </div>
-                            <div className="flex-1 space-y-1">
-                              <h4 className="font-display text-lg font-semibold text-charcoal group-hover/item:text-gold transition-colors">{item.name}</h4>
-                              <p className="text-xs font-body text-muted-foreground">
-                                {item.quantity} x ₹{Number(item.price || 0).toLocaleString()}
-                                {item.selectedShade && <span className="mx-2">•</span>}
-                                {item.selectedShade}
-                              </p>
-                              
-                              {order.status === "Delivered" && (
-                                <button 
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenReview(item, order.orderNumber);
-                                  }}
-                                  className="mt-2 flex items-center gap-2 text-[10px] font-body font-bold text-gold uppercase tracking-widest hover:text-charcoal transition-colors group/rev"
-                                >
-                                  <Star size={10} className="fill-gold group-hover/rev:fill-charcoal transition-colors" />
-                                  Write Review
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
-                      <div className="space-y-8">
-                        {/* Fulfillment Tracker */}
-                        <div className="relative pt-2">
-                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-[2px] bg-secondary" />
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(statusConfig[order.status]?.step / 4) * 100}%` }}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-gold"
-                            transition={{ duration: 1.5, ease: "easeOut" }}
-                          />
-                          <div className="relative flex justify-between">
-                            {[1, 2, 3, 4].map((step) => (
-                              <div 
-                                key={step} 
-                                className={`w-3 h-3 rounded-full border-2 transition-colors duration-500 ${
-                                  step <= statusConfig[order.status]?.step ? "bg-gold border-gold" : "bg-white border-secondary"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                          <div className="flex justify-between mt-4 text-[8px] font-body font-bold text-muted-foreground uppercase tracking-widest">
-                            <span>Processing</span>
-                            <span>Shipped</span>
-                            <span>Delivered</span>
-                          </div>
-                        </div>
-
-                        <div className="flex items-end justify-between pt-4 border-t border-gold/5">
-                          <div>
-                            <p className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest mb-1">Grand Total</p>
-                            <p className="font-display text-2xl font-bold text-charcoal">₹{Number(order.totalAmount || 0).toLocaleString()}</p>
-                          </div>
-                          <button 
-                            onClick={() => navigate(`/track-order?orderId=${order.orderNumber}`)}
-                            className="flex items-center gap-2 text-gold hover:text-charcoal transition-colors group/link"
-                          >
-                            <span className="text-[10px] font-body font-bold uppercase tracking-widest">Track Ritual</span>
-                            <ArrowRight size={14} className="group-hover/link:translate-x-1 transition-transform" />
-                          </button>
+                      {/* Action Grid - Right Span */}
+                      <div className="md:col-span-4 flex flex-col gap-3 h-fit md:sticky md:top-4">
+                        <button 
+                          onClick={() => navigate(`/track-order?orderId=${order.orderNumber}`)}
+                          className="w-full py-3 bg-charcoal text-white text-xs font-bold rounded-xl hover:bg-gold hover:text-charcoal transition-all shadow-md active:scale-[0.98]"
+                        >
+                          Track Order
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setSelectedOrderForDetails(order);
+                            setIsDetailsModalOpen(true);
+                          }}
+                          className="w-full py-3 bg-white border border-border text-charcoal text-xs font-bold rounded-xl hover:bg-muted transition-all active:scale-[0.98]"
+                        >
+                          Order Details
+                        </button>
+                        
+                        <div className="mt-4 p-4 bg-muted/30 rounded-xl border border-border">
+                           <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-2">Order Summary</p>
+                           <div className="flex justify-between items-center">
+                              <span className="text-xs text-charcoal font-medium">{order.items.length} Product(s)</span>
+                              <span className="text-sm font-bold text-charcoal">₹{order.totalAmount.toLocaleString()}</span>
+                           </div>
                         </div>
                       </div>
                     </div>
@@ -262,64 +277,44 @@ const Orders = () => {
               ))}
             </div>
           ) : (
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-32 bg-white rounded-[3rem] border border-gold/10 shadow-ethereal"
-            >
-              <div className="w-24 h-24 bg-gold/5 rounded-full flex items-center justify-center mx-auto mb-8 text-gold/20">
-                <Archive size={48} />
+            <div className="text-center py-32 bg-white border border-border rounded-3xl shadow-sm">
+              <div className="w-20 h-20 bg-muted/50 rounded-full flex items-center justify-center mx-auto mb-6 text-muted-foreground/30">
+                <Archive size={40} />
               </div>
-              <h2 className="font-display text-3xl font-bold text-charcoal mb-4 lowercase">your archive is <span className="italic font-light text-gold/60">untouched.</span></h2>
-              <p className="text-muted-foreground font-body max-w-sm mx-auto mb-12 italic">
-                Every ritual begins with a single selection. Discover your first curated treasure today.
-              </p>
-              <button onClick={() => window.location.href = "/products"} className="px-10 py-5 bg-charcoal text-white rounded-full text-[10px] font-body font-bold uppercase tracking-[0.25em] hover:bg-gold hover:text-charcoal transition-all shadow-xl">
-                Begin Exploration
+              <h2 className="text-2xl font-display font-bold text-charcoal mb-2">No Orders Found</h2>
+              <p className="text-sm text-muted-foreground mb-8">You haven't placed any orders with this ritual yet.</p>
+              <button 
+                onClick={() => navigate("/products")}
+                className="px-10 py-3.5 bg-charcoal text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gold transition-all"
+              >
+                Shop Now
               </button>
-            </motion.div>
+            </div>
           )}
-
-          {/* Customer Support Integration */}
-          <div className="mt-24 p-12 bg-charcoal rounded-[3rem] text-center space-y-6 relative overflow-hidden">
-             <div className="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-             <div className="relative z-10 space-y-6">
-                <h3 className="font-display text-3xl text-white">Need guidance on your <span className="text-gold italic">shipment?</span></h3>
-                <p className="text-white/60 font-body text-sm max-w-lg mx-auto">
-                  Our concierge team is available 24/7 to provide real-time updates on your curated selections.
-                </p>
-                <div className="flex flex-wrap justify-center gap-6 pt-4">
-                  <button className="px-8 py-4 bg-gold text-charcoal rounded-full text-[10px] font-body font-bold uppercase tracking-widest hover:bg-white transition-all shadow-xl">
-                    Contact Concierge
-                  </button>
-                  <button className="px-8 py-4 border border-white/20 text-white rounded-full text-[10px] font-body font-bold uppercase tracking-widest hover:bg-white/10 transition-all">
-                    Help Center
-                  </button>
-                </div>
-             </div>
-          </div>
         </div>
       </main>
 
       <Footer />
       <WhatsAppButton />
 
-      {selectedProductForReview && user && (
-        <ReviewModal
-          isOpen={isReviewModalOpen}
-          onClose={() => setIsReviewModalOpen(false)}
-          product={selectedProductForReview}
-          user={{
-            mobileNumber: user.mobileNumber,
-            fullName: user.fullName || "Guest User"
-          }}
-          orderNumber={selectedOrderNumber}
-          onSuccess={() => {
-            // Optional: Show a toast or success message
-            console.log("Review submitted successfully");
-          }}
-        />
-      )}
+      <ReviewModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        product={selectedProductForReview!}
+        user={{
+          mobileNumber: user?.mobileNumber || "",
+          fullName: user?.fullName || "Guest User"
+        }}
+        orderNumber={selectedOrderNumber}
+        existingReview={existingReview}
+        onSuccess={fetchData}
+      />
+
+      <OrderDetailsModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        order={selectedOrderForDetails!}
+      />
     </div>
   );
 };

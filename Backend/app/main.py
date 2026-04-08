@@ -35,20 +35,11 @@ async def lifespan(app: FastAPI):
     # Startup: Connect to MongoDB
     await connect_to_mongo()
     
-    # Ensure uploads directory exists
-    uploads_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
-    if not os.path.exists(uploads_dir):
-        os.makedirs(uploads_dir)
-        
     yield
     # Shutdown: Close MongoDB connection
     await close_mongo_connection()
 
 app = FastAPI(title="Lucsent Glow API", lifespan=lifespan)
-
-# Mount static files for uploads
-uploads_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
-app.mount("/uploads", StaticFiles(directory=uploads_path), name="uploads")
 
 # Enhanced CORS Sanctuary for local interoperability
 app.add_middleware(

@@ -3,343 +3,325 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Package, Truck, CheckCircle2, Search, MapPin, 
   Calendar, ShoppingBag, ArrowRight, ShieldCheck, 
-  HelpCircle, ChevronRight, Clock, Box, Mail, Sparkles, ChevronLeft
+  HelpCircle, ChevronRight, Clock, Box, Mail, Sparkles, ChevronLeft,
+  RotateCcw, Copy, ExternalLink, MessageCircle
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 
-const trackingSteps = [
-  { id: 1, title: "Order Confirmed", description: "Payment received & confirmed", icon: <CheckCircle2 size={24} />, time: "9:30 AM, March 29" },
-  { id: 2, title: "Preparing Treasures", description: "Curating your skincare rituals", icon: <Box size={24} />, time: "2:15 PM, March 29" },
-  { id: 3, title: "Shipped", description: "In transit to your sanctuary", icon: <Truck size={24} />, time: "11:00 AM, March 30" },
-  { id: 4, title: "Out for Delivery", description: "Approaching your doorstep", icon: <MapPin size={24} />, time: "In Progress" },
-  { id: 5, title: "Delivered", description: "Radiance reaches you", icon: <Package size={24} />, time: "Pending" }
-];
+interface TrackStep {
+  id: number;
+  title: string;
+  description: string;
+  icon: JSX.Element;
+  time: string;
+  isCompleted: boolean;
+  isCurrent?: boolean;
+}
 
 const TrackOrder = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [orderId, setOrderId] = useState("");
   const [email, setEmail] = useState("");
   const [isTracking, setIsTracking] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  
+  // Mock data representing a found order
+  const [orderData, setOrderData] = useState<any>(null);
 
   useEffect(() => {
     const urlOrderId = searchParams.get("orderId");
     if (urlOrderId) {
       setOrderId(urlOrderId);
+      handleTrack(null, urlOrderId);
     }
     if (user?.email) {
       setEmail(user.email);
     }
   }, [searchParams, user]);
 
-  const handleTrack = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleTrack = (e: React.FormEvent | null, idFromUrl?: string) => {
+    if (e) e.preventDefault();
     setLoading(true);
-    // Simulate API delay
+    
+    // Simulate API fetch delay
     setTimeout(() => {
+      setOrderData({
+        orderNumber: idFromUrl || orderId,
+        status: "Shipped",
+        expectedDelivery: "April 1, 2026",
+        courier: "BlueDart Express",
+        trackingId: "BDE-908273645",
+        items: [
+          { name: "Hydra Glow Serum", image: "/serum.png", quantity: 1 }
+        ],
+        steps: [
+          { id: 1, title: "Order Confirmed", description: "Your order has been received and confirmed.", icon: <CheckCircle2 size={18} />, time: "9:30 AM, March 29", isCompleted: true },
+          { id: 2, title: "Quality Check", description: "Our experts verified your items for perfection.", icon: <ShieldCheck size={18} />, time: "11:15 AM, March 29", isCompleted: true },
+          { id: 3, title: "Order Shipped", description: "Your order is on the way via BlueDart Express.", icon: <Truck size={18} />, time: "2:45 PM, March 29", isCompleted: true, isCurrent: true },
+          { id: 4, title: "Out for Delivery", description: "A courier is navigating to your address.", icon: <MapPin size={18} />, time: "Pending", isCompleted: false },
+          { id: 5, title: "Delivered", description: "Your order has been successfully delivered.", icon: <Package size={18} />, time: "Pending", isCompleted: false }
+        ]
+      });
       setIsTracking(true);
       setLoading(false);
-    }, 1500);
+    }, 1200);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="min-h-screen bg-[#faf9f6]">
+    <div className="min-h-screen bg-[#fafaf9]">
       <Header />
       
-      <main>
-        {/* Navigation Back */}
-        <div className="bg-charcoal pt-12 md:pt-16 px-4 md:px-6">
-          <div className="container mx-auto">
-            <button 
-              onClick={() => window.history.back()} 
-              className="flex items-center gap-4 text-white/50 hover:text-gold transition-all group mb-8"
-            >
-              <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-gold/30 transition-all shadow-2xl">
-                <ChevronLeft size={20} />
-              </div>
-              <div className="flex flex-col items-start">
-                <span className="text-[10px] font-body font-bold uppercase tracking-[0.3em] leading-none mb-1">Return</span>
-                <span className="text-xs font-display font-medium text-white">Back to Orders</span>
-              </div>
-            </button>
+      <main className="pt-28 pb-32 md:pt-40">
+        <div className="max-w-2xl mx-auto px-6">
+          {/* Professional Header Section */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div className="space-y-1">
+              <h1 className="text-3xl md:text-5xl font-display font-bold text-charcoal">Track Order</h1>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium">Real-time status of your items</p>
+            </div>
+            {isTracking && (
+               <button 
+                onClick={() => setIsTracking(false)}
+                className="text-[10px] text-gold font-bold uppercase tracking-widest hover:text-charcoal transition-colors flex items-center gap-2 group"
+               >
+                 <RotateCcw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
+                 New Tracking
+               </button>
+            )}
           </div>
-        </div>
 
-        {/* Luxury Hero Background */}
-        <section className="relative pb-16 md:pb-24 overflow-hidden bg-charcoal">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gold/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/4 opacity-40" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-rose-light/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/4 opacity-30" />
-          
-          <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-6 max-w-3xl mx-auto"
-            >
-              <div className="flex items-center justify-center gap-4 text-gold mb-4">
-                <Sparkles size={16} className="opacity-50" />
-                <span className="text-[10px] font-body font-bold uppercase tracking-[0.4em]">Logistics Portal</span>
-              </div>
-              <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-white tracking-tight leading-[0.9] lowercase">
-                Track Your <span className="text-gold italic font-light">Order</span>
-              </h1>
-              <p className="text-white/40 font-body text-sm md:text-base max-w-lg mx-auto leading-relaxed italic">
-                Secure real-time updates on your curated selections from our fulfillment center to your residence.
-              </p>
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Tracking Input Card */}
-        <section className="container mx-auto px-4 md:px-6 -mt-8 md:-mt-12 relative z-20 pb-20 md:pb-24">
           <AnimatePresence mode="wait">
             {!isTracking ? (
               <motion.div
                 key="track-form"
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="max-w-4xl mx-auto bg-white rounded-[2.5rem] md:rounded-[3rem] p-6 sm:p-8 lg:p-16 shadow-ethereal border border-gold/10"
+                exit={{ opacity: 0, scale: 0.98 }}
+                className="bg-white border border-border p-8 md:p-12 rounded-[2.5rem] shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)]"
               >
-                <form onSubmit={handleTrack} className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-end">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-body font-bold text-charcoal uppercase tracking-widest pl-2">Order ID</label>
-                    <div className="relative">
-                      <ShoppingBag className="absolute left-6 top-1/2 -translate-y-1/2 text-gold" size={18} />
-                      <input
-                        required
-                        type="text"
-                        placeholder="e.g. #LUC-7890"
-                        className="w-full bg-[#f8f8f8] border border-transparent rounded-xl md:rounded-2xl py-4 md:py-6 pl-14 md:pl-16 pr-6 font-body focus:bg-white focus:border-gold/30 outline-none transition-all text-sm"
-                        value={orderId}
-                        onChange={(e) => setOrderId(e.target.value)}
-                      />
+                 <form onSubmit={handleTrack} className="space-y-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <div className="space-y-2 group">
+                         <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1 group-focus-within:text-gold transition-colors">Order Number</label>
+                         <div className="relative">
+                           <ShoppingBag className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-gold transition-colors" size={16} />
+                           <input
+                             required
+                             type="text"
+                             placeholder="e.g. #LG-12345"
+                             className="w-full bg-white border border-border rounded-xl py-4 pl-12 pr-4 text-sm outline-none focus:border-gold/50 focus:ring-1 ring-gold/10 transition-all font-medium"
+                             value={orderId}
+                             onChange={(e) => setOrderId(e.target.value)}
+                           />
+                         </div>
+                       </div>
+                       
+                       <div className="space-y-2 group">
+                         <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1 group-focus-within:text-gold transition-colors">Email Address</label>
+                         <div className="relative">
+                           <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 group-focus-within:text-gold transition-colors" size={16} />
+                           <input
+                             required
+                             type="email"
+                             placeholder="your@email.com"
+                             className="w-full bg-white border border-border rounded-xl py-4 pl-12 pr-4 text-sm outline-none focus:border-gold/50 focus:ring-1 ring-gold/10 transition-all font-medium"
+                             value={email}
+                             onChange={(e) => setEmail(e.target.value)}
+                           />
+                         </div>
+                       </div>
                     </div>
-                  </div>
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-body font-bold text-charcoal uppercase tracking-widest pl-2">Email Address</label>
-                    <div className="relative">
-                      <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-gold" size={18} />
-                      <input
-                        required
-                        type="email"
-                        placeholder="your@email.com"
-                        className="w-full bg-[#f8f8f8] border border-transparent rounded-xl md:rounded-2xl py-4 md:py-6 pl-14 md:pl-16 pr-6 font-body focus:bg-white focus:border-gold/30 outline-none transition-all text-sm"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                  <div className="md:col-span-2 pt-4">
+
                     <button
                       disabled={loading}
                       type="submit"
-                      className="w-full py-4 md:py-6 bg-charcoal text-white font-body font-bold uppercase tracking-[0.25em] rounded-xl md:rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-2xl flex items-center justify-center gap-3 relative overflow-hidden text-xs md:text-sm"
+                      className="w-full py-4 bg-charcoal text-white font-bold rounded-xl hover:bg-gold hover:text-charcoal transition-all active:scale-[0.98] flex items-center justify-center gap-3 uppercase text-[10px] tracking-[0.3em] shadow-lg shadow-charcoal/5"
                     >
                       {loading ? (
-                        <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       ) : (
                         <>
-                          <Search size={18} />
+                          <Search size={16} />
                           <span>Track Now</span>
                         </>
                       )}
                     </button>
-                  </div>
-                </form>
+                 </form>
 
-                <div className="mt-12 pt-12 border-t border-border/50 grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0 text-gold">
-                      <ShieldCheck size={20} />
+                 <div className="mt-12 pt-10 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex gap-4 p-4 rounded-2xl bg-muted/30">
+                       <ShieldCheck size={20} className="text-gold flex-shrink-0" />
+                       <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-charcoal uppercase tracking-wider">Secure Access</p>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">Verification through encrypted credentials.</p>
+                       </div>
                     </div>
-                    <div>
-                      <p className="font-body font-bold text-[10px] uppercase tracking-widest mb-1">Encrypted Access</p>
-                      <p className="text-xs text-muted-foreground">Only authorized access to order details via validated email pairing.</p>
+                    <div className="flex gap-4 p-4 rounded-2xl bg-muted/30">
+                       <HelpCircle size={20} className="text-gold flex-shrink-0" />
+                       <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-charcoal uppercase tracking-wider">Need Support?</p>
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">Our help center is available 24/7 for you.</p>
+                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center flex-shrink-0 text-gold">
-                      <HelpCircle size={20} />
-                    </div>
-                    <div>
-                      <p className="font-body font-bold text-[10px] uppercase tracking-widest mb-1">Concierge Help</p>
-                      <p className="text-xs text-muted-foreground">Having trouble? Our consultants are available via WhatsApp 24/7.</p>
-                    </div>
-                  </div>
-                </div>
+                 </div>
               </motion.div>
             ) : (
               <motion.div
                 key="track-results"
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="max-w-5xl mx-auto space-y-8"
+                className="space-y-6"
               >
-                {/* Status Bar */}
-                <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-6 md:p-8 lg:p-12 shadow-ethereal border border-gold/10 flex flex-col md:flex-row flex-wrap items-center justify-between gap-6 md:gap-8">
-                  <div className="text-center md:text-left">
-                    <p className="text-[9px] md:text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em] mb-1">Current Status</p>
-                    <h2 className="font-display text-2xl md:text-3xl font-bold flex items-center justify-center md:justify-start gap-3">
-                      <Truck size={28} className="text-gold" />
-                      In Transit
-                    </h2>
-                  </div>
-                  <div className="w-px h-12 bg-border/50 hidden lg:block" />
-                  <div className="text-center md:text-left">
-                    <p className="text-[9px] md:text-[10px] font-body font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Order Identifier</p>
-                    <p className="font-body font-bold text-base md:text-lg">{orderId || "#LUC-7890-GLOW"}</p>
-                  </div>
-                  <div className="w-px h-12 bg-border/50 hidden lg:block" />
-                  <div className="text-center md:text-left">
-                    <p className="text-[9px] md:text-[10px] font-body font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Estimated Arrival</p>
-                    <p className="font-body font-bold text-base md:text-lg flex items-center justify-center md:justify-start gap-2">
-                       <Calendar size={18} className="text-gold" /> April 1, 2026
-                    </p>
-                  </div>
-                  <button 
-                    onClick={() => {
-                      setIsTracking(false);
-                      setOrderId("");
-                      setEmail("");
-                    }}
-                    className="p-3 md:p-4 rounded-full border border-gold/10 hover:bg-gold/5 transition-colors group"
-                  >
-                    <RefreshCw size={20} className="text-gold group-hover:rotate-180 transition-transform duration-700" />
-                  </button>
+                {/* Nykaa-Style Status Banner */}
+                <div className="bg-white border border-border p-8 rounded-[2rem] shadow-sm flex items-center justify-between group overflow-hidden relative">
+                   <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+                      <Truck size={120} />
+                   </div>
+                   <div className="space-y-2 relative z-10">
+                      <div className="flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/20 rounded-full w-fit">
+                        <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                        <span className="text-[10px] font-bold text-gold uppercase tracking-wider">{orderData.status}</span>
+                      </div>
+                      <h2 className="text-3xl font-display font-bold text-charcoal tracking-tight">On its way.</h2>
+                   </div>
+                   <div className="text-right space-y-1 relative z-10">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estimated Delivery</p>
+                      <p className="text-xl font-bold text-charcoal">{orderData.expectedDelivery}</p>
+                   </div>
                 </div>
 
-                {/* Animated Timeline Stage */}
-                <div className="bg-white rounded-[2.5rem] md:rounded-[4rem] p-6 sm:p-8 md:p-12 lg:p-20 shadow-ethereal border border-gold/10 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 md:h-1.5 bg-secondary overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: "55%" }}
-                        transition={{ duration: 1.5, delay: 0.5 }}
-                        className="h-full bg-gold shadow-[0_0_15px_rgba(182,143,76,0.5)]"
-                      />
-                  </div>
-
-                  <div className="flex flex-col md:grid md:grid-cols-5 gap-10 md:gap-12 relative">
-                    {trackingSteps.map((step, i) => {
-                      const isActive = step.id <= 3;
-                      const isCurrent = step.id === 3;
-                      
-                      return (
-                        <div key={step.id} className="relative group flex md:block items-center gap-6 md:gap-0">
-                          <div className={`w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-3xl flex-shrink-0 md:mx-auto mb-0 md:mb-6 flex items-center justify-center transition-all duration-700 relative z-10 ${
-                            isActive 
-                              ? "bg-gold text-white shadow-lg md:shadow-xl shadow-gold/20" 
-                              : "bg-secondary text-muted-foreground/40 border border-border"
-                          }`}>
-                            <div className="scale-75 md:scale-100">
-                              {step.icon}
-                            </div>
-                            {isCurrent && (
-                              <div className="absolute inset-0 rounded-2xl md:rounded-3xl border-2 md:border-4 border-gold animate-ping opacity-20" />
-                            )}
-                          </div>
-                          <div className="text-left md:text-center space-y-1 md:space-y-2">
-                            <p className={`font-body font-bold text-[9px] md:text-[10px] uppercase tracking-[0.15em] ${isActive ? "text-charcoal" : "text-muted-foreground/40"}`}>
-                              {step.title}
-                            </p>
-                            <p className="text-[8px] md:text-[9px] font-body text-muted-foreground leading-tight italic">
-                              {step.description}
-                            </p>
-                            <div className={`flex items-center justify-start md:justify-center gap-1.5 text-[7px] md:text-[8px] font-body font-bold uppercase tracking-widest pt-1 md:pt-2 ${isActive ? "text-gold" : "text-muted-foreground/20"}`}>
-                              <Clock size={10} /> {step.time}
-                            </div>
-                          </div>
-                          {i < trackingSteps.length - 1 && (
-                            <>
-                              <div className="hidden md:block absolute top-[31px] left-[calc(50%+32px)] w-[calc(100%-64px)] h-[2px] bg-secondary" />
-                              <div className="md:hidden absolute top-[48px] left-[23px] w-[2px] h-[calc(100%-48px+40px)] bg-secondary" />
-                            </>
-                          )}
+                {/* Logistics & Items Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                   
+                   {/* Left: Timeline */}
+                   <div className="md:col-span-12 lg:col-span-8 bg-white border border-border rounded-[2.5rem] p-8 md:p-12 relative shadow-sm">
+                      <div className="space-y-10 relative">
+                        {/* Solid Connection Line */}
+                        <div className="absolute left-[20px] top-4 bottom-4 w-[1px] bg-border">
+                          <motion.div 
+                            initial={{ height: 0 }}
+                            animate={{ height: "55%" }}
+                            transition={{ duration: 1, ease: "easeInOut" }}
+                            className="w-full bg-gold"
+                          />
                         </div>
-                      );
-                    })}
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2 bg-[#f4f2ee] rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 border border-gold/5 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 overflow-hidden relative">
-                    <div className="space-y-4 md:space-y-6 relative z-10 text-center md:text-left">
-                      <div className="flex items-center justify-center md:justify-start gap-3 text-gold">
-                         <Sparkles size={18} />
-                         <span className="text-[10px] font-body font-bold uppercase tracking-[0.2em]">Live Location</span>
-                      </div>
-                      <h3 className="font-display text-3xl md:text-4xl font-bold">Mumbai Vault <br /><span className="text-gold italic font-light">Processing</span></h3>
-                      <button className="flex items-center justify-center md:justify-start gap-3 text-[10px] font-body font-bold uppercase tracking-widest text-charcoal hover:text-gold transition-colors mx-auto md:mx-0">
-                        View Detailed Log <ArrowRight size={14} />
-                      </button>
-                    </div>
-                    <div className="w-full md:w-1/2 absolute -right-10 md:-right-20 top-0 bottom-0 opacity-5 md:opacity-10 pointer-events-none">
-                       <MapPin size={400} className="text-charcoal" />
-                    </div>
-                  </div>
+                        {orderData.steps.map((step: any, i: number) => (
+                          <div key={step.id} className="relative flex gap-8 group">
+                            {/* Crisp Node */}
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center z-10 transition-all ${
+                              step.isCompleted ? "bg-gold text-white shadow-xl shadow-gold/20" : "bg-white border border-border text-muted-foreground/30"
+                            }`}>
+                              {step.isCompleted ? step.icon : <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/20" />}
+                              {step.isCurrent && (
+                                <div className="absolute inset-0 rounded-full border-2 border-gold animate-ping opacity-30" />
+                              )}
+                            </div>
 
-                  <div className="bg-charcoal rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-12 text-white space-y-6 md:space-y-8">
-                    <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.2em]">Package Insight</p>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                        <span className="text-[10px] text-white/40 uppercase">Weight</span>
-                        <span className="font-body font-bold">1.2 kg</span>
+                            <div className="flex-1 space-y-1 pt-1.5">
+                              <h4 className={`text-base font-bold transition-colors ${step.isCompleted ? "text-charcoal" : "text-muted-foreground/30"}`}>
+                                {step.title}
+                              </h4>
+                              <p className={`text-xs leading-relaxed transition-colors ${step.isCompleted ? "text-muted-foreground" : "text-muted-foreground/20"}`}>
+                                {step.description}
+                              </p>
+                              {step.isCompleted && step.time !== "Pending" && (
+                                <p className="text-[9px] text-gold font-bold uppercase tracking-widest mt-1 bg-gold/5 w-fit px-2 py-0.5 rounded-md">
+                                  {step.time}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex justify-between items-center pb-4 border-b border-white/5">
-                        <span className="text-[10px] text-white/40 uppercase">Carrier</span>
-                        <span className="font-body font-bold text-sm">Lucsent Express</span>
+                   </div>
+
+                   {/* Right: Shipping Partner & Items */}
+                   <div className="md:col-span-12 lg:col-span-4 space-y-6">
+                      {/* Courier Partner */}
+                      <div className="bg-white p-6 rounded-[2rem] border border-border shadow-sm space-y-5">
+                         <div className="flex items-center gap-3">
+                            <Box size={18} className="text-gold" />
+                            <h3 className="text-[10px] font-bold text-charcoal uppercase tracking-widest">Shipping Partner</h3>
+                         </div>
+                         <div className="space-y-4">
+                            <p className="text-base font-bold text-charcoal">{orderData.courier}</p>
+                            <div className="flex items-center justify-between p-3 bg-muted/20 border border-border rounded-xl">
+                               <div className="space-y-0.5">
+                                  <p className="text-[8px] text-muted-foreground uppercase font-bold tracking-wider">Tracking ID</p>
+                                  <p className="text-xs font-bold text-charcoal truncate max-w-[120px]">{orderData.trackingId}</p>
+                               </div>
+                               <button 
+                                 onClick={() => copyToClipboard(orderData.trackingId)}
+                                 className="p-2 hover:bg-white rounded-lg transition-all text-gold group"
+                               >
+                                 {copied ? <CheckCircle2 size={16} /> : <Copy size={16} className="group-hover:scale-110" />}
+                               </button>
+                            </div>
+                         </div>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] text-white/40 uppercase">Method</span>
-                        <span className="font-body font-bold text-sm text-gold">Priority Air</span>
+
+                      {/* Item Preview */}
+                      <div className="bg-white p-6 rounded-[2rem] border border-border shadow-sm space-y-5">
+                         <div className="flex items-center gap-3">
+                            <ShoppingBag size={18} className="text-gold" />
+                            <h3 className="text-[10px] font-bold text-charcoal uppercase tracking-widest">Package Contents</h3>
+                         </div>
+                         <div className="space-y-4">
+                            {orderData.items.map((item: any, i: number) => (
+                              <div key={i} className="flex items-center gap-4 group">
+                                 <div className="w-12 h-12 bg-muted rounded-lg border border-border p-1 flex-shrink-0 group-hover:border-gold transition-all">
+                                    <img src={item.image} alt={item.name} className="w-full h-full object-contain" />
+                                 </div>
+                                 <div className="min-w-0">
+                                    <p className="text-xs font-bold text-charcoal truncate">{item.name}</p>
+                                    <p className="text-[10px] text-muted-foreground">Qty: {item.quantity}</p>
+                                 </div>
+                              </div>
+                            ))}
+                         </div>
                       </div>
-                    </div>
-                    <div className="pt-4">
-                      <Link to="/products" className="w-full py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-widest hover:bg-gold hover:text-charcoal transition-all duration-500">
-                        Continue Shopping
-                      </Link>
-                    </div>
-                  </div>
+
+                      {/* Support Hub */}
+                      <div className="bg-charcoal p-6 rounded-[2.2rem] shadow-xl text-white space-y-6">
+                         <div className="space-y-2">
+                            <h3 className="text-lg font-display font-bold">Need assistance?</h3>
+                            <p className="text-xs text-white/60 leading-relaxed italic">Our curators are always ready to help with your shipment.</p>
+                         </div>
+                         <div className="space-y-3">
+                            <a 
+                              href="https://wa.me/#"
+                              target="_blank"
+                              className="w-full py-3 bg-gold text-charcoal font-bold rounded-xl flex items-center justify-center gap-2 uppercase text-[9px] tracking-widest hover:brightness-110 transition-all active:scale-[0.98]"
+                            >
+                               <MessageCircle size={14} />
+                               Talk to Expert
+                            </a>
+                            <button className="w-full py-3 bg-white/10 text-white font-bold rounded-xl flex items-center justify-center gap-2 uppercase text-[9px] tracking-widest hover:bg-white/20 transition-all">
+                               Help Center
+                            </button>
+                         </div>
+                      </div>
+                   </div>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-        </section>
-
-        {/* Global Support Call */}
-        <section className="py-16 md:py-24 lg:py-40 relative">
-          <div className="container mx-auto px-4 md:px-6 text-center">
-            <motion.div
-               initial={{ opacity: 0 }}
-               whileInView={{ opacity: 1 }}
-               viewport={{ once: true }}
-               className="max-w-4xl mx-auto space-y-8 md:space-y-12"
-            >
-              <div className="space-y-4 md:space-y-6">
-                <h2 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-charcoal tracking-tight leading-tight">Need <span className="text-gradient-gold italic font-light">Assistance?</span></h2>
-                <p className="text-sm md:text-lg text-muted-foreground font-body max-w-xl mx-auto italic">
-                  "Questions about your gems? Our radiance consultants are on standby to ensure your delivery is as smooth as our textures."
-                </p>
-              </div>
-              
-              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 md:gap-8">
-                <a href="#whatsapp" className="w-full sm:w-auto flex items-center justify-center gap-4 px-8 md:px-10 py-4 md:py-5 bg-[#25D366] text-white rounded-full font-body font-bold uppercase tracking-widest text-[10px] md:text-xs hover:shadow-2xl hover:translate-y-[-4px] transition-all">
-                  WhatsApp Support
-                </a>
-                <Link to="/contact" className="w-full sm:w-auto flex items-center justify-center gap-4 px-8 md:px-10 py-4 md:py-5 border border-charcoal text-charcoal rounded-full font-body font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-charcoal hover:text-white transition-all">
-                  Contact Concierge
-                </Link>
-              </div>
-            </motion.div>
-          </div>
-        </section>
+        </div>
       </main>
 
       <Footer />
@@ -347,25 +329,5 @@ const TrackOrder = () => {
     </div>
   );
 };
-
-const RefreshCw = ({ size, className }: { size: number; className?: string }) => (
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeWidth="2" 
-    strokeLinecap="round" 
-    strokeLinejoin="round" 
-    className={className}
-  >
-    <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-    <path d="M21 3v5h-5" />
-    <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-    <path d="M3 21v-5h5" />
-  </svg>
-);
 
 export default TrackOrder;

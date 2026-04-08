@@ -45,6 +45,7 @@
     --cream: 35 30% 95%;
     --cream-dark: 30 20% 88%;
     --charcoal: 20 10% 15%;
+    --nykaa-pink: 330 81% 53%;
 
     --font-display: 'Cormorant Garamond', serif;
     --font-body: 'Outfit', sans-serif;
@@ -106,6 +107,15 @@
   }
   .bg-charcoal {
     background-color: hsl(var(--charcoal));
+  }
+  .bg-nykaa-pink {
+    background-color: hsl(var(--nykaa-pink));
+  }
+  .text-nykaa-pink {
+    color: hsl(var(--nykaa-pink));
+  }
+  .border-nykaa-pink {
+    border-color: hsl(var(--nykaa-pink));
   }
 
   /* Premium Luxury Utilities */

@@ -32,11 +32,22 @@ export const getApiUrl = (path: string): string => {
  */
 export const getAssetUrl = (path: string): string => {
   if (!path) return "/placeholder.svg";
-  if (path.startsWith('http')) return path; // Already absolute
   
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  // If already absolute (like a remote Unsplash image), return as is
+  if (path.startsWith('http')) return path;
   
-  // Since we moved assets to Frontend/public/uploads, they are served relative to the frontend origin
+  let cleanPath = path.startsWith('/') ? path : `/${path}`;
+  
+  // Smart Prepend: If the filename looks like a server upload but lacks the /uploads/ prefix
+  if (!cleanPath.startsWith('/uploads') && !cleanPath.startsWith('/assets') && !cleanPath.startsWith('/static')) {
+    const fileName = cleanPath.split('/').pop() || "";
+    if (/^[0-9]{10,}/.test(fileName) || fileName.startsWith('migrated_')) {
+      cleanPath = `/uploads/${fileName}`;
+    }
+  }
+
+  // All images are now served directly by the Frontend public folder.
+  // We use relative paths which work regardless of the hosting environment.
   return cleanPath;
 };
 

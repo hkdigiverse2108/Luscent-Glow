@@ -6,10 +6,9 @@ from fastapi.responses import JSONResponse
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
-# Get the absolute path to the uploads directory inside Backend/
-# This matches the StaticFiles mount in main.py: app.mount("/uploads", ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
+# Go up three levels from app/routes to reach the project root (Luscent-Glow/)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+UPLOAD_DIR = os.path.join(PROJECT_ROOT, "Frontend", "public", "uploads")
 
 @router.post("/", response_description="Upload a file")
 async def upload_file(file: UploadFile = File(...)):

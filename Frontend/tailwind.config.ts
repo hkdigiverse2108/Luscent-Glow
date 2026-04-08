@@ -59,6 +59,7 @@ export default {
           DEFAULT: "hsl(var(--rose))",
           light: "hsl(var(--rose-light))",
         },
+        "nykaa-pink": "hsl(var(--nykaa-pink))",
         cream: {
           DEFAULT: "hsl(var(--cream))",
           dark: "hsl(var(--cream-dark))",

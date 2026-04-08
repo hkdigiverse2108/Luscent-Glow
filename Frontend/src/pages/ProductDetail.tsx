@@ -11,6 +11,7 @@ import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import ReviewModal from "@/components/ReviewModal";
+import CustomerGalleryModal from "@/components/CustomerGalleryModal";
 import { useAuth } from "@/context/AuthContext";
 
 const ProductDetail = () => {
@@ -34,6 +35,18 @@ const ProductDetail = () => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const lastFetchedProductId = useRef<string | null>(null);
+
+  // Gallery Sanctuary States
+  const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
+  const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
+
+  // Aggregate all customer images for the sanctuary
+  const allCustomerImages = reviews.flatMap(r => r.images || []);
+
+  const openGallery = (index: number = 0) => {
+    setCurrentGalleryIndex(index);
+    setIsGalleryModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -68,19 +81,18 @@ const ProductDetail = () => {
     if (id) fetchProduct();
   }, [id]);
 
-  const fetchReviews = async () => {
+  const fetchReviews = async (force: boolean = false) => {
     if (!product) return;
     const productId = (product._id || product.id)?.toString();
     if (!productId) return;
     
-    // Prevent redundant fetches if we already have reviews for this product
-    if (lastFetchedProductId.current === productId && reviews.length > 0) {
+    // Allow force refresh for live updates after submission
+    if (!force && lastFetchedProductId.current === productId && reviews.length > 0) {
       return; 
     }
 
     try {
       setReviewsLoading(true);
-      // Cache busting: add timestamp to avoid stale API responses
       const url = getApiUrl(`/api/reviews/product/${productId}?t=${Date.now()}`);
       console.log(`[DEBUG] Fetching reviews from: ${url}`);
       const response = await fetch(url);
@@ -478,20 +490,61 @@ const ProductDetail = () => {
             )}
             {activeTab === "reviews" && (
               <div className="space-y-12">
-                {/* 1. Header/Summary Row */}
-                <div className="flex flex-col md:flex-row items-baseline justify-between gap-4 border-b border-border pb-6">
-                  <div className="space-y-1">
-                    <h2 className="font-display text-2xl font-bold text-charcoal tracking-tight uppercase">Rating & Reviews</h2>
-                    <p className="text-[10px] font-body text-muted-foreground uppercase tracking-widest font-bold">
-                      {product?.reviewCount || 0} Chronicles of Radiance
-                    </p>
+                {/* 1. Enhanced Summary & CTA Row */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-secondary/15 p-8 rounded-[2rem] border border-gold/5">
+                  <div className="flex items-center gap-6">
+                    <div className="text-center">
+                      {/* Calculate live stats from the fetched reviews array instead of potentially stale product field */}
+                      <div className="text-4xl font-display font-black text-charcoal">
+                        {reviews.length > 0 ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviews.length).toFixed(1) : (product?.rating?.toFixed(1) || "5.0")}
+                      </div>
+                      <div className="flex items-center gap-0.5 mt-1">
+                        {[...Array(5)].map((_, i) => {
+                          const avg = reviews.length > 0 ? (reviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviews.length) : (product?.rating || 5);
+                          return (
+                            <Star key={i} size={12} className={i < Math.floor(avg) ? "fill-gold text-gold" : "text-border"} />
+                          );
+                        })}
+                      </div>
+                      <div className="text-[9px] font-body text-muted-foreground uppercase tracking-widest mt-2">{reviews.length > 0 ? reviews.length : (product?.reviewCount || 0)} Ratings</div>
+                    </div>
+                    
+                    <div className="h-16 w-px bg-gold/10 hidden sm:block" />
+
+                    {/* Star Bars - Nykaa Style */}
+                    <div className="flex flex-col gap-1.5 w-40 sm:w-60">
+                      {[5, 4, 3, 2, 1].map((star) => {
+                        const count = reviews.length > 0 ? reviews.filter(r => r.rating === star).length : (star === 5 ? (product?.reviewCount || 1) : 0);
+                        const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : (star === 5 ? 100 : 0);
+                        return (
+                          <div key={star} className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 w-8">
+                              <span className="text-[10px] font-body font-bold text-charcoal">{star}</span>
+                              <Star size={8} className="fill-charcoal/30 text-charcoal/30" />
+                            </div>
+                            <div className="flex-1 h-1.5 bg-white rounded-full overflow-hidden border border-gold/5">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${percentage}%` }}
+                                className={`h-full ${star >= 4 ? "bg-[#0E9F6E]" : star === 3 ? "bg-gold" : "bg-destructive"}`} 
+                              />
+                            </div>
+                            <span className="text-[9px] font-body text-muted-foreground w-6">{count}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                  <button 
-                    onClick={() => setIsReviewModalOpen(true)}
-                    className="px-8 py-3 bg-charcoal text-white rounded-full font-body font-bold text-[10px] uppercase tracking-[0.2em] hover:bg-gold hover:text-charcoal transition-all shadow-xl shadow-charcoal/10"
-                  >
-                    Initiate Review
-                  </button>
+
+                  <div className="text-center md:text-right space-y-3">
+                    <div className="text-xs font-body text-muted-foreground italic mb-2 pr-2">Your experience matters.</div>
+                    <button 
+                      onClick={() => setIsReviewModalOpen(true)}
+                      className="px-10 py-4 bg-charcoal text-white rounded-full font-body font-bold text-[10px] uppercase tracking-[0.25em] hover:bg-gold hover:text-charcoal transition-all shadow-xl shadow-charcoal/10"
+                    >
+                      Initiate Review
+                    </button>
+                  </div>
                 </div>
 
                 {/* 2. Enhanced Customer Gallery Strip */}
@@ -499,117 +552,126 @@ const ProductDetail = () => {
                   <div className="space-y-6">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-display font-bold text-charcoal tracking-tight">Photos From Customers</h3>
-                      <button className="text-[10px] font-body font-bold text-gold uppercase tracking-widest flex items-center gap-1 hover:underline">
+                      <button 
+                        onClick={() => openGallery(0)}
+                        className="text-[10px] font-body font-bold text-gold uppercase tracking-widest flex items-center gap-1 hover:underline"
+                      >
                         Explore Gallery <ChevronRight size={12} />
                       </button>
                     </div>
                     
                     <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0 scroll-smooth">
-                      {reviews.flatMap(r => r.images || []).map((img, idx) => (
+                      {allCustomerImages.map((img, idx) => (
                         <motion.div 
                           key={idx}
                           whileHover={{ scale: 1.05 }}
+                          onClick={() => openGallery(idx)}
                           className="relative flex-none w-24 h-24 rounded-xl overflow-hidden border border-gold/10 shadow-sm cursor-pointer"
                         >
                           <img src={getAssetUrl(img)} alt="Customer Ritual" className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-gold/5 hover:bg-transparent transition-colors" />
                         </motion.div>
                       ))}
-                      {/* Overflow marker to simulate scale */}
-                      <div className="relative flex-none w-24 h-24 rounded-xl overflow-hidden bg-charcoal flex flex-col items-center justify-center text-center p-2 cursor-pointer group">
-                        <span className="text-white text-xs font-bold font-display">+875</span>
-                        <span className="text-white/60 text-[8px] font-body font-bold uppercase tracking-widest leading-tight">more</span>
-                        <div className="absolute inset-0 border border-white/20 group-hover:border-gold/50 transition-colors rounded-xl" />
-                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* 3. Proper Unified Reviews List */}
-                <div className="space-y-8">
+                {/* 3. Nykaa-Style Reviews List */}
+                <div className="space-y-4">
                   {reviewsLoading ? (
-                    <div className="flex flex-col items-center py-24 gap-4 bg-secondary/10 rounded-[3rem]">
-                      <div className="w-10 h-10 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
-                      <p className="text-[10px] font-body text-muted-foreground uppercase tracking-widest font-bold">Consulting the Chronicles...</p>
+                    <div className="flex flex-col items-center py-12 gap-3 bg-secondary/10 rounded-2xl">
+                      <div className="w-5 h-5 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
+                      <p className="text-[9px] font-body text-muted-foreground uppercase tracking-widest font-bold">Consulting Chronicles...</p>
                     </div>
                   ) : reviews.length > 0 ? (
-                    <div className="space-y-10">
+                    <div className="space-y-4">
                       {reviews.map((review, i) => (
                         <motion.div 
                           key={review.id || review._id || i}
-                          initial={{ opacity: 0, y: 20 }}
+                          initial={{ opacity: 0, y: 5 }}
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
-                          transition={{ delay: Math.min(i * 0.1, 0.5) }}
-                          className="bg-white rounded-[2rem] border border-gold/5 p-8 md:p-10 shadow-sm hover:shadow-xl hover:shadow-charcoal/[0.02] transition-all"
+                          transition={{ delay: Math.min(i * 0.05, 0.2) }}
+                          className="bg-white rounded-xl border border-charcoal/5 p-4 md:p-6 shadow-sm hover:shadow-md transition-all relative overflow-hidden group"
                         >
-                          <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-                            {/* User Column */}
-                            <div className="md:w-56 flex flex-row md:flex-col items-center md:items-start gap-5 flex-none">
-                              <div className={`w-20 h-20 rounded-full flex items-center justify-center font-display text-2xl font-black shadow-inner border-2 border-white ${
-                                ['bg-[#FDF2F2] text-[#F05252]', 'bg-[#F2F8FB] text-[#2D89EF]', 'bg-[#F3FAF7] text-[#0E9F6E]', 'bg-[#FFFAF0] text-[#D03801]'][i % 4]
-                              }`}>
-                                {review.userName?.charAt(0).toUpperCase() || "S"}
-                              </div>
-                              <div className="space-y-1">
-                                <h4 className="font-display font-bold text-charcoal leading-none mb-1">{review.userName || "Radiant Customer"}</h4>
-                                <div className="flex items-center gap-1.5 text-[#0E9F6E] bg-[#DEF7EC] px-3 py-1 rounded-full w-fit">
-                                  <Check size={10} className="stroke-[3px]" />
-                                  <span className="text-[9px] font-black uppercase tracking-[0.05em]">Verified Buyers</span>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Chronicle Content Column */}
-                            <div className="flex-1 space-y-6">
-                              <div className="flex flex-col gap-3">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-2">
-                                    <div className="bg-[#0E9F6E] text-white px-2 py-0.5 rounded flex items-center gap-1 text-[11px] font-black">
-                                      {review.rating || 5} <Star size={10} className="fill-white" />
-                                    </div>
-                                    <span className="text-[10px] font-body text-charcoal/40 font-bold uppercase tracking-widest">
-                                      {new Date(review.createdAt || Date.now()).toLocaleDateString("en-GB")}
-                                    </span>
-                                  </div>
-                                </div>
-                                
-                                {review.selectedVariant && (
-                                  <p className="text-[12px] font-body text-charcoal/60">
-                                    Shade: <span className="w-2.5 h-2.5 rounded-full bg-gold/40 inline-block align-middle mr-1.5" /> 
-                                    <span className="font-bold text-charcoal">{review.selectedVariant}</span>
-                                  </p>
-                                )}
-                              </div>
-
-                              <div className="space-y-3">
-                                <h5 className="font-display font-bold text-charcoal italic text-base">"{review.comment.split('.')[0]}..."</h5>
-                                <p className="text-[15px] font-body text-charcoal/80 leading-relaxed text-justify pr-4">
-                                  {review.comment}
-                                  {review.comment.length > 200 && <button className="text-charcoal font-black ml-2 hover:text-gold transition-colors">Read More</button>}
-                                </p>
-                              </div>
-
-                              {/* Individual Review Images */}
-                              {review.images && review.images.length > 0 && (
-                                <div className="flex flex-wrap gap-3 pt-2">
-                                  {review.images.map((img, imgIdx) => (
-                                    <div key={imgIdx} className="w-24 h-24 rounded-xl overflow-hidden border border-gold/10 hover:border-gold/40 transition-all cursor-zoom-in">
-                                      <img src={getAssetUrl(img)} alt="Chronicle" className="w-full h-full object-cover" />
-                                    </div>
+                          <div className="flex flex-col gap-4">
+                            {/* Evaluation Header - Proper Nykaa Style */}
+                            <div className="flex items-center justify-between border-b border-charcoal/[0.03] pb-3">
+                              <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star 
+                                      key={star} 
+                                      size={12} 
+                                      className={star <= (review.rating || 5) ? "fill-gold text-gold" : "fill-charcoal/10 text-charcoal/10"} 
+                                    />
                                   ))}
                                 </div>
-                              )}
+                                <span className="text-[10px] font-body font-black text-charcoal/20 uppercase tracking-tighter">Verified Review</span>
+                              </div>
+                              <span className="text-[10px] font-body text-charcoal/40 font-bold uppercase tracking-tighter">
+                                {new Date(review.createdAt || Date.now()).toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </span>
+                            </div>
 
-                              {/* Engagement Loop */}
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-4 pt-6 border-t border-gold/5">
-                                <button className="flex items-center justify-center gap-2 px-6 py-2 border-2 border-charcoal/5 rounded-lg hover:border-gold/30 hover:bg-gold/5 transition-all group w-fit">
-                                  <ThumbsUp size={16} className="text-charcoal/40 group-hover:text-gold" />
-                                  <span className="font-body font-bold text-xs text-charcoal group-hover:text-gold">Helpful</span>
-                                </button>
-                                <p className="text-[11px] font-body text-charcoal/40 font-bold">
-                                  <span className="text-charcoal pr-1">{review.helpfulCount || 58} people</span> found this helpful
-                                </p>
+                            <div className="flex gap-5">
+                              {/* Left: Metadata Anchor */}
+                              <div className="w-10 sm:w-12 flex-none">
+                                <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-display text-base sm:text-lg font-black shadow-inner border border-white ${
+                                  ['bg-[#FDF2F2] text-[#F05252]', 'bg-[#F2F8FB] text-[#2D89EF]', 'bg-[#F3FAF7] text-[#0E9F6E]', 'bg-[#FFFAF0] text-[#D03801]'][i % 4]
+                                }`}>
+                                  {review.userName?.charAt(0).toUpperCase() || "S"}
+                                </div>
+                              </div>
+
+                              {/* Right: Testimonial & Identity */}
+                              <div className="flex-1 space-y-3">
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-display font-bold text-charcoal text-sm leading-tight">{review.userName || "Radiant Customer"}</h4>
+                                    <div className="flex items-center gap-1 text-[#0E9F6E] bg-[#DEF7EC] px-1.5 py-0.5 rounded-sm">
+                                      <Check size={8} className="stroke-[4px]" />
+                                      <span className="text-[7px] font-black uppercase tracking-tighter">Verified Buyer</span>
+                                    </div>
+                                  </div>
+                                  
+                                  {review.title && <h5 className="font-display font-bold text-charcoal/90 text-[13px] leading-tight line-clamp-1 italic">"{review.title}"</h5>}
+                                  
+                                  <p className="text-[13px] font-body text-charcoal/70 leading-[1.6] text-justify md:text-left">
+                                    {review.comment}
+                                  </p>
+                                </div>
+
+                                {review.images && review.images.length > 0 && (
+                                  <div className="flex flex-wrap gap-2 pt-1 border-t border-charcoal/[0.02]">
+                                    {review.images.map((img, imgIdx) => {
+                                      // Find the index in the total aggregate for the lightbox
+                                      const globalIndex = allCustomerImages.indexOf(img);
+                                      return (
+                                        <motion.div 
+                                          key={imgIdx} 
+                                          whileHover={{ scale: 1.05 }}
+                                          onClick={() => openGallery(globalIndex !== -1 ? globalIndex : 0)}
+                                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-charcoal/5 shadow-sm cursor-pointer hover:border-gold/30 transition-all"
+                                        >
+                                          <img src={getAssetUrl(img)} alt="Chronicle" className="w-full h-full object-cover" />
+                                        </motion.div>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+
+                                {/* Social Connectivity Footer */}
+                                <div className="flex items-center justify-between pt-3 border-t border-charcoal/[0.02]">
+                                  <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-1.5 text-charcoal/40 group cursor-pointer hover:text-gold transition-colors">
+                                      <ThumbsUp size={12} className="group-hover:fill-gold/10" />
+                                      <span className="text-[10px] font-body font-black uppercase tracking-widest">Helpful?</span>
+                                    </div>
+                                    <p className="text-[10px] font-body text-charcoal/30 font-bold uppercase tracking-widest border-l border-charcoal/10 pl-4">
+                                      <span className="text-charcoal pr-0.5">{review.helpfulCount || 0}</span> Found this ritual useful
+                                    </p>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -621,13 +683,13 @@ const ProductDetail = () => {
                       <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-gold/30 shadow-inner">
                         <MessageSquare size={32} />
                       </div>
-                      <h3 className="font-display text-2xl font-bold text-charcoal mb-3 italic">Be the First Chronicler</h3>
-                      <p className="text-sm font-body text-muted-foreground max-w-sm mx-auto mb-10 leading-relaxed">
+                      <h3 className="font-display text-2xl font-bold text-charcoal mb-3 italic text-center">Be the First Chronicler</h3>
+                      <p className="text-sm font-body text-muted-foreground max-w-sm mx-auto mb-10 leading-relaxed text-center">
                         Share your unique ritual and guide others on their journey to radiance.
                       </p>
                       <button 
                         onClick={() => setIsReviewModalOpen(true)}
-                        className="px-12 py-5 bg-charcoal text-white rounded-full font-body font-bold text-[10px] uppercase tracking-[0.25em] hover:bg-gold hover:text-charcoal transition-all shadow-2xl shadow-charcoal/10"
+                        className="px-12 py-5 bg-charcoal text-white rounded-full font-body font-bold text-[10px] uppercase tracking-[0.25em] hover:bg-gold hover:text-charcoal transition-all shadow-2xl shadow-charcoal/10 mx-auto block"
                       >
                         Initiate First Review
                       </button>
@@ -673,6 +735,14 @@ const ProductDetail = () => {
           }}
         />
       )}
+
+      {/* Visual Sanctuary Gallery Lightbox */}
+      <CustomerGalleryModal 
+        isOpen={isGalleryModalOpen}
+        onClose={() => setIsGalleryModalOpen(false)}
+        images={allCustomerImages}
+        initialIndex={currentGalleryIndex}
+      />
     </div>
   );
 };
