@@ -28,6 +28,7 @@ from .routes.settings import router as settings_router
 from .routes.offers import router as offers_router
 from .routes.home import router as home_router
 from .routes.reviews import router as reviews_router
+from .routes.chat import router as chat_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -83,6 +84,7 @@ app.include_router(settings_router, prefix="/api", tags=["Global Settings"])
 app.include_router(offers_router, prefix="/api", tags=["Offers"])
 app.include_router(home_router, prefix="/api", tags=["Home Page"])
 app.include_router(reviews_router, prefix="/api", tags=["Reviews"])
+app.include_router(chat_router, prefix="/api", tags=["AI Concierge"])
 
 @app.get("/", tags=["Root"])
 async def read_root():
