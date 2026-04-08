@@ -43,7 +43,6 @@ const menuGroups = [
       { icon: Layout,          label: "Home Page",     path: "/admin/home" },
       { icon: ShoppingBag,     label: "Products",      path: "/admin/products" },
       { icon: Edit2,           label: "Blogs",         path: "/admin/blogs" },
-      { icon: Percent,         label: "Offers",        path: "/admin/offers" },
     ]
   },
   {

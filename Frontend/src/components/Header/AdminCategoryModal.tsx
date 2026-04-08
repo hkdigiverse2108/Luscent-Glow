@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Sparkles, Plus, Trash2 } from "lucide-react";
-import { getApiUrl } from "@/lib/api";
+import { X, Save, Sparkles, Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 
 interface Category {
@@ -25,6 +25,7 @@ const AdminCategoryModal = ({ isOpen, onClose, category, onSuccess }: AdminCateg
     image: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (category) {
@@ -33,6 +34,26 @@ const AdminCategoryModal = ({ isOpen, onClose, category, onSuccess }: AdminCateg
       setFormData({ name: "", slug: "", image: "" });
     }
   }, [category, isOpen]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Direct-to-DB Base64 Pattern
+    const reader = new FileReader();
+    reader.onloadstart = () => setIsUploading(true);
+    reader.onload = (event) => {
+      const base64String = event.target?.result as string;
+      setFormData(prev => ({ ...prev, image: base64String }));
+      setIsUploading(false);
+      toast.success("Visual asset localized to database.");
+    };
+    reader.onerror = () => {
+      setIsUploading(false);
+      toast.error("Failed to process image.");
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,6 +142,32 @@ const AdminCategoryModal = ({ isOpen, onClose, category, onSuccess }: AdminCateg
           </div>
 
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            <div className="flex items-center gap-6 pb-2 border-b border-gold/5">
+              <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-gold/20 flex items-center justify-center overflow-hidden bg-gold/5">
+                {formData.image ? (
+                  <img src={getAssetUrl(formData.image)} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <ImageIcon size={24} className="text-gold/20" />
+                )}
+              </div>
+              <div className="flex-1 space-y-2">
+                <input 
+                  type="file" 
+                  id="cat-image" 
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                />
+                <label 
+                  htmlFor="cat-image"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold rounded-full text-[10px] font-bold uppercase tracking-widest cursor-pointer hover:bg-gold hover:text-charcoal transition-all"
+                >
+                  {isUploading ? "Uploading..." : formData.image ? "Change Image" : "Add Image"}
+                </label>
+                <p className="text-[9px] text-charcoal/40 uppercase tracking-widest ml-1">PNG, JPG or WEBP (1:1 Recommended)</p>
+              </div>
+            </div>
+
             <div className="space-y-4">
               <label className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] ml-2">Name</label>
               <input 
@@ -159,7 +206,7 @@ const AdminCategoryModal = ({ isOpen, onClose, category, onSuccess }: AdminCateg
               )}
               <button 
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUploading}
                 className="flex-[2] py-4 bg-gold text-charcoal text-[10px] font-bold uppercase tracking-widest rounded-2xl shadow-xl shadow-gold/10 hover:bg-white transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Save size={14} /> {isSubmitting ? "Saving..." : "Save Category"}

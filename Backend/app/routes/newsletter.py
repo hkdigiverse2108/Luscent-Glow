@@ -2,6 +2,8 @@ from fastapi import APIRouter, Body, HTTPException, status
 from ..database import get_database
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
+from typing import List
+from ..models import NewsletterSubModel
 
 router = APIRouter(prefix="/newsletter", tags=["newsletter"])
 
@@ -25,7 +27,7 @@ async def subscribe_newsletter(data: NewsletterSubscribe):
     await db["newsletter_subs"].insert_one(new_sub)
     return {"message": "Welcome to the inner circle of radiance."}
 
-@router.get("/", response_description="List all subscribers")
+@router.get("/", response_description="List all subscribers", response_model=List[NewsletterSubModel])
 async def list_subscribers():
     db = await get_database()
     subs = await db["newsletter_subs"].find({}).to_list(1000)

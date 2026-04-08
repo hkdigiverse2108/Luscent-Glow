@@ -13,6 +13,13 @@ async def get_global_settings():
         # Fallback to hardcoded default if no settings exist in DB
         return {
             "whatsappNumber": "919537150942",
+            "storeName": "Luscent Glow",
+            "supportEmail": "hello@luscentglow.com",
+            "supportPhone": "+91 97126 63607",
+            "freeShippingThreshold": 999,
+            "promoText": "Use Code",
+            "promoCode": "GLOW15",
+            "copyrightText": "© 2026 Luscent Glow. All rights reserved.",
             "updatedAt": datetime.utcnow().isoformat()
         }
     return settings

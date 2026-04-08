@@ -12,7 +12,6 @@ import ProductDetail from "./pages/ProductDetail.tsx";
 import Cart from "./pages/Cart.tsx";
 import Wishlist from "./pages/Wishlist.tsx";
 import RadianceQuiz from "./pages/RadianceQuiz.tsx";
-import Offers from "./pages/Offers.tsx";
 import About from "./pages/About.tsx";
 import Contact from "./pages/Contact.tsx";
 import FAQ from "./pages/FAQ.tsx";
@@ -51,7 +50,6 @@ import AdminContact from "./pages/Admin/AdminContact.tsx";
 import AdminFAQ from "./pages/Admin/AdminFAQ.tsx";
 import AdminPolicies from "./pages/Admin/PoliciesAdmin.tsx";
 import AdminBlogs from "./pages/Admin/AdminBlogs.tsx";
-import AdminOffers from "./pages/Admin/AdminOffers.tsx";
 import AdminReviews from "./pages/Admin/AdminReviews.tsx";
 import AdminFooter from "./pages/Admin/AdminFooter.tsx";
 import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute.tsx";
@@ -76,7 +74,6 @@ const App = () => (
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/wishlist" element={<Wishlist />} />
                 <Route path="/quiz" element={<RadianceQuiz />} />
-                <Route path="/offers" element={<Offers />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/faq" element={<FAQ />} />
@@ -120,7 +117,6 @@ const App = () => (
                     <Route path="faq" element={<AdminFAQ />} />
                     <Route path="policies" element={<AdminPolicies />} />
                     <Route path="blogs" element={<AdminBlogs />} />
-                    <Route path="offers" element={<AdminOffers />} />
                     <Route path="reviews" element={<AdminReviews />} />
                     <Route path="footer" element={<AdminFooter />} />
                     <Route path="settings" element={<AdminSettings />} />

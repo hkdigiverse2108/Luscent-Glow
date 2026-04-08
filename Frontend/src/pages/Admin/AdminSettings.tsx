@@ -16,7 +16,13 @@ import {
   EyeOff,
   RotateCcw,
   ShieldCheck,
-  FlaskConical
+  FlaskConical,
+  Mail,
+  Phone,
+  Truck,
+  Tag,
+  Copyright,
+  Store
 } from "lucide-react";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { getApiUrl } from "../../lib/api";
@@ -45,7 +51,17 @@ const DEFAULT_CREDS: PaymentCreds = {
 
 const AdminSettings = () => {
   const { isDark } = useAdminTheme();
+  
+  // Global Settings State
   const [whatsappNumber, setWhatsappNumber] = useState("");
+  const [storeName, setStoreName] = useState("");
+  const [supportEmail, setSupportEmail] = useState("");
+  const [supportPhone, setSupportPhone] = useState("");
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(0);
+  const [promoText, setPromoText] = useState("");
+  const [promoCode, setPromoCode] = useState("");
+  const [copyrightText, setCopyrightText] = useState("");
+  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -58,14 +74,21 @@ const AdminSettings = () => {
   const [showCashfreeSecret, setShowCashfreeSecret] = useState(false);
   const [hasStoredCreds, setHasStoredCreds] = useState(false);
 
-  // ── Fetch WhatsApp ──────────────────────────────────────────────────────────
+  // ── Fetch Global Settings ──────────────────────────────────────────────────
   const fetchSettings = async () => {
     try {
       setLoading(true);
       const response = await fetch(getApiUrl("/api/settings/global/"));
       if (response.ok) {
         const data = await response.json();
-        setWhatsappNumber(data.whatsappNumber);
+        setWhatsappNumber(data.whatsappNumber || "");
+        setStoreName(data.storeName || "");
+        setSupportEmail(data.supportEmail || "");
+        setSupportPhone(data.supportPhone || "");
+        setFreeShippingThreshold(data.freeShippingThreshold || 0);
+        setPromoText(data.promoText || "");
+        setPromoCode(data.promoCode || "");
+        setCopyrightText(data.copyrightText || "");
       }
     } catch (error) {
       toast.error("Could not reach the Settings Registry.");
@@ -75,21 +98,26 @@ const AdminSettings = () => {
   };
 
   const handleUpdate = async () => {
-    if (!whatsappNumber) {
-      toast.error("WhatsApp number cannot be null.");
-      return;
-    }
     try {
       setSaving(true);
       const response = await fetch(getApiUrl("/api/settings/global/"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ whatsappNumber })
+        body: JSON.stringify({ 
+          whatsappNumber,
+          storeName,
+          supportEmail,
+          supportPhone,
+          freeShippingThreshold,
+          promoText,
+          promoCode,
+          copyrightText
+        })
       });
       if (response.ok) {
-        toast.success("WhatsApp Concierge registry updated.");
+        toast.success("Global Platform configurations committed.");
       } else {
-        toast.error("Failed to update configuration.");
+        toast.error("Failed to update registry.");
       }
     } catch {
       toast.error("Systemic update failure.");
@@ -202,10 +230,49 @@ const AdminSettings = () => {
 
       <div className="max-w-4xl space-y-8">
 
-        {/* ── WhatsApp Section ── */}
+        {/* ── Store Identity ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
+          className={cardClass}
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10 border-b pb-8 border-gold/10">
+            <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-xl">
+              <Store size={28} />
+            </div>
+            <div className="space-y-1">
+              <h3 className={`text-xl font-extrabold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
+                Store Identity
+              </h3>
+              <p className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-charcoal/60"}`}>
+                Define the primary name and branding identity of your digital sanctuary.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-4">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Official Store Name
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={storeName}
+                  onChange={(e) => setStoreName(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. Luscent Glow"
+                />
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* ── Global Concierge ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
           className={cardClass}
         >
           <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10 border-b pb-8 border-gold/10">
@@ -214,16 +281,16 @@ const AdminSettings = () => {
             </div>
             <div className="space-y-1">
               <h3 className={`text-xl font-extrabold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
-                WhatsApp Concierge
+                Global Concierge
               </h3>
               <p className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-charcoal/60"}`}>
-                Primary communication channel for seeker outreach and curation advice.
+                Primary communication channels for seeker outreach and support.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-end">
-            <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-3">
               <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
                 WhatsApp Number
               </label>
@@ -236,32 +303,185 @@ const AdminSettings = () => {
                   value={whatsappNumber}
                   onChange={(e) => setWhatsappNumber(e.target.value)}
                   className={`${inputClass} pl-12`}
-                  placeholder="e.g. 919537150942"
+                  placeholder="919537150942"
                 />
               </div>
-              <p className={`text-[10px] font-semibold uppercase tracking-wide leading-relaxed ${isDark ? "text-white/25" : "text-charcoal/35"}`}>
-                Format: [Country Code][Number] — no symbols. Used globally for the floating WhatsApp button.
+            </div>
+
+            <div className="space-y-3">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Support Email
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <Mail size={18} />
+                </div>
+                <input
+                  type="email"
+                  value={supportEmail}
+                  onChange={(e) => setSupportEmail(e.target.value)}
+                  className={`${inputClass} pl-12`}
+                  placeholder="hello@luscentglow.com"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Support Phone
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <Phone size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={supportPhone}
+                  onChange={(e) => setSupportPhone(e.target.value)}
+                  className={`${inputClass} pl-12`}
+                  placeholder="+91 97126 63607"
+                />
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* ── Promotional Rituals ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className={cardClass}
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10 border-b pb-8 border-gold/10">
+            <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-xl">
+              <Sparkles size={28} />
+            </div>
+            <div className="space-y-1">
+              <h3 className={`text-xl font-extrabold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
+                Promotional Rituals
+              </h3>
+              <p className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-charcoal/60"}`}>
+                Configure global banners and shipping thresholds.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={handleUpdate}
-                disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold/80 transition-all shadow-lg shadow-gold/20 disabled:opacity-50"
-              >
-                {saving ? <RefreshCcw size={14} className="animate-spin" /> : <Save size={14} />}
-                {saving ? "Saving..." : "Update"}
-              </button>
-              <button
-                onClick={fetchSettings}
-                className={`flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold uppercase tracking-[0.15em] text-xs border transition-all ${
-                  isDark ? "border-white/10 text-white/50 hover:bg-white/5" : "border-charcoal/10 text-charcoal/50 hover:bg-charcoal/5"
-                }`}
-              >
-                <RefreshCcw size={14} />
-                Sync
-              </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-3">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Free Shipping Threshold (₹)
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <Truck size={18} />
+                </div>
+                <input
+                  type="number"
+                  value={freeShippingThreshold}
+                  onChange={(e) => setFreeShippingThreshold(Number(e.target.value))}
+                  className={`${inputClass} pl-12`}
+                />
+              </div>
             </div>
+
+            <div className="space-y-3">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Promo Banner Text
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <Tag size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={promoText}
+                  onChange={(e) => setPromoText(e.target.value)}
+                  className={`${inputClass} pl-12`}
+                  placeholder="Use Code"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Active Promo Code
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <Hash size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  className={`${inputClass} pl-12`}
+                  placeholder="GLOW15"
+                />
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* ── System Strings ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className={cardClass}
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10 border-b pb-8 border-gold/10">
+            <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-xl">
+              <Globe size={28} />
+            </div>
+            <div className="space-y-1">
+              <h3 className={`text-xl font-extrabold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
+                System Strings
+              </h3>
+              <p className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-charcoal/60"}`}>
+                Manage site-wide footer and legal text artifacts.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Global Copyright Text
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <Copyright size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={copyrightText}
+                  onChange={(e) => setCopyrightText(e.target.value)}
+                  className={`${inputClass} pl-12`}
+                  placeholder="© 2026 Luscent Glow. All rights reserved."
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-10">
+            <button
+              onClick={handleUpdate}
+              disabled={saving}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold/80 transition-all shadow-lg shadow-gold/20 disabled:opacity-50"
+            >
+              {saving ? <RefreshCcw size={14} className="animate-spin" /> : <Save size={14} />}
+              {saving ? "Saving Changes..." : "Commit Registry Updates"}
+            </button>
+            <button
+              onClick={fetchSettings}
+              className={`flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold uppercase tracking-[0.15em] text-xs border transition-all ${
+                isDark ? "border-white/10 text-white/50 hover:bg-white/5" : "border-charcoal/10 text-charcoal/50 hover:bg-charcoal/5"
+              }`}
+            >
+              <RefreshCcw size={14} />
+              Re-Sync
+            </button>
           </div>
         </motion.section>
 

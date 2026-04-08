@@ -641,6 +641,13 @@ class GlobalSettingsModel(BaseModel):
     """
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     whatsappNumber: str = Field(default="919537150942")
+    storeName: str = Field(default="Luscent Glow")
+    supportEmail: str = Field(default="hello@luscentglow.com")
+    supportPhone: str = Field(default="+91 97126 63607")
+    freeShippingThreshold: int = Field(default=999)
+    promoText: str = Field(default="Use Code")
+    promoCode: str = Field(default="GLOW15")
+    copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
     updatedAt: Optional[str] = None
 
     class Config:
@@ -648,6 +655,13 @@ class GlobalSettingsModel(BaseModel):
         json_schema_extra = {
             "example": {
                 "whatsappNumber": "919537150942",
+                "storeName": "Luscent Glow",
+                "supportEmail": "hello@luscentglow.com",
+                "supportPhone": "+91 97126 63607",
+                "freeShippingThreshold": 999,
+                "promoText": "Use Code",
+                "promoCode": "GLOW15",
+                "copyrightText": "© 2026 Luscent Glow. All rights reserved.",
                 "updatedAt": "2026-04-06T09:53:06Z"
             }
         }
@@ -805,6 +819,17 @@ class HomeSettingsModel(BaseModel):
     discountBanner: HomeDiscountBannerModel = Field(...)
     instagram: HomeInstagramModel = Field(...)
     updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+class NewsletterSubModel(BaseModel):
+    """
+    Schema for newsletter subscribers.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    email: str = Field(...)
+    subscribedAt: str = Field(...)
 
     class Config:
         populate_by_name = True

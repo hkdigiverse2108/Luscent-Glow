@@ -11,6 +11,7 @@ const glowTexture = "/assets/contact/glow-texture.png";
 
 const Contact = () => {
   const [config, setConfig] = useState<any>(null);
+  const [globalSettings, setGlobalSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitted, setIsSubmitted] = useState(false);
   
@@ -26,16 +27,42 @@ const Contact = () => {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch(getApiUrl("/api/contact-settings/settings"));
-      if (response.ok) {
-        const data = await response.json();
-        setConfig(data);
-        if (data.formSubjects?.length > 0) {
-          setFormState(prev => ({ ...prev, subject: data.formSubjects[0] }));
+      const [contactRes, globalRes] = await Promise.all([
+        fetch(getApiUrl("/api/contact-settings/settings")),
+        fetch(getApiUrl("/api/settings/global/"))
+      ]);
+      
+      let contactData = null;
+      let globalData = null;
+
+      if (contactRes.ok) {
+        contactData = await contactRes.json();
+      }
+      if (globalRes.ok) {
+        globalData = await globalRes.json();
+        setGlobalSettings(globalData);
+      }
+
+      if (contactData) {
+        // Merge global settings into channels if they exist
+        if (globalData && contactData.channels) {
+          contactData.channels = contactData.channels.map((chan: any) => {
+            if (chan.badge === "Call Us" && globalData.supportPhone) {
+              return { ...chan, value: globalData.supportPhone };
+            }
+            if (chan.badge === "Email Us" && globalData.supportEmail) {
+              return { ...chan, value: globalData.supportEmail };
+            }
+            return chan;
+          });
+        }
+        setConfig(contactData);
+        if (contactData.formSubjects?.length > 0) {
+          setFormState(prev => ({ ...prev, subject: contactData.formSubjects[0] }));
         }
       }
     } catch (error) {
-      console.error("Failed to fetch Contact settings:", error);
+      console.error("Failed to fetch settings:", error);
     } finally {
       setLoading(false);
     }

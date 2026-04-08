@@ -35,6 +35,16 @@ const Header = () => {
     logoImage: null,
     useImage: false
   });
+  const [globalSettings, setGlobalSettings] = useState<any>({
+    whatsappNumber: "919537150942",
+    storeName: "Luscent Glow",
+    supportEmail: "hello@luscentglow.com",
+    supportPhone: "+91 97126 63607",
+    freeShippingThreshold: 999,
+    promoText: "Use Code",
+    promoCode: "GLOW15",
+    copyrightText: "© 2026 Luscent Glow. All rights reserved."
+  });
 
   // Admin UI State
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
@@ -91,6 +101,12 @@ const Header = () => {
         if (brandRes.ok) {
           const brand = await brandRes.json();
           setBranding(brand);
+        }
+        
+        const globalRes = await fetch(getApiUrl("/api/settings/global/"));
+        if (globalRes.ok) {
+          const global = await globalRes.json();
+          setGlobalSettings(global);
         }
       } catch (err) {
         console.error("Error fetching header data:", err);
@@ -154,9 +170,9 @@ const Header = () => {
         {/* Top bar */}
         <div className="bg-primary text-primary-foreground text-[8px] md:text-[10px] lg:text-xs py-2 px-2 md:px-4 text-center tracking-widest uppercase font-body relative group/banner overflow-hidden">
           <div className="flex items-center justify-center gap-x-2 gap-y-1 flex-wrap md:gap-4 animate-in fade-in slide-in-from-top-1 duration-500">
-            <span>Free Shipping Above ₹999</span>
+            <span>Free Shipping Above ₹{globalSettings.freeShippingThreshold}</span>
             <span className="hidden xs:inline opacity-40">|</span>
-            <span>Use Code <span className="text-gold font-semibold">GLOW15</span></span>
+            <span>{globalSettings.promoText} <span className="text-gold font-semibold">{globalSettings.promoCode}</span></span>
             <span className="hidden sm:inline opacity-40">|</span>
             <Link to="/quiz" className="hidden sm:inline text-gold font-bold hover:text-white transition-colors">Find Your Glow</Link>
           </div>
@@ -450,10 +466,10 @@ const Header = () => {
                      </button>
                   )}
                   <Link
-                    to="/offers"
+                    to="/products"
                     className="text-sm font-body font-bold text-gold hover:text-gold/80 transition-all tracking-wide uppercase px-4 py-2 bg-gold/5 rounded-full border border-gold/20"
                   >
-                    Offers
+                    Rituals
                   </Link>
                 </div>
               </div>
@@ -582,20 +598,15 @@ const Header = () => {
 
                   <div>
                     <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] mb-5">More</p>
-                    <div className="grid grid-cols-1 gap-3">
-                       <Link to="/offers" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 py-3 px-4 bg-gold/5 border border-gold/10 text-gold font-bold rounded-2xl font-body">
-                        <span className="animate-pulse">🔥</span> Exclusive Offers
-                       </Link>
-                       <div className="grid grid-cols-2 gap-3">
-                          <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 bg-secondary/50 rounded-2xl border border-border/50">
-                            <Gift size={16} className="text-gold" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Gifts</span>
-                          </Link>
-                          <Link to="/bulk-orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 bg-secondary/50 rounded-2xl border border-border/50">
-                            <Package size={16} className="text-gold" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Bulk</span>
-                          </Link>
-                       </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 bg-secondary/50 rounded-2xl border border-border/50">
+                        <Gift size={16} className="text-gold" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Gifts</span>
+                      </Link>
+                      <Link to="/bulk-orders" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2 p-3 bg-secondary/50 rounded-2xl border border-border/50">
+                        <Package size={16} className="text-gold" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Bulk</span>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -606,7 +617,7 @@ const Header = () => {
                     <Link to="/privacy-policy" onClick={() => setMobileMenuOpen(false)} className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Privacy</Link>
                     <Link to="/terms-and-conditions" onClick={() => setMobileMenuOpen(false)} className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Terms</Link>
                  </div>
-                 <p className="text-[10px] text-muted-foreground italic">© 2024 Luscent Glow. All rights reserved.</p>
+                 <p className="text-[10px] text-muted-foreground italic">{globalSettings.copyrightText}</p>
               </div>
             </motion.div>
           </>

@@ -24,7 +24,6 @@ DEFAULT_FOOTER = {
                 {"label": "About Us", "path": "/about"},
                 {"label": "Contact Us", "path": "/contact"},
                 {"label": "FAQ's", "path": "/faq"},
-                {"label": "Special Offers", "path": "/offers"},
                 {"label": "Blogs", "path": "/blogs"},
                 {"label": "Track Your Order", "path": "/track-order"},
                 {"label": "Careers", "path": "/contact"}

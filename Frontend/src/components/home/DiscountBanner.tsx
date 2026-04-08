@@ -23,7 +23,7 @@ const DiscountBanner = ({ banner }: DiscountBannerProps) => {
     subtitle: "Exclusive Invitation",
     discountText: "40% OFF",
     buttonText: "Retrieve Offer",
-    buttonLink: "/offers",
+    buttonLink: "/products",
     endDate: ""
   };
 
@@ -109,14 +109,7 @@ const DiscountBanner = ({ banner }: DiscountBannerProps) => {
                   ))}
                 </div>
                 
-                <div className="h-10 w-[1px] bg-white/20 mx-2 hidden lg:block" />
-                
-                <Link
-                  to={activeBanner.buttonLink}
-                  className="w-full sm:w-auto px-8 md:px-10 py-4 md:py-5 bg-gold text-charcoal font-body font-bold text-xs md:text-sm uppercase tracking-widest rounded-full hover:bg-white transition-all duration-500 shadow-2xl flex items-center justify-center gap-3"
-                >
-                  {activeBanner.buttonText} <ArrowRight size={18} />
-                </Link>
+                <div className="h-10 w-[1px] bg-white/20 mx-2 hidden lg:block invisible" />
               </div>
             </div>
           </div>

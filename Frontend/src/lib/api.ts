@@ -33,8 +33,8 @@ export const getApiUrl = (path: string): string => {
 export const getAssetUrl = (path: string): string => {
   if (!path) return "/placeholder.svg";
   
-  // If already absolute (like a remote Unsplash image), return as is
-  if (path.startsWith('http')) return path;
+  // If already absolute (like a remote Unsplash image) or Base64 data, return as is
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
   
   let cleanPath = path.startsWith('/') ? path : `/${path}`;
   

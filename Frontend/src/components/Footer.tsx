@@ -8,6 +8,7 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [footer, setFooter] = useState<any>(null);
+  const [globalSettings, setGlobalSettings] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,44 +17,55 @@ const Footer = () => {
 
   const fetchFooter = async () => {
     try {
-      const response = await fetch(getApiUrl("/api/footer/"));
-      if (!response.ok) throw new Error("Failed to load");
-      const data = await response.json();
-      setFooter(data);
+      const [footerRes, settingsRes] = await Promise.all([
+        fetch(getApiUrl("/api/footer/")),
+        fetch(getApiUrl("/api/settings/global/"))
+      ]);
+
+      if (footerRes.ok) {
+        const data = await footerRes.json();
+        setFooter(data);
+      } else {
+        // Fallback for footer structure
+        setFooter({
+          brandDescription: "Elevate your beauty routine with our premium, cruelty-free cosmetics. Crafted with love, powered by nature.",
+          socials: [
+            { platform: "Instagram", url: "https://instagram.com/hk_digiverse" },
+            { platform: "Facebook", url: "https://facebook.com/luscentglow" },
+            { platform: "Youtube", url: "https://youtube.com/luscentglow" },
+            { platform: "Twitter", url: "https://twitter.com/luscentglow" }
+          ],
+          email: "hello@luscentglow.com",
+          phone: "+91 97126 63607",
+          columns: [
+            {
+              title: "Information",
+              links: [
+                { label: "About Us", path: "/about" },
+                { label: "Contact Us", path: "/contact" },
+                { label: "FAQ's", path: "/faq" }
+              ]
+            },
+            {
+              title: "Policies",
+              links: [
+                { label: "Privacy Policy", path: "/privacy-policy" },
+                { label: "Terms & Conditions", path: "/terms-and-conditions" }
+              ]
+            }
+          ],
+          newsletterTitle: "Beauty Line",
+          newsletterSubtitle: "Curated aesthetics & beauty tips straight to your inbox.",
+          copyrightText: `© ${new Date().getFullYear()} Luscent Glow. All rights reserved.`
+        });
+      }
+
+      if (settingsRes.ok) {
+        const settings = await settingsRes.json();
+        setGlobalSettings(settings);
+      }
     } catch (error) {
-      console.error("Footer fetch failed:", error);
-      // Fallback structure to prevent perpetual loading
-      setFooter({
-        brandDescription: "Elevate your beauty routine with our premium, cruelty-free cosmetics. Crafted with love, powered by nature.",
-        socials: [
-          { platform: "Instagram", url: "https://instagram.com/hk_digiverse" },
-          { platform: "Facebook", url: "https://facebook.com/luscentglow" },
-          { platform: "Youtube", url: "https://youtube.com/luscentglow" },
-          { platform: "Twitter", url: "https://twitter.com/luscentglow" }
-        ],
-        email: "hello@luscentglow.com",
-        phone: "+91 97126 63607",
-        columns: [
-          {
-            title: "Information",
-            links: [
-              { label: "About Us", path: "/about" },
-              { label: "Contact Us", path: "/contact" },
-              { label: "FAQ's", path: "/faq" }
-            ]
-          },
-          {
-            title: "Policies",
-            links: [
-              { label: "Privacy Policy", path: "/privacy-policy" },
-              { label: "Terms & Conditions", path: "/terms-and-conditions" }
-            ]
-          }
-        ],
-        newsletterTitle: "Beauty Line",
-        newsletterSubtitle: "Curated aesthetics & beauty tips straight to your inbox.",
-        copyrightText: `© ${new Date().getFullYear()} Luscent Glow. All rights reserved.`
-      });
+      console.error("Footer/Settings fetch failed:", error);
     } finally {
       setLoading(false);
     }
@@ -124,11 +136,11 @@ const Footer = () => {
               ))}
             </div>
             <div className="pt-2 space-y-2 text-sm text-primary-foreground/50 font-body">
-              <a href={`mailto:${footer.email}`} className="hover:text-gold transition-colors flex items-center gap-2">
-                <Mail size={14} className="opacity-60" /> {footer.email}
+              <a href={`mailto:${globalSettings?.supportEmail || footer.email}`} className="hover:text-gold transition-colors flex items-center gap-2">
+                <Mail size={14} className="opacity-60" /> {globalSettings?.supportEmail || footer.email}
               </a>
-              <a href={`tel:${footer.phone}`} className="hover:text-gold transition-colors flex items-center gap-2">
-                <Phone size={14} className="opacity-60" /> {footer.phone}
+              <a href={`tel:${globalSettings?.supportPhone || footer.phone}`} className="hover:text-gold transition-colors flex items-center gap-2">
+                <Phone size={14} className="opacity-60" /> {globalSettings?.supportPhone || footer.phone}
               </a>
             </div>
           </div>
@@ -176,7 +188,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 text-center text-xs text-primary-foreground/40 font-body">
-          {footer.copyrightText}
+          {globalSettings?.copyrightText || footer.copyrightText}
         </div>
       </div>
     </footer>

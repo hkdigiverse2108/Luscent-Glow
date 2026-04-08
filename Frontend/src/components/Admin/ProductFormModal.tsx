@@ -39,32 +39,24 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
   const [isUploading, setIsUploading] = useState(false);
   const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    const formDataUpload = new FormData();
-    formDataUpload.append("file", file);
-
-    try {
-      const response = await fetch(getApiUrl("/api/upload"), {
-        method: "POST",
-        body: formDataUpload,
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setFormData(prev => ({ ...prev, image: data.url }));
-        toast.success("Visual asset localized successfully.");
-      } else {
-        toast.error(data.detail || "Upload failed.");
-      }
-    } catch (error) {
-      toast.error("System connection error during upload.");
-    } finally {
+    // Transition to Direct-to-DB Base64 Pattern
+    const reader = new FileReader();
+    reader.onloadstart = () => setIsUploading(true);
+    reader.onload = (event) => {
+      const base64String = event.target?.result as string;
+      setFormData(prev => ({ ...prev, image: base64String }));
       setIsUploading(false);
-    }
+      toast.success("Visual asset localized to database.");
+    };
+    reader.onerror = () => {
+      setIsUploading(false);
+      toast.error("Failed to process ritual visual.");
+    };
+    reader.readAsDataURL(file);
   };
 
   useEffect(() => {
