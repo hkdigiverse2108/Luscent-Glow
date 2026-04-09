@@ -97,59 +97,11 @@ const AdminOrders = () => {
     }
   };
 
-  const StatusStepper = ({ currentStatus }: { currentStatus: string }) => {
-    const steps = [
-      { id: 'Processing', icon: Clock },
-      { id: 'Shipped', icon: Truck },
-      { id: 'Delivered', icon: CheckCircle }
-    ];
-    
-    const currentIndex = steps.findIndex(s => s.id.toLowerCase() === currentStatus.toLowerCase());
-    const isCancelled = currentStatus.toLowerCase() === 'cancelled';
-
-    if (isCancelled) {
-      return (
-        <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] border shadow-sm ${getStatusColor('cancelled')}`}>
-          Cancelled
-        </span>
-      );
-    }
-
+  const StatusPill = ({ currentStatus }: { currentStatus: string }) => {
     return (
-      <div className="flex items-center gap-1.5">
-        {steps.map((step, index) => {
-          const StepIcon = step.icon;
-          const isActive = index <= currentIndex;
-          const isCurrent = index === currentIndex;
-          
-          let colorClass = "";
-          if (isActive) {
-            if (step.id === 'Delivered') colorClass = isDark ? "bg-gold-400 border-gold-400 text-charcoal" : "bg-gold-500 border-gold-500 text-white";
-            else if (step.id === 'Shipped') colorClass = isDark ? "bg-gold-400 border-gold-400 text-charcoal" : "bg-gold-500 border-gold-500 text-white";
-            else colorClass = "bg-gold border-gold text-charcoal";
-          } else {
-            colorClass = isDark ? "bg-white/10 border-white/10 text-white/30" : "bg-charcoal/10 border-charcoal/10 text-charcoal/30";
-          }
-
-          return (
-            <React.Fragment key={step.id}>
-              <div 
-                className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-500 ${colorClass} ${isCurrent ? "scale-110 shadow-lg" : "scale-100"}`}
-                title={step.id}
-              >
-                <StepIcon size={14} strokeWidth={isActive ? 3 : 2} />
-              </div>
-              {index < steps.length - 1 && (
-                <div className={`w-4 h-[2px] rounded-full transition-all duration-700 ${
-                  index < currentIndex 
-                    ? (steps[index + 1].id === 'Shipped' ? 'bg-gold-400/70' : 'bg-gold-400/70') 
-                    : (isDark ? 'bg-white/10' : 'bg-charcoal/10')
-                }`} />
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
+      <span className={`px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-[0.2em] border shadow-sm ${getStatusColor(currentStatus)}`}>
+        {currentStatus}
+      </span>
     );
   };
 
@@ -267,7 +219,7 @@ const AdminOrders = () => {
                           ₹{o.totalAmount}
                        </td>
                        <td className="px-4 py-1.5">
-                           <StatusStepper currentStatus={o.status} />
+                           <StatusPill currentStatus={o.status} />
                        </td>
                        <td className="px-4 py-1.5">
                           <div className="flex items-center gap-2">

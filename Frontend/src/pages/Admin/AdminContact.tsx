@@ -476,52 +476,6 @@ const AdminContact = () => {
         </div>
       </div>
 
-      {/* Quick FAQ Strip Management */}
-      <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-        <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
-          <ExternalLink size={20} className="text-gold" /> Quick FAQ Strip
-        </h3>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-           <div className="space-y-6">
-              <div className="space-y-2">
-                 <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">FAQ Title</label>
-                 <input 
-                   value={config.faqTitle}
-                   onChange={(e) => setConfig({ ...config, faqTitle: e.target.value })}
-                   className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold uppercase tracking-widest"
-                 />
-              </div>
-              <div className="space-y-2">
-                 <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">FAQ Subtitle</label>
-                 <input 
-                   value={config.faqSubtitle}
-                   onChange={(e) => setConfig({ ...config, faqSubtitle: e.target.value })}
-                   className="w-full p-4 rounded-xl border bg-transparent text-xs font-bold italic"
-                 />
-              </div>
-           </div>
-           <div className="space-y-4">
-              <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Linked Registries</label>
-              <div className="flex flex-wrap gap-3">
-                 {config.faqLinks.map((link: string, i: number) => (
-                   <div key={i} className="px-5 py-3 border rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center gap-3 group">
-                      {link}
-                      <X size={12} className="cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setConfig({ ...config, faqLinks: config.faqLinks.filter((_:any, idx:number) => idx !== i) })} />
-                   </div>
-                 ))}
-                 <button 
-                    onClick={() => {
-                      const val = prompt("Registry label?");
-                      if (val) setConfig({ ...config, faqLinks: [...config.faqLinks, val] });
-                    }}
-                    className="px-5 py-3 border-2 border-dashed border-gold/30 text-gold rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-gold/5 transition-all"
-                  >
-                    + New Link
-                  </button>
-              </div>
-           </div>
-        </div>
-      </div>
           </motion.div>
         )}
       </AnimatePresence>

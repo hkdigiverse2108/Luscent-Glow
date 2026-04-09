@@ -130,7 +130,7 @@ const Contact = () => {
               animate={{ opacity: 1, y: 0 }}
               className="max-w-3xl"
             >
-              <p className="text-[10px] md:text-sm font-body font-bold text-gold uppercase tracking-[0.4em] mb-4 md:mb-6">{config.heroBadge}</p>
+              <p className="text-[10px] md:text-sm font-body font-bold text-gold uppercase tracking-[0.4em] mb-4 md:mb-6">Customer Support</p>
               <h1 className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-6 md:mb-8 text-glow-gold/30">
                 {config.heroTitle.split(' Priority. ').length > 1 ? (
                    <>
@@ -159,7 +159,7 @@ const Contact = () => {
                 className="space-y-12"
               >
                 <div className="space-y-4">
-                  <h2 className="font-display text-3xl font-bold text-foreground capitalize">{config.formTitle}</h2>
+                  <h2 className="font-display text-3xl font-bold text-foreground capitalize">Send us a Message</h2>
                   <div className="h-1 w-20 bg-gold/30" />
                 </div>
 
@@ -223,7 +223,7 @@ const Contact = () => {
                     </div>
 
                     <div className="relative">
-                      <p className="text-xs font-body font-bold text-gold uppercase tracking-widest mb-4">Nature of Inquiry</p>
+                      <p className="text-xs font-body font-bold text-gold uppercase tracking-widest mb-4">How can we help?</p>
                       <div className="flex flex-wrap gap-2 md:gap-3">
                         {config.formSubjects.map((sub: string) => (
                           <button
@@ -256,7 +256,7 @@ const Contact = () => {
                         className="absolute left-0 top-4 text-xs md:text-sm text-muted-foreground font-body transition-all pointer-events-none 
                         peer-focus:-top-4 peer-focus:text-xs peer-focus:text-gold peer-[:not(:placeholder-shown)]:-top-4 peer-[:not(:placeholder-shown)]:text-xs"
                       >
-                        Tell us more about your discovery
+                        Tell us more about your inquiry
                       </label>
                     </div>
 
@@ -264,7 +264,7 @@ const Contact = () => {
                       type="submit"
                       className="w-full sm:w-auto group flex items-center justify-center gap-4 px-10 md:px-12 py-4 md:py-5 bg-primary text-white rounded-full font-body font-bold uppercase tracking-widest text-[10px] md:text-xs hover:bg-gold transition-all shadow-2xl hover:shadow-gold/30"
                     >
-                      Illuminate My Inquiry <Send size={16} className="group-hover:translate-x-2 transition-transform" />
+                      Send Message <Send size={16} className="group-hover:translate-x-2 transition-transform" />
                     </button>
                   </form>
                 ) : (
@@ -276,9 +276,9 @@ const Contact = () => {
                     <div className="w-20 h-20 bg-gold rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-gold/30">
                       <CheckCircle2 size={40} className="text-primary" />
                     </div>
-                    <h3 className="font-display text-4xl font-bold text-foreground">Inquiry Received.</h3>
+                    <h3 className="font-display text-4xl font-bold text-foreground">Message Received.</h3>
                     <p className="font-body text-muted-foreground leading-relaxed max-w-sm mx-auto">
-                      Our artisan team has been notified. Expect a personalized response within 24 radiance hours.
+                      Thank you for reaching out. Our team has been notified and will get back to you within 24 hours.
                     </p>
                     <button 
                       onClick={() => setIsSubmitted(false)}
@@ -299,18 +299,32 @@ const Contact = () => {
                    className="space-y-12"
                 >
                   <div className="space-y-10">
-                    {config.channels.map((chan: any, i: number) => (
-                       <div key={i} className="flex gap-8 group">
-                         <div className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors text-gold group-hover:text-primary">
-                            <DynamicIcon name={chan.icon} size={24} />
+                    {config.channels.map((chan: any, i: number) => {
+                       const isPhone = chan.icon?.toLowerCase().includes('phone');
+                       const isMail = chan.icon?.toLowerCase().includes('mail');
+                       const href = isPhone ? `tel:${chan.value.replace(/\s+/g, '')}` : isMail ? `mailto:${chan.value}` : undefined;
+                       
+                       const ChannelContent = (
+                         <div className="flex gap-8 group cursor-pointer">
+                           <div className="w-14 h-14 bg-secondary rounded-2xl flex items-center justify-center flex-shrink-0 group-hover:bg-gold transition-colors text-gold group-hover:text-primary">
+                              <DynamicIcon name={chan.icon} size={24} />
+                           </div>
+                           <div className="space-y-2">
+                             <p className="text-xs font-body font-bold text-gold uppercase tracking-widest">{chan.badge}</p>
+                             <p className="font-display text-2xl font-bold text-foreground">{chan.value}</p>
+                             <p className="text-sm font-body text-muted-foreground italic">{chan.desc}</p>
+                           </div>
                          </div>
-                         <div className="space-y-2">
-                           <p className="text-xs font-body font-bold text-gold uppercase tracking-widest">{chan.badge}</p>
-                           <p className="font-display text-2xl font-bold text-foreground">{chan.value}</p>
-                           <p className="text-sm font-body text-muted-foreground italic">{chan.desc}</p>
-                         </div>
-                       </div>
-                    ))}
+                       );
+
+                       return href ? (
+                         <a key={i} href={href} className="block no-underline">
+                           {ChannelContent}
+                         </a>
+                       ) : (
+                         <div key={i}>{ChannelContent}</div>
+                       );
+                    })}
                   </div>
 
                   {/* Boutique Preview */}
@@ -324,24 +338,6 @@ const Contact = () => {
           </div>
         </section>
 
-        {/* Quick FAQ Strip */}
-        <section className="py-20 bg-primary">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-              <div className="space-y-2 text-center lg:text-left">
-                <h3 className="font-display text-2xl font-bold text-white uppercase tracking-wider">{config.faqTitle}</h3>
-                <p className="text-white/40 font-body italic text-sm">{config.faqSubtitle}</p>
-              </div>
-              <div className="flex flex-wrap justify-center gap-4">
-                {config.faqLinks.map((item: string) => (
-                  <button key={item} className="px-8 py-3 border border-white/20 rounded-full text-[10px] font-body font-bold text-white uppercase tracking-widest hover:border-gold hover:text-gold transition-all">
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <Footer />
