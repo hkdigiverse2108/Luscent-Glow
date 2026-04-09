@@ -29,6 +29,49 @@ async def initiate_payment(order_data: dict = Body(...)):
     creds = await get_payment_credentials()
     active_gateway = creds.get("activeGateway", "razorpay")
 
+    # Explicit Guest Lead Capture
+    # If this is a guest checkout (userMobile provided but no auth token usually), 
+    # we upsert a 'Guest' record in the users collection to ensure persistence.
+    user_mobile = order_data.get("user_mobile") or order_data.get("userMobile")
+    user_email = order_data.get("email") or (order_data.get("shippingAddress") or {}).get("email")
+    user_name = order_data.get("userName") or order_data.get("fullName") or (order_data.get("shippingAddress") or {}).get("name")
+    
+    if user_mobile:
+        user_record = await db["users"].find_one({"mobileNumber": user_mobile})
+        if not user_record:
+            # Create a Guest Profile
+            new_guest = {
+                "fullName": user_name or "Guest User",
+                "email": user_email or f"guest_{user_mobile}@luscentglow.com",
+                "mobileNumber": user_mobile,
+                "password": "", # No password for guests
+                "isGuest": True,
+                "isAdmin": False,
+                "isVerified": False,
+                "shippingAddress": order_data.get("shippingAddress"),
+                "createdAt": datetime.utcnow().isoformat()
+            }
+            await db["users"].insert_one(new_guest)
+        elif user_record.get("isGuest"):
+            # Update existing guest address/details
+            update_fields = {}
+            if user_name: update_fields["fullName"] = user_name
+            if user_email: update_fields["email"] = user_email
+            if order_data.get("shippingAddress"): update_fields["shippingAddress"] = order_data.get("shippingAddress")
+            
+            if update_fields:
+                await db["users"].update_one({"_id": user_record["_id"]}, {"$set": update_fields})
+
+        # Sync to Newsletter Subscribers
+        if user_email:
+            existing_sub = await db["newsletter_subs"].find_one({"email": user_email})
+            if not existing_sub:
+                await db["newsletter_subs"].insert_one({
+                    "email": user_email,
+                    "subscribedAt": datetime.utcnow().isoformat(),
+                    "source": "Guest Checkout"
+                })
+
     existing_order = await db["orders"].find_one({"orderNumber": order_data.get("orderNumber")})
     
     if existing_order:
@@ -56,6 +99,34 @@ async def initiate_payment(order_data: dict = Body(...)):
             "updatedAt": created_at
         }
         await db["payments"].insert_one(new_payment)
+    
+    # Handle COD (Cash on Delivery)
+    if order_data.get("paymentMethod") == "COD":
+        new_order = {
+            "userMobile": order_data.get("userMobile"),
+            "items": order_data.get("items"),
+            "totalAmount": order_data.get("totalAmount"),
+            "status": "Processing",
+            "paymentStatus": "Pending",
+            "paymentMethod": "COD",
+            "shippingAddress": order_data.get("shippingAddress"),
+            "createdAt": datetime.utcnow().isoformat(),
+            "orderNumber": order_number,
+            "merchantTransactionId": merchant_txn_id if 'merchant_txn_id' in locals() else f"COD_{uuid.uuid4().hex[:10].upper()}"
+        }
+        await db["orders"].insert_one(new_order)
+        
+        # Cleanup cart
+        identifier = order_data.get("userMobile")
+        if identifier:
+            await db["cart"].delete_many({"$or": [{"userMobile": identifier}, {"guestId": identifier}]})
+            
+        return {
+            "success": True,
+            "gateway": "cod",
+            "orderNumber": order_number,
+            "message": "Order placed successfully with Cash on Delivery"
+        }
 
     amount_float = float(order_data.get("totalAmount"))
 

@@ -319,10 +319,14 @@ const AdminUsers = () => {
                             <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[10px] font-black uppercase tracking-widest border border-gold/30 shadow-lg shadow-gold/5 flex items-center gap-2 w-fit">
                               <Shield size={10} /> Admin
                             </span>
+                          ) : u.isGuest ? (
+                            <span className="px-3 py-1.5 rounded-full bg-rose-light/10 text-rose-brand text-[10px] font-black uppercase tracking-widest border border-rose-light/20 shadow-lg shadow-rose-light/5 flex items-center gap-2 w-fit">
+                               <User size={10} /> Guest Lead
+                            </span>
                           ) : (
                             <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-colors ${
                               isDark ? "bg-white/5 border-white/10 text-white/40" : "bg-charcoal/5 border-charcoal/10 text-charcoal/40"
-                            }`}>User</span>
+                            }`}>Registered</span>
                           )}
                        </td>
                        <td className="px-6 py-6 text-center">
@@ -714,7 +718,9 @@ const AdminUsers = () => {
                       </div>
                       <div className="text-center space-y-2 pt-2">
                          <h3 className={`text-2xl font-bold tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>{selectedUser.fullName}</h3>
-                         <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">User ID: {selectedUser.id}</p>
+                         <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">
+                           {selectedUser.isGuest ? "Guest Checkout Profile" : `User ID: ${selectedUser.id}`}
+                         </p>
                       </div>
                     </div>
 

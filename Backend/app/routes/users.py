@@ -245,3 +245,32 @@ async def delete_user(userId: str):
         await db["wishlist"].delete_many({"userMobile": user_mobile})
         
     return {"message": "User and associated records deleted successfully"}
+
+@router.get("/lookup")
+async def lookup_user(mobile: str):
+    if not mobile:
+        raise HTTPException(status_code=400, detail="Mobile number is required")
+        
+    db = await get_database()
+    
+    # 1. Search in users collection
+    user = await db["users"].find_one({"mobileNumber": mobile})
+    if user:
+        return {
+            "fullName": user.get("fullName"),
+            "shippingAddress": user.get("shippingAddress")
+        }
+    
+    # 2. Search in orders collection for most recent entry (Guest persistence)
+    recent_order = await db["orders"].find_one(
+        {"userMobile": mobile},
+        sort=[("createdAt", -1)]
+    )
+    
+    if recent_order:
+        return {
+            "fullName": recent_order.get("userName"),
+            "shippingAddress": recent_order.get("shippingAddress")
+        }
+        
+    return {"message": "No data found for this mobile number"}

@@ -102,7 +102,7 @@ const AdminNewsletter = () => {
              }`}>
                 <tr>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Subscriber</th>
-                   <th className="px-4 py-2 font-extrabold uppercase tracking-widest">Status</th>
+                   <th className="px-4 py-2 font-extrabold uppercase tracking-widest">Source</th>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-widest">Joined Ritual</th>
                    <th className="px-6 py-6 text-right pr-12 font-extrabold uppercase tracking-widest">Actions</th>
                 </tr>
@@ -134,11 +134,12 @@ const AdminNewsletter = () => {
                               }`}>{s.email}</span>
                            </div>
                         </td>
-                       <td className="px-6 py-5">
-                          <div className="flex items-center gap-2 text-emerald-500">
-                             <CheckCircle size={18} />
-                             <span className="text-[13px] font-extrabold uppercase tracking-widest">Acknowledged</span>
-                          </div>
+                       <td className="px-4 py-1.5">
+                          <span className={`text-[11px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
+                            isDark ? "bg-white/5 border-white/10 text-white/50" : "bg-charcoal/5 border-charcoal/10 text-charcoal/60"
+                          }`}>
+                            {s.source || "Direct Signup"}
+                          </span>
                        </td>
                         <td className="px-4 py-1.5">
                            <div className={`flex items-center gap-2 text-[13px] font-extrabold uppercase tracking-widest transition-colors ${

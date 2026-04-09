@@ -30,6 +30,7 @@ import BlogDetail from "./pages/BlogDetail.tsx";
 import TrackOrder from "./pages/TrackOrder.tsx";
 import Profile from "./pages/Profile.tsx";
 import Orders from "./pages/Orders.tsx";
+import Checkout from "./pages/Checkout.tsx";
 import OrderSuccess from "./pages/OrderSuccess.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLayout from "./components/Admin/AdminLayout.tsx";
@@ -85,6 +86,7 @@ const App = () => (
                 <Route path="/track-order" element={<TrackOrder />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/checkout" element={<Checkout />} />
                 <Route path="/order-success" element={<OrderSuccess />} />
                 
                 {/* Dynamic Legal Sanctuary (Root-Level) */}
