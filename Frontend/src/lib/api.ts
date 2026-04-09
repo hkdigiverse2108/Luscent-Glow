@@ -1,15 +1,17 @@
 /**
- * API Configuration
+ * API Configuration for Production and Development
  * 
- * We use a relative '/api' proxy as the default. 
- * This is truly dynamic: it works regardless of whether you are on 
- * localhost, 127.0.0.1, or a network IP.
+ * We recommend using a relative '/api' proxy. 
+ * This approach is "host-agnostic": it works on localhost, staging, and production
+ * without needing to change any hardcoded strings.
  */
 
+// If VITE_API_BASE_URL is not set, we default to the relative '/api' path.
+// In production, this allows your Frontend and Backend to share the same domain.
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 const BASE_URL = API_BASE.includes('http') 
   ? API_BASE.split('/api')[0] 
-  : ''; // Relative fallback
+  : window.location.origin; // Dynamically resolve to current domain if relative
 
 export const getApiUrl = (path: string): string => {
   const cleanPath = path.startsWith('/') ? path : `/${path}`;

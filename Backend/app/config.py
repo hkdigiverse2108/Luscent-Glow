@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     RAZORPAY_KEY_SECRET: str = os.getenv("RAZORPAY_KEY_SECRET", "")
 
     # App URLs for Redirects and Callbacks
+    # IMPORTANT: In production, set these via environment variables:
+    # BACKEND_URL: The public URL of your FastAPI server
+    # FRONTEND_URL: The public URL of your React frontend (important for CORS and redirects)
     BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:5172")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 

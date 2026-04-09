@@ -4,6 +4,7 @@ import {
   Search, 
   Filter, 
   Trash2, 
+  Edit2,
   Star,
   MessageSquare,
   User,
@@ -11,18 +12,22 @@ import {
   AlertCircle,
   Package,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Plus
 } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
+import AdminAddReviewModal from "../../components/Admin/AdminAddReviewModal.tsx";
 
 const AdminReviews = () => {
   const { isDark } = useAdminTheme();
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<any>(null);
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -78,6 +83,11 @@ const AdminReviews = () => {
         highlightedWord="Chronicles"
         subtitle="Manage and moderate product feedback and testimonials"
         isDark={isDark}
+        action={{
+          label: "Add Chronicle",
+          onClick: () => setIsAddModalOpen(true),
+          icon: Plus
+        }}
       />
 
       <div className="flex flex-col md:flex-row gap-4">
@@ -202,8 +212,21 @@ const AdminReviews = () => {
                           </div>
                        </td>
                        <td className="px-6 py-4 text-right">
-                          <button 
-                             onClick={() => handleDelete(r.id || r._id)}
+                          <div className="flex items-center justify-end gap-3">
+                             <button 
+                                onClick={() => {
+                                  setEditingReview(r);
+                                  setIsAddModalOpen(true);
+                                }}
+                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+                                  isDark ? "bg-white/5 text-white/20 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold hover:bg-gold/10"
+                                }`}
+                                title="Refine Feedback"
+                             >
+                                <Edit2 size={16} />
+                             </button>
+                             <button 
+                                onClick={() => handleDelete(r.id || r._id)}
                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                                isDark ? "bg-white/5 text-white/20 hover:text-rose-light hover:bg-rose-light/10" : "bg-charcoal/5 text-charcoal/40 hover:text-rose-600 hover:bg-rose-50"
                              }`}
@@ -211,6 +234,7 @@ const AdminReviews = () => {
                           >
                              <Trash2 size={16} />
                           </button>
+                        </div>
                        </td>
                     </motion.tr>
                   ))
@@ -246,6 +270,17 @@ const AdminReviews = () => {
            </div>
         </div>
       </div>
+      
+      <AdminAddReviewModal 
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingReview(null);
+        }}
+        onSuccess={fetchReviews}
+        isDark={isDark}
+        review={editingReview}
+      />
     </div>
   );
 };

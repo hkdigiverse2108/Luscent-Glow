@@ -15,7 +15,7 @@ import CustomerGalleryModal from "@/components/CustomerGalleryModal";
 import { useAuth } from "@/context/AuthContext";
 
 const ProductDetail = () => {
-  const { user } = useAuth();
+  const { user, isAdminAuthenticated } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
@@ -514,8 +514,8 @@ const ProductDetail = () => {
                     {/* Star Bars - Nykaa Style */}
                     <div className="flex flex-col gap-1.5 w-40 sm:w-60">
                       {[5, 4, 3, 2, 1].map((star) => {
-                        const count = reviews.length > 0 ? reviews.filter(r => r.rating === star).length : (star === 5 ? (product?.reviewCount || 1) : 0);
-                        const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : (star === 5 ? 100 : 0);
+                        const count = reviews.length > 0 ? reviews.filter(r => r.rating === star).length : 0;
+                        const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
                         return (
                           <div key={star} className="flex items-center gap-3">
                             <div className="flex items-center gap-1 w-8">
@@ -536,15 +536,7 @@ const ProductDetail = () => {
                     </div>
                   </div>
 
-                  <div className="text-center md:text-right space-y-3">
-                    <div className="text-xs font-body text-muted-foreground italic mb-2 pr-2">Your experience matters.</div>
-                    <button 
-                      onClick={() => setIsReviewModalOpen(true)}
-                      className="px-10 py-4 bg-charcoal text-white rounded-full font-body font-bold text-[10px] uppercase tracking-[0.25em] hover:bg-gold hover:text-charcoal transition-all shadow-xl shadow-charcoal/10"
-                    >
-                      Initiate Review
-                    </button>
-                  </div>
+                  <div />
                 </div>
 
                 {/* 2. Enhanced Customer Gallery Strip */}
@@ -678,23 +670,7 @@ const ProductDetail = () => {
                         </motion.div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-center py-24 px-8 bg-secondary/15 rounded-[4rem] border-2 border-dashed border-gold/10">
-                      <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-6 text-gold/30 shadow-inner">
-                        <MessageSquare size={32} />
-                      </div>
-                      <h3 className="font-display text-2xl font-bold text-charcoal mb-3 italic text-center">Be the First Chronicler</h3>
-                      <p className="text-sm font-body text-muted-foreground max-w-sm mx-auto mb-10 leading-relaxed text-center">
-                        Share your unique ritual and guide others on their journey to radiance.
-                      </p>
-                      <button 
-                        onClick={() => setIsReviewModalOpen(true)}
-                        className="px-12 py-5 bg-charcoal text-white rounded-full font-body font-bold text-[10px] uppercase tracking-[0.25em] hover:bg-gold hover:text-charcoal transition-all shadow-2xl shadow-charcoal/10 mx-auto block"
-                      >
-                        Initiate First Review
-                      </button>
-                    </div>
-                  )}
+                  ) : null}
                 </div>
               </div>
             )}
