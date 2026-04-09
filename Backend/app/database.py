@@ -1,4 +1,5 @@
 from motor.motor_asyncio import AsyncIOMotorClient
+import certifi
 from .config import settings
 
 class Database:
@@ -17,7 +18,10 @@ async def connect_to_mongo():
     """
     Initialize connection to MongoDB during app startup.
     """
-    db_connection.client = AsyncIOMotorClient(settings.MONGODB_URL)
+    db_connection.client = AsyncIOMotorClient(
+        settings.MONGODB_URL,
+        tlsCAFile=certifi.where()
+    )
     db_connection.db = db_connection.client[settings.DATABASE_NAME]
     print(f"Connected to MongoDB at {settings.MONGODB_URL}")
 
