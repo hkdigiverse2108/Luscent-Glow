@@ -3,9 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   ChevronLeft, Search, Star, 
   MapPin, Package, Truck, 
-  CheckCircle2, Clock, Archive,
+  CheckCircle2, Clock, Archive, XCircle,
   Info, Navigation, Sparkles,
-  SearchIcon, Calendar, Filter
+  SearchIcon, Calendar, Filter, ExternalLink
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
@@ -33,6 +33,8 @@ interface Order {
   totalAmount: number;
   status: "Processing" | "Quality Check" | "Shipped" | "Delivered" | "Cancelled" | "Pending Payment";
   createdAt: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
 }
 
 const statusConfig = {
@@ -138,6 +140,28 @@ const Orders = () => {
     return null;
   };
 
+  const handleCancelOrder = async (orderId: string, orderNumber: string) => {
+    if (!window.confirm(`Are you sure you want to cancel ritual #${orderNumber}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(getApiUrl(`/api/orders/${orderId}/cancel`), {
+        method: "POST"
+      });
+      
+      if (response.ok) {
+        toast.success("Ritual cancelled successfully.");
+        fetchData();
+      } else {
+        const error = await response.json();
+        toast.error(error.detail || "Cancellation failed.");
+      }
+    } catch (error) {
+      toast.error("Process connection failed.");
+    }
+  };
+
   const filteredOrders = orders.filter(order => 
     order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -150,6 +174,17 @@ const Orders = () => {
       <main className="pt-28 pb-32 md:pt-36">
         <div className="max-w-4xl mx-auto px-6">
           
+          {/* Navigation Back Ritual */}
+          <button 
+            onClick={() => navigate(-1)}
+            className="group flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground hover:text-gold transition-all mb-8"
+          >
+            <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center group-hover:border-gold group-hover:bg-gold/5 transition-all">
+              <ChevronLeft size={16} />
+            </div>
+            Back to Sanctuary
+          </button>
+
           {/* Professional Header Section */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div className="space-y-1">
@@ -248,10 +283,34 @@ const Orders = () => {
                       {/* Action Grid - Right Span */}
                       <div className="md:col-span-4 flex flex-col gap-3 h-fit md:sticky md:top-4">
                         <button 
-                          onClick={() => navigate(`/track-order?orderId=${order.orderNumber}`)}
-                          className="w-full py-3 bg-charcoal text-white text-xs font-bold rounded-xl hover:bg-gold hover:text-charcoal transition-all shadow-md active:scale-[0.98]"
+                          onClick={() => {
+                            const hasRealTracking = order.trackingNumber && order.trackingNumber.toLowerCase() !== 'processing' && order.trackingNumber.trim() !== '';
+                            if (order.trackingUrl || hasRealTracking) {
+                              window.open(order.trackingUrl || `https://shiprocket.co/tracking/${order.trackingNumber}`, '_blank');
+                            } else {
+                              navigate(`/track-order?orderId=${order.orderNumber}&auto=true`);
+                            }
+                          }}
+                          className={`w-full py-3 text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 ${
+                            order.status === 'Cancelled'
+                            ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
+                            : order.status === 'Shipped' 
+                              ? "bg-gold text-charcoal hover:bg-gold/80" 
+                              : "bg-charcoal text-white hover:bg-charcoal/80"
+                          }`}
+                          disabled={order.status === 'Cancelled'}
                         >
-                          Track Order
+                          {order.status === 'Cancelled' ? (
+                            <>
+                              <Archive size={14} />
+                              Cancelled
+                            </>
+                          ) : (
+                            <>
+                              <ExternalLink size={14} />
+                              {order.status === 'Shipped' ? 'Track on Shiprocket' : 'Track Order'}
+                            </>
+                          )}
                         </button>
                         <button 
                           onClick={() => {
@@ -262,6 +321,16 @@ const Orders = () => {
                         >
                           Order Details
                         </button>
+                        
+                        {(order.status === "Processing" || order.status === "Quality Check") && (
+                          <button 
+                            onClick={() => handleCancelOrder(order.id, order.orderNumber)}
+                            className="w-full py-3 bg-red-50 border border-red-100 text-red-600 text-[10px] font-bold rounded-xl hover:bg-red-500 hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-widest"
+                          >
+                            <XCircle size={14} />
+                            Cancel Ritual
+                          </button>
+                        )}
                         
                         <div className="mt-4 p-4 bg-muted/30 rounded-xl border border-border">
                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-2">Order Summary</p>

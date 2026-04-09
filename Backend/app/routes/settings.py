@@ -50,6 +50,8 @@ _DEFAULT_PAYMENT_CREDENTIALS = {
     "cashfreeAppId": "",
     "cashfreeSecretKey": "",
     "cashfreeMode": "sandbox",
+    "shiprocketEmail": "",
+    "shiprocketPassword": "",
 }
 
 async def get_payment_credentials() -> dict:

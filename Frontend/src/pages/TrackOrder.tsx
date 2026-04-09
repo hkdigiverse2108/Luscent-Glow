@@ -6,6 +6,7 @@ import {
   HelpCircle, ChevronRight, Clock, Box, Mail, Sparkles, ChevronLeft,
   RotateCcw, Copy, ExternalLink, MessageCircle
 } from "lucide-react";
+import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
@@ -33,46 +34,121 @@ const TrackOrder = () => {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  // Mock data representing a found order
+  // Tracking state management
   const [orderData, setOrderData] = useState<any>(null);
-
+  const [isAutoTracking, setIsAutoTracking] = useState(false);
   useEffect(() => {
     const urlOrderId = searchParams.get("orderId");
+    const autoTrack = searchParams.get("auto") === "true";
+    
     if (urlOrderId) {
       setOrderId(urlOrderId);
-      handleTrack(null, urlOrderId);
+      if (autoTrack) {
+        setIsAutoTracking(true);
+        handleTrack(null, urlOrderId);
+      } else {
+        handleTrack(null, urlOrderId);
+      }
     }
     if (user?.email) {
       setEmail(user.email);
     }
   }, [searchParams, user]);
 
-  const handleTrack = (e: React.FormEvent | null, idFromUrl?: string) => {
+  const handleTrack = async (e: React.FormEvent | null, idFromUrl?: string) => {
     if (e) e.preventDefault();
     setLoading(true);
     
-    // Simulate API fetch delay
-    setTimeout(() => {
+    try {
+      const targetId = idFromUrl || orderId;
+      if (!targetId) {
+        toast.error("Please enter an order number.");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(getApiUrl(`/api/orders/${targetId}/track`));
+      if (!response.ok) {
+        throw new Error("Order not found or registry unreachable.");
+      }
+
+      const data = await response.json();
+      const { order, tracking } = data;
+
+      if (!order) {
+        toast.error("Order not found.");
+        setLoading(false);
+        return;
+      }
+
+      // Map Order & Tracking Data
+      const shiprocketData = tracking?.tracking_data?.shipment_track?.[0];
+      const activities = shiprocketData?.shipment_track_activities || [];
+      
+      // Determine steps based on activities
+      const steps = [
+        { id: 1, title: "Order Confirmed", description: "Your order has been received and confirmed.", icon: <CheckCircle2 size={18} />, time: new Date(order.createdAt).toLocaleString(), isCompleted: true },
+        { id: 2, title: "Quality Check", description: "Our experts verified your items for perfection.", icon: <ShieldCheck size={18} />, time: "Completed", isCompleted: true },
+        { id: 3, title: "Order Shipped", description: "Your order is on the way.", icon: <Truck size={18} />, time: "Pending", isCompleted: false },
+        { id: 4, title: "Out for Delivery", description: "A courier is navigating to your address.", icon: <MapPin size={18} />, time: "Pending", isCompleted: false },
+        { id: 5, title: "Delivered", description: "Your order has been successfully delivered.", icon: <Package size={18} />, time: "Pending", isCompleted: false }
+      ];
+
+      // Update steps based on Shiprocket activities
+      if (activities.length > 0) {
+        const latestStatus = shiprocketData.current_status.toLowerCase();
+        
+        steps[2].isCompleted = true; // Shipped
+        steps[2].time = activities.find((a: any) => a.status.toLowerCase().includes('shipped'))?.date || "In Transit";
+        
+        if (latestStatus.includes('delivered')) {
+          steps[3].isCompleted = true;
+          steps[4].isCompleted = true;
+          steps[4].isCurrent = true;
+          steps[4].time = activities.find((a: any) => a.status.toLowerCase().includes('delivered'))?.date || "Delivered";
+        } else if (latestStatus.includes('out')) {
+          steps[3].isCompleted = true;
+          steps[3].isCurrent = true;
+          steps[3].time = activities.find((a: any) => a.status.toLowerCase().includes('out'))?.date || "Out for Delivery";
+        } else {
+          steps[2].isCurrent = true;
+        }
+      } else if (order.status === "Shipped") {
+        steps[2].isCompleted = true;
+        steps[2].isCurrent = true;
+      } else if (order.status === "Delivered") {
+        steps[2].isCompleted = true;
+        steps[3].isCompleted = true;
+        steps[4].isCompleted = true;
+        steps[4].isCurrent = true;
+      }
+
+      // Arrived via direct link (auto=true) - Bypass internal view and go to Shiprocket
+      const hasRealTracking = order.trackingNumber && order.trackingNumber.toLowerCase() !== 'processing';
+      
+      if (hasRealTracking) {
+        // Use href instead of open to bypass popup blockers on auto-redirect
+        window.location.href = `https://shiprocket.co/tracking/${order.trackingNumber}`;
+        return;
+      }
+
       setOrderData({
-        orderNumber: idFromUrl || orderId,
-        status: "Shipped",
-        expectedDelivery: "April 1, 2026",
-        courier: "BlueDart Express",
-        trackingId: "BDE-908273645",
-        items: [
-          { name: "Hydra Glow Serum", image: "/serum.png", quantity: 1 }
-        ],
-        steps: [
-          { id: 1, title: "Order Confirmed", description: "Your order has been received and confirmed.", icon: <CheckCircle2 size={18} />, time: "9:30 AM, March 29", isCompleted: true },
-          { id: 2, title: "Quality Check", description: "Our experts verified your items for perfection.", icon: <ShieldCheck size={18} />, time: "11:15 AM, March 29", isCompleted: true },
-          { id: 3, title: "Order Shipped", description: "Your order is on the way via BlueDart Express.", icon: <Truck size={18} />, time: "2:45 PM, March 29", isCompleted: true, isCurrent: true },
-          { id: 4, title: "Out for Delivery", description: "A courier is navigating to your address.", icon: <MapPin size={18} />, time: "Pending", isCompleted: false },
-          { id: 5, title: "Delivered", description: "Your order has been successfully delivered.", icon: <Package size={18} />, time: "Pending", isCompleted: false }
-        ]
+        orderNumber: order.orderNumber,
+        status: order.status,
+        expectedDelivery: shiprocketData?.expected_date || "To be updated",
+        courier: order.courierPartner || shiprocketData?.courier_name || "Logistics Partner",
+        trackingId: order.trackingNumber || shiprocketData?.awb_code || "Processing",
+        items: order.items || [],
+        steps: steps
       });
+
       setIsTracking(true);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to fetch tracking data.");
+    } finally {
       setLoading(false);
-    }, 1200);
+      setIsAutoTracking(false);
+    }
   };
 
   const copyToClipboard = (text: string) => {
@@ -105,7 +181,31 @@ const TrackOrder = () => {
           </div>
 
           <AnimatePresence mode="wait">
-            {!isTracking ? (
+            {isAutoTracking ? (
+              <motion.div
+                key="auto-loader"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center justify-center py-24 space-y-8"
+              >
+                <div className="relative">
+                  <div className="w-24 h-24 border-2 border-gold/10 rounded-full" />
+                  <motion.div 
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                    className="absolute inset-0 border-2 border-transparent border-t-gold rounded-full"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center text-gold">
+                    <Sparkles size={32} className="animate-pulse" />
+                  </div>
+                </div>
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-display font-bold text-charcoal">Summoning Logistics...</h3>
+                  <p className="text-xs text-muted-foreground uppercase tracking-widest animate-pulse">Syncing with Shiprocket Registry</p>
+                </div>
+              </motion.div>
+            ) : !isTracking ? (
               <motion.div
                 key="track-form"
                 initial={{ opacity: 0, y: 10 }}

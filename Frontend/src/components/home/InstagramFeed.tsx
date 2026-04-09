@@ -11,8 +11,8 @@ interface InstagramFeedProps {
 }
 
 const InstagramFeed = ({ settings }: InstagramFeedProps) => {
-  const widgetId = settings?.widgetId || import.meta.env.VITE_LIGHTWIDGET_ID || "YOUR_LIGHTWIDGET_ID_HERE";
-  const hasWidget = widgetId !== "YOUR_LIGHTWIDGET_ID_HERE";
+  const widgetId = settings?.widgetId || import.meta.env.VITE_LIGHTWIDGET_ID || "e28ed63b938158708c05b3804025caf6";
+  const hasWidget = widgetId !== "e28ed63b938158708c05b3804025caf6";
   const profileHandle = settings?.profileHandle || "@hk_digiverse";
   const description = settings?.description || "Explore our latest innovations and milestones. Follow @hk_digiverse for daily tech inspiration.";
 

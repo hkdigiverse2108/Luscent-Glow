@@ -270,6 +270,13 @@ class OrderModel(BaseModel):
     createdAt: str = Field(...)
     orderNumber: str = Field(...)
     merchantTransactionId: Optional[str] = Field(default=None)
+    
+    # Shiprocket Tracking Fields
+    shiprocketOrderId: Optional[str] = Field(default=None)
+    shiprocketShipmentId: Optional[str] = Field(default=None)
+    trackingNumber: Optional[str] = Field(default=None)
+    trackingUrl: Optional[str] = Field(default=None)
+    courierPartner: Optional[str] = Field(default=None)
 
     class Config:
         populate_by_name = True
@@ -683,6 +690,11 @@ class PaymentCredentialsModel(BaseModel):
     cashfreeAppId: str = Field(default="")
     cashfreeSecretKey: str = Field(default="")
     cashfreeMode: str = Field(default="sandbox") # "sandbox" or "live"
+    
+    # Shiprocket Credentials
+    shiprocketEmail: str = Field(default="")
+    shiprocketPassword: str = Field(default="")
+    shiprocketPickupLocation: str = Field(default="Primary")
     
     updatedAt: Optional[str] = None
 

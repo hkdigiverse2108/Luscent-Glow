@@ -15,10 +15,13 @@ import {
   Calendar,
   IndianRupee,
   ShieldCheck,
-  ShoppingBag
+  ShoppingBag,
+  Save,
+  Sparkles
 } from "lucide-react";
-import { getAssetUrl } from "@/lib/api";
+import { getAssetUrl, getApiUrl } from "@/lib/api";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import { toast } from "sonner";
 
 interface OrderRitualModalProps {
   isOpen: boolean;
@@ -29,6 +32,65 @@ interface OrderRitualModalProps {
 
 const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitualModalProps) => {
   const { isDark } = useAdminTheme();
+  const [trackingNumber, setTrackingNumber] = React.useState(order?.trackingNumber || "");
+  const [courierPartner, setCourierPartner] = React.useState(order?.courierPartner || "Shiprocket");
+  const [isUpdatingTracking, setIsUpdatingTracking] = React.useState(false);
+  const [isAutoFulfilling, setIsAutoFulfilling] = React.useState(false);
+  const [updatingStatus, setUpdatingStatus] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (order) {
+      setTrackingNumber(order.trackingNumber || "");
+      setCourierPartner(order.courierPartner || "Shiprocket");
+    }
+  }, [order]);
+
+  const handleUpdateTracking = async () => {
+    setIsUpdatingTracking(true);
+    try {
+      const response = await fetch(getApiUrl(`/api/orders/${order._id || order.id}/tracking`), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trackingNumber, courierPartner }),
+      });
+      if (response.ok) {
+        toast.success("Tracking information updated.");
+      } else {
+        toast.error("Failed to update tracking info.");
+      }
+    } catch (error) {
+      toast.error("Connection error.");
+    } finally {
+      setIsUpdatingTracking(false);
+    }
+  };
+
+  const handleAutoFulfill = async () => {
+    setIsAutoFulfilling(true);
+    try {
+      const response = await fetch(getApiUrl(`/api/orders/${order._id || order.id}/fulfill`), {
+        method: "POST",
+      });
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success("Shiprocket Ritual Complete!", {
+          description: `AWB Generated: ${data.tracking.trackingNumber}`
+        });
+        setTrackingNumber(data.tracking.trackingNumber);
+        setCourierPartner(data.tracking.courierPartner || "Shiprocket");
+        // Trigger a refresh (the parent modal will re-fetch orders usually)
+      } else {
+        toast.error("Shiprocket Rejection", {
+          description: data.detail || "Fulfillment failed."
+        });
+      }
+    } catch (error) {
+      toast.error("Spirit connection failed.");
+    } finally {
+      setIsAutoFulfilling(false);
+    }
+  };
 
   if (!isOpen || !order) return null;
 
@@ -308,20 +370,97 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                      { id: 'Cancelled', icon: <XCircle size={16} />, color: "hover:text-rose-400 hover:border-rose-400/30 hover:bg-rose-400/5" }
                    ].map(status => (
                      <button
-                       key={status.id}
-                       onClick={() => onStatusUpdate(order._id || order.id, status.id)}
-                       className={`flex items-center justify-center gap-3 p-5 rounded-2xl border font-bold uppercase tracking-widest text-[10px] transition-all duration-500 ${
-                         order.status === status.id 
-                           ? (isDark ? "bg-white/10 border-white/20 text-white shadow-lg" : "bg-charcoal/5 border-charcoal/10 text-charcoal shadow-lg")
-                           : (isDark ? "bg-white/[0.02] border-white/5 text-white/20" : "bg-charcoal/[0.01] border-charcoal/5 text-charcoal/30")
-                       } ${status.color}`}
-                     >
-                        {status.icon}
-                        <span>{status.id}</span>
-                     </button>
+                        key={status.id}
+                        disabled={updatingStatus !== null}
+                        onClick={async () => {
+                          setUpdatingStatus(status.id);
+                          await onStatusUpdate(order._id || order.id, status.id);
+                          setUpdatingStatus(null);
+                        }}
+                        className={`flex items-center justify-center gap-3 p-5 rounded-2xl border font-bold uppercase tracking-widest text-[10px] transition-all duration-500 ${
+                          order.status === status.id 
+                            ? (isDark ? "bg-white/10 border-white/20 text-white shadow-lg" : "bg-charcoal/5 border-charcoal/10 text-charcoal shadow-lg")
+                            : (isDark ? "bg-white/[0.02] border-white/5 text-white/20" : "bg-charcoal/[0.01] border-charcoal/5 text-charcoal/30")
+                        } ${status.color} ${updatingStatus === status.id ? "animate-pulse" : ""}`}
+                      >
+                        {updatingStatus === status.id ? <Clock className="animate-spin" size={16} /> : status.icon}
+                        {updatingStatus === status.id ? "Synchronizing..." : status.id}
+                      </button>
                    ))}
                 </div>
             </div>
+
+            {/* Tracking Integration Ritual */}
+            {(order.status === 'Shipped' || order.status === 'Delivered') && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`p-8 rounded-[2rem] border space-y-6 transition-all duration-700 ${
+                  isDark ? "bg-indigo-500/5 border-indigo-500/20" : "bg-indigo-50/50 border-indigo-100"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
+                      <Truck size={20} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-extrabold uppercase tracking-widest text-indigo-400">Logistics Manifest</h4>
+                      <p className="text-[10px] font-medium opacity-40 uppercase tracking-tighter">Instant synchronization with Shiprocket API</p>
+                    </div>
+                  </div>
+                  
+                  <button 
+                    onClick={handleAutoFulfill}
+                    disabled={isAutoFulfilling}
+                    className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold rounded-lg uppercase tracking-widest text-[9px] hover:bg-indigo-500 hover:text-white transition-all flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {isAutoFulfilling ? <Clock size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                    {isAutoFulfilling ? "Generating..." : "Auto-Generate Manifest"}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold uppercase tracking-widest opacity-40 ml-1 text-indigo-400">Tracking Number / AWB</label>
+                    <input 
+                      type="text" 
+                      value={trackingNumber}
+                      onChange={(e) => setTrackingNumber(e.target.value)}
+                      placeholder="e.g. 1234567890"
+                      className={`w-full px-5 py-3 rounded-xl border text-sm font-bold outline-none transition-all ${
+                        isDark ? "bg-white/5 border-white/10 text-white focus:border-indigo-400" : "bg-white border-charcoal/10 text-charcoal focus:border-indigo-400 shadow-sm"
+                      }`}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-bold uppercase tracking-widest opacity-40 ml-1 text-indigo-400">Courier Partner</label>
+                    <select 
+                      value={courierPartner}
+                      onChange={(e) => setCourierPartner(e.target.value)}
+                      className={`w-full px-5 py-3 rounded-xl border text-sm font-bold outline-none appearance-none transition-all ${
+                        isDark ? "bg-white/5 border-white/10 text-white focus:border-indigo-400" : "bg-white border-charcoal/10 text-charcoal focus:border-indigo-400 shadow-sm"
+                      }`}
+                    >
+                      <option value="Shiprocket">Shiprocket</option>
+                      <option value="BlueDart">BlueDart</option>
+                      <option value="Delhivery">Delhivery</option>
+                      <option value="Ecom Express">Ecom Express</option>
+                      <option value="Other">Other Partner</option>
+                    </select>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleUpdateTracking}
+                  disabled={isUpdatingTracking}
+                  className="w-full py-4 bg-indigo-500 text-white font-bold rounded-xl uppercase tracking-widest text-[10px] hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isUpdatingTracking ? <Clock size={14} className="animate-spin" /> : <Save size={14} />}
+                  {isUpdatingTracking ? "Synchronizing Manifest..." : "Update Logistic Manifest"}
+                </button>
+              </motion.div>
+            )}
           </div>
 
           {/* Footer Ritual */}

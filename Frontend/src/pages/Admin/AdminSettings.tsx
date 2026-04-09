@@ -37,6 +37,8 @@ type PaymentCreds = {
   cashfreeAppId: string;
   cashfreeSecretKey: string;
   cashfreeMode: "sandbox" | "live";
+  shiprocketEmail: string;
+  shiprocketPassword: string;
 };
 
 const DEFAULT_CREDS: PaymentCreds = {
@@ -47,6 +49,8 @@ const DEFAULT_CREDS: PaymentCreds = {
   cashfreeAppId: "",
   cashfreeSecretKey: "",
   cashfreeMode: "sandbox",
+  shiprocketEmail: "",
+  shiprocketPassword: "",
 };
 
 const AdminSettings = () => {
@@ -707,6 +711,98 @@ const AdminSettings = () => {
               </div>
             </div>
           )}
+        </motion.section>
+
+        {/* ── Shiprocket Logistics ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className={cardClass}
+        >
+          <div className="flex flex-col md:flex-row md:items-center gap-6 mb-10 border-b pb-8 border-gold/10">
+            <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-xl">
+              <Truck size={28} />
+            </div>
+            <div className="space-y-1">
+              <h3 className={`text-xl font-extrabold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
+                Shiprocket Logistics
+              </h3>
+              <p className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-charcoal/60"}`}>
+                Configure Shiprocket API for real-time order tracking.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-3">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Shiprocket Email
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <Mail size={18} />
+                </div>
+                <input
+                  type="email"
+                  value={creds.shiprocketEmail}
+                  onChange={(e) => setCreds({ ...creds, shiprocketEmail: e.target.value })}
+                  className={`${inputClass} pl-12`}
+                  placeholder="name@example.com"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Shiprocket Password
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <Key size={18} />
+                </div>
+                <input
+                  type={showKeySecret ? "text" : "password"}
+                  value={creds.shiprocketPassword}
+                  onChange={(e) => setCreds({ ...creds, shiprocketPassword: e.target.value })}
+                  className={`${inputClass} pl-12`}
+                  placeholder="xxxxxxxx"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3 md:col-span-2">
+              <label className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                Shiprocket Pickup Nickname
+              </label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                  <MapPin size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={creds.shiprocketPickupLocation}
+                  onChange={(e) => setCreds({ ...creds, shiprocketPickupLocation: e.target.value })}
+                  className={`${inputClass} pl-12`}
+                  placeholder="e.g. Primary, Warehouse1, Home"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-2 italic font-medium px-1">
+                This must match the "Nickname" of the pickup location in your Shiprocket panel.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-3 mt-10">
+            <button
+              onClick={handleSaveCreds}
+              disabled={credsSaving}
+              className="px-8 py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold/80 transition-all shadow-lg shadow-gold/20 disabled:opacity-50 flex items-center gap-2"
+            >
+              {credsSaving ? <RefreshCcw size={14} className="animate-spin" /> : <Save size={14} />}
+              {credsSaving ? "Synchronizing..." : "Save Logistics Config"}
+            </button>
+          </div>
         </motion.section>
 
         {/* ── System Health ── */}

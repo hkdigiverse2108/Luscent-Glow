@@ -58,8 +58,21 @@ const AdminOrders = () => {
         body: JSON.stringify({ status: newStatus }),
       });
       if (response.ok) {
+        const data = await response.json();
         toast.success(`Ritual status updated to ${newStatus}.`);
-        fetchOrders();
+        if (data.tracking && data.tracking.trackingNumber) {
+          toast.success(`Shiprocket AWB Assigned: ${data.tracking.trackingNumber}`, {
+            description: "Logistic manifest synchronized successfully."
+          });
+        }
+        await fetchOrders();
+        
+        // Refresh the selected order in the modal if it's the one we just updated
+        if (selectedOrder && (selectedOrder._id === id || selectedOrder.id === id)) {
+          const freshRes = await fetch(getApiUrl(`/api/orders/${id}`));
+          const freshData = await freshRes.json();
+          if (freshRes.ok) setSelectedOrder(freshData);
+        }
       } else {
         const error = await response.json();
         toast.error(error.detail || "Status update failed.");
