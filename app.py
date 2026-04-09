@@ -21,9 +21,10 @@ def start_services():
     frontend_dir = os.path.join(root_dir, "Frontend")
     backend_dir = os.path.join(root_dir, "Backend")
 
-    # Commands - Use 'shell=True' for Windows compatibility with npm/uvicorn
+    # Commands - Cross-platform compatibility
     frontend_cmd = ["npm", "run", "dev"]
     backend_cmd = ["uvicorn", "app.main:app", "--reload", "--port", "5172"]
+    is_windows = os.name == "nt"
 
     p_frontend = None
     p_backend = None
@@ -34,7 +35,7 @@ def start_services():
         p_frontend = subprocess.Popen(
             frontend_cmd, 
             cwd=frontend_dir, 
-            shell=True,
+            shell=is_windows,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -46,7 +47,7 @@ def start_services():
         p_backend = subprocess.Popen(
             backend_cmd, 
             cwd=backend_dir, 
-            shell=True,
+            shell=is_windows,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
