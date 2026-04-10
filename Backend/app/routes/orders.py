@@ -319,7 +319,7 @@ async def track_order_live(id: str):
     if not order:
         raise HTTPException(status_code=404, detail=f"Order {id} not found")
         
-    creds = await get_payment_credentials()
+    creds = await get_shiprocket_credentials()
     tracking_data = {}
     
     tracking_number = order.get("trackingNumber")

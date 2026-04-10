@@ -14,185 +14,180 @@ def get_default_policy(policy_type: str) -> Dict:
         "privacy-policy": {
             "type": "privacy-policy",
             "title": "Privacy Policy",
-            "subtitle": "Your trust is the foundation of our commitment to you.",
-            "lastUpdated": "March 30, 2026",
+            "subtitle": "Your privacy is our priority. We handle your data with care.",
+            "lastUpdated": "April 10, 2026",
             "insights": [
-                {"icon": "Shield", "title": "Data Protection", "description": "We use industry-standard encryption to protect your personal information at all times."},
-                {"icon": "Eye", "title": "Full Transparency", "description": "You have complete control over how your data is collected and used."},
-                {"icon": "Lock", "title": "Secure Access", "description": "Only authorized personnel have access to your data for fulfillment purposes."},
-                {"icon": "Globe", "title": "Privacy Rights", "description": "We respect all regional data protection regulations (GDPR, CCPA, etc.)."}
+                {"icon": "Shield", "title": "Data Safety", "description": "We use strong encryption to keep your personal information secure at all times."},
+                {"icon": "Eye", "title": "Clear Choice", "description": "You decide how your information is used. No hidden data harvesting."},
+                {"icon": "Lock", "title": "Secure Only", "description": "Only the people fulfilling your order can ever see your details."},
+                {"icon": "Globe", "title": "Global Ready", "description": "We follow all major privacy laws so you can shop with total confidence."}
             ],
             "sections": [
                 {
                     "id": "collection",
-                    "title": "Information We Collect",
-                    "content": "<p>When you visit Luscent Glow, we collect certain information to provide you with a personalized experience. This includes:</p><ul class=\"list-disc pl-6 space-y-2\"><li><strong>Personal Data:</strong> Name, email address, shipping address, and payment information provided during checkout.</li><li><strong>Usage Data:</strong> Information on how you interact with our website, including pages visited and products viewed.</li><li><strong>Device Data:</strong> IP address, browser type, and device identifiers to optimize our technical performance.</li></ul>"
+                    "title": "What We Collect",
+                    "content": "<p>We only collect what we need to deliver your products and a better experience:</p><ul class=\"list-disc pl-6 space-y-2\"><li><strong>Details:</strong> Name, email, and address for shipping.</li><li><strong>Interaction:</strong> Which products you like so we can show you better recommendations.</li><li><strong>Technical:</strong> Basic device info to make sure our site runs smoothly for you.</li></ul>"
                 },
                 {
                     "id": "usage",
-                    "title": "How We Use Your Data",
-                    "content": "<p>Your information is used to ensure a seamless skincare journey, including:</p><ul class=\"list-disc pl-6 space-y-2\"><li>Processing and fulfilling your orders.</li><li>Communicating order updates and promotional offers (if opted-in).</li><li>Improving our website and product offerings through analytics.</li><li>Preventing fraudulent activities and ensuring platform security.</li></ul>"
+                    "title": "How We Use It",
+                    "content": "<p>Your data helps us serve you better:</p><ul class=\"list-disc pl-6 space-y-2\"><li>Processing and shipping your orders.</li><li>Sending order updates and news (only if you want them).</li><li>Making our products and website better every day.</li><li>Keeping our shop safe and secure for everyone.</li></ul>"
                 },
                 {
                     "id": "sharing",
-                    "title": "Third-Party Sharing",
-                    "content": "We never sell your personal data to third parties. We only share information with trusted service providers who assist us in operating our website, conducting our business, or servicing you, provided they agree to keep this information confidential."
+                    "title": "Sharing Data",
+                    "content": "We do not sell your data. We only share it with trusted partners—like delivery services—who help us get your order to you. They are legally required to keep your info private."
                 },
                 {
                     "id": "rights",
-                    "title": "Your Rights",
-                    "content": "You have the right to access, correct, or delete your personal information at any time. Simply contact us via our concierge service or through the settings in your account profile."
+                    "title": "Your Control",
+                    "content": "You own your data. You can ask us to see, change, or delete your info at any time. Just reach out through our support chat or email—we'll handle it immediately."
                 }
             ]
         },
         "terms-and-conditions": {
             "type": "terms-and-conditions",
             "title": "Terms & Conditions",
-            "subtitle": "The principles that guide our relationship with you.",
-            "lastUpdated": "March 30, 2026",
+            "subtitle": "Clear and simple rules for a respectful shopping experience.",
+            "lastUpdated": "April 10, 2026",
             "insights": [
-                {"icon": "FileText", "title": "Agreement", "description": "By using our platform, you agree to comply with our terms and standards."},
-                {"icon": "UserCheck", "title": "User Conduct", "description": "We expect a respectful and honest community of skincare enthusiasts."},
-                {"icon": "ShieldAlert", "title": "Liability", "description": "We strive for excellence but are not responsible for certain unforeseen events."},
-                {"icon": "Award", "title": "Fair Usage", "description": "Our content and branding are protected by intellectual property laws."}
+                {"icon": "FileText", "title": "Agreement", "description": "By using our site, you agree to follow these simple community rules."},
+                {"icon": "UserCheck", "title": "Respect", "description": "We expect all our beauty enthusiasts to be honest and respectful."},
+                {"icon": "ShieldAlert", "title": "Fairness", "description": "We work hard for perfection but can't be held responsible for system outages."},
+                {"icon": "Award", "title": "Our Brand", "description": "Our designs and content are our own—please don't copy without asking."}
             ],
             "sections": [
                 {
                     "id": "acceptance",
-                    "title": "Acceptance of Terms",
-                    "content": "Welcome to Luscent Glow. By accessing and using our website, you agree to be bound by these Terms and Conditions and our Privacy Policy. If you do not agree, please refrain from using our platform."
+                    "title": "Accepting These Rules",
+                    "content": "Welcome to Luscent Glow. By using our website, you're agreeing to these terms. If you don't agree, please don't use the site. It's as simple as that."
                 },
                 {
                     "id": "intellectual",
-                    "title": "Intellectual Property",
-                    "content": "<p>All content on this website, including text, graphics, logos, images, and software, is the property of Luscent Glow and is protected by copyright and intellectual property laws.</p><ul class=\"list-disc pl-6 space-y-2\"><li><strong>Permitted Use:</strong> You may access our website only for personal, non-commercial use.</li><li><strong>Restrictions:</strong> Any reproduction, modification, or distribution of our content without express written consent is strictly prohibited.</li></ul>"
+                    "title": "Our Content",
+                    "content": "Everything you see here—text, logos, and images—belongs to us. You can use it for your personal shopping, but you cannot copy or use it for business without our written permission."
                 },
                 {
                     "id": "user-accounts",
-                    "title": "User Accounts",
-                    "content": "When creating an account, you are responsible for maintaining the confidentiality of your credentials. You agree to accept responsibility for all activities that occur under your account."
+                    "title": "Your Account",
+                    "content": "If you create an account, keep your password safe. You are responsible for everything that happens under your account."
                 },
                 {
                     "id": "liability",
-                    "title": "Limitation of Liability",
-                    "content": "Luscent Glow will not be liable for any damages arising out of your use of our platform. While we strive to provide the most accurate skincare guidance, our products and advice are for aesthetic purposes and do not replace professional medical advice."
+                    "title": "Our Responsibility",
+                    "content": "We provide premium skincare guidance, but it doesn't replace a doctor's advice. We aren't responsible for how you use the products or if the system has a temporary glitch."
                 },
                 {
                     "id": "governing",
-                    "title": "Governing Law",
-                    "content": "These Terms and Conditions are governed by the laws of the jurisdiction in which we operate, and any disputes will be subject to the courts of that jurisdiction."
+                    "title": "Disputes",
+                    "content": "If we ever have a legal disagreement, it will be handled by the local courts in our headquarters' jurisdiction."
                 }
             ]
         },
         "return-policy": {
             "type": "return-policy",
             "title": "Return & Refund",
-            "subtitle": "Ensuring your satisfaction with every luminous drop.",
-            "lastUpdated": "March 30, 2026",
+            "subtitle": "Shop with confidence. We've got you covered.",
+            "lastUpdated": "April 10, 2026",
             "insights": [
-                {"icon": "RefreshCcw", "title": "30-Day Window", "description": "You have 30 days from the date of delivery to initiate a return or exchange."},
-                {"icon": "ShieldCheck", "title": "Quality Promise", "description": "Items must be in original condition or at least 50% full to be eligible for a refund."},
-                {"icon": "Mail", "title": "Seamless Support", "description": "Our Glow Concierge is available 24/7 to guide you through the return process."},
-                {"icon": "HelpCircle", "title": "Easy Refunds", "description": "Refunds are processed back to your original payment method within 7-10 business days."}
+                {"icon": "RefreshCcw", "title": "30 Days", "description": "You have 30 full days from delivery to decide if a product is right for you."},
+                {"icon": "ShieldCheck", "title": "Easy Returns", "description": "We accept returns on items that are mostly full and in good condition."},
+                {"icon": "Mail", "title": "Fast Support", "description": "Our support team is always ready to help you with your return request."},
+                {"icon": "HelpCircle", "title": "Quick Refunds", "description": "Once approved, your money goes back to you within 7-10 business days."}
             ],
             "sections": [
                 {
                     "id": "eligibility",
-                    "title": "Eligibility for Returns",
-                    "content": "<p>At Luscent Glow, we want you to be completely satisfied with your skincare journey. If a product doesn't meet your expectations, we accept returns on items that are in their original packaging or have been used for less than 50% of their volume.</p><p>Please note that promotional items, gift cards, and certain limited-edition sets are non-refundable unless defective.</p>"
+                    "title": "When Can You Return?",
+                    "content": "<p>We want you to love your glow. If you aren't happy, you can return products that are mostly unused (at least half full) within 30 days.</p><p>Please note: Gift cards and sale items are usually final sale unless they arrive damaged.</p>"
                 },
                 {
                     "id": "process",
-                    "title": "The Return Process",
-                    "content": "<p>Initiating a return is simple. Please follow these steps:</p><ul class=\"list-disc pl-6 space-y-2\"><li>Contact our concierge at support@luscentglow.com with your order number.</li><li>Once approved, you will receive a prepaid return shipping label via email.</li><li>Securely pack the items in the original box if possible.</li><li>Drop off the package at any authorized carrier location.</li></ul>"
+                    "title": "How to Return",
+                    "content": "<p>Returning is easy:</p><ul class=\"list-disc pl-6 space-y-2\"><li>Email us at support@luscentglow.com with your order number.</li><li>We'll send you a prepaid shipping label.</li><li>Pack it up and drop it at the carrier.</li></ul>"
                 },
                 {
                     "id": "refunds",
-                    "title": "Refund Timeline",
-                    "content": "Once your return is received and inspected, we will send you an email notification. Approved refunds will be processed immediately and will automatically be applied to your original method of payment within 7-10 business days, depending on your financial institution."
+                    "title": "Getting Your Money Back",
+                    "content": "Once we receive your return, we'll check it and send you an email. If everything looks good, we'll refund your original payment method within 7-10 business days."
                 },
                 {
                     "id": "exchanges",
-                    "title": "Exchanges",
-                    "content": "We only replace items if they are defective or damaged during transit. If you need to exchange an item for a different variant, please contact our concierge team for assistance."
+                    "title": "Swapping Products",
+                    "content": "If your product arrives damaged, we'll replace it for free. If you just want a different item, contact us and we'll help you set up a swap."
                 }
             ]
         },
         "shipping-policy": {
             "type": "shipping-policy",
             "title": "Shipping Policy",
-            "subtitle": "Ensuring a smooth, elegant journey to your doorstep.",
-            "lastUpdated": "March 30, 2026",
+            "subtitle": "Safe, fast, and elegant delivery to your doorstep.",
+            "lastUpdated": "April 10, 2026",
             "insights": [
-                {"icon": "Zap", "title": "Fast Dispatch", "description": "Orders are processed and dispatched within 1-2 business days of confirmation."},
-                {"icon": "PackageCheck", "title": "Glow Priority", "description": "Get expedited 1-2 day delivery with our priority shipping option."},
-                {"icon": "Truck", "title": "Eco-Shipping", "description": "Our carbon-neutral shipping partners ensure a sustainable journey for your glow."},
-                {"icon": "Globe2", "title": "Tracking", "description": "Receive real-time tracking updates via email as soon as your order leaves our facility."}
+                {"icon": "Zap", "title": "Fast Shipping", "description": "We pack and ship your orders within 1-2 business days."},
+                {"icon": "PackageCheck", "title": "Priority Glow", "description": "Need it fast? Choose our priority shipping for 1-2 day delivery."},
+                {"icon": "Truck", "title": "Eco-Friendly", "description": "We use sustainable shipping partners to reduce our carbon footprint."},
+                {"icon": "Globe2", "title": "Tracking", "description": "You'll get a tracking link the moment your package leaves our shop."}
             ],
             "sections": [
                 {
                     "id": "processing",
-                    "title": "Order Processing Time",
-                    "content": "Thank you for joining the Luscent Glow community. All orders are processed within 1-2 business days (excluding weekends and holidays). You will receive a confirmation email once your order has been successfully placed, followed by a tracking number once dispatched."
+                    "title": "Packing Time",
+                    "content": "We move fast. Most orders are packed and ready to go within 1-2 business days. You'll get an email tracking link as soon as it's on the truck."
                 },
                 {
                     "id": "rates",
-                    "title": "Shipping Rates & Delivery Estimates",
-                    "content": "<p>We offer two tiers of shipping to accommodate your schedule:</p><ul class=\"list-disc pl-6 space-y-2\"><li><strong>Standard Glow:</strong> 3-5 business days. Free for all orders over $75.</li><li><strong>Priority Radiance:</strong> 1-2 business days. Available for a flat rate of $15.</li></ul>"
+                    "title": "Costs & Timing",
+                    "content": "<p>We offer two simple shipping options:</p><ul class=\"list-disc pl-6 space-y-2\"><li><strong>Standard:</strong> 3-5 days. Free on all orders over $75!</li><li><strong>Priority:</strong> 1-2 days. Available for a flat $15 fee.</li></ul>"
                 },
                 {
                     "id": "international",
-                    "title": "International Shipping",
-                    "content": "We currently ship to select global locations. International delivery times vary (typically 7-14 business days). Please note that international orders may be subject to import duties and taxes, which are the responsibility of the recipient."
+                    "title": "Global Shipping",
+                    "content": "We ship worldwide! International orders usually take 7-14 days. Just keep in mind that local custom fees are handled by the customer."
                 },
                 {
-                    "id": "order-tracking",
-                    "title": "Tracking Your Order",
-                    "content": "As soon as your order has been dispatched, you'll receive a shipping confirmation email featuring a tracking number. You can monitor your package's journey through our website's tracking portal or directly through the carrier's link."
+                    "id": "tracking",
+                    "title": "Keep an Eye on It",
+                    "content": "Check your email for your tracking number. You can track your package right here on our website or through the carrier's link."
                 },
                 {
                     "id": "damages",
-                    "title": "Lost or Damaged Items",
-                    "content": "Luscent Glow is not liable for products damaged or lost during shipping. However, if your order arrives damaged, please save all packaging materials and damaged goods before filing a claim with the carrier and contacting our concierge team for assistance."
+                    "title": "Lost or Damaged",
+                    "content": "If your package is lost or arrives damaged, don't worry. Contact us immediately and we'll work with the carrier to make it right for you."
                 }
             ]
         },
         "cancellation-policy": {
             "type": "cancellation-policy",
             "title": "Cancellation Policy",
-            "subtitle": "Flexible guidance for your changing beauty needs.",
-            "lastUpdated": "March 30, 2026",
+            "subtitle": "Easy changes for your evolving beauty ritual.",
+            "lastUpdated": "April 10, 2026",
             "insights": [
-                {"icon": "Clock", "title": "6-Hour Window", "description": "Cancel your order within 6 hours of placement for a full, immediate refund."},
-                {"icon": "XCircle", "title": "No Hassle", "description": "Cancellations are easy and direct through your account or our concierge email."},
-                {"icon": "CheckCircle2", "title": "Quick Approval", "description": "Once requested within the timeframe, your cancellation is approved automatically."},
-                {"icon": "CreditCard", "title": "Instant Refund", "description": "Funds are released back to your original payment method immediately upon approval."}
+                {"icon": "Clock", "title": "6-Hour Window", "description": "Cancel within 6 hours of ordering for a full, instant refund."},
+                {"icon": "XCircle", "title": "No Stress", "description": "Cancel easily through your account settings or a quick email."},
+                {"icon": "CheckCircle2", "title": "Auto-Approve", "description": "If you're within the 6-hour window, your request is approved instantly."},
+                {"icon": "CreditCard", "title": "Instant Refund", "description": "We release your funds back to you the moment you cancel."}
             ],
             "sections": [
                 {
                     "id": "window",
-                    "title": "Cancellation Window",
-                    "content": "We understand that plans can change. To ensure our fulfillment process remains efficient, we offer a 6-hour window from the time of order placement to cancel your order and receive a full refund."
+                    "title": "The Cancellation Window",
+                    "content": "Changed your mind? No problem. You have 6 hours from the moment you place your order to cancel it for a full, guaranteed refund."
                 },
                 {
                     "id": "how-to",
                     "title": "How to Cancel",
-                    "content": "<p>Please use one of the following methods to cancel your order:</p><ul class=\"list-disc pl-6 space-y-2\"><li>Log in to your account and select \"Cancel Order\" in your order history.</li><li>Email our concierge at support@luscentglow.com with your order number.</li></ul>"
+                    "content": "<p>You have two easy options:</p><ul class=\"list-disc pl-6 space-y-2\"><li>Go to your \"Order History\" and click \"Cancel Order\".</li><li>Email us at support@luscentglow.com with your order number.</li></ul>"
                 },
                 {
                     "id": "after-window",
-                    "title": "Cancellations After 6 Hours",
-                    "content": "Once the 6-hour window has passed, our team has likely begun the fulfillment process. In this case, we are unable to cancel the order. However, you are still eligible to return the items for a refund once they arrive, in accordance with our Return Policy."
+                    "title": "After 6 Hours",
+                    "content": "After 6 hours, we've already started packing your ritual. While we can't cancel it then, you can still return it for a refund once it arrives."
                 },
                 {
                     "id": "refunds",
-                    "title": "Refund Process",
-                    "content": "Once a cancellation is confirmed, your refund will be initiated immediately. Depending on your bank or credit card issuer, it may take 5-7 business days for the funds to reflect in your account."
-                },
-                {
-                    "id": "pre-orders",
-                    "title": "Pre-Orders & Limited Releases",
-                    "content": "Please note that pre-ordered items or certain limited-edition releases may have specific cancellation terms, which will be clearly stated at the time of purchase."
+                    "title": "Getting Your Refund",
+                    "content": "We release your funds to your bank immediately. It usually takes 5-7 days for your bank to show it in your account."
                 }
             ]
         }

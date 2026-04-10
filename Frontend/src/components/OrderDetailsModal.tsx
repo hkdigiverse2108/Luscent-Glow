@@ -47,19 +47,19 @@ const OrderDetailsModal = ({ isOpen, onClose, order }: OrderDetailsProps) => {
           initial={{ opacity: 0, y: "100%" }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: "100%" }}
-          className="relative w-full max-w-2xl bg-background sm:rounded-3xl h-full sm:h-[90vh] overflow-y-auto shadow-2xl"
+          className="relative w-full max-w-2xl bg-[#faf9f6]/95 backdrop-blur-xl sm:rounded-[3rem] h-full sm:h-[90vh] overflow-y-auto shadow-2xl border border-white/20"
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-white px-6 py-5 border-b flex items-center gap-6">
+          <div className="sticky top-0 z-10 bg-white/70 backdrop-blur-md px-6 py-5 border-b border-gold/5 flex items-center gap-6">
             <button onClick={onClose} className="p-1 hover:bg-muted rounded-full transition-colors group">
               <X size={24} className="text-charcoal group-hover:text-gold transition-colors" />
             </button>
-            <h2 className="text-2xl font-display font-bold text-charcoal flex-1 lowercase">Order <span className="text-gold italic font-light">Details</span></h2>
+            <h2 className="text-2xl font-display font-bold text-charcoal flex-1 uppercase tracking-tight">Order <span className="text-gold italic font-light">Details</span></h2>
           </div>
 
           <div className="p-6 md:p-8 space-y-6 pb-24">
             {/* Status Summary */}
-            <div className="bg-white p-6 rounded-[2rem] border border-border shadow-sm space-y-6">
+            <div className="bg-[#fdfcfb]/80 backdrop-blur-sm p-7 rounded-[2.5rem] border border-gold/10 shadow-[0_15px_40px_rgba(182,143,76,0.04)] space-y-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Order Number</p>
@@ -78,7 +78,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order }: OrderDetailsProps) => {
             </div>
 
             {/* Items Section */}
-            <div className="bg-white rounded-[2rem] border border-border shadow-sm overflow-hidden">
+            <div className="bg-[#fdfcfb]/80 backdrop-blur-sm rounded-[2.5rem] border border-gold/10 shadow-[0_15px_40px_rgba(182,143,76,0.04)] overflow-hidden">
                <div className="px-8 py-5 border-b bg-muted/5 flex items-center gap-3">
                   <ShoppingBag size={18} className="text-gold" />
                   <h3 className="text-sm font-bold text-charcoal uppercase tracking-widest">Items Ordered</h3>
@@ -90,7 +90,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order }: OrderDetailsProps) => {
                            <img src={getAssetUrl(item.image)} alt={item.name} className="w-full h-full object-contain" />
                         </div>
                         <div className="flex-1 min-w-0">
-                           <h4 className="text-lg font-display font-bold text-charcoal truncate lowercase">{item.name}</h4>
+                           <h4 className="text-lg font-display font-bold text-charcoal truncate">{item.name}</h4>
                            <p className="text-xs text-muted-foreground mt-1 font-body">Qty: {item.quantity} • {item.selectedShade || "Default"}</p>
                            <p className="text-base font-bold text-charcoal mt-3">₹{Number(item.price).toLocaleString()}</p>
                         </div>
@@ -101,8 +101,8 @@ const OrderDetailsModal = ({ isOpen, onClose, order }: OrderDetailsProps) => {
 
             {/* Shipping & Payment Grid */}
             <div className="grid md:grid-cols-2 gap-6">
-               {/* Shipping Address */}
-               <div className="bg-white p-7 rounded-[2.5rem] border border-border shadow-sm space-y-5">
+                {/* Shipping Address */}
+                <div className="bg-[#fdfcfb]/80 p-7 rounded-[2.5rem] border border-gold/10 shadow-[0_15px_40px_rgba(182,143,76,0.04)] space-y-5">
                   <div className="flex items-center gap-3">
                      <MapPin size={18} className="text-gold" />
                      <h3 className="text-xs font-bold text-charcoal uppercase tracking-[0.2em]">Delivery Address</h3>
@@ -112,8 +112,8 @@ const OrderDetailsModal = ({ isOpen, onClose, order }: OrderDetailsProps) => {
                   </div>
                </div>
 
-               {/* Payment Info */}
-               <div className="bg-white p-7 rounded-[2.5rem] border border-border shadow-sm space-y-6">
+                {/* Payment Info */}
+                <div className="bg-[#fdfcfb]/80 p-7 rounded-[2.5rem] border border-gold/10 shadow-[0_15px_40px_rgba(182,143,76,0.04)] space-y-6">
                    <div className="flex items-center gap-3">
                      <CreditCard size={18} className="text-gold" />
                      <h3 className="text-xs font-bold text-charcoal uppercase tracking-[0.2em]">Payment Summary</h3>
@@ -140,9 +140,9 @@ const OrderDetailsModal = ({ isOpen, onClose, order }: OrderDetailsProps) => {
                               <span className="font-bold text-gold">-₹{order.discount.toLocaleString()}</span>
                           </div>
                         )}
-                        <div className="flex justify-between text-lg pt-4 border-t border-border mt-2">
-                            <span className="font-display font-bold text-charcoal lowercase">Total Amount</span>
-                            <span className="font-display font-bold text-gold text-2xl">₹{Number(order.totalAmount).toLocaleString()}</span>
+                        <div className="flex justify-between items-baseline pt-4 border-t border-gold/10 mt-2">
+                            <span className="font-display font-bold text-charcoal uppercase tracking-tight">Total Amount</span>
+                            <span className="font-body font-bold text-gold text-3xl tracking-tight">₹{Number(order.totalAmount).toLocaleString()}</span>
                         </div>
                       </div>
                    </div>

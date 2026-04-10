@@ -45,7 +45,7 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
     <div className="min-h-screen bg-[#FDFBF9] selection:bg-gold/30">
       <Header />
       
-      <main className="pt-32 md:pt-40 pb-24">
+      <main className="pt-16 md:pt-24 pb-24">
         <div className="container mx-auto px-4">
           
           {/* Editorial Hero */}
@@ -70,7 +70,7 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
               transition={{ delay: 0.1 }}
               className="font-display text-3xl sm:text-4xl md:text-6xl lg:text-8xl font-bold text-primary mb-6 leading-tight md:leading-[1.1]"
             >
-              {title} <span className="text-gold italic">Concierge</span>
+              {title}
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0 }}

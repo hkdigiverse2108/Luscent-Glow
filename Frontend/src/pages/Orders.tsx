@@ -38,11 +38,11 @@ interface Order {
 }
 
 const statusConfig = {
-  "Processing": { color: "text-muted-foreground", bg: "bg-muted/50", border: "border-muted-foreground/10" },
-  "Quality Check": { color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
-  "Shipped": { color: "text-gold", bg: "bg-gold/5", border: "border-gold/20" },
+  "Processing": { color: "text-charcoal/60", bg: "bg-charcoal/5", border: "border-charcoal/10" },
+  "Quality Check": { color: "text-gold", bg: "bg-gold/5", border: "border-gold/10" },
+  "Shipped": { color: "text-gold", bg: "bg-gold/10", border: "border-gold/20" },
   "Delivered": { color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-100" },
-  "Cancelled": { color: "text-destructive", bg: "bg-destructive/5", border: "border-destructive/10" },
+  "Cancelled": { color: "text-rose-500", bg: "bg-rose-50", border: "border-rose-100" },
   "Pending Payment": { color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
 };
 
@@ -168,10 +168,32 @@ const Orders = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[#fafaf9]">
+    <div className="min-h-screen bg-[#faf9f6] relative overflow-hidden">
       <Header />
       
-      <main className="pt-28 pb-32 md:pt-36">
+      {/* Luxury Aura Background Elements */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden select-none z-0">
+        <motion.div 
+          animate={{ 
+            x: [0, 40, 0],
+            y: [0, 60, 0],
+            scale: [1, 1.2, 1]
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[-5%] right-[-5%] w-[45%] h-[45%] bg-gold/10 rounded-full blur-[130px] opacity-40" 
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, -30, 0],
+            y: [0, 40, 0],
+            scale: [1, 1.1, 1]
+          }}
+          transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
+          className="absolute bottom-[5%] left-[-10%] w-[50%] h-[50%] bg-gold/5 rounded-full blur-[110px] opacity-35" 
+        />
+      </div>
+
+      <main className="relative z-10 pt-28 pb-32 md:pt-36">
         <div className="max-w-4xl mx-auto px-6">
           
           {/* Navigation Back Ritual */}
@@ -188,8 +210,10 @@ const Orders = () => {
           {/* Professional Header Section */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div className="space-y-1">
-              <h1 className="text-3xl md:text-5xl font-display font-bold text-charcoal">Your Orders</h1>
-              <p className="text-xs text-muted-foreground uppercase tracking-[0.2em] font-medium">Track and manage your rituals</p>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-medium text-charcoal tracking-tight">
+                Your <span className="text-gold italic font-light">Orders</span>
+              </h1>
+              <p className="text-[10px] md:text-xs text-muted-foreground uppercase font-bold tracking-[0.4em] opacity-60">Track and manage your rituals</p>
             </div>
 
             <div className="relative w-full md:w-80">
@@ -199,7 +223,7 @@ const Orders = () => {
                 placeholder="Search by order ID or product..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white border border-border rounded-xl py-3.5 pl-11 pr-4 text-sm outline-none focus:ring-1 ring-gold/20 focus:border-gold transition-all shadow-sm"
+                className="w-full bg-white/50 backdrop-blur-sm border border-gold/10 rounded-2xl py-4 pl-12 pr-4 text-xs font-body font-bold text-charcoal outline-none focus:ring-4 ring-gold/5 focus:border-gold/30 transition-all shadow-sm uppercase tracking-widest placeholder:text-muted-foreground/30"
               />
             </div>
           </div>
@@ -218,10 +242,10 @@ const Orders = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.05 }}
-                  className="bg-white border border-border rounded-2xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_4px_6px_-2px_rgba(0,0,0,0.05)] overflow-hidden hover:shadow-lg transition-shadow"
+                  className="bg-[#fdfcfb]/80 backdrop-blur-md border border-gold/10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(182,143,76,0.05)] overflow-hidden hover:shadow-[0_30px_60px_rgba(182,143,76,0.08)] transition-all duration-700 hover:border-gold/20"
                 >
                   {/* Card Header Strip */}
-                  <div className="px-6 py-4 bg-muted/20 border-b border-border flex flex-wrap items-center justify-between gap-4">
+                  <div className="px-8 py-6 bg-white/40 border-b border-gold/5 flex flex-wrap items-center justify-between gap-6">
                     <div className="flex items-center gap-6">
                       <div className="space-y-0.5">
                         <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Order Placed</p>
@@ -294,9 +318,7 @@ const Orders = () => {
                           className={`w-full py-3 text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 ${
                             order.status === 'Cancelled'
                             ? "bg-muted text-muted-foreground cursor-not-allowed shadow-none"
-                            : order.status === 'Shipped' 
-                              ? "bg-gold text-charcoal hover:bg-gold/80" 
-                              : "bg-charcoal text-white hover:bg-charcoal/80"
+                            : "bg-charcoal text-white hover:bg-charcoal/80"
                           }`}
                           disabled={order.status === 'Cancelled'}
                         >
@@ -308,7 +330,7 @@ const Orders = () => {
                           ) : (
                             <>
                               <ExternalLink size={14} />
-                              {order.status === 'Shipped' ? 'Track on Shiprocket' : 'Track Order'}
+                              Track Order
                             </>
                           )}
                         </button>
@@ -332,7 +354,7 @@ const Orders = () => {
                           </button>
                         )}
                         
-                        <div className="mt-4 p-4 bg-muted/30 rounded-xl border border-border">
+                        <div className="mt-4 p-4 bg-white/40 rounded-2xl border border-gold/5">
                            <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mb-2">Order Summary</p>
                            <div className="flex justify-between items-center">
                               <span className="text-xs text-charcoal font-medium">{order.items.length} Product(s)</span>

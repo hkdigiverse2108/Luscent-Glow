@@ -101,6 +101,8 @@ const AdminSettings = () => {
 
   const [showKeySecret, setShowKeySecret] = useState(false);
   const [showCashfreeSecret, setShowCashfreeSecret] = useState(false);
+  const [showShiprocketPassword, setShowShiprocketPassword] = useState(false);
+  const [showSmtpPassword, setShowSmtpPassword] = useState(false);
 
   useEffect(() => {
     fetchSettings();
@@ -337,6 +339,26 @@ const AdminSettings = () => {
                 />
               </div>
             </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-10">
+            <button
+              onClick={handleUpdate}
+              disabled={saving}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold/80 transition-all shadow-lg shadow-gold/20 disabled:opacity-50"
+            >
+              {saving ? <RefreshCcw size={14} className="animate-spin" /> : <Save size={14} />}
+              {saving ? "Saving Changes..." : "Save Settings"}
+            </button>
+            <button
+              onClick={fetchSettings}
+              className={`flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold uppercase tracking-[0.15em] text-xs border transition-all ${
+                isDark ? "border-white/10 text-white/50 hover:bg-white/5" : "border-charcoal/10 text-charcoal/50 hover:bg-charcoal/5"
+              }`}
+            >
+              <RefreshCcw size={14} />
+              Re-Sync
+            </button>
           </div>
         </motion.section>
 
@@ -682,12 +704,19 @@ const AdminSettings = () => {
                       <Key size={18} />
                     </div>
                     <input
-                      type="password"
+                      type={showShiprocketPassword ? "text" : "password"}
                       value={shiprocket.shiprocketPassword}
                       onChange={(e) => setShiprocket({ ...shiprocket, shiprocketPassword: e.target.value })}
-                      className={`${inputClass} pl-12`}
+                      className={`${inputClass} pl-12 pr-12`}
                       placeholder="xxxxxxxx"
                     />
+                    <button 
+                      onClick={() => setShowShiprocketPassword(!showShiprocketPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gold/60 hover:text-gold transition-colors"
+                      type="button"
+                    >
+                      {showShiprocketPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
                   </div>
                 </div>
 

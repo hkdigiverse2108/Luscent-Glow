@@ -543,7 +543,7 @@ const Checkout = () => {
                                                 <img src={getAssetUrl(item.image)} className="w-full h-full object-cover" alt={item.name} />
                                             </div>
                                             <div className="flex-1 min-w-0 py-1">
-                                                <h4 className="text-[11px] font-black text-charcoal truncate uppercase tracking-widest">{item.name}</h4>
+                                                <h4 className="text-[11px] font-black text-charcoal tracking-widest">{item.name}</h4>
                                                 <p className="text-[10px] text-gray-400 mt-1 font-body">Quantity: {item.quantity}</p>
                                                 <p className="text-base font-black text-charcoal mt-3 font-body">₹{(item.price * item.quantity).toLocaleString()}</p>
                                             </div>
@@ -647,7 +647,7 @@ const Checkout = () => {
                                     )}
                                     <div className="pt-6 border-t border-gray-100 flex justify-between items-baseline">
                                         <span className="text-sm font-black text-charcoal uppercase tracking-[0.2em]">Grand Total</span>
-                                        <span className="text-3xl font-display font-medium text-gold">₹{total.toLocaleString()}</span>
+                                        <span className="text-2xl md:text-3xl font-body font-bold text-gold tracking-tight">₹{total.toLocaleString()}</span>
                                     </div>
                                 </div>
                             </motion.div>

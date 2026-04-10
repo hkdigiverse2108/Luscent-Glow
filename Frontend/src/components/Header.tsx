@@ -228,13 +228,13 @@ const Header = () => {
                     </button>
                     
                     <div className="absolute top-full -left-4 w-66 pt-4 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-[100]">
-                      <div className="bg-white border border-gold/10 shadow-ethereal rounded-2xl overflow-hidden py-3">
+                      <div className="bg-white border border-gold/10 shadow-ethereal rounded-2xl overflow-hidden py-2">
                         <div className="space-y-0.5">
                           {dynamicCategories.map((cat) => (
                             <div key={cat.slug} className="group/item relative flex items-center">
                               <Link
                                 to={`/products?category=${cat.slug}`}
-                                className="flex-1 block px-6 py-3 text-[11px] font-body font-bold text-charcoal/80 uppercase tracking-widest hover:text-gold hover:bg-gold/5 transition-all duration-300"
+                                className="flex-1 block px-6 py-2 text-[11px] font-body font-bold text-charcoal/80 uppercase tracking-widest hover:text-gold hover:bg-gold/5 transition-all duration-300"
                               >
                                 {cat.name}
                               </Link>
@@ -259,10 +259,10 @@ const Header = () => {
                             </button>
                           </div>
                         )}
-                        <div className="border-t border-border/60 mt-3 pt-2">
+                        <div className="border-t border-border/60 mt-2 pt-1.5">
                           <Link
                             to="/products"
-                            className="block text-center px-6 py-3 text-[10px] font-body font-black text-gold hover:opacity-80 transition-all duration-300 uppercase tracking-[0.3em]"
+                            className="block text-center px-6 py-2.5 text-[10px] font-body font-black text-gold hover:opacity-80 transition-all duration-300 uppercase tracking-[0.3em]"
                           >
                             Explore All
                           </Link>
@@ -588,7 +588,7 @@ const Header = () => {
                           <Link
                             to={`/products?category=${cat.slug}`}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex-1 flex items-center justify-between py-4 px-4 text-base font-body font-medium text-foreground hover:bg-gold/5 rounded-2xl transition-all border-b border-border/30 last:border-0 active:bg-gold/10"
+                            className="flex-1 flex items-center justify-between py-2.5 px-4 text-base font-body font-medium text-foreground hover:bg-gold/5 rounded-2xl transition-all border-b border-border/30 last:border-0 active:bg-gold/10"
                           >
                             {cat.name}
                             <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
@@ -608,7 +608,7 @@ const Header = () => {
                       <Link
                         to="/products"
                         onClick={() => setMobileMenuOpen(false)}
-                        className="flex items-center justify-between py-4 px-4 text-base font-body font-bold text-gold hover:bg-gold/5 rounded-2xl transition-all active:bg-gold/10"
+                        className="flex items-center justify-between py-2.5 px-4 text-base font-body font-bold text-gold hover:bg-gold/5 rounded-2xl transition-all active:bg-gold/10"
                       >
                         Explore All Products
                       </Link>

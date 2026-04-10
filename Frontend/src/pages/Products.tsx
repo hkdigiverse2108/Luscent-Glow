@@ -7,6 +7,13 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { categories, Product, products } from "@/data/products";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getApiUrl } from "@/lib/api";
 
 const priceRanges = [
@@ -177,7 +184,7 @@ const Products = () => {
       <Header />
       <main className="container mx-auto px-4 py-6 md:py-8 lg:py-12">
         {/* Breadcrumb */}
-        <p className="text-[10px] md:text-xs font-body text-muted-foreground mb-4 md:mb-6 uppercase tracking-widest opacity-70">
+        <p className="text-[10px] md:text-xs font-body font-bold text-muted-foreground mb-4 md:md-6 tracking-widest opacity-70">
           Home / {selectedCategory ? dynamicCategories.find((c) => c.slug === selectedCategory)?.name : "All Products"}
           {searchParam && <span className="text-gold font-medium"> / Searching for "{searchParam}"</span>}
         </p>
@@ -200,17 +207,23 @@ const Products = () => {
                 >
                   <SlidersHorizontal size={14} /> Filter
                 </button>
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="appearance-none bg-background border border-border rounded-full px-5 py-2.5 pr-10 text-[11px] font-body font-bold uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-gold/20"
-                  >
-                    {sortOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                <div className="relative min-w-[160px]">
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="w-full bg-white/50 backdrop-blur-sm border-gold/20 rounded-full h-11 px-6 text-[10px] font-bold uppercase tracking-[0.2em] text-charcoal shadow-sm hover:border-gold/40 transition-all focus:ring-gold/10">
+                      <SelectValue placeholder="Sort By" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white/95 backdrop-blur-xl border-gold/10 rounded-[1.5rem] shadow-ethereal overflow-hidden">
+                      {sortOptions.map((opt) => (
+                        <SelectItem 
+                          key={opt.value} 
+                          value={opt.value}
+                          className="text-[10px] font-bold uppercase tracking-widest text-charcoal/70 focus:bg-gold/5 focus:text-gold py-3 px-6 cursor-pointer"
+                        >
+                          {opt.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>

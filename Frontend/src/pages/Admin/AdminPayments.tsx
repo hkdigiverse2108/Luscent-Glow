@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, 
@@ -193,14 +194,14 @@ const AdminPayments = () => {
                         className={`group hover:bg-gold/5 transition-all cursor-default`}
                       >
                         <td className="px-6 py-6 border-transparent relative">
-                          <div className="flex flex-col gap-1">
-                            <span className={`text-[13px] font-bold ${isDark ? "text-white" : "text-charcoal"}`}>
+                          <Link to="/admin/orders" className="flex flex-col gap-1 group/link">
+                            <span className={`text-[13px] font-bold transition-colors ${isDark ? "text-white group-hover/link:text-gold" : "text-charcoal group-hover/link:text-gold"}`}>
                               {p.orderNumber || "LG-UNKNOWN"}
                             </span>
                             <span className={`text-[10px] font-mono opacity-40 group-hover:opacity-100 transition-opacity`}>
                               {p.merchantTransactionId}
                             </span>
-                          </div>
+                          </Link>
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gold rounded-r-full scale-y-0 group-hover:scale-y-100 transition-transform" />
                         </td>
                         <td className="px-6 py-6 border-transparent">

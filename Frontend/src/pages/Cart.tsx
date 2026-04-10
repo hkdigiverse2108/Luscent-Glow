@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -65,7 +65,8 @@ const Cart = () => {
   const navigate = useNavigate();
   const [couponInput, setCouponInput] = React.useState("");
   const [giftCardInput, setGiftCardInput] = React.useState("");
-  const [isCouponsModalOpen, setIsCouponsModalOpen] = React.useState(false);
+  const [isCouponsModalOpen, setIsCouponsModalOpen] = useState(false);
+  const [isGiftCardsModalOpen, setIsGiftCardsModalOpen] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = React.useState(false);
   const [orderComplete, setOrderComplete] = React.useState(false);
 
@@ -211,9 +212,9 @@ const Cart = () => {
                   <Sparkles size={14} className="opacity-50" />
                   <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Special Selections</span>
                 </div>
-                <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-charcoal tracking-tight lowercase leading-[0.9]">
-                  My <span className="text-gold italic font-light">Cart</span>
-                </h1>
+                <h1 className="text-4xl md:text-5xl font-display font-medium text-charcoal tracking-tight">
+              My <span className="text-gold italic font-light">Cart</span>
+            </h1>
               </div>
 
               {/* Mobile Bulk Action */}
@@ -298,7 +299,7 @@ const Cart = () => {
                                 <span className="w-6 h-[1px] bg-gold/30" />
                                 <p className="text-[9px] font-body font-bold text-gold uppercase tracking-[0.4em] leading-none">{item.category}</p>
                               </div>
-                              <h3 className="font-display text-2xl md:text-3xl lg:text-4xl font-bold text-charcoal leading-tight truncate tracking-tight lowercase">
+                              <h3 className="font-display text-xl md:text-2xl font-bold text-charcoal leading-tight tracking-tight">
                                 {item.name}<span className="text-gold italic font-light">.</span>
                               </h3>
                               
@@ -322,7 +323,7 @@ const Cart = () => {
                               <div className="flex items-center gap-2 md:gap-4">
                                 <button 
                                   onClick={() => handleMoveToWishlist(item)}
-                                  className="group/wish flex items-center gap-2 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-gold transition-all"
+                                  className="group/wish flex items-center gap-2 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-charcoal/60 hover:text-gold transition-all"
                                 >
                                   <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-gold/5 group-hover/wish:bg-gold group-hover/wish:text-white transition-all duration-500">
                                     <Heart size={14} strokeWidth={1.5} className={isInWishlist(item.id) ? "fill-current" : ""} />
@@ -330,8 +331,13 @@ const Cart = () => {
                                   <span className="hidden md:inline">Wishlist</span>
                                 </button>
 
-                                <button onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)} className="group/del flex items-center gap-2 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-rose-brand transition-all">
-                                  <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-rose-brand/5 group-hover/del:bg-rose-brand group-hover/del:text-white transition-all duration-500"><Trash2 size={14} strokeWidth={1.5} /></div>
+                                <button 
+                                  onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)} 
+                                  className="group/del flex items-center gap-2 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-rose-brand/60 hover:text-rose-brand active:scale-90 transition-all duration-200"
+                                >
+                                  <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-rose-brand/5 group-hover/del:bg-rose-brand group-hover/del:text-white group-active/del:bg-rose-brand group-active/del:text-charcoal transition-all duration-300">
+                                    <Trash2 size={14} strokeWidth={1.5} />
+                                  </div>
                                   <span className="hidden md:inline">Remove</span>
                                 </button>
                               </div>
@@ -339,7 +345,7 @@ const Cart = () => {
                           </div>
                           <div className="text-right">
                             <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.4em] mb-1">Item Total</p>
-                            <p className="font-display text-3xl lg:text-4xl font-normal text-charcoal tracking-tight">₹{(item.price * item.quantity).toLocaleString()}</p>
+                            <p className="font-body text-2xl lg:text-3xl font-bold text-charcoal tracking-tight">₹{(item.price * item.quantity).toLocaleString()}</p>
                           </div>
                         </div>
                       </div>
@@ -361,7 +367,7 @@ const Cart = () => {
                     <div className="flex justify-between items-center mb-8 border-b border-gold/10 pb-6">
                        <div className="space-y-1">
                          <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.4em] leading-none mb-1">Order Summary</p>
-                         <h2 className="font-display text-3xl font-light text-charcoal italic tracking-tight">Summary<span className="text-gold font-serif">.</span></h2>
+                         <h2 className="font-display text-3xl font-light text-charcoal italic tracking-tight uppercase">Summary<span className="text-gold font-serif">.</span></h2>
                        </div>
                     </div>
                     
@@ -397,7 +403,7 @@ const Cart = () => {
                           <DialogContent className="max-w-md w-[95vw] rounded-[3rem] p-0 overflow-hidden border-white/10 shadow-2xl flex flex-col max-h-[85vh] bg-[#fdfcfb]">
                              <div className="bg-white px-8 py-6 border-b border-gray-100 flex items-center gap-6">
                                <DialogClose className="p-1 hover:bg-gray-100 rounded-full transition-colors text-gold"><ChevronLeft size={24} /></DialogClose>
-                               <DialogTitle className="font-display text-2xl font-bold text-charcoal tracking-tight lowercase">Available <span className="text-gold italic font-light">Coupons</span></DialogTitle>
+                               <DialogTitle className="font-display text-2xl font-bold text-charcoal tracking-tight uppercase">Available <span className="text-gold italic font-light">Coupons</span></DialogTitle>
                              </div>
                              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f8f9fb]">
                                <div className="p-6 bg-white shadow-sm mb-6">
@@ -414,15 +420,15 @@ const Cart = () => {
                                        <div key={coupon.code} className={`relative bg-white rounded-[2rem] p-6 shadow-sm border transition-all duration-500 ${appliedCoupon?.code === coupon.code ? 'border-gold shadow-gold/10' : 'border-gold/5'}`}>
                                          <div className="flex justify-between items-start gap-4 mb-6">
                                            <div className="space-y-3 flex-1">
-                                              <h6 className="font-display text-lg font-bold text-gold/80 tracking-tight lowercase italic">Glow Boutique</h6>
+                                              <h6 className="font-display text-lg font-bold text-gold/80 tracking-tight uppercase italic">Glow Boutique</h6>
                                               <h4 className="text-xl font-display font-medium text-charcoal leading-tight tracking-tight">{coupon.code === "GLOW20" ? "20% Radiance" : coupon.code === "FESTIVE15" ? "15% Celebration" : coupon.code === "FREESHIP" ? "Free Logistics" : "₹500 Ritual Offset"}</h4>
                                            </div>
                                            <button disabled={appliedCoupon?.code === coupon.code} onClick={() => { applyCoupon(coupon.code); setIsCouponsModalOpen(false); }} className={`px-8 py-3 rounded-full border text-[10px] font-body font-bold uppercase tracking-widest transition-all ${appliedCoupon?.code === coupon.code ? 'bg-gold/10 border-gold/20 text-gold cursor-default' : 'bg-charcoal text-white hover:bg-gold hover:text-charcoal border-transparent active:scale-95'}`}>{appliedCoupon?.code === coupon.code ? "Active" : "Apply"}</button>
                                          </div>
-                                         <div className="flex items-center justify-between bg-secondary rounded-xl px-4 py-3 border border-gold/5">
+                                          <div className="flex items-center justify-between bg-secondary rounded-xl px-4 py-3 border border-gold/5">
                                             <span className="text-[11px] font-mono font-bold text-charcoal tracking-widest">{coupon.code}</span>
                                             <span className="text-[8px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">Sacred until May 2026</span>
-                                         </div>
+                                          </div>
                                        </div>
                                      ))}
                                    </div>
@@ -441,19 +447,19 @@ const Cart = () => {
                             <span className="text-[10px] font-body font-bold uppercase tracking-[0.4em]">Apply Gift Card</span>
                           </div>
                           {receivedGiftCards.length > 0 && (
-                            <Dialog>
+                            <Dialog open={isGiftCardsModalOpen} onOpenChange={setIsGiftCardsModalOpen}>
                               <DialogTrigger asChild>
                                 <button className="text-[9px] font-body font-bold text-gold hover:text-charcoal transition-colors px-3 py-1 bg-gold/10 rounded-full">QUICK SELECT</button>
                               </DialogTrigger>
                               <DialogContent className="max-w-md w-[95vw] rounded-[3rem] p-8 border-white/10 shadow-2xl bg-[#fdfcfb]">
                                 <DialogHeader className="mb-8">
-                                  <DialogTitle className="font-display text-2xl font-bold text-charcoal lowercase">Your <span className="text-gold italic font-light">Received Cards</span></DialogTitle>
+                                  <DialogTitle className="font-display text-2xl font-bold text-charcoal uppercase">Your <span className="text-gold italic font-light">Received Cards</span></DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
                                   {receivedGiftCards.map((card, idx) => (
                                     <button 
                                       key={idx}
-                                      onClick={() => { applyGiftCard(card.code); }}
+                                      onClick={() => { applyGiftCard(card.code); setIsGiftCardsModalOpen(false); }}
                                       className="w-full text-left p-5 rounded-2xl bg-white border border-gold/10 hover:border-gold/30 hover:shadow-lg transition-all group flex justify-between items-center"
                                     >
                                       <div className="space-y-1">
@@ -518,9 +524,9 @@ const Cart = () => {
                         <div className="flex justify-between items-end mb-8">
                           <div className="space-y-1">
                              <p className="text-[10px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.5em] leading-none mb-1">Total Amount</p>
-                             <span className="font-display text-xl md:text-2xl font-light text-charcoal italic tracking-tight lowercase">Grand <span className="text-gold">Total</span></span>
+                             <span className="font-display text-xl md:text-2xl font-light text-charcoal italic tracking-tight uppercase">Grand <span className="text-gold">Total</span></span>
                           </div>
-                          <span className="font-display text-3xl md:text-5xl font-normal text-gold tracking-tight leading-none drop-shadow-[0_2px_10px_rgba(182,143,76,0.15)]">₹{total.toLocaleString()}</span>
+                          <span className="font-body text-3xl md:text-4xl font-bold text-gold tracking-tight leading-none drop-shadow-[0_2px_10px_rgba(182,143,76,0.15)]">₹{total.toLocaleString()}</span>
                         </div>
                       </div>
                     </div>

@@ -228,7 +228,7 @@ const ProductDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <nav className="text-[10px] md:text-sm font-body text-muted-foreground mb-4 md:mb-6 uppercase tracking-widest flex items-center gap-2 flex-wrap">
+        <nav className="text-[10px] md:text-sm font-body font-bold text-muted-foreground mb-4 md:md-6 tracking-widest flex items-center gap-2 flex-wrap">
           <Link to="/" className="hover:text-gold transition-colors opacity-70 hover:opacity-100">Home</Link>
           <span className="opacity-30">/</span>
           <Link 

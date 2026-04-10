@@ -101,7 +101,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       {/* Info */}
       <div className="p-4 space-y-2">
-        <p className="text-[11px] font-body font-medium text-muted-foreground uppercase tracking-wider">
+        <p className="text-[11px] font-body font-bold text-gold tracking-widest leading-none mb-1">
           {product.brand}
         </p>
         <Link to={`/product/${productId}`}>
@@ -128,7 +128,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Price */}
         <div className="flex items-baseline gap-2">
-          <span className="font-body font-semibold text-foreground">
+          <span className="font-body text-lg font-bold text-charcoal tracking-tight">
             ₹{(product.price ?? 0).toLocaleString()}
           </span>
           {product.originalPrice && (
