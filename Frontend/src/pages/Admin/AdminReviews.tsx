@@ -72,7 +72,7 @@ const AdminReviews = () => {
     r.comment?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const cardStyle = `backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 ${
+  const cardStyle = `backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 min-h-[600px] ${
     isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
   }`;
 

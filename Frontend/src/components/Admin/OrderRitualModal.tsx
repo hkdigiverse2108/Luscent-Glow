@@ -74,7 +74,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
       const data = await response.json();
       
       if (response.ok) {
-        toast.success("Shiprocket Ritual Complete!", {
+        toast.success("Order Fulfillment Complete!", {
           description: `AWB Generated: ${data.tracking.trackingNumber}`
         });
         setTrackingNumber(data.tracking.trackingNumber);
@@ -150,7 +150,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                     <h3 className={`font-body text-2xl font-bold uppercase tracking-tight transition-colors duration-700 ${
                       isDark ? "text-white" : "text-charcoal"
                     }`}>
-                      Order <span className="text-indigo-500 italic">Ritual</span>
+                      Order <span className="text-indigo-500 italic">Details</span>
                     </h3>
                     <span className={`px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border ${getStatusColor(order.status)}`}>
                        {order.status}
@@ -185,9 +185,9 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                   }`} />
                   
                   {[
-                    { id: 'Processing', icon: Clock, label: 'Order Ritual initiated' },
-                    { id: 'Shipped', icon: Truck, label: 'Aura in Transit' },
-                    { id: 'Delivered', icon: CheckCircle, label: 'Ritual Completed' }
+                    { id: 'Processing', icon: Clock, label: 'Order received' },
+                    { id: 'Shipped', icon: Truck, label: 'Order in transit' },
+                    { id: 'Delivered', icon: CheckCircle, label: 'Order delivered' }
                   ].map((step, index, array) => {
                     const StepIcon = step.icon;
                     const steps = ['Processing', 'Shipped', 'Delivered'];
@@ -240,8 +240,8 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                {/* Left: Items (8 cols) */}
                <div className="lg:col-span-12 space-y-8">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Included Rituals ({order.items?.length || 0})</h4>
-                    <span className="text-[10px] font-bold uppercase tracking-widest opacity-20 italic">Aura Collection</span>
+                    <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Items ({order.items?.length || 0})</h4>
+                    <span className="text-[10px] font-bold uppercase tracking-widest opacity-20 italic">Order Summary</span>
                   </div>
                   
                   <div className={`rounded-3xl overflow-hidden border ${
@@ -278,7 +278,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
 
                {/* Logistics Section */}
                <div className="lg:col-span-7 space-y-8">
-                  <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Seeker Metadata</h4>
+                  <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Customer Information</h4>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className={`p-6 rounded-3xl border space-y-4 ${
@@ -290,7 +290,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                        </div>
                        <div>
                           <p className={`text-lg font-bold leading-tight mb-1 ${isDark ? "text-white" : "text-charcoal"}`}>
-                            {order.shippingAddress?.fullName || "Mysterious Seeker"}
+                            {order.shippingAddress?.fullName || "Customer"}
                           </p>
                           <div className="flex items-center gap-2 text-xs font-medium opacity-40">
                              <Phone size={12} />
@@ -304,7 +304,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                     }`}>
                        <div className="flex items-center gap-3 text-gold/60">
                           <MapPin size={16} />
-                          <span className="text-[10px] font-bold uppercase tracking-widest">Shipping Sanctuary</span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest">Shipping Address</span>
                        </div>
                        <p className={`text-xs font-medium leading-[1.6] ${isDark ? "text-white/60" : "text-charcoal/70"}`}>
                           {order.shippingAddress?.street}<br />
@@ -317,7 +317,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
 
                {/* Payment Breakdown */}
                <div className="lg:col-span-5 space-y-8">
-                  <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Payment Blueprint</h4>
+                  <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Payment Summary</h4>
                   
                   <div className={`p-8 rounded-4xl border space-y-6 ${
                     isDark ? "bg-white/[0.02] border-white/10 shadow-black/20 shadow-xl" : "bg-charcoal/[0.02] border-charcoal/10 shadow-lg"
@@ -341,7 +341,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                      
                      <div className="flex justify-between items-end">
                         <div className="space-y-1">
-                           <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-gold">Final Consignment</span>
+                           <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-gold">Order Total</span>
                            <div className="flex items-center gap-2">
                               <span className={`text-3xl font-display italic font-medium ${isDark ? "text-white" : "text-charcoal"}`}>₹{order.totalAmount}</span>
                            </div>
@@ -361,7 +361,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
 
             {/* Lifecycle Transitions (Admin Only) */}
             <div className="space-y-8 pt-8 border-t border-white/5">
-                <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-[0.3em]">Lifecycle Transitions</h4>
+                <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-[0.3em]">Update Status</h4>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                    {[
                      { id: 'Processing', icon: <Clock size={16} />, color: "hover:text-gold hover:border-gold/30 hover:bg-gold/5" },
@@ -405,8 +405,8 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                       <Truck size={20} />
                     </div>
                     <div>
-                      <h4 className="text-sm font-extrabold uppercase tracking-widest text-indigo-400">Logistics Manifest</h4>
-                      <p className="text-[10px] font-medium opacity-40 uppercase tracking-tighter">Instant synchronization with Shiprocket API</p>
+                      <h4 className="text-sm font-extrabold uppercase tracking-widest text-indigo-400">Tracking Details</h4>
+                      <p className="text-[10px] font-medium opacity-40 uppercase tracking-tighter">Sync with shipping partner API</p>
                     </div>
                   </div>
                   
@@ -416,7 +416,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                     className="px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-bold rounded-lg uppercase tracking-widest text-[9px] hover:bg-indigo-500 hover:text-white transition-all flex items-center gap-2 disabled:opacity-50"
                   >
                     {isAutoFulfilling ? <Clock size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                    {isAutoFulfilling ? "Generating..." : "Auto-Generate Manifest"}
+                    {isAutoFulfilling ? "Generating..." : "Auto-Generate AWB"}
                   </button>
                 </div>
 
@@ -457,7 +457,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                   className="w-full py-4 bg-indigo-500 text-white font-bold rounded-xl uppercase tracking-widest text-[10px] hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isUpdatingTracking ? <Clock size={14} className="animate-spin" /> : <Save size={14} />}
-                  {isUpdatingTracking ? "Synchronizing Manifest..." : "Update Logistic Manifest"}
+                  {isUpdatingTracking ? "Saving..." : "Update Tracking Details"}
                 </button>
               </motion.div>
             )}
@@ -474,7 +474,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                }`}
              >
                 <CheckCircle size={18} />
-                <span>Finalize Inspection</span>
+                <span>Close Order View</span>
              </button>
           </div>
         </motion.div>

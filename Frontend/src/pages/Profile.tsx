@@ -85,7 +85,7 @@ const Profile = () => {
         setReceivedCards(data);
       }
     } catch (error) {
-      toast.error("Could not fetch the gifting sanctuary details.");
+      toast.error("Could not fetch the gift card details.");
     } finally {
       setCardsLoading(false);
     }
@@ -274,11 +274,11 @@ const Profile = () => {
                   {user.fullName}
                 </h1>
                 <p className="font-display text-xl md:text-2xl text-muted-foreground/60 italic font-light lowercase">
-                  the <span className="text-charcoal font-medium">Radiance Guardian</span>
+                  the <span className="text-charcoal font-medium">Valued Member</span>
                 </p>
               </div>
               <p className="text-sm md:text-base text-muted-foreground font-body max-w-sm italic leading-relaxed">
-                "A curator of radiance and keeper of sacred wellness ritual protocols."
+                "Experience the glow with our premium skincare collections."
               </p>
             </div>
           </div>
@@ -624,8 +624,8 @@ const Profile = () => {
                                 <span className="font-display text-sm italic font-medium">LCSNT</span>
                               </div>
                               <div className="text-right">
-                                <p className="text-[8px] uppercase tracking-[0.4em] text-gold opacity-60">Aura Tier</p>
-                                <p className="text-xs font-display italic">Platinum Member</p>
+                                <p className="text-[8px] uppercase tracking-[0.4em] text-gold opacity-60">Status</p>
+                                <p className="text-xs font-display italic">Premium Member</p>
                               </div>
                             </div>
                             
@@ -671,7 +671,7 @@ const Profile = () => {
                           <AlertCircle size={20} />
                         </div>
                         <p className="text-[11px] text-muted-foreground/80 font-body leading-loose tracking-wide">
-                          Your payment details are protected within our <span className="text-charcoal font-bold">Secure Payment System</span>. We never retain full card details or CVVs on our physical architecture, ensuring your details remain safe and secure.
+                          Your payment details are protected within our <span className="text-charcoal font-bold">Secure Payment System</span>. We never retain full card details or CVVs on our servers, ensuring your details remain safe and secure.
                         </p>
                       </div>
                     </div>
@@ -736,9 +736,9 @@ const Profile = () => {
                            <div className="w-20 h-20 bg-gold/5 rounded-full flex items-center justify-center mb-6 text-gold/20">
                              <Gift size={40} />
                            </div>
-                           <h4 className="font-display text-2xl font-bold text-charcoal opacity-60">No Gifting Rituals Found.</h4>
+                           <h4 className="font-display text-2xl font-bold text-charcoal opacity-60">No Gift Cards Found.</h4>
                            <p className="text-[10px] font-body text-muted-foreground mt-4 italic max-w-xs leading-relaxed uppercase tracking-widest">
-                             Tokens added via the Admin Sanctuary will appear here for the registered recipient.
+                             Cards added via the Admin Panel will appear here for the registered recipient.
                            </p>
                         </div>
                       )}

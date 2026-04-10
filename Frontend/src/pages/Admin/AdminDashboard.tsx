@@ -67,12 +67,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [ordersRes, usersRes, productsRes, inquiriesRes, newsletterRes, giftCardsRes, reviewsRes] =
+        const [ordersRes, usersRes, productsRes,  newsletterRes, giftCardsRes, reviewsRes] =
           await Promise.allSettled([
             fetch(getApiUrl("/api/orders/")),
             fetch(getApiUrl("/api/users/")),
             fetch(getApiUrl("/api/products/")),
-            fetch(getApiUrl("/api/contact/inquiries")),
             fetch(getApiUrl("/api/newsletter/")),
             fetch(getApiUrl("/api/gift-cards/")),
             fetch(getApiUrl("/api/reviews/")),
@@ -81,7 +80,6 @@ const AdminDashboard = () => {
         const orders: any[]       = ordersRes.status === "fulfilled" && ordersRes.value.ok ? await ordersRes.value.json() : [];
         const users: any[]        = usersRes.status === "fulfilled" && usersRes.value.ok ? await usersRes.value.json() : [];
         const products: any[]     = productsRes.status === "fulfilled" && productsRes.value.ok ? await productsRes.value.json() : [];
-        const inquiries: any[]    = inquiriesRes.status === "fulfilled" && inquiriesRes.value.ok ? await inquiriesRes.value.json() : [];
         const newsletter: any[]   = newsletterRes.status === "fulfilled" && newsletterRes.value.ok ? await newsletterRes.value.json() : [];
         const giftCards: any[]    = giftCardsRes.status === "fulfilled" && giftCardsRes.value.ok ? await giftCardsRes.value.json() : [];
         const reviews: any[]      = reviewsRes.status === "fulfilled" && reviewsRes.value.ok ? await reviewsRes.value.json() : [];
@@ -125,14 +123,6 @@ const AdminDashboard = () => {
             icon: Package,
             accent: "from-emerald-400/20 to-emerald-400/5 border-emerald-400/20 text-emerald-400",
             href: "/admin/products",
-          },
-          {
-            label: "Inquiries",
-            value: String(inquiries.length),
-            sub: "Contact & bulk requests",
-            icon: MessageSquare,
-            accent: "from-rose-400/20 to-rose-400/5 border-rose-400/20 text-rose-400",
-            href: "/admin/inquiries",
           },
           {
             label: "Subscribers",
@@ -198,7 +188,7 @@ const AdminDashboard = () => {
       <AdminHeader
         title="Platform"
         highlightedWord="Dashboard"
-        subtitle="Real-time snapshot of your sanctuary's performance."
+        subtitle="Real-time snapshot of your store's performance."
         isDark={isDark}
       />
 
@@ -385,7 +375,6 @@ const AdminDashboard = () => {
             { label: "View Orders",   href: "/admin/orders",     icon: ShoppingBag,  color: "text-sky-400" },
             { label: "Manage Users",  href: "/admin/users",      icon: Users,        color: "text-violet-400" },
             { label: "Gift Cards",    href: "/admin/gift-cards", icon: Ticket,       color: "text-pink-400" },
-            { label: "Inquiries",     href: "/admin/inquiries",  icon: MessageSquare,color: "text-rose-400" },
             { label: "Settings",      href: "/admin/settings",   icon: Rss,          color: "text-amber-400" },
           ].map((q) => (
             <Link

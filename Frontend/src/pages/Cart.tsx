@@ -36,6 +36,7 @@ import Footer from "@/components/Footer";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useWishlist } from "@/context/WishlistContext";
 import { load } from '@cashfreepayments/cashfree-js';
 
 const Cart = () => {
@@ -59,6 +60,7 @@ const Cart = () => {
     fetchReceivedGiftCards
   } = useCart();
   const { user } = useAuth();
+  const { toggleWishlist, isInWishlist } = useWishlist();
   
   const navigate = useNavigate();
   const [couponInput, setCouponInput] = React.useState("");
@@ -66,6 +68,48 @@ const Cart = () => {
   const [isCouponsModalOpen, setIsCouponsModalOpen] = React.useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = React.useState(false);
   const [orderComplete, setOrderComplete] = React.useState(false);
+
+  const handleMoveToWishlist = (item: any) => {
+    // Product object expected by toggleWishlist
+    const productData = {
+      id: item.id,
+      _id: item.id,
+      name: item.name,
+      price: item.price,
+      image: item.image,
+      category: item.category
+    };
+    
+    // Add to wishlist if not already there
+    if (!isInWishlist(item.id)) {
+      toggleWishlist(productData as any);
+    } else {
+      toast.info(`${item.name} is already in your wishlist`);
+    }
+    
+    // Remove from cart
+    removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata);
+  };
+
+  const handleMoveAllToWishlist = () => {
+    if (items.length === 0) return;
+    
+    items.forEach(item => {
+      if (!isInWishlist(item.id)) {
+        toggleWishlist({
+          id: item.id,
+          _id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          category: item.category
+        } as any, true);
+      }
+    });
+    
+    clearCart();
+    toast.success("All items moved to wishlist");
+  };
 
   const shipping = subtotal >= 999 ? 0 : 50; 
   const tax = 0; 
@@ -109,7 +153,7 @@ const Cart = () => {
             <div className="space-y-4">
               <h1 className="font-display text-5xl md:text-6xl font-light text-foreground tracking-tight">Order <span className="italic font-normal">Placed</span></h1>
               <p className="text-muted-foreground font-body text-lg max-w-md mx-auto leading-relaxed">
-                Your curated selection has been successfully recorded in our orders database.
+                Your order has been successfully received.
               </p>
             </div>
 
@@ -118,7 +162,7 @@ const Cart = () => {
                 to="/products"
                 className="group inline-flex items-center gap-4 px-12 py-5 bg-primary text-primary-foreground rounded-full font-body font-bold uppercase tracking-[0.2em] text-xs hover:bg-gold transition-all duration-700 shadow-2xl"
               >
-                Continue Your Journey <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
+                Continue Shopping <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
               </Link>
             </div>
           </motion.div>
@@ -160,7 +204,7 @@ const Cart = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 md:mb-24 gap-10">
             <div className="space-y-4">
               <Link to="/products" className="inline-flex items-center gap-3 text-gold hover:gap-5 transition-all text-[11px] md:text-xs font-body font-bold uppercase tracking-[0.3em] mb-4 group">
-                <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Collection
+                <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back to Shop
               </Link>
               <div className="space-y-1">
                 <div className="flex items-center gap-3 text-gold">
@@ -168,14 +212,38 @@ const Cart = () => {
                   <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Special Selections</span>
                 </div>
                 <h1 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-charcoal tracking-tight lowercase leading-[0.9]">
-                  Shopping <span className="text-gold italic font-light">Bag</span>
+                  My <span className="text-gold italic font-light">Cart</span>
                 </h1>
+              </div>
+
+              {/* Mobile Bulk Action */}
+              <div className="flex md:hidden items-center gap-3">
+                <button 
+                  onClick={handleMoveAllToWishlist}
+                  className="flex-1 flex items-center justify-center gap-3 px-6 py-3.5 bg-white/60 border border-gold/10 rounded-2xl shadow-sm active:scale-95 transition-all"
+                >
+                  <Heart size={14} className="text-gold" />
+                  <span className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">Move All to Wishlist</span>
+                </button>
+                <div className="px-4 py-3.5 bg-gold/5 border border-gold/10 rounded-2xl flex items-center gap-2">
+                  <ShoppingBag size={14} className="text-gold" />
+                  <span className="text-[10px] font-body font-bold text-charcoal">{totalItems}</span>
+                </div>
               </div>
             </div>
             <div className="hidden md:flex flex-col items-end gap-3 pb-2">
-              <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-full border border-white/50 shadow-sm">
-                <ShoppingBag size={18} className="text-gold" />
-                <p className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">{totalItems} Total Items</p>
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={handleMoveAllToWishlist}
+                  className="px-6 py-3 bg-white/40 hover:bg-gold/10 backdrop-blur-md border border-white/50 hover:border-gold/30 rounded-full transition-all duration-500 shadow-sm flex items-center gap-3 group"
+                >
+                  <Heart size={16} className="text-gold group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">Move All to Wishlist</span>
+                </button>
+                <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-full border border-white/50 shadow-sm">
+                  <ShoppingBag size={18} className="text-gold" />
+                  <p className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">{totalItems} Total Items</p>
+                </div>
               </div>
             </div>
           </div>
@@ -190,7 +258,7 @@ const Cart = () => {
               <div className="w-24 h-24 bg-gold/5 rounded-full flex items-center justify-center mx-auto mb-10 text-gold/40">
                 <ShoppingBag size={48} strokeWidth={1} />
               </div>
-              <h2 className="font-display text-4xl font-light mb-6 text-charcoal tracking-tight">Your collection is empty<span className="text-gold">.</span></h2>
+              <h2 className="font-display text-4xl font-light mb-6 text-charcoal tracking-tight">Your cart is empty<span className="text-gold">.</span></h2>
               <p className="text-muted-foreground/60 font-body mb-10 max-w-sm mx-auto leading-relaxed italic text-sm text-center">
                 Discover our latest arrivals in skincare and makeup, curated for your perfect glow.
               </p>
@@ -198,7 +266,7 @@ const Cart = () => {
                 to="/products"
                 className="inline-flex items-center gap-4 px-12 py-5 bg-charcoal text-white rounded-full font-body font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl"
               >
-                Explore Collection <ArrowRight size={18} />
+                Continue Shopping <ArrowRight size={18} />
               </Link>
             </motion.div>
           ) : (
@@ -250,14 +318,27 @@ const Cart = () => {
                                 <span className="w-8 text-xs font-bold font-body text-charcoal text-center">{item.quantity}</span>
                                 <button onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedShade, item.selectedSize, item.metadata)} className="w-8 h-8 flex items-center justify-center text-muted-foreground/60 hover:text-gold transition-all hover:bg-gold/5 rounded-lg"><Plus size={12} /></button>
                               </div>
-                              <button onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)} className="group/del flex items-center gap-2 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-rose-brand transition-all">
-                                <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-rose-brand/5 group-hover/del:bg-rose-brand group-hover/del:text-white transition-all duration-500"><Trash2 size={14} strokeWidth={1.5} /></div>
-                                <span className="hidden md:inline">Remove</span>
-                              </button>
+                              
+                              <div className="flex items-center gap-2 md:gap-4">
+                                <button 
+                                  onClick={() => handleMoveToWishlist(item)}
+                                  className="group/wish flex items-center gap-2 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-gold transition-all"
+                                >
+                                  <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-gold/5 group-hover/wish:bg-gold group-hover/wish:text-white transition-all duration-500">
+                                    <Heart size={14} strokeWidth={1.5} className={isInWishlist(item.id) ? "fill-current" : ""} />
+                                  </div>
+                                  <span className="hidden md:inline">Wishlist</span>
+                                </button>
+
+                                <button onClick={() => removeItem(item.id, item.selectedShade, item.selectedSize, item.metadata)} className="group/del flex items-center gap-2 text-[10px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/40 hover:text-rose-brand transition-all">
+                                  <div className="w-8 h-8 flex items-center justify-center rounded-xl bg-rose-brand/5 group-hover/del:bg-rose-brand group-hover/del:text-white transition-all duration-500"><Trash2 size={14} strokeWidth={1.5} /></div>
+                                  <span className="hidden md:inline">Remove</span>
+                                </button>
+                              </div>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.4em] mb-1">Ritual Value</p>
+                            <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.4em] mb-1">Item Total</p>
                             <p className="font-display text-3xl lg:text-4xl font-normal text-charcoal tracking-tight">₹{(item.price * item.quantity).toLocaleString()}</p>
                           </div>
                         </div>
@@ -292,7 +373,7 @@ const Cart = () => {
                       </div>
 
                       <div className="flex justify-between text-[11px] font-body font-bold text-muted-foreground/60 uppercase tracking-[0.3em] items-center">
-                        <span>Logistics (Shipping)</span>
+                        <span>Shipping</span>
                         <span className={shipping === 0 ? "text-gold" : "text-charcoal"}>
                           {shipping === 0 ? "FREE" : `₹${shipping}`}
                         </span>
@@ -321,13 +402,13 @@ const Cart = () => {
                              <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#f8f9fb]">
                                <div className="p-6 bg-white shadow-sm mb-6">
                                   <div className="relative flex items-center bg-secondary rounded-2xl border border-gold/5 overflow-hidden group focus-within:ring-2 focus-within:ring-gold/20 transition-all">
-                                    <input type="text" value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} placeholder="Enter Ritual Code" className="flex-1 bg-transparent border-none px-6 py-5 text-sm font-body font-bold text-charcoal outline-none placeholder:text-muted-foreground/30 uppercase tracking-widest" />
+                                    <input type="text" value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} placeholder="Enter Promo Code" className="flex-1 bg-transparent border-none px-6 py-5 text-sm font-body font-bold text-charcoal outline-none placeholder:text-muted-foreground/30 uppercase tracking-widest" />
                                     <button onClick={() => { if(applyCoupon(couponInput)) setIsCouponsModalOpen(false); }} className="px-8 py-5 text-[10px] font-body font-bold text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em]">Apply</button>
                                   </div>
                                </div>
                                <div className="px-6 space-y-6 pb-20">
                                  <div className="space-y-4">
-                                   <div className="flex items-center gap-3 px-2"><Sparkles size={12} className="text-gold opacity-50" /><h5 className="text-[10px] font-body font-bold text-muted-foreground/60 uppercase tracking-[0.3em]">Unlocked Potential</h5></div>
+                                   <div className="flex items-center gap-3 px-2"><Sparkles size={12} className="text-gold opacity-50" /><h5 className="text-[10px] font-body font-bold text-muted-foreground/60 uppercase tracking-[0.3em]">Available Offers</h5></div>
                                    <div className="grid gap-5">
                                      {availableCoupons.map((coupon) => (
                                        <div key={coupon.code} className={`relative bg-white rounded-[2rem] p-6 shadow-sm border transition-all duration-500 ${appliedCoupon?.code === coupon.code ? 'border-gold shadow-gold/10' : 'border-gold/5'}`}>
@@ -425,7 +506,7 @@ const Cart = () => {
                              <div className="flex justify-between items-center text-[10px] font-body font-bold text-gold uppercase tracking-[0.35em]">
                                  <div className="flex items-center gap-3">
                                    <div className="p-2 bg-gold/10 rounded-full"><Tag size={12} /></div>
-                                   <span>Aura Discount</span>
+                                   <span>Coupon Discount</span>
                                  </div>
                                  <div className="flex items-center gap-4">
                                    <span className="text-charcoal font-display text-lg">- ₹{discountAmount.toLocaleString()}</span>
@@ -436,8 +517,8 @@ const Cart = () => {
                                              <div className="pt-8 border-t border-gold/10">
                         <div className="flex justify-between items-end mb-8">
                           <div className="space-y-1">
-                             <p className="text-[10px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.5em] leading-none mb-1">Total Ritual Value</p>
-                             <span className="font-display text-xl md:text-2xl font-light text-charcoal italic tracking-tight lowercase">Grand <span className="text-gold">Total</span> Price</span>
+                             <p className="text-[10px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.5em] leading-none mb-1">Total Amount</p>
+                             <span className="font-display text-xl md:text-2xl font-light text-charcoal italic tracking-tight lowercase">Grand <span className="text-gold">Total</span></span>
                           </div>
                           <span className="font-display text-3xl md:text-5xl font-normal text-gold tracking-tight leading-none drop-shadow-[0_2px_10px_rgba(182,143,76,0.15)]">₹{total.toLocaleString()}</span>
                         </div>
@@ -450,7 +531,7 @@ const Cart = () => {
                       className="w-full group/btn relative py-5 md:py-6 bg-charcoal text-white rounded-2xl font-body font-bold uppercase tracking-[0.4em] text-[10px] md:text-xs overflow-hidden transition-all hover:translate-y-[-2px] hover:shadow-[0_10px_30px_rgba(182,143,76,0.2)] disabled:opacity-50 disabled:translate-y-0 shadow-2xl"
                     >
                       <span className="relative z-10 flex items-center justify-center gap-4">
-                        {isPlacingOrder ? "Placing Order..." : "Complete purchase"} 
+                        {isPlacingOrder ? "Placing Order..." : "Checkout Now"} 
                         {!isPlacingOrder && <ChevronRight size={16} className="transition-transform group-hover/btn:translate-x-2" />}
                       </span>
                       <div className="absolute inset-0 bg-gold transform -translate-x-full group-hover/btn:translate-x-0 transition-transform duration-700 origin-left" />
@@ -474,7 +555,7 @@ const Cart = () => {
                       </div>
                       <div className="flex-1 space-y-3">
                         <div className="flex justify-between items-center text-[9px] font-body font-bold uppercase tracking-[0.3em] text-muted-foreground/60">
-                          <span>Progress to complimentary logistics</span>
+                          <span>Progress to free shipping</span>
                           <span className="text-gold">{Math.round(progressToFreeShipping)}%</span>
                         </div>
                         <div className="h-1 bg-gold/5 rounded-full overflow-hidden border border-gold/5">

@@ -12,7 +12,6 @@ import {
   Sparkles,
   CheckCircle2,
   Image as ImageIcon,
-  Clock,
   Eye,
   Quote,
   MessageSquare,
@@ -242,7 +241,7 @@ const AdminBlogs = () => {
                  initial={{ opacity: 0, y: 10 }}
                  animate={{ opacity: 1, y: 0 }}
                  exit={{ opacity: 0, y: -10 }}
-                 className="grid gap-6"
+                 className="grid gap-6 min-h-[600px]"
                >
                   {filteredPosts.map((post) => (
                     <div key={post._id || post.id} className={`group p-4 rounded-3xl border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-gold/30" : "bg-white border-charcoal/10 shadow-lg hover:border-gold/50"}`}>
@@ -259,7 +258,6 @@ const AdminBlogs = () => {
                           <div className="flex-1 space-y-3 min-w-0">
                              <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gold">
                                 <span className="flex items-center gap-1"><Calendar size={12} /> {post.date}</span>
-                                <span className="flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
                                 <span className="px-2 py-0.5 bg-gold/10 rounded-md border border-gold/20">{post.category}</span>
                              </div>
                              <h4 className="font-display text-xl font-bold truncate group-hover:text-gold transition-colors">{post.title}</h4>
@@ -308,7 +306,7 @@ const AdminBlogs = () => {
                  initial={{ opacity: 0, y: 10 }}
                  animate={{ opacity: 1, y: 0 }}
                  exit={{ opacity: 0, y: -10 }}
-                 className="grid gap-6"
+                 className="grid gap-6 min-h-[600px]"
                >
                   {filteredVoices.map((voice) => (
                     <div key={voice._id || voice.id} className={`group p-6 rounded-[2.5rem] border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-gold/30" : "bg-white border-charcoal/10 shadow-lg hover:border-gold/50"}`}>

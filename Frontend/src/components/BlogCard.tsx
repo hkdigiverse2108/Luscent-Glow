@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Calendar, Clock, User } from "lucide-react";
+import { ArrowUpRight, Calendar, User } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getAssetUrl } from "@/lib/api";
 
@@ -45,10 +45,6 @@ const BlogCard = forwardRef<HTMLDivElement, BlogCardProps>(({ post, index }, ref
           <div className="flex items-center gap-1.5">
             <Calendar size={12} className="text-gold/60" />
             {post.date}
-          </div>
-          <div className="flex items-center gap-1.5">
-            <Clock size={12} className="text-gold/60" />
-            {post.readTime}
           </div>
         </div>
 

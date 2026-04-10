@@ -98,7 +98,7 @@ const Checkout = () => {
               state: data.shippingAddress?.state || prev.state,
               zipCode: data.shippingAddress?.zipCode || prev.zipCode,
             }));
-            toast.success("Welcome back! We've retrieved your ritual details.");
+            toast.success("Welcome back! We've retrieved your contact details.");
           }
         } catch (err) {
           console.error("Lookup error:", err);
@@ -185,7 +185,7 @@ const Checkout = () => {
 
       if (response.ok) {
         if (data.gateway === "cod") {
-            toast.success("Golden Ritual Confirmed! Order placed.");
+            toast.success("Order Confirmed! Your order has been placed.");
             clearCart();
             navigate(`/order-success?orderNumber=${data.orderNumber}`);
             return;
@@ -216,7 +216,7 @@ const Checkout = () => {
 
                     const verifyData = await verifyResponse.json();
                     if (verifyResponse.ok && verifyData.success) {
-                        toast.success("Purchase Complete! Curating your ritual...");
+                        toast.success("Purchase Complete! Preparing your order...");
                         clearCart();
                         navigate(`/order-success?orderNumber=${data.orderNumber}`);
                     } else {
@@ -236,7 +236,7 @@ const Checkout = () => {
             amount: data.amount,
             currency: "INR",
             name: "Luscent Glow",
-            description: "Ritual Selection Purchase",
+            description: "Product Purchase",
             image: "/logo.png",
             order_id: data.razorpayOrderId,
             handler: async function (response: any) {
@@ -263,7 +263,7 @@ const Checkout = () => {
                   setIsPlacingOrder(false);
                 }
               } catch (err) {
-                toast.error("Could not verify your payment ritual.");
+                toast.error("Could not verify your payment.");
                 setIsPlacingOrder(false);
               }
             },
@@ -374,7 +374,7 @@ const Checkout = () => {
                             <div className="relative">
                                 <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input 
-                                    type="email" placeholder="ritual@luscent.com"
+                                    type="email" placeholder="support@luscent.com"
                                     className={`${inputClass} pl-12`}
                                     value={address.email}
                                     onChange={(e) => setAddress({...address, email: e.target.value})}
@@ -492,7 +492,7 @@ const Checkout = () => {
                             {isPlacingOrder ? (
                                 <>
                                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Processing Ritual...
+                                    Processing Order...
                                 </>
                             ) : (
                                 <>
@@ -544,7 +544,7 @@ const Checkout = () => {
                                             </div>
                                             <div className="flex-1 min-w-0 py-1">
                                                 <h4 className="text-[11px] font-black text-charcoal truncate uppercase tracking-widest">{item.name}</h4>
-                                                <p className="text-[10px] text-gray-400 mt-1 font-body">Inspiration Qty: {item.quantity}</p>
+                                                <p className="text-[10px] text-gray-400 mt-1 font-body">Quantity: {item.quantity}</p>
                                                 <p className="text-base font-black text-charcoal mt-3 font-body">₹{(item.price * item.quantity).toLocaleString()}</p>
                                             </div>
                                         </div>

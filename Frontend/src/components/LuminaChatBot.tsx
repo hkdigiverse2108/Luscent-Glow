@@ -114,6 +114,9 @@ const LuminaChatBot = () => {
     setInput("");
     setIsLoading(true);
 
+    // Auto-focus after sending
+    setTimeout(() => inputRef.current?.focus(), 10);
+
     // Build history for API (exclude welcome message)
     const history = messages
       .filter((m) => m.id !== "welcome")
@@ -148,6 +151,8 @@ const LuminaChatBot = () => {
       setMessages((prev) => [...prev, errMsg]);
     } finally {
       setIsLoading(false);
+      // Ensure cursor returns after response
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
 

@@ -166,7 +166,7 @@ const AdminInquiries = () => {
         />
       </div>
 
-      <div className={`backdrop-blur-3xl border rounded-3xl shadow-2xl overflow-hidden transition-all duration-700 ${isDark ? "bg-charcoal/40 border-white/5 shadow-black/80" : "bg-white border-charcoal/5 shadow-charcoal/5"}`}>
+      <div className={`backdrop-blur-3xl border rounded-3xl shadow-2xl overflow-hidden transition-all duration-700 min-h-[600px] ${isDark ? "bg-charcoal/40 border-white/5 shadow-black/80" : "bg-white border-charcoal/5 shadow-charcoal/5"}`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
              <thead className={`border-b font-body text-[12px] font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${isDark ? "bg-white/[0.04] border-white/10 text-white/60" : "bg-charcoal/[0.04] border-charcoal/10 text-charcoal/80"}`}>

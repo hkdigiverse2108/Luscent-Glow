@@ -5,7 +5,7 @@ import { getApiUrl } from "@/lib/api";
 
 interface WishlistContextType {
   wishlist: Product[];
-  toggleWishlist: (product: Product) => void;
+  toggleWishlist: (product: Product, silent?: boolean) => void;
   isInWishlist: (id: string) => boolean;
   clearWishlist: () => void;
   syncWithServer: () => Promise<void>;
@@ -52,7 +52,7 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     localStorage.setItem("luscent-glow-wishlist", JSON.stringify(wishlist));
   }, [wishlist]);
 
-  const toggleWishlist = async (product: Product) => {
+  const toggleWishlist = async (product: Product, silent = false) => {
     const productId = product._id || product.id;
     const user = getLoggedInUser();
 
@@ -70,10 +70,12 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
     });
 
-    if (action === "added") {
-      toast.success(`${product.name} added to wishlist`);
-    } else {
-      toast.info(`${product.name} removed from wishlist`);
+    if (!silent) {
+      if (action === "added") {
+        toast.success(`${product.name} added to wishlist`);
+      } else {
+        toast.info(`${product.name} removed from wishlist`);
+      }
     }
 
     // Sync with server if logged in

@@ -85,13 +85,13 @@ const Footer = () => {
 
       const data = await response.json();
       if (response.ok) {
-        toast.success(data.message || "Welcome to our inner circle!");
+        toast.success(data.message || "Thank you for subscribing!");
         setEmail("");
       } else {
         toast.error(data.detail || "Something went wrong. Please try again.");
       }
     } catch (error) {
-      toast.error("Could not reach our sanctuary. Check your connection.");
+      toast.error("Could not connect to the server. Check your connection.");
     } finally {
       setIsSubmitting(false);
     }
@@ -137,16 +137,16 @@ const Footer = () => {
             </div>
             <div className="pt-2 space-y-2 text-sm text-primary-foreground/50 font-body">
               <a 
-                href={`mailto:${globalSettings?.supportEmail || footer.email}`} 
+                href={`mailto:$"hello@luscentglow.com"`} 
                 className="hover:text-gold hover:underline transition-all flex items-center gap-2 cursor-pointer w-fit"
               >
-                <Mail size={14} className="opacity-60" /> {globalSettings?.supportEmail || footer.email}
+                <Mail size={14} className="opacity-60" /> "hello@luscentglow.com"
               </a>
               <a 
-                href={`tel:${globalSettings?.supportPhone || footer.phone}`} 
+                href={`tel:$"+91 97126 63607"`} 
                 className="hover:text-gold hover:underline transition-all flex items-center gap-2 cursor-pointer w-fit"
               >
-                <Phone size={14} className="opacity-60" /> {globalSettings?.supportPhone || footer.phone}
+                <Phone size={14} className="opacity-60" /> "+91 97126 63607"
               </a>
             </div>
           </div>

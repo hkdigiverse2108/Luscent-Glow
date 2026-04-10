@@ -161,7 +161,7 @@ const AdminFAQ = () => {
         </div>
 
         {/* Categories & Questions Management */}
-        <div className={`p-4 rounded-3xl border h-fit ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+        <div className={`p-4 rounded-3xl border min-h-[600px] ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-display text-xl font-bold flex items-center gap-3">
               <Layout size={20} className="text-gold" /> Registry Repository

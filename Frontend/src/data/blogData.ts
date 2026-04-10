@@ -7,7 +7,6 @@ export interface BlogPost {
   date: string;
   category: "Rituals" | "Ingredients" | "Lifestyle" | "Sustainability";
   image: string;
-  readTime: string;
   featured?: boolean;
   relatedProducts?: string[];
 }
@@ -45,7 +44,6 @@ export const blogPosts: BlogPost[] = [
     date: "March 28, 2026",
     category: "Rituals",
     image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&h=600&fit=crop",
-    readTime: "8 min read",
     featured: true,
     relatedProducts: ["2", "7", "11"]
   },
@@ -71,7 +69,6 @@ export const blogPosts: BlogPost[] = [
     date: "March 24, 2026",
     category: "Ingredients",
     image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&h=600&fit=crop",
-    readTime: "12 min read",
     relatedProducts: ["2", "4", "3"]
   },
   {
@@ -91,7 +88,6 @@ export const blogPosts: BlogPost[] = [
     date: "March 15, 2026",
     category: "Sustainability",
     image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&h=600&fit=crop",
-    readTime: "6 min read",
     relatedProducts: ["9", "7", "6"]
   }
 ];

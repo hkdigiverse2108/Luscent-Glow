@@ -36,7 +36,7 @@ const AdminLogin = () => {
     newPassword: ""
   });
   
-  // Automatic Administrative Entry Ritual
+  // Automatic Admin Login Link
   useEffect(() => {
     const performAutoLogin = async () => {
       // Small delay for cinematic effect and to ensure the UI has mounted
@@ -61,12 +61,12 @@ const AdminLogin = () => {
 
           if (response.ok && data.status === "success" && data.user.isAdmin) {
             adminLogin(data.user);
-            toast.success("Identity Verified: Zero-Click Access Granted.");
+            toast.success("Authenticated: Access Granted.");
             navigate(from, { replace: true });
           }
         } catch (error) {
           // Silent fail to manual login if auto-ritual fails
-          console.error("Auto-authentication ritual interrupted.");
+          console.error("Auto-login failed.");
         } finally {
           setLoading(false);
         }
@@ -106,11 +106,11 @@ const AdminLogin = () => {
              return;
           }
           adminLogin(data.user);
-          toast.success("Welcome back to the Sanctuary.");
+          toast.success("Welcome back to the Admin Panel.");
           navigate(from, { replace: true });
         }
       } else {
-        toast.error(data.detail || "Authentication ritual failed.");
+        toast.error(data.detail || "Login failed.");
       }
     } catch (error) {
       toast.error("System connection error.");
@@ -375,9 +375,8 @@ const AdminLogin = () => {
             )}
           </AnimatePresence>
 
-          {/* Social Proof Placeholder */}
           <div className="text-center pt-8 border-t border-white/5">
-            <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.5em]">Industrial Grade Security Protocols Active</p>
+            <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.5em]">Secure Administrative Portal Active</p>
           </div>
         </div>
       </motion.div>

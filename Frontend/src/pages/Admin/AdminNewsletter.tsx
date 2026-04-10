@@ -214,7 +214,7 @@ const AdminNewsletter = () => {
               </button>
             </div>
 
-            <div className={`backdrop-blur-3xl border rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-700 ${
+            <div className={`backdrop-blur-3xl border rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-700 min-h-[600px] ${
               isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
             }`}>
               <div className="overflow-x-auto">

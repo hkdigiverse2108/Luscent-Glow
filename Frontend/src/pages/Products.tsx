@@ -192,9 +192,7 @@ const Products = () => {
           <div className="flex-1">
             {/* Top bar */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-              <p className="text-xs md:text-sm font-body text-muted-foreground order-2 sm:order-1">
-                Showing <span className="text-foreground font-semibold">{filtered.length}</span> luxury formulas
-              </p>
+                Showing <span className="text-foreground font-semibold">{filtered.length}</span> products
               <div className="flex items-center justify-between sm:justify-end gap-3 order-1 sm:order-2">
                 <button
                   onClick={() => setSidebarOpen(true)}
@@ -228,7 +226,7 @@ const Products = () => {
               <div className="text-center py-20 bg-rose/5 rounded-[3rem] border border-rose/10">
                 <p className="font-display text-xl text-rose/70 mb-4">{error}</p>
                 <button onClick={() => window.location.reload()} className="text-sm font-body font-bold text-rose uppercase tracking-widest hover:opacity-80 transition-opacity">
-                  Reload Collection
+                  Refresh Page
                 </button>
               </div>
             ) : (

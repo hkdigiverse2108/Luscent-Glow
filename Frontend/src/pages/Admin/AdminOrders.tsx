@@ -9,7 +9,6 @@ import {
   CheckCircle, 
   Clock, 
   XCircle,
-  MoreVertical,
   ChevronLeft,
   ChevronRight,
   ExternalLink,
@@ -40,7 +39,7 @@ const AdminOrders = () => {
         setOrders(data);
       }
     } catch (error) {
-      toast.error("Could not reach the order repository.");
+      toast.error("Could not reach the database.");
     } finally {
       setLoading(false);
     }
@@ -59,10 +58,10 @@ const AdminOrders = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        toast.success(`Ritual status updated to ${newStatus}.`);
+        toast.success(`Order status updated to ${newStatus}.`);
         if (data.tracking && data.tracking.trackingNumber) {
           toast.success(`Shiprocket AWB Assigned: ${data.tracking.trackingNumber}`, {
-            description: "Logistic manifest synchronized successfully."
+            description: "Tracking information updated."
           });
         }
         await fetchOrders();
@@ -78,7 +77,7 @@ const AdminOrders = () => {
         toast.error(error.detail || "Status update failed.");
       }
     } catch (error) {
-      toast.error("System connection error.");
+      toast.error("Connection error.");
     }
   };
 
@@ -114,8 +113,8 @@ const AdminOrders = () => {
     <div className="space-y-2 pb-4">
       <AdminHeader 
         title="Order"
-        highlightedWord="Concierge"
-        subtitle="Live tracking and management of sanctuary data transitions"
+        highlightedWord="Management"
+        subtitle="Manage and track your store's customer orders"
         isDark={isDark}
       />
 
@@ -147,7 +146,7 @@ const AdminOrders = () => {
       </div>
 
       {/* Order Table Ritual */}
-      <div className={`backdrop-blur-3xl border rounded-3xl shadow-2xl transition-all duration-700 ${
+      <div className={`backdrop-blur-3xl border rounded-3xl shadow-2xl transition-all duration-700 min-h-[600px] ${
         isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
         <div className="overflow-x-auto">
@@ -157,7 +156,7 @@ const AdminOrders = () => {
              }`}>
                 <tr>
                    <th className="px-4 py-2">Reference</th>
-                    <th className="px-4 py-2">Seeker</th>
+                    <th className="px-4 py-2">Customer</th>
                     <th className="px-4 py-2">Total Amount</th>
                     <th className="px-4 py-2">Status</th>
                     <th className="px-4 py-2">Payment</th>
@@ -229,8 +228,8 @@ const AdminOrders = () => {
                              </span>
                           </div>
                        </td>
-                       <td className="px-6 py-5 text-right pr-8">
-                          <div className="flex items-center justify-end gap-3">
+                       <td className="px-6 py-5 text-right pr-12">
+                          <div className="flex items-center justify-end ">
                              <button 
                                 onClick={() => openOrderModal(o)}
                                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
@@ -238,38 +237,6 @@ const AdminOrders = () => {
                              }`}>
                                 <Eye size={18} />
                              </button>
-                             <div className="relative group/actions">
-                                <button className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
-                                  isDark ? "bg-white/5 text-white/40 hover:text-white" : "bg-charcoal/5 text-charcoal/40 hover:text-charcoal"
-                                }`}>
-                                   <MoreVertical size={18} />
-                                </button>
-                                <div className={`absolute right-0 top-full mt-3 w-56 border rounded-2xl shadow-2xl p-2.5 opacity-0 scale-95 pointer-events-none group-hover/actions:opacity-100 group-hover/actions:scale-100 group-hover/actions:pointer-events-auto transition-all duration-300 z-50 ${
-                                  isDark ? "bg-charcoal border-white/10" : "bg-white border-charcoal/10"
-                                }`}>
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Processing')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-gold hover:bg-gold/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
-                                     isDark ? "text-white/60" : "text-charcoal/80"
-                                    }`}>
-                                      <Clock size={15} /> Processing
-                                   </button>
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Shipped')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-gold-400 hover:bg-gold-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
-                                     isDark ? "text-white/60" : "text-charcoal/80"
-                                    }`}>
-                                      <Truck size={15} /> Shipped
-                                   </button>
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Delivered')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-gold-400 hover:bg-gold-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
-                                     isDark ? "text-white/60" : "text-charcoal/80"
-                                    }`}>
-                                      <CheckCircle size={15} /> Delivered
-                                   </button>
-                                   <div className={`h-[1px] my-2.5 ${isDark ? "bg-white/5" : "bg-charcoal/5"}`} />
-                                   <button onClick={() => handleStatusUpdate(o._id || o.id, 'Cancelled')} className={`w-full text-left px-5 py-3 text-[13px] font-extrabold hover:text-rose-400 hover:bg-rose-400/5 rounded-xl uppercase tracking-widest transition-colors flex items-center gap-3 ${
-                                     isDark ? "text-white/60" : "text-charcoal/80"
-                                    }`}>
-                                      <XCircle size={15} /> Cancel Ritual
-                                   </button>
-                                </div>
-                             </div>
                           </div>
                        </td>
                     </motion.tr>
@@ -279,7 +246,7 @@ const AdminOrders = () => {
                     <td colSpan={6} className={`px-8 py-24 text-center font-body text-base font-extrabold uppercase tracking-widest italic transition-colors ${
                       isDark ? "text-white/40" : "text-charcoal/70"
                     }`}>
-                      No order rituals recorded in the repository.
+                      No orders found in the database.
                     </td>
                   </tr>
                 )}
@@ -295,7 +262,7 @@ const AdminOrders = () => {
            <p className={`text-xs font-bold uppercase tracking-widest transition-colors duration-700 ${
              isDark ? "text-white/20" : "text-charcoal/60"
            }`}>
-              Live Order Overlook
+              Order View
            </p>
            <div className={`flex items-center gap-4 text-xs font-bold uppercase tracking-widest transition-colors duration-700 ${
              isDark ? "text-white/40" : "text-charcoal/40"

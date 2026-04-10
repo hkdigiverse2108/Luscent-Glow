@@ -93,7 +93,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
               onClick={handleQuickAdd}
               className="w-full py-2 bg-primary/90 backdrop-blur-md text-primary-foreground text-[10px] font-body font-bold uppercase tracking-widest rounded-xl hover:bg-gold transition-colors shadow-2xl"
             >
-              Quick Add to Bag
+              Quick Add to Cart
             </button>
           </div>
         </div>
@@ -117,23 +117,23 @@ const ProductCard = ({ product }: ProductCardProps) => {
               <Star
                 key={i}
                 size={12}
-                className={i < Math.floor(product.rating) ? "fill-gold text-gold" : "text-border"}
+                className={i < Math.floor(product.rating ?? 0) ? "fill-gold text-gold" : "text-border"}
               />
             ))}
           </div>
           <span className="text-[11px] text-muted-foreground font-body">
-            ({product.reviewCount.toLocaleString()})
+            ({(product.reviewCount ?? 0).toLocaleString()})
           </span>
         </div>
 
         {/* Price */}
         <div className="flex items-baseline gap-2">
           <span className="font-body font-semibold text-foreground">
-            ₹{product.price.toLocaleString()}
+            ₹{(product.price ?? 0).toLocaleString()}
           </span>
           {product.originalPrice && (
             <span className="text-sm text-muted-foreground line-through font-body">
-              ₹{product.originalPrice.toLocaleString()}
+              ₹{(product.originalPrice).toLocaleString()}
             </span>
           )}
         </div>

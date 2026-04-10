@@ -363,4 +363,25 @@ async def verify_payment(payload: dict = Body(...)):
         )
         raise HTTPException(status_code=400, detail="Invalid payment signature.")
 
+
+@router.get("/", response_description="List all platform transaction attempts")
+async def list_payments(limit: int = 500):
+    """
+    Administrative endpoint to fetch all transaction audit logs.
+    """
+    db = await get_database()
+    payments = await db["payments"].find({}).sort("createdAt", -1).to_list(limit)
+    
+    # Simple serialization for frontend
+    for p in payments:
+        p["id"] = str(p.get("_id", ""))
+        p["_id"] = str(p.get("_id", ""))
+        p.setdefault("status", "UNKNOWN")
+        p.setdefault("amount", 0.0)
+        p.setdefault("orderNumber", "N/A")
+        p.setdefault("merchantId", "N/A")
+        p.setdefault("createdAt", datetime.utcnow().isoformat())
+        
+    return payments
+
 # Gone are the PhonePe callback/redirect rituals

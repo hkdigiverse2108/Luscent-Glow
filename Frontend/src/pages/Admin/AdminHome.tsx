@@ -16,36 +16,40 @@ import {
   ArrowRight,
   MousePointer2,
   Edit3,
-  Loader2
+  Loader2,
+  Settings,
+  Shield,
+  Eye
 } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
+import AdminBrandingModal from "../../components/Header/AdminBrandingModal.tsx";
 
 const AdminHome = () => {
   const { isDark } = useAdminTheme();
   const [config, setConfig] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
+  const [branding, setBranding] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isConfigSaving, setIsConfigSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"carousel" | "editorial" | "promotions" | "social" | "taxonomy">("carousel");
+  const [activeTab, setActiveTab] = useState<"carousel" | "editorial" | "promotions" | "social" | "taxonomy" | "identity">("carousel");
   const [editingCategory, setEditingCategory] = useState<any>(null);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isBrandingModalOpen, setIsBrandingModalOpen] = useState(false);
 
   const fetchConfig = async () => {
     try {
-      const hResponse = await fetch(getApiUrl("/home/settings"));
-      if (hResponse.ok) {
-        const data = await hResponse.json();
-        setConfig(data);
-      }
-      
-      const cResponse = await fetch(getApiUrl("/api/categories/"));
-      if (cResponse.ok) {
-        const cData = await cResponse.json();
-        setCategories(cData);
-      }
+      const [hResponse, cResponse, bResponse] = await Promise.all([
+        fetch(getApiUrl("/home/settings")),
+        fetch(getApiUrl("/api/categories/")),
+        fetch(getApiUrl("/api/branding/"))
+      ]);
+
+      if (hResponse.ok) setConfig(await hResponse.json());
+      if (cResponse.ok) setCategories(await cResponse.json());
+      if (bResponse.ok) setBranding(await bResponse.json());
     } catch (error) {
       toast.error("Failed to fetch Home Page configuration.");
     } finally {
@@ -83,10 +87,10 @@ const AdminHome = () => {
         } else {
           setConfig({ ...config, [field]: data.url });
         }
-        toast.success("Visual artifact uploaded.");
+        toast.success("Image uploaded.");
       }
     } catch (error) {
-      toast.error("Image synchronization failed.");
+      toast.error("Image upload failed.");
     }
   };
 
@@ -103,17 +107,17 @@ const AdminHome = () => {
         body: JSON.stringify(editingCategory)
       });
       if (response.ok) {
-        toast.success("Category taxonomy synchronized.");
+        toast.success("Category saved.");
         setIsCategoryModalOpen(false);
         fetchConfig();
       }
     } catch (error) {
-      toast.error("Failed to sync category artifact.");
+      toast.error("Failed to save category.");
     }
   };
 
   const handleCategoryDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to remove this category from the taxonomy?")) return;
+    if (!confirm("Are you sure you want to delete this category?")) return;
     try {
       const response = await fetch(getApiUrl(`/api/categories/${id}`), {
         method: "DELETE"
@@ -136,12 +140,12 @@ const AdminHome = () => {
         body: JSON.stringify(config)
       });
       if (response.ok) {
-        toast.success("Homepage sanctuary synchronized.");
+        toast.success("Home page settings saved.");
       } else {
-        toast.error("Failed to commit artifacts.");
+        toast.error("Failed to save changes.");
       }
     } catch (error) {
-      toast.error("Process connection error.");
+      toast.error("Connection error.");
     } finally {
       setIsConfigSaving(false);
     }
@@ -151,28 +155,28 @@ const AdminHome = () => {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
         <Loader2 className="animate-spin text-gold" size={40} />
-        <p className="font-display text-xs font-bold uppercase tracking-[0.3em] text-gold animate-pulse">Establishing Ritual Connection...</p>
+        <p className="font-display text-xs font-bold uppercase tracking-[0.3em] text-gold animate-pulse">Loading Page Settings...</p>
       </div>
     );
   }
 
   const tabs = [
-    { id: "carousel", label: "Hero Sanctuary", icon: ImageIcon },
-    { id: "editorial", label: "Brand Philosophy", icon: MessageSquare },
-    { id: "promotions", label: "Promotions", icon: ShoppingBag },
-    { id: "taxonomy", label: "Collection Taxonomy", icon: Layout },
-    { id: "social", label: "Connect", icon: Instagram }
+    { id: "carousel", label: "Hero Banner", icon: ImageIcon },
+    { id: "identity", label: "Branding", icon: Sparkles },
+    { id: "editorial", label: "Brand Story", icon: MessageSquare },
+    { id: "taxonomy", label: "Categories", icon: Layout },
+    { id: "social", label: "Social Media", icon: Instagram }
   ];
 
   return (
     <div className="space-y-6 pb-20">
       <AdminHeader 
         title="Home Page"
-        highlightedWord="Registry"
-        subtitle="Manage the global entrance and editorial narrative of your sanctuary."
+        highlightedWord="Settings"
+        subtitle="Manage the home page content and display of your store."
         isDark={isDark}
         action={{
-          label: isConfigSaving ? "Synchronizing..." : "Commit Artifacts",
+          label: isConfigSaving ? "Saving..." : "Save Changes",
           onClick: handleSaveConfig,
           icon: isConfigSaving ? Sparkles : CheckCircle2,
           disabled: isConfigSaving
@@ -249,7 +253,7 @@ const AdminHome = () => {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[8px] font-black uppercase tracking-widest opacity-30">Supporting Narrative</label>
+                        <label className="text-[8px] font-black uppercase tracking-widest opacity-30">Summary / Subtitle</label>
                         <textarea 
                           value={slide.subtitle}
                           onChange={(e) => {
@@ -302,7 +306,7 @@ const AdminHome = () => {
                 <div className="w-16 h-16 rounded-full bg-gold/10 flex items-center justify-center text-gold group-hover:scale-110 transition-transform">
                   <Plus size={32} />
                 </div>
-                <span className="font-display text-sm font-bold uppercase tracking-[0.3em] text-gold">Manifest New Slide</span>
+                <span className="font-display text-sm font-bold uppercase tracking-[0.3em] text-gold">Add New Slide</span>
               </button>
             </div>
           </motion.div>
@@ -324,8 +328,8 @@ const AdminHome = () => {
                     <Zap size={24} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold uppercase tracking-tight font-display">Philosophy Oracle</h3>
-                    <p className="text-xs text-muted-foreground font-body">Manage the brand's core narrative and philosophical interlude.</p>
+                    <h3 className="text-xl font-bold uppercase tracking-tight font-display">Brand Story Manager</h3>
+                    <p className="text-xs text-muted-foreground font-body">Manage your store's about section and brand narrative.</p>
                   </div>
                 </div>
 
@@ -333,7 +337,7 @@ const AdminHome = () => {
                   <div className="space-y-6">
                     <div className="flex flex-col md:flex-row gap-6">
                       <div className="w-full md:w-1/3">
-                        <label className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-3 block">Philosophy Visual</label>
+                        <label className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-3 block">Story Image</label>
                         <div className="relative aspect-square rounded-[2rem] overflow-hidden group border border-white/10 shadow-2xl">
                           <img src={getAssetUrl(config.brandStory.image)} className="w-full h-full object-cover" />
                           <label className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all">
@@ -393,7 +397,7 @@ const AdminHome = () => {
 
                   <div className="space-y-6">
                     <div className="p-6 rounded-[2rem] bg-gold/5 border border-gold/10 space-y-6">
-                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gold text-center mb-4">Registry Section Headers</h4>
+                      <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-gold text-center mb-4">Section Headers</h4>
                       
                       <div className="space-y-4">
                         <div className="space-y-2">
@@ -451,88 +455,73 @@ const AdminHome = () => {
           </motion.div>
         )}
 
-        {activeTab === "promotions" && (
-          <motion.div
-            key="promotions"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.05 }}
-            className="flex justify-center"
-          >
-            <div className={`w-full max-w-4xl p-10 rounded-[3.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-gold/10 shadow-2xl"}`}>
-              <div className="flex items-center gap-4 mb-10 pb-6 border-b border-white/5">
-                <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold">
-                  <Zap size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold uppercase tracking-tight font-display">Promotional Artifact</h3>
-                  <p className="text-xs text-muted-foreground font-body">Manage the high-impact discount banner appearing on the global entry.</p>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-1 gap-12">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <label className="text-[8px] font-black uppercase tracking-widest opacity-30 px-2">Primary Title</label>
-                    <input 
-                      value={config.discountBanner.title}
-                      onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, title: e.target.value } })}
-                      className="w-full bg-white/5 rounded-2xl p-5 text-lg font-display font-bold border-none focus:ring-1 focus:ring-gold/30"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[8px] font-black uppercase tracking-widest opacity-30 px-2">Supporting Narrative</label>
-                    <input 
-                      value={config.discountBanner.subtitle}
-                      onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, subtitle: e.target.value } })}
-                      className="w-full bg-white/5 rounded-2xl p-5 text-xs font-body font-medium border-none focus:ring-1 focus:ring-gold/30 opacity-70"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[8px] font-black uppercase tracking-widest opacity-30 px-2 text-gold">Highlight Discount Text</label>
-                    <input 
-                      value={config.discountBanner.discountText}
-                      onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, discountText: e.target.value } })}
-                      className="w-full bg-gold/10 rounded-2xl p-5 text-2xl font-display font-black text-gold border-none focus:ring-1 focus:ring-gold/30 placeholder:text-gold/20"
-                    />
-                  </div>
-                  <div className="space-y-2 group">
-                    <label className="text-[8px] font-black uppercase tracking-widest opacity-30 px-2 text-gold">Offer Expiry (Countdown Ritual)</label>
-                    <div className="relative">
-                      <input 
-                        type="datetime-local"
-                        value={config.discountBanner.endDate ? config.discountBanner.endDate.slice(0, 16) : ""}
-                        onChange={(e) => {
-                          const date = e.target.value;
-                          setConfig({ 
-                            ...config, 
-                            discountBanner: { ...config.discountBanner, endDate: date } 
-                          });
-                        }}
-                        className={`w-full bg-white/5 rounded-2xl p-5 text-xs font-body font-bold border-none focus:ring-1 focus:ring-gold/30 transition-all ${isDark ? "text-white" : "text-charcoal"}`}
-                      />
+        {activeTab === "identity" && (
+          <motion.div
+            key="identity"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="max-w-4xl mx-auto space-y-6"
+          >
+            <div className={`p-8 rounded-[3rem] border shadow-2xl relative overflow-hidden ${isDark ? "bg-charcoal/40 border-gold/10" : "bg-white border-gold/20"}`}>
+                <div className="flex items-center gap-4 mb-8 pb-6 border-b border-white/5">
+                    <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold">
+                      <Sparkles size={24} />
                     </div>
-                    <p className="text-[7px] uppercase tracking-widest text-muted-foreground px-2 opacity-50">Set the exact moment the ritual concludes.</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="text-[8px] font-black uppercase tracking-widest opacity-30 px-2 text-gold">Action Label</label>
-                      <input 
-                        value={config.discountBanner.buttonText}
-                        onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, buttonText: e.target.value } })}
-                        className="w-full bg-white/5 rounded-2xl p-5 text-[10px] font-bold uppercase tracking-widest border-none focus:ring-1 focus:ring-gold/30"
-                      />
+                    <div>
+                      <h3 className="text-xl font-bold uppercase tracking-tight font-display">Header Branding</h3>
+                      <p className="text-xs text-muted-foreground font-body">Manage the logo and global branding of your store.</p>
                     </div>
-                    <div className="space-y-2">
-                      <label className="text-[8px] font-black uppercase tracking-widest opacity-30 px-2 text-gold">Action Link</label>
-                      <input 
-                        value={config.discountBanner.buttonLink}
-                        onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, buttonLink: e.target.value } })}
-                        className="w-full bg-white/5 rounded-2xl p-5 text-[10px] font-bold uppercase tracking-widest border-none focus:ring-1 focus:ring-gold/30"
-                      />
-                    </div>
-                  </div>
                 </div>
+
+                <div className="space-y-8">
+                    <div className="p-10 rounded-[2.5rem] bg-secondary/30 border border-gold/10 flex items-center justify-center relative group">
+                        {branding?.useImage && branding?.logoImage ? (
+                            <img 
+                                src={getAssetUrl(branding.logoImage)} 
+                                alt="Active Logo" 
+                                className="h-20 w-auto object-contain transition-transform group-hover:scale-110 duration-500"
+                            />
+                        ) : (
+                            <h1 className="font-display text-4xl font-semibold tracking-wide italic">
+                                {branding?.logoText?.split(' ')[0]} <span className="text-gold">{branding?.logoText?.split(' ').slice(1).join(' ')}</span>
+                            </h1>
+                        )}
+                        <div className="absolute top-6 right-6 text-[8px] font-bold uppercase tracking-widest text-gold bg-gold/5 px-4 py-1.5 rounded-full border border-gold/10">
+                            Current Logo
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className={`p-6 rounded-3xl border ${isDark ? "bg-white/5 border-white/5" : "bg-charcoal/5 border-charcoal/5"}`}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50 mb-1">Identity State</p>
+                        <p className="text-lg font-bold">{branding?.useImage ? "Visual Mark (Image)" : "Text Identity"}</p>
+                      </div>
+                      <div className={`p-6 rounded-3xl border ${isDark ? "bg-white/5 border-white/5" : "bg-charcoal/5 border-charcoal/5"}`}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-50 mb-1">Last Updated</p>
+                        <p className="text-lg font-bold">{new Date(branding?.updatedAt).toLocaleDateString(undefined, { dateStyle: 'long' })}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-4">
+                      <button 
+                          onClick={() => setIsBrandingModalOpen(true)}
+                          className="flex-1 py-5 bg-gold text-charcoal rounded-2xl flex items-center justify-center gap-3 font-bold text-[10px] uppercase tracking-widest hover:bg-white transition-all shadow-xl shadow-gold/10"
+                      >
+                          <Settings size={14} /> Edit Branding
+                      </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className={`p-6 rounded-[2.5rem] border ${isDark ? "border-gold/5 bg-gold/5" : "border-gold/10 bg-gold/5"} flex items-center gap-5`}>
+              <div className="w-12 h-12 rounded-2xl bg-gold/20 flex items-center justify-center shrink-0">
+                  <Shield size={24} className="text-gold" />
+              </div>
+              <div>
+                <p className="text-[11px] leading-relaxed opacity-80 uppercase tracking-[0.2em] font-bold text-gold">Branding Notice</p>
+                <p className="text-[10px] opacity-60 font-medium">Changes to branding settings apply across your entire store in real-time.</p>
               </div>
             </div>
           </motion.div>
@@ -551,7 +540,7 @@ const AdminHome = () => {
                 <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center text-gold">
                   <Layout size={20} />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gold italic">Homepage Category Bento Grid Management</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gold italic">Home Page Category Bento Grid Management</p>
               </div>
               <button 
                 onClick={() => {
@@ -560,7 +549,7 @@ const AdminHome = () => {
                 }}
                 className="px-6 py-2 bg-gold text-charcoal rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-all shadow-lg shadow-gold/20 flex items-center gap-2"
               >
-                <Plus size={14} /> Manifest New Category
+                <Plus size={14} /> Add New Category
               </button>
             </div>
 
@@ -624,12 +613,12 @@ const AdminHome = () => {
                 <X size={24} />
               </button>
 
-              <h3 className="text-2xl font-display font-bold mb-8 italic">Category <span className="text-gold">Manifestation</span></h3>
+              <h3 className="text-2xl font-display font-bold mb-8 italic">Category <span className="text-gold">Management</span></h3>
 
               <div className="space-y-6">
                 <div className="flex gap-6">
                   <div className="w-1/3">
-                    <label className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-3 block">Artifact Visual</label>
+                    <label className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-3 block">Category Image</label>
                     <div className="relative aspect-square rounded-2xl overflow-hidden group border border-white/10 shadow-lg">
                       <img src={getAssetUrl(editingCategory?.image)} className="w-full h-full object-cover" />
                       <label className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all">
@@ -668,7 +657,7 @@ const AdminHome = () => {
                     onClick={handleCategorySave}
                     className="w-full py-4 bg-gold text-charcoal rounded-2xl text-[10px] font-bold uppercase tracking-widest hover:bg-white transition-all shadow-xl shadow-gold/10"
                   >
-                    Commit Category to Taxonomy
+                    Save Category
                   </button>
                 </div>
               </div>
@@ -676,6 +665,13 @@ const AdminHome = () => {
           </div>
         )}
       </AnimatePresence>
+
+      <AdminBrandingModal 
+        isOpen={isBrandingModalOpen}
+        onClose={() => setIsBrandingModalOpen(false)}
+        branding={branding}
+        onSuccess={fetchConfig}
+      />
     </div>
   );
 };

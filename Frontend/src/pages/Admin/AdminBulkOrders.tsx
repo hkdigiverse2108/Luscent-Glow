@@ -192,7 +192,7 @@ const AdminBulkOrders = () => {
               />
             </div>
 
-            <div className={`rounded-2xl border overflow-hidden transition-all duration-700 ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl shadow-charcoal/5"}`}>
+            <div className={`rounded-2xl border overflow-hidden transition-all duration-700 min-h-[600px] ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl shadow-charcoal/5"}`}>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead className={isDark ? "bg-white/5" : "bg-charcoal/5"}>

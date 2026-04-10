@@ -8,7 +8,7 @@ from bson import ObjectId
 import random
 import string
 from ..shiprocket import shiprocket_client
-from .settings import get_payment_credentials
+from .settings import get_shiprocket_credentials
 
 def serialize_order(o: dict) -> dict:
     """Convert a MongoDB order document to a JSON-serializable dict."""
@@ -252,7 +252,7 @@ async def update_order_status(id: str, body: dict = Body(...)):
     fulfillment_error = None
     
     if new_status == "Shipped" and not order.get("trackingNumber"):
-        creds = await get_payment_credentials()
+        creds = await get_shiprocket_credentials()
         success, result = await fulfill_order_via_shiprocket(db, order, creds)
         if success:
             tracking_update = result
@@ -292,7 +292,7 @@ async def trigger_fulfillment(id: str):
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    creds = await get_payment_credentials()
+    creds = await get_shiprocket_credentials()
     success, result = await fulfill_order_via_shiprocket(db, order, creds)
     
     if success:

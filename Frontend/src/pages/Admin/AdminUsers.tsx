@@ -225,8 +225,8 @@ const AdminUsers = () => {
     <div className="space-y-4 pb-8">
       <AdminHeader 
         title="User"
-        highlightedWord="Concierge"
-        subtitle="Full CRUD control for all registered users"
+        highlightedWord="Management"
+        subtitle="Full administrative control for all registered users"
         isDark={isDark}
         action={{
           label: "Add New User",
@@ -255,7 +255,7 @@ const AdminUsers = () => {
       </div>
 
       {/* Users Table */}
-      <div className={`backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 ${
+      <div className={`backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 min-h-[600px] ${
         isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
         <div className="overflow-x-auto">
@@ -514,7 +514,7 @@ const AdminUsers = () => {
                   </div>
 
                   <div className="space-y-6">
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-gold">Shipping Repository</h4>
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-gold">Shipping Address</h4>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Street Address</label>
                       <input 
@@ -564,9 +564,7 @@ const AdminUsers = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-center py-4">
-                  <button type="submit" className="w-full max-w-md py-5 bg-gold text-charcoal font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white transition-all shadow-xl shadow-gold/20">Create Identity Profile</button>
-                </div>
+                  <button type="submit" className="w-full max-w-md py-5 bg-gold text-charcoal font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white transition-all shadow-xl shadow-gold/20">Create User Profile</button>
               </form>
             </motion.div>
           </div>
@@ -662,7 +660,7 @@ const AdminUsers = () => {
                                      setSelectedUser(updatedUser);
                                      if (userDetails) setUserDetails({ ...userDetails, user: updatedUser });
                                      setUsers(users.map(u => u.id === selectedUser.id ? updatedUser : u));
-                                     toast.success("Identity visual cleared.");
+                                     toast.success("Profile picture removed.");
                                    }
                                  } catch (err) {
                                     toast.error("Process interrupted.");
@@ -719,7 +717,7 @@ const AdminUsers = () => {
                       <div className="text-center space-y-2 pt-2">
                          <h3 className={`text-2xl font-bold tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>{selectedUser.fullName}</h3>
                          <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-40">
-                           {selectedUser.isGuest ? "Guest Checkout Profile" : `User ID: ${selectedUser.id}`}
+                           {selectedUser.isGuest ? "Guest User" : `User ID: ${selectedUser.id}`}
                          </p>
                       </div>
                     </div>
@@ -1120,7 +1118,7 @@ const AdminUsers = () => {
                                            </div>
                                            <div className="h-[1px] bg-white/10 w-full" />
                                            <p className="text-[10px] font-body font-light italic line-clamp-2 opacity-80">
-                                             {card.message || "A token of radiance shared."}
+                                             {card.message || "A gift for you."}
                                            </p>
                                         </div>
                                       </div>
@@ -1130,7 +1128,7 @@ const AdminUsers = () => {
                             ) : (
                                <div className="py-24 text-center opacity-20">
                                  <Gift size={48} className="mx-auto mb-4" />
-                                 <p className="text-base font-bold uppercase tracking-widest italic">No gifting rituals recorded.</p>
+                                 <p className="text-base font-bold uppercase tracking-widest italic">No gift cards found.</p>
                                </div>
                             )}
                         </div>

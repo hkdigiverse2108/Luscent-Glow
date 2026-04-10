@@ -6,7 +6,6 @@ import {
   Image as ImageIcon,
   Calendar,
   User as UserIcon,
-  Clock,
   Layout,
   Star,
   Plus,
@@ -26,7 +25,6 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
     date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
     category: "Rituals",
     image: "",
-    readTime: "5 min read",
     featured: false,
     relatedProducts: []
   });
@@ -48,7 +46,6 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
         date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         category: "Rituals",
         image: "",
-        readTime: "5 min read",
         featured: false,
         relatedProducts: []
       });
@@ -220,7 +217,7 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
                </div>
 
                {/* Meta Details */}
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                      <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 flex items-center gap-2"><UserIcon size={12} /> Author</label>
                      {voices && voices.length > 0 ? (
@@ -241,10 +238,6 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
                   <div className="space-y-2">
                      <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 flex items-center gap-2"><Calendar size={12} /> Published Date</label>
                      <input value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold" />
-                  </div>
-                  <div className="space-y-2">
-                     <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 flex items-center gap-2"><Clock size={12} /> Read Time</label>
-                     <input value={formData.readTime} onChange={(e) => setFormData({...formData, readTime: e.target.value})} className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold" />
                   </div>
                   <div className="space-y-2">
                      <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 flex items-center gap-2"><Layout size={12} /> Category</label>

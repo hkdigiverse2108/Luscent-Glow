@@ -24,7 +24,8 @@ import {
   Rss,
   Globe,
   UserCheck,
-  Star
+  Star,
+  CreditCard
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -49,6 +50,7 @@ const menuGroups = [
     label: "Commerce",
     items: [
       { icon: ClipboardList,   label: "Orders",        path: "/admin/orders" },
+      { icon: CreditCard,      label: "Payments",      path: "/admin/payments" },
       { icon: Ticket,          label: "Gift Cards",    path: "/admin/gift-cards" },
       { icon: Package,         label: "Bulk Orders",   path: "/admin/bulk-orders" },
     ]
@@ -59,13 +61,11 @@ const menuGroups = [
       { icon: Users,           label: "Users",         path: "/admin/users" },
       { icon: Star,            label: "Reviews",       path: "/admin/reviews" },
       { icon: Rss,             label: "Subscribers",   path: "/admin/newsletter" },
-      { icon: MessageSquare,   label: "Inquiries",     path: "/admin/inquiries" },
     ]
   },
   {
     label: "Site",
     items: [
-      { icon: UserCheck,       label: "Header",        path: "/admin/branding" },
       { icon: Sparkles,        label: "About Us",      path: "/admin/about" },
       { icon: Phone,           label: "Contact Us",    path: "/admin/contact" },
       { icon: HelpCircle,      label: "FAQ",           path: "/admin/faq" },
@@ -126,7 +126,7 @@ const AdminLayout = () => {
               </h1>
               <p className={`text-[8px] font-black uppercase tracking-[0.5em] mt-0.5 transition-colors duration-700 ${
                 isDark ? "text-white/30" : "text-charcoal/35"
-              }`}>Sanctuary</p>
+              }`}>Admin Panel</p>
             </div>
           </Link>
         </div>
@@ -225,7 +225,7 @@ const AdminLayout = () => {
             }`}
           >
             <span className="text-[0.7rem] font-bold uppercase tracking-widest leading-none">
-              {isDark ? "Obsidian Mode" : "Radiant Mode"}
+              {isDark ? "Dark Mode" : "Light Mode"}
             </span>
             {isDark ? <Moon size={13} /> : <Sun size={13} />}
           </button>

@@ -50,11 +50,11 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
       const base64String = event.target?.result as string;
       setFormData(prev => ({ ...prev, image: base64String }));
       setIsUploading(false);
-      toast.success("Visual asset localized to database.");
+      toast.success("Image added to database.");
     };
     reader.onerror = () => {
       setIsUploading(false);
-      toast.error("Failed to process ritual visual.");
+      toast.error("Failed to process product image.");
     };
     reader.readAsDataURL(file);
   };
@@ -120,12 +120,12 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
       });
 
       if (response.ok) {
-        toast.success(product ? "Ritual updated in repository." : "New ritual added to sanctuary.");
+        toast.success(product ? "Product updated successfully." : "New product added successfully.");
         onSuccess();
         onClose();
       } else {
         const error = await response.json();
-        toast.error(error.detail || "Ritual submission failed.");
+        toast.error(error.detail || "Product submission failed.");
       }
     } catch (error) {
       toast.error("System connection error.");
@@ -143,7 +143,24 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     } else if (name === "tags") {
       setFormData(prev => ({ ...prev, tags: value.split(",").map(t => t.trim()) }));
     } else if (type === "number") {
-      setFormData(prev => ({ ...prev, [name]: parseFloat(value) }));
+      const numValue = parseFloat(value);
+      setFormData(prev => {
+        const newData = { ...prev, [name]: numValue };
+        
+        // Automatic Discount Calculation
+        if (name === "price" || name === "originalPrice") {
+          const currentPrice = name === "price" ? numValue : prev.price;
+          const originalPrice = name === "originalPrice" ? numValue : prev.originalPrice;
+          
+          if (originalPrice > 0 && currentPrice > 0 && originalPrice > currentPrice) {
+            newData.discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
+          } else {
+            newData.discount = 0;
+          }
+        }
+        
+        return newData;
+      });
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -184,11 +201,11 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                   <h3 className={`font-body text-2xl font-bold uppercase tracking-tight transition-colors duration-700 ${
                     isDark ? "text-white" : "text-charcoal"
                   }`}>
-                    {product ? "Edit" : "Add New"} <span className="text-indigo-500 italic">Ritual</span>
+                    {product ? "Edit" : "Add New"} <span className="text-indigo-500 italic">Product</span>
                   </h3>
                   <p className={`text-xs font-bold uppercase tracking-widest font-body transition-colors duration-700 ${
                     isDark ? "text-white/30" : "text-charcoal/70"
-                  }`}>Metadata Repository</p>
+                  }`}>Product Database</p>
                </div>
             </div>
             <button 
@@ -208,7 +225,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                <div className="space-y-8">
                   <div className="space-y-4">
-                     <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Ritual Name</label>
+                     <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Product Name</label>
                      <input 
                        name="name"
                        value={formData.name}
@@ -257,7 +274,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
 
                <div className="space-y-8">
                    <div className="space-y-4">
-                      <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Ritual Visual</label>
+                      <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Product Image</label>
                       <div className="flex items-center gap-6">
                         <div className={`w-28 h-28 rounded-3xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-all duration-500 ${
                           isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
@@ -265,7 +282,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                           {formData.image ? (
                             <img 
                               src={getAssetUrl(formData.image)} 
-                              alt="Ritual Preview" 
+                              alt="Product Preview" 
                               className="w-full h-full object-cover"
                             />
                           ) : (
@@ -277,13 +294,13 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                            <div className="relative">
                               <input 
                                 type="file"
-                                id="ritual-image"
+                                id="product-image"
                                 className="hidden"
                                 onChange={handleFileUpload}
                                 accept="image/*"
                               />
                               <label 
-                                htmlFor="ritual-image"
+                                htmlFor="product-image"
                                 className={`flex items-center justify-center gap-3 px-8 py-4 rounded-2xl border cursor-pointer font-bold uppercase tracking-widest text-[10px] transition-all duration-500 ${
                                   isDark 
                                   ? "bg-white/5 border-white/10 text-white/60 hover:bg-gold/10 hover:border-gold/30 hover:text-gold" 
@@ -320,7 +337,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                      </div>
                      <div className="space-y-4">
                         <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Discount (%)</label>
-                        <input name="discount" type="number" value={formData.discount} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${
+                        <input name="discount" type="number" readOnly value={formData.discount} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm opacity-60 cursor-not-allowed ${
                           isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
                         }`} />
                      </div>
@@ -328,11 +345,11 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                </div>
             </div>
 
-            {/* Tags & Badges Ritual */}
+            {/* Tags & Badges Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-8 border-t border-white/5">
                 <div className="space-y-8">
                    <div className="space-y-4">
-                      <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Ritual Tags (comma separated)</label>
+                      <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Product Tags (comma separated)</label>
                       <input 
                         name="tags"
                         value={formData.tags.join(", ")}
@@ -377,13 +394,13 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                  <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-4">
                        <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Rating (0-5)</label>
-                       <input name="rating" type="number" step="0.1" max="5" value={formData.rating} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${
+                       <input name="rating" type="number" step="0.1" max="5" readOnly value={formData.rating} className={`w-full border rounded-2xl py-4 px-6 text-sm opacity-60 cursor-not-allowed ${
                          isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
                        }`} />
                     </div>
                     <div className="space-y-4">
                        <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Review Count</label>
-                       <input name="reviewCount" type="number" value={formData.reviewCount} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${
+                       <input name="reviewCount" type="number" readOnly value={formData.reviewCount} className={`w-full border rounded-2xl py-4 px-6 text-sm opacity-60 cursor-not-allowed ${
                          isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
                        }`} />
                     </div>
@@ -395,13 +412,13 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <Info size={14} className="text-gold/60" />
-                    <label className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Ritual Narrative</label>
+                    <label className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Product Description</label>
                   </div>
                    <textarea 
                      name="description"
                      value={formData.description}
                      onChange={handleInputChange}
-                     placeholder="Describe the transformative experience of this ritual..."
+                     placeholder="Describe the product experience..."
                      rows={4}
                      className={`w-full border rounded-3xl py-6 px-8 font-body text-sm focus:ring-1 focus:ring-gold/30 outline-none resize-none transition-all ${
                        isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
@@ -424,12 +441,12 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                        />
                     </div>
                     <div className="space-y-4">
-                       <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>How To Invoke (Usage)</label>
+                       <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Usage Instructions</label>
                        <textarea 
                          name="howToUse"
                          value={formData.howToUse}
                          onChange={handleInputChange}
-                         placeholder="Define the application ritual..."
+                         placeholder="Describe how to use the product..."
                          rows={6}
                          className={`w-full border rounded-3xl py-6 px-8 font-body text-sm focus:ring-1 focus:ring-gold/30 outline-none resize-none transition-all ${
                            isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
@@ -450,7 +467,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                   isDark ? "text-white/30 hover:text-white" : "text-charcoal/70 hover:text-charcoal"
                 }`}
               >
-                Cancel Ritual
+                Cancel
               </button>
              <button 
                onClick={handleSubmit}
@@ -458,11 +475,11 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                className="flex items-center gap-3 px-10 py-5 bg-gold text-charcoal font-bold rounded-2xl shadow-xl shadow-gold/5 hover:bg-white disabled:opacity-50 transition-all duration-500 uppercase tracking-widest text-xs"
              >
                {isSubmitting ? (
-                 <span className="flex items-center gap-3">Finalizing...</span>
+                 <span className="flex items-center gap-3">Saving...</span>
                ) : (
                  <>
                    <Save size={18} />
-                   <span>{product ? "Update" : "Consign"} Ritual</span>
+                   <span>{product ? "Update" : "Save"} Product</span>
                  </>
                )}
              </button>

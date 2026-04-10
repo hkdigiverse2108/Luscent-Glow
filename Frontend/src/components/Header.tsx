@@ -69,8 +69,6 @@ const Header = () => {
     };
   }, [mobileMenuOpen]);
 
-  // Removed local user handling as it's now in AuthContext
-
   useEffect(() => {
     const fetchSearchData = async () => {
       try {
@@ -106,7 +104,7 @@ const Header = () => {
         const globalRes = await fetch(getApiUrl("/api/settings/global/"));
         if (globalRes.ok) {
           const global = await globalRes.json();
-          setGlobalSettings(global);
+          setGlobalSettings((prev: any) => ({ ...prev, ...global }));
         }
       } catch (err) {
         console.error("Error fetching header data:", err);
@@ -277,78 +275,99 @@ const Header = () => {
             </div>
 
             {/* Right actions */}
-            <div className="flex items-center gap-0.5 xs:gap-1.5 md:gap-2 lg:gap-3">
-              <button
-                onClick={() => setSearchOpen(!searchOpen)}
-                className="p-2 text-foreground/70 hover:text-gold transition-colors"
-              >
-                <Search size={20} />
-              </button>
-              <Link to="/gift-cards" className="hidden sm:flex p-2 text-foreground/70 hover:text-gold transition-colors">
-                <Gift size={20} />
-              </Link>
-              <Link to="/bulk-orders" className="hidden md:flex p-2 text-foreground/70 hover:text-gold transition-colors">
-                <Package size={20} />
-              </Link>
-              
-              {user ? (
-                <div className="relative group p-2">
-                  <div className="flex items-center gap-3 cursor-pointer">
-                    <div className="hidden lg:flex flex-col items-end mr-1">
-                      <span className="text-xs text-primary font-bold line-clamp-1">{user.fullName.split(' ')[0]}</span>
-                    </div>
-                    <div className="w-9 h-9 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-charcoal transition-all duration-500 shadow-sm overflow-hidden">
-                      {user.profilePicture ? (
-                        <img src={getAssetUrl(user.profilePicture)} alt={user.fullName} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="font-display font-medium text-sm">{user.fullName.charAt(0).toUpperCase()}</span>
-                      )}
-                    </div>
-                  </div>
+            <div className="flex items-center gap-0.5 xs:gap-1.5 md:gap-2">
+              <div className="relative group flex flex-col items-center">
+                <button
+                  onClick={() => setSearchOpen(!searchOpen)}
+                  className="p-2 text-foreground/70 hover:text-gold transition-colors"
+                >
+                  <Search size={20} />
+                </button>
+                <span className="absolute top-full mt-[-2px] opacity-0 group-hover:opacity-100 transition-all duration-300 text-[8px] font-black uppercase tracking-[0.1em] text-gold pointer-events-none">Search</span>
+              </div>
 
-                  {/* Hover Dropdown */}
-                  <div className="absolute top-[calc(100%-5px)] right-0 w-64 pt-6 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-50">
-                    <div className="bg-white border border-gold/10 rounded-[2rem] shadow-ethereal overflow-hidden">
-                      <div className="px-6 py-6 border-b border-gold/10 bg-gold/5">
-                        <h4 className="text-sm font-display font-bold text-charcoal truncate">{user.fullName}</h4>
-                        <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
-                      </div>
-                      <div className="p-2">
-                        <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest hover:text-gold hover:bg-gold/5 rounded-2xl transition-all">
-                          <User size={14} /> Profile
-                        </Link>
-                        <button 
-                          onClick={() => setIsLogoutDialogOpen(true)}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-rose-brand uppercase tracking-widest hover:bg-rose-brand/5 rounded-2xl transition-all text-left"
-                        >
-                          <LogOut size={14} /> Logout
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <Link to="/login" className="p-2 text-foreground/70 hover:text-gold transition-colors" title="Login / Register">
-                  <User size={20} />
+              <div className="relative group flex flex-col items-center hidden sm:flex">
+                <Link to="/gift-cards" className="p-2 text-foreground/70 hover:text-gold transition-colors">
+                  <Gift size={20} />
                 </Link>
-              )}
+                <span className="absolute top-full mt-[-2px] opacity-0 group-hover:opacity-100 transition-all duration-300 text-[8px] font-black uppercase tracking-[0.1em] text-gold pointer-events-none">Gifts</span>
+              </div>
 
-              <Link to="/wishlist" className="p-1.5 md:p-2 text-foreground/70 hover:text-gold transition-colors relative">
-                <Heart size={20} />
-                {wishlist.length > 0 && (
-                  <span className="absolute top-0 right-0 md:-top-0.5 md:-right-0.5 w-3.5 h-3.5 md:w-4 md:h-4 bg-gold text-primary-foreground text-[8px] md:text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {wishlist.length}
-                  </span>
+              <div className="relative group flex flex-col items-center hidden md:flex">
+                <Link to="/bulk-orders" className="p-2 text-foreground/70 hover:text-gold transition-colors">
+                  <Package size={20} />
+                </Link>
+                <span className="absolute top-full mt-[-2px] opacity-0 group-hover:opacity-100 transition-all duration-300 text-[8px] font-black uppercase tracking-[0.1em] text-gold pointer-events-none">Bulk</span>
+              </div>
+              
+              <div className="relative group flex flex-col items-center">
+                {user ? (
+                  <div className="relative p-2">
+                    <div className="flex items-center gap-3 cursor-pointer">
+                      <div className="hidden lg:flex flex-col items-end mr-1">
+                        <span className="text-xs text-primary font-bold line-clamp-1">{user.fullName.split(' ')[0]}</span>
+                      </div>
+                      <div className="w-9 h-9 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-charcoal transition-all duration-500 shadow-sm overflow-hidden">
+                        {user.profilePicture ? (
+                          <img src={getAssetUrl(user.profilePicture)} alt={user.fullName} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="font-display font-medium text-sm">{user.fullName.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Hover Dropdown */}
+                    <div className="absolute top-[calc(100%-5px)] right-0 w-64 pt-6 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-500 z-50">
+                      <div className="bg-white border border-gold/10 rounded-[2rem] shadow-ethereal overflow-hidden">
+                        <div className="px-6 py-6 border-b border-gold/10 bg-gold/5">
+                          <h4 className="text-sm font-display font-bold text-charcoal truncate">{user.fullName}</h4>
+                          <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                        <div className="p-2">
+                          <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest hover:text-gold hover:bg-gold/5 rounded-2xl transition-all">
+                            <User size={14} /> Profile
+                          </Link>
+                          <button 
+                            onClick={() => setIsLogoutDialogOpen(true)}
+                            className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-body font-bold text-rose-brand uppercase tracking-widest hover:bg-rose-brand/5 rounded-2xl transition-all text-left"
+                          >
+                            <LogOut size={14} /> Logout
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <Link to="/login" className="p-2 text-foreground/70 hover:text-gold transition-colors">
+                    <User size={20} />
+                  </Link>
                 )}
-              </Link>
-              <Link to="/cart" className="p-1.5 xs:p-2 text-foreground/70 hover:text-gold transition-colors relative">
-                <ShoppingBag size={20} className="w-5 h-5" />
-                {totalItems > 0 && (
-                  <span className="absolute top-0 right-0 md:-top-0.5 md:-right-0.5 w-3.5 h-3.5 md:w-4 md:h-4 bg-gold text-primary-foreground text-[8px] md:text-[10px] font-bold rounded-full flex items-center justify-center">
-                    {totalItems}
-                  </span>
-                )}
-              </Link>
+                <span className="absolute top-full mt-[-2px] opacity-0 group-hover:opacity-100 transition-all duration-300 text-[8px] font-black uppercase tracking-[0.1em] text-gold pointer-events-none">Account</span>
+              </div>
+
+              <div className="relative group flex flex-col items-center">
+                <Link to="/wishlist" className="p-1.5 md:p-2 text-foreground/70 hover:text-gold transition-colors relative">
+                  <Heart size={20} />
+                  {wishlist.length > 0 && (
+                    <span className="absolute top-0 right-0 md:-top-0.5 md:-right-0.5 w-3.5 h-3.5 md:w-4 md:h-4 bg-gold text-primary-foreground text-[8px] md:text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </Link>
+                <span className="absolute top-full mt-[-2px] opacity-0 group-hover:opacity-100 transition-all duration-300 text-[8px] font-black uppercase tracking-[0.1em] text-gold pointer-events-none">Wishlist</span>
+              </div>
+              
+              <div className="relative group flex flex-col items-center">
+                <Link to="/cart" className="p-1.5 xs:p-2 text-foreground/70 hover:text-gold transition-colors relative">
+                  <ShoppingBag size={20} className="w-5 h-5" />
+                  {totalItems > 0 && (
+                    <span className="absolute top-0 right-0 md:-top-0.5 md:-right-0.5 w-3.5 h-3.5 md:w-4 md:h-4 bg-gold text-primary-foreground text-[8px] md:text-[10px] font-bold rounded-full flex items-center justify-center">
+                      {totalItems}
+                    </span>
+                  )}
+                </Link>
+                <span className="absolute top-full mt-[-2px] opacity-0 group-hover:opacity-100 transition-all duration-300 text-[8px] font-black uppercase tracking-[0.1em] text-gold pointer-events-none">Bag</span>
+              </div>
             </div>
           </div>
         </div>
@@ -386,7 +405,7 @@ const Header = () => {
                       >
                         <div className="p-4 max-h-[400px] overflow-y-auto">
                           <p className="text-[10px] font-body font-bold text-primary uppercase tracking-[0.2em] mb-4 px-2">
-                            {searchResults.length > 0 ? "Top Results" : "No results found"}
+                             {searchResults.length > 0 ? "Top Results" : "No results found"}
                           </p>
                           <div className="space-y-2">
                             {searchResults.map((product) => (
@@ -408,7 +427,7 @@ const Header = () => {
                                 </div>
                                 <div className="flex-1">
                                   <h4 className="text-sm font-body font-bold text-primary group-hover:text-gold transition-colors line-clamp-1">
-                                    {product.name || "Unnamed Treasure"}
+                                    {product.name || "Unnamed Product"}
                                   </h4>
                                   <p className="text-[10px] text-muted-foreground uppercase">{product.category || "Collection"}</p>
                                 </div>
@@ -424,7 +443,7 @@ const Header = () => {
                               onClick={() => setSearchOpen(false)}
                               className="block text-center pt-4 mt-4 border-t border-gold/10 text-[10px] font-body font-bold text-gold uppercase tracking-[0.2em] hover:opacity-80 transition-opacity"
                             >
-                              View All Collection
+                              View All Products
                             </Link>
                           )}
                         </div>
@@ -469,7 +488,7 @@ const Header = () => {
                     to="/products"
                     className="text-sm font-body font-bold text-gold hover:text-gold/80 transition-all tracking-wide uppercase px-4 py-2 bg-gold/5 rounded-full border border-gold/20"
                   >
-                    Rituals
+                    All Products
                   </Link>
                 </div>
               </div>
@@ -591,7 +610,7 @@ const Header = () => {
                         onClick={() => setMobileMenuOpen(false)}
                         className="flex items-center justify-between py-4 px-4 text-base font-body font-bold text-gold hover:bg-gold/5 rounded-2xl transition-all active:bg-gold/10"
                       >
-                        Explore All Collections
+                        Explore All Products
                       </Link>
                     </div>
                   </div>

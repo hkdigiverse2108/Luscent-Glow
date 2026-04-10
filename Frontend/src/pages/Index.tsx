@@ -38,7 +38,7 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-charcoal flex flex-col items-center justify-center space-y-4">
         <Loader2 className="animate-spin text-gold" size={48} />
-        <p className="font-display text-[10px] font-bold uppercase tracking-[0.5em] text-gold animate-pulse">Illuminating Sanctuary...</p>
+        <p className="font-display text-[10px] font-bold uppercase tracking-[0.5em] text-gold animate-pulse">Loading...</p>
       </div>
     );
   }

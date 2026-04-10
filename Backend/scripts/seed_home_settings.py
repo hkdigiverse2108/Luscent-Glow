@@ -56,7 +56,7 @@ async def seed_home_settings():
             "subtitle": "Exclusive Invitation",
             "discountText": "40% OFF",
             "buttonText": "Retrieve Offer",
-            "buttonLink": "/offers"
+            "buttonLink": "/products"
         },
         "instagram": {
             "profileHandle": "@hk_digiverse",

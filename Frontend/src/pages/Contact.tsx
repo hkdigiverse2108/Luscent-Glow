@@ -47,11 +47,11 @@ const Contact = () => {
         // Merge global settings into channels if they exist
         if (globalData && contactData.channels) {
           contactData.channels = contactData.channels.map((chan: any) => {
-            if (chan.badge === "Call Us" && globalData.supportPhone) {
-              return { ...chan, value: globalData.supportPhone };
+            if (chan.badge === "Call Us") {
+              return { ...chan, value: "+91 97126 63607" };
             }
-            if (chan.badge === "Email Us" && globalData.supportEmail) {
-              return { ...chan, value: globalData.supportEmail };
+            if (chan.badge === "Email Us") {
+              return { ...chan, value: "hello@luscentglow.com" };
             }
             return chan;
           });

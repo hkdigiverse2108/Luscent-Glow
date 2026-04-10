@@ -71,7 +71,7 @@ const ProductDetail = () => {
           setProduct(localProduct);
           setError(null);
         } else {
-          setError("We couldn't find this specific treasure. It might have been curated by someone else.");
+          setError("We couldn't find this product. It may have been moved or removed.");
         }
       } finally {
         setLoading(false);
@@ -188,7 +188,7 @@ const ProductDetail = () => {
         <Header />
         <div className="container mx-auto px-4 py-20 flex flex-col items-center justify-center">
           <div className="w-16 h-16 border-4 border-gold/20 border-t-gold rounded-full animate-spin mb-6" />
-          <p className="font-display text-xl text-muted-foreground italic">Revealing product details...</p>
+          <p className="font-display text-xl text-muted-foreground italic">Loading product details...</p>
         </div>
         <Footer />
       </div>
@@ -202,14 +202,14 @@ const ProductDetail = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-20 text-center max-w-md">
-          <h2 className="font-display text-3xl text-foreground mb-4">Discovery Failed</h2>
+          <h2 className="font-display text-3xl text-foreground mb-4">Product Not Found</h2>
           <p className="font-body text-muted-foreground mb-8">
             {isLegacyId 
-              ? "This treasure has been moved to our live collection with a new identity. Your wishlist may need a small update."
+              ? "This product has been updated. Please search for it again."
               : error || "Product not found"}
           </p>
           <button onClick={() => navigate("/products")} className="px-8 py-3 bg-primary text-primary-foreground rounded-full font-body font-bold uppercase tracking-widest text-xs hover:bg-gold transition-all">
-            Explore Live Collection
+            Browse Products
           </button>
         </div>
         <Footer />
@@ -238,7 +238,7 @@ const ProductDetail = () => {
             {product.category || "Collection"}
           </Link>
           <span className="opacity-30">/</span>
-          <span className="text-foreground opacity-90">{product.name || "Treasure Detail"}</span>
+          <span className="text-foreground opacity-90">{product.name || "Product Details"}</span>
         </nav>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-start">
@@ -560,7 +560,7 @@ const ProductDetail = () => {
                           onClick={() => openGallery(idx)}
                           className="relative flex-none w-24 h-24 rounded-xl overflow-hidden border border-gold/10 shadow-sm cursor-pointer"
                         >
-                          <img src={getAssetUrl(img)} alt="Customer Ritual" className="w-full h-full object-cover" />
+                          <img src={getAssetUrl(img)} alt="Customer Photo" className="w-full h-full object-cover" />
                         </motion.div>
                       ))}
                     </div>
@@ -572,7 +572,7 @@ const ProductDetail = () => {
                   {reviewsLoading ? (
                     <div className="flex flex-col items-center py-12 gap-3 bg-secondary/10 rounded-2xl">
                       <div className="w-5 h-5 border-2 border-gold/20 border-t-gold rounded-full animate-spin" />
-                      <p className="text-[9px] font-body text-muted-foreground uppercase tracking-widest font-bold">Consulting Chronicles...</p>
+                      <p className="text-[9px] font-body text-muted-foreground uppercase tracking-widest font-bold">Loading Reviews...</p>
                     </div>
                   ) : reviews.length > 0 ? (
                     <div className="space-y-4">
@@ -660,7 +660,7 @@ const ProductDetail = () => {
                                       <span className="text-[10px] font-body font-black uppercase tracking-widest">Helpful?</span>
                                     </div>
                                     <p className="text-[10px] font-body text-charcoal/30 font-bold uppercase tracking-widest border-l border-charcoal/10 pl-4">
-                                      <span className="text-charcoal pr-0.5">{review.helpfulCount || 0}</span> Found this ritual useful
+                                      <span className="text-charcoal pr-0.5">{review.helpfulCount || 0}</span> Found this helpful
                                     </p>
                                   </div>
                                 </div>
@@ -712,7 +712,7 @@ const ProductDetail = () => {
         />
       )}
 
-      {/* Visual Sanctuary Gallery Lightbox */}
+      {/* Customer Photo Gallery */}
       <CustomerGalleryModal 
         isOpen={isGalleryModalOpen}
         onClose={() => setIsGalleryModalOpen(false)}

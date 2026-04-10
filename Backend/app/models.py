@@ -890,3 +890,48 @@ class NewsletterEmailSettingsModel(BaseModel):
                 "quote": "\"In the pursuit of light...\""
             }
         }
+
+class GlobalSettingsModel(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    whatsappNumber: str = Field(default="919537150942")
+    copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+class PaymentCredentialsModel(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    activeGateway: str = Field(default="razorpay")
+    keyId: str = Field(default="")
+    keySecret: str = Field(default="")
+    mode: str = Field(default="sandbox")
+    cashfreeAppId: str = Field(default="")
+    cashfreeSecretKey: str = Field(default="")
+    cashfreeMode: str = Field(default="sandbox")
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+class ShiprocketCredentialsModel(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    shiprocketEmail: str = Field(default="")
+    shiprocketPassword: str = Field(default="")
+    shiprocketPickupLocation: str = Field(default="Primary")
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+class SmtpCredentialsModel(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    smtpHost: str = Field(default="smtp.gmail.com")
+    smtpPort: int = Field(default=587)
+    smtpUser: str = Field(default="")
+    smtpPassword: str = Field(default="")
+    smtpFromEmail: str = Field(default="")
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True

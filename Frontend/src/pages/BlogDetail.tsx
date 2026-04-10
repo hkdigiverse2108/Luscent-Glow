@@ -2,7 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { 
-  ArrowLeft, Calendar, Clock, User, Share2, Facebook, Twitter, 
+  ArrowLeft, Calendar, User, Share2, Facebook, Twitter, 
   Link as LinkIcon, Mail, ArrowRight, ChevronRight, ShoppingBag,
   Sparkles, Heart
 } from "lucide-react";
@@ -155,16 +155,6 @@ const BlogDetail = () => {
                     <div>
                       <p className="text-white/60 mb-0.5 md:mb-1 tracking-[0.2em]">Published</p>
                       <p className="text-white">{post.date}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center bg-white/5">
-                      <Clock size={16} className="text-gold" />
-                    </div>
-                    <div>
-                      <p className="text-white/60 mb-0.5 md:mb-1 tracking-[0.2em]">Read Time</p>
-                      <p className="text-white">{post.readTime}</p>
                     </div>
                   </div>
                 </div>

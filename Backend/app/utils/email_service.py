@@ -7,6 +7,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from ..database import get_database
+from ..routes.settings import get_smtp_credentials
 
 async def send_welcome_email(to_email: str):
     """
@@ -18,11 +19,11 @@ async def send_welcome_email(to_email: str):
     # Fetch custom content settings from DB
     db_settings = await db["newsletter_settings"].find_one({})
     
-    # Fetch SMTP credentials from DB
-    db_creds = await db["payment_credentials"].find_one({})
+    # Fetch specialized SMTP credentials from DB
+    db_creds = await get_smtp_credentials()
     
     # ── Credentials Logic ───────────────────────────────────────────────
-    # Prioritize specialized Newsletter settings, then Global DB creds, then .env
+    # Prioritize specialized Newsletter settings (overrides), then the system SMTP creds, then .env
     smtp_host = (db_settings or {}).get("smtpHost") or (db_creds or {}).get("smtpHost") or settings.SMTP_HOST
     smtp_port = (db_settings or {}).get("smtpPort") or (db_creds or {}).get("smtpPort") or settings.SMTP_PORT
     smtp_user = (db_settings or {}).get("smtpUser") or (db_creds or {}).get("smtpUser") or settings.SMTP_USER

@@ -36,7 +36,7 @@ const AdminProducts = () => {
         setProducts(data);
       }
     } catch (error) {
-      toast.error("Could not reach the product sanctuary.");
+      toast.error("Could not reach the product database.");
     } finally {
       setLoading(false);
     }
@@ -47,17 +47,17 @@ const AdminProducts = () => {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to remove this ritual from the sanctuary?")) return;
+    if (!window.confirm("Are you sure you want to remove this product?")) return;
     
     try {
       const response = await fetch(getApiUrl(`/api/products/${id}`), {
         method: "DELETE",
       });
       if (response.ok) {
-        toast.success("Ritual removed from repository.");
+        toast.success("Product removed.");
         fetchProducts();
       } else {
-        toast.error("Removal ritual failed.");
+        toast.error("Delete action failed.");
       }
     } catch (error) {
       toast.error("System connection error.");
@@ -82,12 +82,12 @@ const AdminProducts = () => {
   return (
     <div className="space-y-2 pb-4">
       <AdminHeader 
-        title="Inventory"
-        highlightedWord="Concierge"
-        subtitle="Live database management for industrial product rituals"
+        title="Products"
+        highlightedWord="Management"
+        subtitle="Live database management for the product catalog"
         isDark={isDark}
         action={{
-          label: "Add New Ritual",
+          label: "Add New Product",
           onClick: openAddModal,
           icon: Plus
         }}
@@ -100,7 +100,7 @@ const AdminProducts = () => {
           }`} size={18} />
           <input 
             type="text" 
-            placeholder="Search rituals by name or category..."
+            placeholder="Search products by name or category..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className={`w-full backdrop-blur-2xl border rounded-2xl py-3 pl-16 pr-6 font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all ${
@@ -120,8 +120,8 @@ const AdminProducts = () => {
         </button>
       </div>
 
-      {/* Database Table Ritual */}
-      <div className={`backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 ${
+      {/* Database Table */}
+      <div className={`backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 min-h-[600px] ${
         isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
         <div className="overflow-x-auto overflow-y-visible">
@@ -130,7 +130,7 @@ const AdminProducts = () => {
                isDark ? "bg-white/[0.04] border-white/10 text-white/50" : "bg-charcoal/[0.04] border-charcoal/10 text-charcoal/80"
              }`}>
                 <tr>
-                   <th className="px-4 py-2 min-w-[300px] font-extrabold uppercase tracking-[0.3em]">Product Ritual</th>
+                   <th className="px-4 py-2 min-w-[300px] font-extrabold uppercase tracking-[0.3em]">Product</th>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Brand</th>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Category</th>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Pricing</th>
@@ -255,7 +255,7 @@ const AdminProducts = () => {
                     <td colSpan={7} className={`px-8 py-24 text-center font-body text-base uppercase tracking-widest italic transition-colors ${
                       isDark ? "text-white/40" : "text-charcoal/70"
                     }`}>
-                      No rituals found in the sanctuary repository.
+                      No products found in the database.
                     </td>
                   </tr>
                 )}
@@ -263,14 +263,14 @@ const AdminProducts = () => {
           </table>
         </div>
 
-        {/* Footer Ritual */}
+        {/* Footer */}
         <div className={`px-8 py-4 border-t flex items-center justify-between transition-colors duration-700 ${
           isDark ? "bg-white/[0.01] border-white/5" : "bg-charcoal/[0.01] border-charcoal/5"
         }`}>
            <p className={`text-xs font-bold uppercase tracking-widest transition-colors duration-700 ${
              isDark ? "text-white/20" : "text-charcoal/60"
            }`}>
-              Showing {filteredProducts.length} of {products.length} live rituals
+              Showing {filteredProducts.length} of {products.length} live products
            </p>
            <div className="flex items-center gap-4">
               <button className={`w-10 h-10 rounded-full border flex items-center justify-center transition-colors cursor-not-allowed ${
