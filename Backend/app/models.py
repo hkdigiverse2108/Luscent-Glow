@@ -696,6 +696,13 @@ class PaymentCredentialsModel(BaseModel):
     shiprocketPassword: str = Field(default="")
     shiprocketPickupLocation: str = Field(default="Primary")
     
+    # SMTP Credentials
+    smtpHost: str = Field(default="smtp.gmail.com")
+    smtpPort: int = Field(default=587)
+    smtpUser: str = Field(default="")
+    smtpPassword: str = Field(default="")
+    smtpFromEmail: str = Field(default="")
+    
     updatedAt: Optional[str] = None
 
     class Config:
@@ -708,7 +715,8 @@ class PaymentCredentialsModel(BaseModel):
                 "mode": "sandbox",
                 "cashfreeAppId": "",
                 "cashfreeSecretKey": "",
-                "cashfreeMode": "sandbox"
+                "cashfreeMode": "sandbox",
+                "smtpUser": "admin@example.com"
             }
         }
 
@@ -845,3 +853,40 @@ class NewsletterSubModel(BaseModel):
 
     class Config:
         populate_by_name = True
+
+class NewsletterEmailSettingsModel(BaseModel):
+    """
+    Model for managing the content and sender details of the newsletter welcome email.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    fromName: str = Field(default="Luscent Glow")
+    fromEmail: str = Field(default="hello@luscentglow.com")
+    subject: str = Field(default="Your Invitation to Radiance")
+    headline: str = Field(default="The Ritual Begins")
+    body1: str = Field(default="We are honored to welcome you to the Luscent Glow sanctuary. You have entered a curated space where botanical alchemy meets modern science to unveil the authentic brilliance of your skin.")
+    body2: str = Field(default="As a cherished member of our inner circle, you will now receive priority access to our artisanal small-batch launches, intimate beauty philosophies, and exclusive invitations reserved for those who prioritize their glow.")
+    buttonText: str = Field(default="Begin Your Ritual")
+    quote: str = Field(default='"In the pursuit of light, we find our most authentic selves."')
+    
+    # SMTP Configuration
+    smtpHost: str = Field(default="smtp.gmail.com")
+    smtpPort: int = Field(default=587)
+    smtpUser: str = Field(default="")
+    smtpPassword: str = Field(default="")
+    
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "fromName": "Luscent Glow",
+                "fromEmail": "hello@luscentglow.com",
+                "subject": "Your Invitation to Radiance",
+                "headline": "The Ritual Begins",
+                "body1": "We are honored...",
+                "body2": "As a cherished member...",
+                "buttonText": "Begin Your Ritual",
+                "quote": "\"In the pursuit of light...\""
+            }
+        }

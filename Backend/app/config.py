@@ -20,6 +20,14 @@ class Settings(BaseSettings):
     BACKEND_URL: str = os.getenv("BACKEND_URL", "http://localhost:5172")
     FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+    # SMTP Settings
+    SMTP_HOST: str = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER: str = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    SMTP_FROM_EMAIL: str = os.getenv("SMTP_FROM_EMAIL", "hello@luscentglow.com")
+    SMTP_FROM_NAME: str = os.getenv("SMTP_FROM_NAME", "Luscent Glow")
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()

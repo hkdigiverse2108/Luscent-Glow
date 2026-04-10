@@ -136,10 +136,16 @@ const Footer = () => {
               ))}
             </div>
             <div className="pt-2 space-y-2 text-sm text-primary-foreground/50 font-body">
-              <a href={`mailto:${globalSettings?.supportEmail || footer.email}`} className="hover:text-gold transition-colors flex items-center gap-2">
+              <a 
+                href={`mailto:${globalSettings?.supportEmail || footer.email}`} 
+                className="hover:text-gold hover:underline transition-all flex items-center gap-2 cursor-pointer w-fit"
+              >
                 <Mail size={14} className="opacity-60" /> {globalSettings?.supportEmail || footer.email}
               </a>
-              <a href={`tel:${globalSettings?.supportPhone || footer.phone}`} className="hover:text-gold transition-colors flex items-center gap-2">
+              <a 
+                href={`tel:${globalSettings?.supportPhone || footer.phone}`} 
+                className="hover:text-gold hover:underline transition-all flex items-center gap-2 cursor-pointer w-fit"
+              >
                 <Phone size={14} className="opacity-60" /> {globalSettings?.supportPhone || footer.phone}
               </a>
             </div>
@@ -150,15 +156,33 @@ const Footer = () => {
             <div key={column.title} className="space-y-4">
               <h4 className="font-display text-lg font-semibold">{column.title}</h4>
               <nav className="space-y-2 text-sm font-body">
-                {column.links.map((link: any) => (
-                  <Link 
-                    key={link.label}
-                    to={link.path} 
-                    className="block text-primary-foreground/60 hover:text-gold transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {column.links.map((link: any) => {
+                  const isExternal = link.path.startsWith('http') || link.path.startsWith('mailto:') || link.path.startsWith('tel:');
+                  
+                  if (isExternal) {
+                    return (
+                      <a 
+                        key={link.label}
+                        href={link.path}
+                        target={link.path.startsWith('http') ? "_blank" : undefined}
+                        rel={link.path.startsWith('http') ? "noopener noreferrer" : undefined}
+                        className="block text-primary-foreground/60 hover:text-gold transition-colors"
+                      >
+                        {link.label}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <Link 
+                      key={link.label}
+                      to={link.path} 
+                      className="block text-primary-foreground/60 hover:text-gold transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
               </nav>
             </div>
           ))}

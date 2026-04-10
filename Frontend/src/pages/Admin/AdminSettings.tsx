@@ -22,7 +22,8 @@ import {
   Truck,
   Tag,
   Copyright,
-  Store
+  Store,
+  MapPin
 } from "lucide-react";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { getApiUrl } from "../../lib/api";
@@ -39,6 +40,12 @@ type PaymentCreds = {
   cashfreeMode: "sandbox" | "live";
   shiprocketEmail: string;
   shiprocketPassword: string;
+  shiprocketPickupLocation: string;
+  smtpHost: string;
+  smtpPort: number;
+  smtpUser: string;
+  smtpPassword: string;
+  smtpFromEmail: string;
 };
 
 const DEFAULT_CREDS: PaymentCreds = {
@@ -51,6 +58,12 @@ const DEFAULT_CREDS: PaymentCreds = {
   cashfreeMode: "sandbox",
   shiprocketEmail: "",
   shiprocketPassword: "",
+  shiprocketPickupLocation: "Primary",
+  smtpHost: "smtp.gmail.com",
+  smtpPort: 587,
+  smtpUser: "",
+  smtpPassword: "",
+  smtpFromEmail: "",
 };
 
 const AdminSettings = () => {
@@ -138,15 +151,16 @@ const AdminSettings = () => {
       if (res.ok) {
         const data = await res.json();
         setCreds({
-          activeGateway: data.activeGateway || "razorpay",
-          keyId: data.keyId || "",
-          keySecret: data.keySecret || "",
-          mode: data.mode || "sandbox",
-          cashfreeAppId: data.cashfreeAppId || "",
-          cashfreeSecretKey: data.cashfreeSecretKey || "",
-          cashfreeMode: data.cashfreeMode || "sandbox",
+          shiprocketEmail: data.shiprocketEmail || "",
+          shiprocketPassword: data.shiprocketPassword || "",
+          shiprocketPickupLocation: data.shiprocketPickupLocation || "Primary",
+          smtpHost: data.smtpHost || "smtp.gmail.com",
+          smtpPort: data.smtpPort || 587,
+          smtpUser: data.smtpUser || "",
+          smtpPassword: data.smtpPassword || "",
+          smtpFromEmail: data.smtpFromEmail || "",
         });
-        setHasStoredCreds(!!data.keyId || !!data.cashfreeAppId);
+        setHasStoredCreds(!!data.keyId || !!data.cashfreeAppId || !!data.smtpUser);
       }
     } catch {
       toast.error("Could not load payment credentials.");

@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from ..database import get_database
 from ..models import GlobalSettingsModel, PaymentCredentialsModel
 from datetime import datetime
+from ..config import settings as app_settings
 
 router = APIRouter(prefix="/settings/global", tags=["Global Settings"])
 
@@ -42,27 +43,34 @@ async def update_global_settings(settings: GlobalSettingsModel):
 
 # ─── Payment Credentials CRUD ───────────────────────────────────────────────
 
-_DEFAULT_PAYMENT_CREDENTIALS = {
-    "activeGateway": "razorpay",
-    "keyId": "",
-    "keySecret": "",
-    "mode": "sandbox",
-    "cashfreeAppId": "",
-    "cashfreeSecretKey": "",
-    "cashfreeMode": "sandbox",
-    "shiprocketEmail": "",
-    "shiprocketPassword": "",
-}
+def get_default_creds():
+    """Helper to generate defaults from .env (via config.py) at runtime."""
+    return {
+        "activeGateway": "razorpay",
+        "keyId": app_settings.RAZORPAY_KEY_ID,
+        "keySecret": app_settings.RAZORPAY_KEY_SECRET,
+        "mode": "sandbox",
+        "cashfreeAppId": "",
+        "cashfreeSecretKey": "",
+        "cashfreeMode": "sandbox",
+        "shiprocketEmail": app_settings.SHIPROCKET_EMAIL,
+        "shiprocketPassword": app_settings.SHIPROCKET_PASSWORD,
+        "smtpHost": app_settings.SMTP_HOST,
+        "smtpPort": app_settings.SMTP_PORT,
+        "smtpUser": app_settings.SMTP_USER,
+        "smtpPassword": app_settings.SMTP_PASSWORD,
+        "smtpFromEmail": app_settings.SMTP_FROM_EMAIL,
+    }
 
 async def get_payment_credentials() -> dict:
     """
     Shared helper used by payments.py to fetch live credentials from DB.
-    Falls back to hardcoded sandbox defaults if none are stored yet.
+    Falls back to .env defaults if none are stored yet.
     """
     db = await get_database()
     creds = await db["payment_credentials"].find_one({})
     if not creds:
-        return _DEFAULT_PAYMENT_CREDENTIALS
+        return get_default_creds()
     return creds
 
 @router.get("/payment-credentials", response_description="Get payment gateway credentials", response_model=PaymentCredentialsModel)
@@ -89,4 +97,4 @@ async def reset_payment_creds():
     """Deletes the stored credentials document, reverting to hardcoded sandbox defaults."""
     db = await get_database()
     await db["payment_credentials"].delete_many({})
-    return {"status": "reset", "message": "Payment credentials reset to sandbox defaults."}
+    return {"status": "reset", "message": "Payment credentials reset to .env defaults."}

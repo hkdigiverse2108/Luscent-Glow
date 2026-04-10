@@ -65,7 +65,7 @@ const InstagramFeed = ({ settings }: InstagramFeedProps) => {
               <iframe 
                 src={`https://lightwidget.com/widgets/${widgetId}.html`}
                 scrolling="no" 
-                allowTransparency={true} 
+                allowtransparency="true" 
                 className="lightwidget-widget w-full border-0 overflow-hidden"
                 style={{ width: '100%', height: 'auto', minHeight: '600px' }}
                 title="HK Digiverse Instagram Feed"
