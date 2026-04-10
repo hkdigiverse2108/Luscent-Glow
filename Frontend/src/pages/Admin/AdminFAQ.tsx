@@ -72,18 +72,18 @@ const AdminFAQ = () => {
   // resolveIcon removed in favor of DynamicIcon component
 
   if (loading || !config) {
-    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing Concierge Connection...</div>;
+    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing System Connection...</div>;
   }
 
   return (
     <div className="space-y-2 pb-4">
       <AdminHeader 
         title="FAQ"
-        highlightedWord="Concierge"
+        highlightedWord="Manager"
         subtitle="Categories, Questions & Assistant Management"
         isDark={isDark}
         action={{
-          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          label: isConfigSaving ? "Saving..." : "Save Settings",
           onClick: handleSaveConfig,
           icon: isConfigSaving ? Sparkles : CheckCircle2,
           disabled: isConfigSaving
@@ -95,7 +95,7 @@ const AdminFAQ = () => {
         <div className="space-y-4">
           <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
             <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
-              <Sparkles size={20} className="text-gold" /> Hero Sanctuary
+              <Sparkles size={20} className="text-gold" /> Hero Section
             </h3>
             <div className="space-y-6">
                <div className="space-y-2">
@@ -127,7 +127,7 @@ const AdminFAQ = () => {
 
           <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
             <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
-              <Plus size={20} className="text-gold" /> Support Registry (Bottom Card)
+              <Plus size={20} className="text-gold" /> Support configuration (Bottom Card)
             </h3>
             <div className="space-y-6">
                <div className="space-y-2">
@@ -164,7 +164,7 @@ const AdminFAQ = () => {
         <div className={`p-4 rounded-3xl border min-h-[600px] ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-display text-xl font-bold flex items-center gap-3">
-              <Layout size={20} className="text-gold" /> Registry Repository
+              <Layout size={20} className="text-gold" /> Category List
             </h3>
             <button 
               onClick={() => {

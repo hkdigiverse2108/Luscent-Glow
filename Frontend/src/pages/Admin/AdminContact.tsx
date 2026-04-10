@@ -48,9 +48,9 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
               </div>
               <div>
                 <h3 className={`text-xl font-bold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
-                  Ritual <span className="text-gold italic text-2xl">Specification</span>
+                  Inquiry <span className="text-gold italic text-2xl">Details</span>
                 </h3>
-                <p className="text-[13px] font-extrabold uppercase tracking-[0.3em] opacity-80 italic">Seeker Metadata Analysis</p>
+                <p className="text-[13px] font-extrabold uppercase tracking-[0.3em] opacity-80 italic">Customer Inquiry Overview</p>
               </div>
             </div>
             <button onClick={onClose} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "hover:bg-white/5 text-white/40" : "hover:bg-charcoal/5 text-charcoal/40"}`}><XCircle size={20} /></button>
@@ -58,21 +58,21 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
           <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className={`p-6 rounded-2xl border ${isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"}`}>
-                 <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><Sparkles size={13} /> Seeker Identity</p>
+                 <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><Sparkles size={13} /> Customer Information</p>
                  <p className={`text-base font-bold ${isDark ? "text-white" : "text-charcoal"}`}>{inquiry.name}</p>
                  <p className="text-sm font-bold opacity-80 break-all transition-opacity hover:opacity-100">{inquiry.email}</p>
               </div>
               <div className={`p-6 rounded-2xl border ${isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"}`}>
-                 <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><Calendar size={13} /> Ritual Context</p>
+                 <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><Calendar size={13} /> Inquiry Time</p>
                  <p className={`text-base font-extrabold ${isDark ? "text-white" : "text-charcoal"}`}>{new Date(inquiry.createdAt).toLocaleString()}</p>
-                 <p className="text-sm font-bold opacity-80 italic transition-opacity">Broadcasted from sanctuary</p>
+                 <p className="text-sm font-bold opacity-80 italic transition-opacity">Sent from platform</p>
               </div>
             </div>
             {inquiry.phoneNumber && (
               <div className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-[12px] font-extrabold uppercase tracking-widest border transition-all ${isDark ? "bg-gold/10 text-gold border-gold/20" : "bg-gold/5 text-charcoal border-gold/20 shadow-sm"} w-fit`}><Phone size={14} /> {inquiry.phoneNumber}</div>
             )}
             <div className="space-y-4">
-              <h4 className="text-[12px] font-extrabold uppercase text-gold tracking-[0.3em]">The Message Ritual</h4>
+              <h4 className="text-[12px] font-extrabold uppercase text-gold tracking-[0.3em]">Message Content</h4>
               <div className={`p-6 rounded-3xl border italic font-body text-base leading-relaxed ${isDark ? "bg-gold/5 border-gold/10 text-white/80" : "bg-gold/5 border-gold/10 text-charcoal/80"}`}>
                  "{inquiry.message}"
               </div>
@@ -124,7 +124,7 @@ const AdminContact = () => {
         setInquiries(data);
       }
     } catch (error) {
-      toast.error("Could not retrieve seeker inquiries.");
+      toast.error("Could not retrieve customer inquiries.");
     } finally {
       setInquiryLoading(false);
     }
@@ -136,7 +136,7 @@ const AdminContact = () => {
   }, []);
 
   const handleDeleteInquiry = async (id: string) => {
-    if (!window.confirm("Archive this seeker inquiry?")) return;
+    if (!window.confirm("Archive this customer inquiry?")) return;
     try {
       const response = await fetch(getApiUrl(`/api/contact/inquiry/${id}`), { method: "DELETE" });
       if (response.ok) {
@@ -181,7 +181,7 @@ const AdminContact = () => {
         body: JSON.stringify(config)
       });
       if (response.ok) {
-        toast.success("Concierge configuration synchronized.");
+        toast.success("Settings saved successfully.");
       } else {
         toast.error("Failed to commit settings.");
       }
@@ -195,18 +195,18 @@ const AdminContact = () => {
   // resolveIcon removed in favor of DynamicIcon component
 
   if (loading || !config) {
-    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing Concierge Connection...</div>;
+    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing System Connection...</div>;
   }
 
   return (
     <div className="space-y-2 pb-4">
       <AdminHeader 
         title="Contact"
-        highlightedWord="Concierge"
-        subtitle="Managing the seeker inquiries and storefront presence"
+        highlightedWord="Management"
+        subtitle="Manage customer inquiries and contact page content"
         isDark={isDark}
         action={activeTab === "settings" ? {
-          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          label: isConfigSaving ? "Saving..." : "Save Settings",
           onClick: handleSaveConfig,
           icon: isConfigSaving ? Sparkles : CheckCircle2,
           disabled: isConfigSaving
@@ -219,7 +219,7 @@ const AdminContact = () => {
               activeTab === "inquiries" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Inquiry Ledger
+            Inquiry List
           </button>
           <button 
             onClick={() => setActiveTab("settings")}
@@ -238,8 +238,8 @@ const AdminContact = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2 font-bold">
               {[
                 { label: "Active Inquiries", value: inquiries.length, icon: MessageSquare, tint: "text-gold" },
-                { label: "Unique Seekers", value: new Set(inquiries.map(i => i.email)).size, icon: Sparkles, tint: "text-emerald-500" },
-                { label: "Ritual Status", value: "Operational", icon: CheckCircle, tint: "text-blue-500" }
+                { label: "Unique Customers", value: new Set(inquiries.map(i => i.email)).size, icon: Sparkles, tint: "text-emerald-500" },
+                { label: "System Status", value: "Operational", icon: CheckCircle, tint: "text-blue-500" }
               ].map((stat, i) => (
                 <div key={i} className={`p-3 rounded-3xl border transition-all hover:scale-105 duration-500 ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5 shadow-sm"}`}>
                   <div className="flex items-center justify-between mb-2">
@@ -254,7 +254,7 @@ const AdminContact = () => {
             <div className={`relative flex items-center p-2 rounded-2xl border transition-all duration-500 ${isDark ? "bg-white/5 border-white/10 focus-within:border-gold/50" : "bg-charcoal/5 border-charcoal/10 focus-within:border-gold/50"}`}>
               <Search className="ml-4 text-muted-foreground" size={18} />
               <input 
-                placeholder="Locate seeker inquiry by name, email, or subject..."
+                placeholder="Search inquiries by name, email, or subject..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-transparent border-none py-3 px-4 text-sm focus:ring-0 placeholder:text-muted-foreground/50 font-bold"
@@ -266,8 +266,8 @@ const AdminContact = () => {
                 <table className="w-full text-left border-collapse">
                   <thead className={isDark ? "bg-white/5" : "bg-charcoal/5"}>
                     <tr>
-                      <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest opacity-60">Seeker Information</th>
-                      <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest opacity-60">Inquiry Ritual</th>
+                      <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest opacity-60">Customer Information</th>
+                      <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest opacity-60">Inquiry Type</th>
                       <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest opacity-60">Date</th>
                       <th className="px-6 py-3 text-[10px] uppercase font-bold tracking-widest opacity-60 text-right">Actions</th>
                     </tr>
@@ -310,7 +310,7 @@ const AdminContact = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground font-bold uppercase tracking-[0.2em] text-xs">No seeker rituals currently logged.</td>
+                        <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground font-bold uppercase tracking-[0.2em] text-xs">No customer inquiries currently logged.</td>
                       </tr>
                     )}
                   </tbody>
@@ -325,7 +325,7 @@ const AdminContact = () => {
         <div className="space-y-6">
           <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
             <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
-              <Sparkles size={20} className="text-gold" /> Hero Concierge
+              <Sparkles size={20} className="text-gold" /> Header Content
             </h3>
             <div className="space-y-6">
                <div className="space-y-2">
@@ -392,11 +392,11 @@ const AdminContact = () => {
           </div>
         </div>
 
-        {/* Artisan Channels & Visuals */}
+        {/* Contact Channels & Visuals */}
         <div className="space-y-6">
            <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
               <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
-                <Phone size={20} className="text-gold" /> Artisan Channels
+                <Phone size={20} className="text-gold" /> Contact Channels
               </h3>
               <div className="space-y-4">
                 {config.channels.map((chan: any, i: number) => (
@@ -460,14 +460,14 @@ const AdminContact = () => {
 
            <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
               <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
-                <MapPin size={20} className="text-gold" /> Boutique Visual
+                <MapPin size={20} className="text-gold" /> Store Image
               </h3>
               <div className="space-y-4">
                  <div className="relative aspect-video rounded-[2rem] overflow-hidden group shadow-2xl">
                     <img src={getAssetUrl(config.boutiqueImage)} className="w-full h-full object-cover" />
                     <label className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all duration-500">
                        <Upload size={32} className="text-gold mb-2" />
-                       <span className="text-[10px] font-bold uppercase tracking-widest text-white">Replace Boutique visual</span>
+                       <span className="text-[10px] font-bold uppercase tracking-widest text-white">Replace Store Image</span>
                        <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload('boutiqueImage', e.target.files[0])} />
                     </label>
                  </div>

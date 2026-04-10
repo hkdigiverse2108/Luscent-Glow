@@ -36,7 +36,7 @@ const AdminPayments = () => {
         const data = await response.json();
         setPayments(data);
       } else {
-        toast.error("Failed to load the financial ledger.");
+        toast.error("Failed to load the financial records.");
       }
     } catch (error) {
       toast.error("Database connection failure.");
@@ -95,7 +95,7 @@ const AdminPayments = () => {
   return (
     <div className="space-y-8 pb-12 animate-in fade-in duration-700">
       <AdminHeader 
-        title="Payment Ledger" 
+        title="Payment History" 
         subtitle="Live transactional audit of all platform commerce."
         icon={CreditCard}
       />
@@ -150,11 +150,11 @@ const AdminPayments = () => {
             }`}
           >
             <RefreshCcw size={14} className={loading ? "animate-spin" : ""} />
-            Re-Sync Ledger
+            Re-Sync Records
           </button>
         </div>
 
-        {/* Ledger Table */}
+        {/* Transaction Table */}
         <div className={`lg:col-span-3 rounded-3xl overflow-hidden ${cardClass}`}>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -172,14 +172,14 @@ const AdminPayments = () => {
                   <tr>
                     <td colSpan={5} className="py-20 text-center">
                       <RefreshCcw size={24} className="animate-spin text-gold mx-auto mb-3" />
-                      <p className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-white/20" : "text-charcoal/20"}`}>Decrypting Ledger...</p>
+                      <p className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-white/20" : "text-charcoal/20"}`}>Loading Records...</p>
                     </td>
                   </tr>
                 ) : filteredPayments.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-20 text-center">
                       <AlertCircle size={24} className="text-gold mx-auto mb-3 opacity-20" />
-                      <p className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-white/20" : "text-charcoal/20"}`}>No matching rituals found.</p>
+                      <p className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-white/20" : "text-charcoal/20"}`}>No matching records found.</p>
                     </td>
                   </tr>
                 ) : (

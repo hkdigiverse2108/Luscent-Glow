@@ -61,8 +61,8 @@ const AdminFooter = () => {
             { label: "Terms & Conditions", path: "/terms-and-conditions" }
           ] }
         ],
-        newsletterTitle: "Beauty Line Ritual",
-        newsletterSubtitle: "Join our elite circle",
+        newsletterTitle: "Newsletter Subscription",
+        newsletterSubtitle: "Join our community",
         copyrightText: `© ${new Date().getFullYear()} Luscent Glow. All rights reserved.`
       });
     } finally {
@@ -97,7 +97,7 @@ const AdminFooter = () => {
         body: JSON.stringify(footer),
       });
       if (response.ok) {
-        toast.success("Footer ritual synchronized successfully");
+        toast.success("Footer settings saved successfully");
       } else {
         throw new Error("Sync failed");
       }
@@ -145,8 +145,8 @@ const AdminFooter = () => {
   if (!footer) return (
     <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
       <AlertCircle className="text-rose-500" size={40} />
-      <p className="text-xs tracking-widest uppercase font-black opacity-40">Registry Artifacts Not Found</p>
-      <button onClick={fetchFooter} className="px-6 py-2 rounded-xl bg-gold text-charcoal font-black text-[10px] uppercase tracking-widest">Retry Ritual</button>
+      <p className="text-xs tracking-widest uppercase font-black opacity-40">Configuration Not Found</p>
+      <button onClick={fetchFooter} className="px-6 py-2 rounded-xl bg-gold text-charcoal font-black text-[10px] uppercase tracking-widest">Retry Loading</button>
     </div>
   );
 
@@ -154,18 +154,18 @@ const AdminFooter = () => {
     <div className="space-y-8 pb-20">
       <AdminHeader 
         title="Footer"
-        highlightedWord="Concierge"
-        subtitle="Regulate the platform's baseline navigational artifacts"
+        highlightedWord="Admin"
+        subtitle="Manage the platform's footer navigation and links"
         isDark={isDark}
         actions={[
           {
-            label: "Revert Ritual",
+            label: "Revert Changes",
             onClick: fetchFooter,
             icon: RotateCcw,
             variant: "secondary"
           },
           {
-            label: saving ? "Synchronizing..." : "Synchronize Registry",
+            label: saving ? "Saving..." : "Save Changes",
             onClick: handleSave,
             icon: saving ? Loader2 : Save,
             disabled: saving,
@@ -202,7 +202,7 @@ const AdminFooter = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1 flex items-center gap-2">Concierge Email</label>
+                <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1 flex items-center gap-2">Support Email</label>
                 <input 
                   type="email"
                   value={footer.email}
@@ -212,7 +212,7 @@ const AdminFooter = () => {
               </div>
               
               <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1 flex items-center gap-2">Sanctuary Mobile</label>
+                <label className="text-[10px] font-black uppercase tracking-widest opacity-30 ml-1 flex items-center gap-2">Contact Number</label>
                 <input 
                   type="text"
                   value={footer.phone}
@@ -223,7 +223,7 @@ const AdminFooter = () => {
             </div>
           </motion.div>
 
-          {/* Social Registry Card */}
+          {/* Social Links Configuration Card */}
           <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -234,7 +234,7 @@ const AdminFooter = () => {
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-gold/20 text-gold" : "bg-gold/10 text-gold"}`}>
                 <Globe size={18} />
               </div>
-              <h3 className="text-lg font-black uppercase tracking-tight">Social Registry</h3>
+              <h3 className="text-lg font-black uppercase tracking-tight">Social Links</h3>
             </div>
 
             <div className="space-y-3">
@@ -363,7 +363,7 @@ const AdminFooter = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold font-serif italic text-xl tracking-tighter">B</div>
-                <h3 className="text-lg font-black uppercase tracking-tight">Beauty Line Ritual</h3>
+                <h3 className="text-lg font-black uppercase tracking-tight">Newsletter Content</h3>
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -392,7 +392,7 @@ const AdminFooter = () => {
                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDark ? "bg-gold/20 text-gold" : "bg-gold/10 text-gold"}`}>
                   <Type size={18} />
                 </div>
-                <h3 className="text-lg font-black uppercase tracking-tight">Legal Manifest</h3>
+                <h3 className="text-lg font-black uppercase tracking-tight">Policies & Copyright</h3>
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">

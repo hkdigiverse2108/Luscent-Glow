@@ -22,7 +22,7 @@ import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminNewsletter = () => {
   const { isDark } = useAdminTheme();
-  const [activeTab, setActiveTab] = useState<"ledger" | "config">("ledger");
+  const [activeTab, setActiveTab] = useState<"list" | "config">("list");
   const [subs, setSubs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,7 +72,7 @@ const AdminNewsletter = () => {
         setSubs(data);
       }
     } catch (error) {
-      toast.error("Could not reach the subscriber repository.");
+      toast.error("Could not reach the subscriber database.");
     } finally {
       setLoading(false);
     }
@@ -92,8 +92,8 @@ const AdminNewsletter = () => {
         body: JSON.stringify(settings),
       });
       if (response.ok) {
-        toast.success("Welcome Email settings synchronized successfully.");
-        setActiveTab("ledger");
+        toast.success("Welcome Email settings saved successfully.");
+        setActiveTab("list");
       } else {
         toast.error("Failed to commit settings.");
       }
@@ -105,17 +105,17 @@ const AdminNewsletter = () => {
   };
 
   const handleDelete = async (email: string) => {
-    if (!window.confirm(`Are you sure you want to remove ${email} from the inner circle?`)) return;
+    if (!window.confirm(`Are you sure you want to remove ${email} from the subscriber list?`)) return;
     
     try {
       const response = await fetch(getApiUrl(`/api/newsletter/${email}`), {
         method: "DELETE",
       });
       if (response.ok) {
-        toast.success("Subscriber removed from repository.");
+        toast.success("Subscriber removed successfully.");
         fetchSubs();
       } else {
-        toast.error("Removal ritual failed.");
+        toast.error("Removal failed.");
       }
     } catch (error) {
       toast.error("System connection error.");
@@ -130,11 +130,11 @@ const AdminNewsletter = () => {
     <div className="space-y-4 pb-4">
       <AdminHeader 
         title="Newsletter"
-        highlightedWord="Concierge"
-        subtitle="Managing the subscriber repository and email rituals"
+        highlightedWord="Manager"
+        subtitle="Manage email subscribers and automated newsletter settings"
         isDark={isDark}
         action={activeTab === "config" ? {
-          label: savingSettings ? "Synchronizing..." : "Save Configuration",
+          label: savingSettings ? "Saving..." : "Save Configuration",
           onClick: handleSaveSettings,
           icon: savingSettings ? Sparkles : CheckCircle,
           disabled: savingSettings
@@ -142,12 +142,12 @@ const AdminNewsletter = () => {
       >
         <div className="flex p-1 rounded-full border mt-4 w-fit bg-white/5 border-white/10">
           <button 
-            onClick={() => setActiveTab("ledger")}
+            onClick={() => setActiveTab("list")}
             className={`px-8 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeTab === "ledger" ? "bg-gold text-charcoal shadow-lg shadow-gold/20" : "text-muted-foreground hover:text-foreground"
+              activeTab === "list" ? "bg-gold text-charcoal shadow-lg shadow-gold/20" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Subscriber Ledger
+            Subscriber List
           </button>
           <button 
             onClick={() => setActiveTab("config")}
@@ -155,15 +155,15 @@ const AdminNewsletter = () => {
               activeTab === "config" ? "bg-gold text-charcoal shadow-lg shadow-gold/20" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Configuration Hub
+            Newsletter Settings
           </button>
         </div>
       </AdminHeader>
 
       <AnimatePresence mode="wait">
-        {activeTab === "ledger" ? (
+        {activeTab === "list" ? (
           <motion.div 
-            key="ledger"
+            key="list"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
@@ -172,9 +172,9 @@ const AdminNewsletter = () => {
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                { label: "Total Radiance", value: subs.length, icon: Users, tint: "text-gold" },
-                { label: "Internal Source", value: subs.filter(s => !s.source || s.source === "Direct Signup").length, icon: Mail, tint: "text-gold/80" },
-                { label: "Engagement Hub", value: "Active", icon: Sparkles, tint: "text-emerald-400" }
+                { label: "Total Subscribers", value: subs.length, icon: Users, tint: "text-gold" },
+                { label: "Direct Signups", value: subs.filter(s => !s.source || s.source === "Direct Signup").length, icon: Mail, tint: "text-gold/80" },
+                { label: "Email Status", value: "Active", icon: Sparkles, tint: "text-emerald-400" }
               ].map((stat, i) => (
                 <div key={i} className={`p-6 rounded-[2.5rem] border transition-all duration-500 hover:scale-[1.02] ${isDark ? "bg-charcoal/40 border-white/5" : "bg-white border-charcoal/5 shadow-xl shadow-charcoal/5"}`}>
                   <div className="flex items-center justify-between mb-4">
@@ -193,7 +193,7 @@ const AdminNewsletter = () => {
                 }`} size={18} />
                 <input 
                   type="text" 
-                  placeholder="Locate subscriber by email address..."
+                  placeholder="Search subscribers by email address..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className={`w-full backdrop-blur-2xl border rounded-2xl py-4 pl-16 pr-6 font-body text-sm focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all ${
@@ -225,7 +225,7 @@ const AdminNewsletter = () => {
                       <tr>
                          <th className="px-8 py-6">Subscriber</th>
                          <th className="px-8 py-6">Origin</th>
-                         <th className="px-8 py-6">Joined Ritual</th>
+                         <th className="px-8 py-6">Joined Date</th>
                          <th className="px-8 py-6 text-right">Actions</th>
                       </tr>
                    </thead>
@@ -288,7 +288,7 @@ const AdminNewsletter = () => {
                           <td colSpan={4} className={`px-8 py-24 text-center font-body text-base font-bold uppercase tracking-widest italic transition-colors ${
                             isDark ? "text-white/20" : "text-charcoal/40"
                           }`}>
-                             No subscribers found in the inner circle.
+                             No subscribers found.
                           </td>
                         </tr>
                       )}
@@ -315,14 +315,14 @@ const AdminNewsletter = () => {
                     <Mail className="text-gold" size={28} />
                   </div>
                   <div>
-                    <h3 className={`text-2xl font-display font-medium ${isDark ? "text-white" : "text-charcoal"}`}>Welcome Ritual Designer</h3>
-                    <p className="text-[10px] text-gold/60 tracking-[0.3em] uppercase font-black mt-1">Curate the seeker's first invitation</p>
+                    <h3 className={`text-2xl font-display font-medium ${isDark ? "text-white" : "text-charcoal"}`}>Welcome Email Editor</h3>
+                    <p className="text-[10px] text-gold/60 tracking-[0.3em] uppercase font-black mt-1">Configure the customer's first email</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Official Sender Identity</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Sender Display Name</label>
                     <input 
                       type="text" 
                       value={settings.fromName}
@@ -334,7 +334,7 @@ const AdminNewsletter = () => {
                     />
                   </div>
                   <div className="md:col-span-2 space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Inaugural Subject Line</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Email Subject Line</label>
                     <input 
                       type="text" 
                       value={settings.subject}
@@ -356,7 +356,7 @@ const AdminNewsletter = () => {
                     />
                   </div>
                   <div className="md:col-span-2 space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Botanical Narrative (Body 1)</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Welcome Text (Section 1)</label>
                     <textarea 
                       rows={4}
                       value={settings.body1}
@@ -367,7 +367,7 @@ const AdminNewsletter = () => {
                     />
                   </div>
                   <div className="md:col-span-2 space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Engagement Philosophy (Body 2)</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Secondary Text (Section 2)</label>
                     <textarea 
                       rows={4}
                       value={settings.body2}
@@ -389,7 +389,7 @@ const AdminNewsletter = () => {
                     />
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Sanctuary Quote</label>
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Email Footer Quote</label>
                     <input 
                       type="text" 
                       value={settings.quote}
@@ -408,8 +408,8 @@ const AdminNewsletter = () => {
                       <Server className="text-gold" size={24} />
                     </div>
                     <div>
-                      <h4 className={`text-xl font-display font-medium ${isDark ? "text-white/80" : "text-charcoal/80"}`}>Internal SMTP Gateway</h4>
-                      <p className="text-[10px] text-gold/40 tracking-[0.3em] uppercase font-black mt-1">Configure the engine behind the dispatches</p>
+                      <h4 className={`text-xl font-display font-medium ${isDark ? "text-white/80" : "text-charcoal/80"}`}>Email SMTP Server Settings</h4>
+                      <p className="text-[10px] text-gold/40 tracking-[0.3em] uppercase font-black mt-1">Configure the server used for sending emails</p>
                     </div>
                   </div>
 

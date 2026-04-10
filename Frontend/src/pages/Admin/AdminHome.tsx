@@ -248,7 +248,7 @@ const AdminHome = () => {
                             newSlides[index].title = e.target.value;
                             setConfig({ ...config, heroSlides: newSlides });
                           }}
-                          placeholder="e.g. Ritual of Radiance"
+                          placeholder="e.g. Premium Glow Collection"
                           className="w-full bg-transparent border-none p-0 text-xl font-display font-bold focus:ring-0 placeholder:opacity-20"
                         />
                       </div>
@@ -261,7 +261,7 @@ const AdminHome = () => {
                             newSlides[index].subtitle = e.target.value;
                             setConfig({ ...config, heroSlides: newSlides });
                           }}
-                          placeholder="Short description of the collection..."
+                          placeholder="Enter slide description..."
                           rows={2}
                           className="w-full bg-transparent border-none p-0 text-xs font-body font-medium leading-relaxed resize-none focus:ring-0 placeholder:opacity-20"
                         />
@@ -298,7 +298,7 @@ const AdminHome = () => {
               ))}
 
               <button 
-                onClick={() => setConfig({ ...config, heroSlides: [...config.heroSlides, { image: "", title: "New Awakening", subtitle: "Description of the new ritual...", cta: "Shop Now", link: "/products" }] })}
+                onClick={() => setConfig({ ...config, heroSlides: [...config.heroSlides, { image: "", title: "New Promotion", subtitle: "Enter promotion description...", cta: "Shop Now", link: "/products" }] })}
                 className={`group min-h-[300px] rounded-[2.5rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all ${
                   isDark ? "border-white/10 bg-white/5 hover:border-gold/30 hover:bg-gold/5" : "border-gold/20 bg-white hover:border-gold/40 shadow-xl"
                 }`}

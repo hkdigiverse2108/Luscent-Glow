@@ -30,7 +30,7 @@ import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminGiftCards = () => {
   const { isDark } = useAdminTheme();
-  const [activeTab, setActiveTab] = useState<"ledger" | "config">("ledger");
+  const [activeTab, setActiveTab] = useState<"list" | "config">("list");
   const [giftCards, setGiftCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,7 +70,7 @@ const AdminGiftCards = () => {
         setGiftCards(data);
       }
     } catch (error) {
-      toast.error("Could not retrieve the gift card ledger.");
+      toast.error("Could not retrieve the gift card list.");
     } finally {
       setLoading(false);
     }
@@ -107,7 +107,7 @@ const AdminGiftCards = () => {
       if (response.ok) {
         const data = await response.json();
         setConfig({ ...config, heroImage: data.filePath });
-        toast.success("Hero vision updated.");
+        toast.success("Header image updated.");
       }
     } catch (error) {
       toast.error("Image upload failed.");
@@ -123,7 +123,7 @@ const AdminGiftCards = () => {
         body: JSON.stringify(config)
       });
       if (response.ok) {
-        toast.success("Page configuration synchronized.");
+        toast.success("Page configuration saved.");
       } else {
         toast.error("Failed to commit settings.");
       }
@@ -178,11 +178,11 @@ const AdminGiftCards = () => {
       });
 
       if (response.ok) {
-        toast.success(editingCard ? "Ledger entry refined." : "New gift card minted.");
+        toast.success(editingCard ? "Card entry updated." : "New gift card created.");
         setIsModalOpen(false);
         fetchGiftCards();
       } else {
-        toast.error("Transaction failed.");
+        toast.error("Operation failed.");
       }
     } catch (error) {
       toast.error("System connection error.");
@@ -190,11 +190,11 @@ const AdminGiftCards = () => {
   };
 
   const handleDeleteToken = async (id: string) => {
-    if (!window.confirm("Are you sure you want to invalidate this token?")) return;
+    if (!window.confirm("Are you sure you want to delete this card?")) return;
     try {
       const response = await fetch(getApiUrl(`/api/gift-cards/${id}`), { method: "DELETE" });
       if (response.ok) {
-        toast.success("Token removed.");
+        toast.success("Card removed.");
         fetchGiftCards();
       }
     } catch (error) {
@@ -227,15 +227,15 @@ const AdminGiftCards = () => {
     <div className="space-y-2 pb-4">
       <AdminHeader 
         title="Gift Card"
-        highlightedWord="Concierge"
-        subtitle="Managing the gift card ledger and storefront presence"
+        highlightedWord="Management"
+        subtitle="Manage the gift card list and storefront appearance"
         isDark={isDark}
-        action={activeTab === "ledger" ? {
-          label: "Mint Token",
+        action={activeTab === "list" ? {
+          label: "Create Card",
           onClick: openCreateModal,
           icon: Plus
         } : {
-          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          label: isConfigSaving ? "Saving..." : "Save Settings",
           onClick: handleSaveConfig,
           icon: isConfigSaving ? Sparkles : CheckCircle2,
           disabled: isConfigSaving
@@ -243,12 +243,12 @@ const AdminGiftCards = () => {
       >
         <div className="flex p-1 rounded-full border mt-2 w-fit bg-white/5 border-white/10">
           <button 
-            onClick={() => setActiveTab("ledger")}
+            onClick={() => setActiveTab("list")}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "ledger" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+              activeTab === "list" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Ledger
+            Card List
           </button>
           <button 
             onClick={() => setActiveTab("config")}
@@ -262,12 +262,12 @@ const AdminGiftCards = () => {
       </AdminHeader>
 
       <AnimatePresence mode="wait">
-        {activeTab === "ledger" ? (
-          <motion.div key="ledger" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
+        {activeTab === "list" ? (
+          <motion.div key="list" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               {[
-                { label: "Active Tokens", value: giftCards.filter(c => c.isActive).length, icon: Ticket, tint: "text-gold" },
-                { label: "Circulating Value", value: `₹${giftCards.reduce((acc, c) => acc + (c.currentBalance || 0), 0).toLocaleString()}`, icon: Wallet, tint: "text-gold/60" },
+                { label: "Active Cards", value: giftCards.filter(c => c.isActive).length, icon: Ticket, tint: "text-gold" },
+                { label: "Total Balance", value: `₹${giftCards.reduce((acc, c) => acc + (c.currentBalance || 0), 0).toLocaleString()}`, icon: Wallet, tint: "text-gold/60" },
                 { label: "Total Issued", value: giftCards.length, icon: CheckCircle2, tint: "text-gold/40" }
               ].map((stat, i) => (
                 <div key={i} className={`p-3 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5"}`}>
@@ -280,7 +280,7 @@ const AdminGiftCards = () => {
             <div className={`relative flex items-center p-2 rounded-2xl border ${isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"}`}>
               <Search className="ml-4 text-muted-foreground" size={18} />
               <input 
-                placeholder="Locate token by code or recipient name..."
+                placeholder="Search card by code or recipient name..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-transparent border-none py-3 px-4 text-sm focus:ring-0"
@@ -291,10 +291,10 @@ const AdminGiftCards = () => {
               <table className="w-full text-left border-collapse">
                 <thead className={isDark ? "bg-white/5" : "bg-charcoal/5"}>
                   <tr>
-                    <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Token</th>
+                    <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Code</th>
                     <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Recipient</th>
                     <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Balance</th>
-                    <th className="px-6 py-3 text-[10px] uppercase font-bold tracking-widest text-right">Rituals</th>
+                    <th className="px-6 py-3 text-[10px] uppercase font-bold tracking-widest text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -563,7 +563,7 @@ const AdminGiftCards = () => {
                 </div>
               </>
             ) : (
-              <div className="py-20 text-center font-bold">Synchronizing Sanctuary Settings...</div>
+              <div className="py-20 text-center font-bold">Synchronizing Configuration...</div>
             )}
           </motion.div>
         )}
@@ -575,7 +575,7 @@ const AdminGiftCards = () => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={() => setIsModalOpen(false)} className="absolute inset-0 bg-charcoal/60 backdrop-blur-md" />
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className={`relative w-full max-w-2xl rounded-3xl p-6 overflow-hidden border ${isDark ? "bg-charcoal border-white/10" : "bg-white border-charcoal/10"}`}>
                <div className="flex justify-between items-center mb-6">
-                  <h3 className="font-display text-2xl font-bold uppercase flex items-center gap-3"><Sparkles size={24} className="text-gold" /> Mint Gift Card</h3>
+                  <h3 className="font-display text-2xl font-bold uppercase flex items-center gap-3"><Sparkles size={24} className="text-gold" /> Create Gift Card</h3>
                   <button onClick={() => setIsModalOpen(false)}><X size={20} /></button>
                </div>
                <form onSubmit={handleSubmit} className="space-y-6">
@@ -599,7 +599,7 @@ const AdminGiftCards = () => {
                         {config?.themes.map((t: any) => <option key={t.id} value={t.name}>{t.name}</option>)}
                      </select>
                   </div>
-                  <button type="submit" className="w-full py-5 bg-gold text-charcoal rounded-3xl font-bold uppercase tracking-widest font-bold">Finalize & Mint</button>
+                  <button type="submit" className="w-full py-5 bg-gold text-charcoal rounded-3xl font-bold uppercase tracking-widest font-bold">Finalize & Create</button>
                </form>
             </motion.div>
           </div>

@@ -45,9 +45,9 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
               </div>
               <div>
                 <h3 className={`text-xl font-bold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
-                  Ritual <span className="text-gold italic">Specification</span>
+                  Inquiry <span className="text-gold italic">Details</span>
                 </h3>
-                <p className="text-[13px] font-extrabold uppercase tracking-[0.3em] opacity-80 italic">Seeker Metadata Analysis</p>
+                <p className={`text-[13px] font-extrabold uppercase tracking-[0.3em] opacity-80 italic`}>Customer Inquiry Data</p>
               </div>
             </div>
             <button onClick={onClose} className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "hover:bg-white/5 text-white/40" : "hover:bg-charcoal/5 text-charcoal/40"}`}><XCircle size={20} /></button>
@@ -55,14 +55,14 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
           <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className={`p-6 rounded-2xl border ${isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"}`}>
-                 <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><User size={13} /> Seeker Identity</p>
-                 <p className={`text-base font-bold ${isDark ? "text-white" : "text-charcoal"}`}>{inquiry.name}</p>
+                  <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><User size={13} /> Customer Information</p>
+                <p className={`text-base font-bold ${isDark ? "text-white" : "text-charcoal"}`}>{inquiry.name}</p>
                  <p className="text-sm font-bold opacity-80 break-all transition-opacity hover:opacity-100">{inquiry.email}</p>
               </div>
               <div className={`p-6 rounded-2xl border ${isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"}`}>
-                 <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><Calendar size={13} /> Ritual Context</p>
+                 <p className="text-[12px] font-extrabold uppercase text-gold tracking-widest mb-2 flex items-center gap-2"><Calendar size={13} /> Context</p>
                  <p className={`text-base font-extrabold ${isDark ? "text-white" : "text-charcoal"}`}>{new Date(inquiry.createdAt).toLocaleString()}</p>
-                 <p className="text-sm font-bold opacity-80 italic transition-opacity">Broadcasted from sanctuary</p>
+                 <p className="text-sm font-bold opacity-80 italic transition-opacity">Logged on platform</p>
               </div>
             </div>
             {(inquiry.phoneNumber || inquiry.companyName) && (
@@ -72,7 +72,7 @@ const InquiryDetailModal = ({ isOpen, onClose, inquiry, isDark }: { isOpen: bool
               </div>
             )}
             <div className="space-y-4">
-              <h4 className="text-[12px] font-extrabold uppercase text-gold tracking-[0.3em]">The Message Ritual</h4>
+              <h4 className="text-[12px] font-extrabold uppercase text-gold tracking-[0.3em]">Message Details</h4>
               <div className={`p-6 rounded-3xl border italic font-body text-base leading-relaxed ${isDark ? "bg-gold/5 border-gold/10 text-white/80" : "bg-gold/5 border-gold/10 text-charcoal/80"}`}>
                  "{inquiry.message}"
               </div>
@@ -106,7 +106,7 @@ const AdminInquiries = () => {
         setInquiries(data);
       }
     } catch (error) {
-      toast.error("Could not reach the seeker inquiries repository.");
+      toast.error("Could not reach the customer inquiries database.");
     } finally {
       setLoading(false);
     }
@@ -121,10 +121,10 @@ const AdminInquiries = () => {
     try {
       const response = await fetch(getApiUrl(endpoint), { method: 'DELETE' });
       if (response.ok) {
-        toast.success("Inquiry ritual acknowledged and archived.");
+        toast.success("Inquiry acknowledged and archived.");
         setInquiries(prev => prev.filter(inq => inq._id !== id));
       } else {
-        toast.error("Could not resolve this sanctuary message.");
+        toast.error("Could not resolve this message.");
       }
     } catch (error) {
       toast.error("System synchronization failed.");
@@ -146,8 +146,8 @@ const AdminInquiries = () => {
     <div className="space-y-2 pb-4">
       <AdminHeader
         title="Inquiry"
-        highlightedWord="Concierge"
-        subtitle="Real-time management of sanctuary outreach rituals"
+        highlightedWord="Management"
+        subtitle="Management of store outreach and support inquiries"
         isDark={isDark}
       >
         <div className={`p-1.5 backdrop-blur-2xl rounded-2xl flex items-center gap-2 border mt-2 w-fit ${isDark ? "bg-white/[0.05] border-white/5 shadow-2xl" : "bg-charcoal/[0.05] border-charcoal/5 shadow-lg"}`}>
@@ -160,7 +160,7 @@ const AdminInquiries = () => {
         <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors ${isDark ? "text-white/20 group-focus-within:text-gold" : "text-charcoal/40 group-focus-within:text-gold"}`} size={18} />
         <input 
           type="text" 
-          placeholder="Search inquiries by seeker name, email, or subject..."
+          placeholder="Search inquiries by customer name, email, or subject..."
           value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
           className={`w-full backdrop-blur-2xl border rounded-2xl py-3 pl-16 pr-6 font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all font-bold text-xs ${isDark ? "bg-charcoal/40 border-white/5 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"}`}
         />
@@ -171,9 +171,9 @@ const AdminInquiries = () => {
           <table className="w-full text-left border-collapse">
              <thead className={`border-b font-body text-[12px] font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${isDark ? "bg-white/[0.04] border-white/10 text-white/60" : "bg-charcoal/[0.04] border-charcoal/10 text-charcoal/80"}`}>
                 <tr>
-                   <th className="px-4 py-2">Seeker Information</th>
+                   <th className="px-4 py-2">Customer Information</th>
                    {activeTab === 'bulk' && <th className="px-6 py-6 font-bold uppercase tracking-widest">Entity</th>}
-                   <th className="px-4 py-2">Inquiry Ritual</th>
+                   <th className="px-4 py-2">Inquiry Details</th>
                    <th className="px-4 py-2">Timeline</th>
                    <th className="px-6 py-6 text-right pr-12">Actions</th>
                 </tr>
@@ -225,7 +225,7 @@ const AdminInquiries = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={activeTab === 'bulk' ? 5 : 4} className={`px-4 py-10 text-center text-[10px] font-bold uppercase tracking-[0.4em] italic opacity-20`}>No seeker rituals currently logged in the sanctuary repository.</td>
+                    <td colSpan={activeTab === 'bulk' ? 5 : 4} className={`px-4 py-10 text-center text-[10px] font-bold uppercase tracking-[0.4em] italic opacity-20`}>No customer inquiries currently logged in the database.</td>
                   </tr>
                 )}
              </tbody>

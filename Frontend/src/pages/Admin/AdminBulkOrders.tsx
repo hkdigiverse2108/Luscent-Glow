@@ -133,11 +133,11 @@ const AdminBulkOrders = () => {
     <div className="space-y-2 pb-4">
       <AdminHeader 
         title="Bulk Order"
-        highlightedWord="Concierge"
-        subtitle="Managing the corporate gifting ledger and portal presence"
+        highlightedWord="Manager"
+        subtitle="Managing the corporate gifting list and portal presence"
         isDark={isDark}
         action={activeTab === "config" ? {
-          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          label: isConfigSaving ? "Saving..." : "Save Settings",
           onClick: handleSaveConfig,
           icon: isConfigSaving ? Sparkles : CheckCircle2,
           disabled: isConfigSaving
@@ -150,7 +150,7 @@ const AdminBulkOrders = () => {
               activeTab === "inquiries" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Inquiry Ledger
+            Inquiry List
           </button>
           <button 
             onClick={() => setActiveTab("config")}
@@ -246,7 +246,7 @@ const AdminBulkOrders = () => {
                 {/* Hero Section Configuration */}
                 <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl shadow-charcoal/5"}`}>
                   <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
-                    <Sparkles size={20} className="text-gold" /> Hero Sanctuary Settings
+                    <Sparkles size={20} className="text-gold" /> Hero Section Settings
                   </h3>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-6">
@@ -452,7 +452,7 @@ const AdminBulkOrders = () => {
                 </div>
               </>
             ) : (
-              <div className="py-20 text-center font-bold font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing Ritual Connection...</div>
+              <div className="py-20 text-center font-bold font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing System Connection...</div>
             )}
           </motion.div>
         )}

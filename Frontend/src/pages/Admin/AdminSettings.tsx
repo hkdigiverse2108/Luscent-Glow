@@ -106,10 +106,10 @@ const AdminSettings = () => {
 
   useEffect(() => {
     fetchSettings();
-    syncAllRituals();
+    syncAllSystems();
   }, []);
 
-  const syncAllRituals = () => {
+  const syncAllSystems = () => {
     fetchPayment();
     fetchShiprocket();
   };
@@ -154,7 +154,7 @@ const AdminSettings = () => {
     }
   };
 
-  // ── Fetch Rituals ────────────────────────────────────────────────────────
+  // ── Fetch Details ────────────────────────────────────────────────────────
 
   const fetchPayment = async () => {
     try {
@@ -199,7 +199,7 @@ const AdminSettings = () => {
   };
 
 
-  // ── Save Rituals ──────────────────────────────────────────────────────────
+  // ── Save Details ──────────────────────────────────────────────────────────
 
   const handleSavePayment = async () => {
     try {
@@ -212,7 +212,7 @@ const AdminSettings = () => {
       if (res.ok) toast.success("Payment credentials secured.");
       else toast.error("Failed to secure payment credentials.");
     } catch {
-      toast.error("System connection failure during payment ritual.");
+      toast.error("System connection failure during update.");
     } finally {
       setPaymentSaving(false);
     }
@@ -226,7 +226,7 @@ const AdminSettings = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(shiprocket),
       });
-      if (res.ok) toast.success("Logistics ritual updated.");
+      if (res.ok) toast.success("Logistics configuration updated.");
       else toast.error("Failed to update logistics.");
     } catch {
       toast.error("Logistics system failure.");
@@ -246,7 +246,7 @@ const AdminSettings = () => {
         await fetchPayment();
       } else toast.error("Reset failed.");
     } catch {
-      toast.error("Reset ritual failure.");
+      toast.error("Reset failure.");
     } finally {
       setPaymentResetting(false);
     }
@@ -300,7 +300,7 @@ const AdminSettings = () => {
       <div className="max-w-4xl space-y-8">
 
 
-        {/* ── Global Concierge ── */}
+        {/* ── Global Settings ── */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -749,7 +749,7 @@ const AdminSettings = () => {
                   className="px-8 py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold/80 transition-all shadow-lg shadow-gold/20 disabled:opacity-50 flex items-center gap-2"
                 >
                   {shiprocketSaving ? <RefreshCcw size={14} className="animate-spin" /> : <Save size={14} />}
-                  {shiprocketSaving ? "Synchronizing..." : "Save Logistics Config"}
+                  {shiprocketSaving ? "Saving..." : "Save Logistics Config"}
                 </button>
                 <button
                   onClick={fetchShiprocket}
@@ -784,7 +784,7 @@ const AdminSettings = () => {
             </div>
             <div>
               <p className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-white/40" : "text-charcoal/60"}`}>
-                Systemic Registry Health
+                System Health Status
               </p>
               <p className={`text-lg font-extrabold uppercase tracking-[0.08em] ${isDark ? "text-white" : "text-charcoal"}`}>
                 Connectivity Optimized

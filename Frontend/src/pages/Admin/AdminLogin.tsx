@@ -65,7 +65,7 @@ const AdminLogin = () => {
             navigate(from, { replace: true });
           }
         } catch (error) {
-          // Silent fail to manual login if auto-ritual fails
+          // Silent fail to manual login if auto-login fails
           console.error("Auto-login failed.");
         } finally {
           setLoading(false);

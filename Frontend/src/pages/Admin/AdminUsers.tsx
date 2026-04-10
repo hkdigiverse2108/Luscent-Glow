@@ -439,7 +439,7 @@ const AdminUsers = () => {
               <form onSubmit={handleAddUser} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-6">
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-gold">Identity Basics</h4>
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-gold">Personal Information</h4>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Full Name</label>
                       <input 
@@ -874,7 +874,7 @@ const AdminUsers = () => {
                              </div>
 
                              <div className="space-y-6">
-                                <h5 className="text-[11px] font-black uppercase tracking-[0.3em] text-gold">Shipping Registry</h5>
+                                <h5 className="text-[11px] font-black uppercase tracking-[0.3em] text-gold">Shipping Information</h5>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                    <div className="space-y-2 md:col-span-2">
                                       <label className="text-[10px] font-black uppercase tracking-widest opacity-40 ml-1">Street Address</label>
@@ -923,7 +923,7 @@ const AdminUsers = () => {
                                 </div>
                              </div>
 
-                             <button type="submit" className="w-full py-4 bg-gold text-charcoal font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white transition-all shadow-xl shadow-gold/20">Sync Personal Registry</button>
+                             <button type="submit" className="w-full py-4 bg-gold text-charcoal font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-white transition-all shadow-xl shadow-gold/20">Save Profile Details</button>
                           </form>
 
                           {/* Security Reset Section */}
@@ -995,7 +995,7 @@ const AdminUsers = () => {
                                       type="submit"
                                       className="w-full py-6 bg-charcoal text-white font-black uppercase tracking-[0.2em] text-[13px] rounded-[2.5rem] shadow-2xl hover:bg-gold transition-all duration-500 active:scale-95"
                                    >
-                                      Confirm Reset ritual
+                                      Confirm Reset process
                                    </button>
                                 </div>
                              </form>

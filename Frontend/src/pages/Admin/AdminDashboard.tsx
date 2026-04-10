@@ -1,400 +1,425 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ShoppingBag,
   Users,
   Package,
   IndianRupee,
-  MessageSquare,
-  Star,
-  Rss,
-  Ticket,
   TrendingUp,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  Truck,
+  TrendingDown,
   ArrowRight,
   Loader2,
   AlertCircle,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  ShieldCheck,
+  Zap,
+  LayoutDashboard
 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 import { getApiUrl } from "../../lib/api";
 
-// ── helpers ────────────────────────────────────────────────────────────────
-const fmt = (n: number) =>
-  n >= 10_00_000
-    ? `₹${(n / 10_00_000).toFixed(1)}L`
-    : n >= 1_000
-    ? `₹${(n / 1_000).toFixed(1)}K`
-    : `₹${n}`;
-
-const statusColor: Record<string, string> = {
-  Processing:    "bg-amber-400/15 text-amber-400 border-amber-400/25",
-  "Quality Check":"bg-sky-400/15 text-sky-400 border-sky-400/25",
-  Shipped:       "bg-blue-400/15 text-blue-400 border-blue-400/25",
-  Delivered:     "bg-emerald-400/15 text-emerald-400 border-emerald-400/25",
-  Cancelled:     "bg-rose-400/15 text-rose-400 border-rose-400/25",
-};
-
-const statusIcon: Record<string, React.ElementType> = {
-  Processing:     Clock,
-  "Quality Check": TrendingUp,
-  Shipped:        Truck,
-  Delivered:      CheckCircle2,
-  Cancelled:      XCircle,
-};
-
-// ── types ──────────────────────────────────────────────────────────────────
-type StatCard = {
-  label: string;
-  value: string;
-  sub: string;
-  icon: React.ElementType;
-  accent: string;
-  href: string;
+type AnalyticsData = {
+  summary: {
+    totalRevenue: { value: number; change: number; trend: string };
+    activeUsers: { value: number; change: number; trend: string };
+    totalOrders: { value: number; change: number; trend: string };
+    conversionRate: { value: number; change: number; trend: string };
+  };
+  revenueTrend: Array<{ name: string; revenue: number }>;
+  profitExpenses: Array<{ name: string; profit: number; expenses: number }>;
+  topProducts: Array<{ name: string; sales: number; growth: number }>;
+  recentOrders: Array<{ customer: string; product: string; amount: number; status: string }>;
 };
 
 const AdminDashboard = () => {
   const { isDark } = useAdminTheme();
-
-  const [stats, setStats]         = useState<StatCard[]>([]);
-  const [recentOrders, setRecent] = useState<any[]>([]);
-  const [loading, setLoading]     = useState(true);
+  const [data, setData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const load = async () => {
+    const fetchAnalytics = async () => {
       try {
-        const [ordersRes, usersRes, productsRes,  newsletterRes, giftCardsRes, reviewsRes] =
-          await Promise.allSettled([
-            fetch(getApiUrl("/api/orders/")),
-            fetch(getApiUrl("/api/users/")),
-            fetch(getApiUrl("/api/products/")),
-            fetch(getApiUrl("/api/newsletter/")),
-            fetch(getApiUrl("/api/gift-cards/")),
-            fetch(getApiUrl("/api/reviews/")),
-          ]);
-
-        const orders: any[]       = ordersRes.status === "fulfilled" && ordersRes.value.ok ? await ordersRes.value.json() : [];
-        const users: any[]        = usersRes.status === "fulfilled" && usersRes.value.ok ? await usersRes.value.json() : [];
-        const products: any[]     = productsRes.status === "fulfilled" && productsRes.value.ok ? await productsRes.value.json() : [];
-        const newsletter: any[]   = newsletterRes.status === "fulfilled" && newsletterRes.value.ok ? await newsletterRes.value.json() : [];
-        const giftCards: any[]    = giftCardsRes.status === "fulfilled" && giftCardsRes.value.ok ? await giftCardsRes.value.json() : [];
-        const reviews: any[]      = reviewsRes.status === "fulfilled" && reviewsRes.value.ok ? await reviewsRes.value.json() : [];
-
-        const totalRevenue = orders
-          .filter((o) => o.paymentStatus === "Paid")
-          .reduce((acc, o) => acc + (o.totalAmount || 0), 0);
-
-        const paidOrders   = orders.filter((o) => o.paymentStatus === "Paid").length;
-        const pendingOrders = orders.filter((o) => o.status === "Processing").length;
-
-        setStats([
-          {
-            label: "Total Revenue",
-            value: fmt(totalRevenue),
-            sub: `${paidOrders} paid orders`,
-            icon: IndianRupee,
-            accent: "from-gold/20 to-gold/5 border-gold/20 text-gold",
-            href: "/admin/orders",
-          },
-          {
-            label: "Total Orders",
-            value: String(orders.length),
-            sub: `${pendingOrders} processing`,
-            icon: ShoppingBag,
-            accent: "from-sky-400/20 to-sky-400/5 border-sky-400/20 text-sky-400",
-            href: "/admin/orders",
-          },
-          {
-            label: "Registered Users",
-            value: String(users.length),
-            sub: `${users.filter((u) => u.isAdmin).length} admins`,
-            icon: Users,
-            accent: "from-violet-400/20 to-violet-400/5 border-violet-400/20 text-violet-400",
-            href: "/admin/users",
-          },
-          {
-            label: "Products",
-            value: String(products.length),
-            sub: `${products.filter((p) => p.isNew).length} new arrivals`,
-            icon: Package,
-            accent: "from-emerald-400/20 to-emerald-400/5 border-emerald-400/20 text-emerald-400",
-            href: "/admin/products",
-          },
-          {
-            label: "Subscribers",
-            value: String(newsletter.length),
-            sub: "Newsletter list",
-            icon: Rss,
-            accent: "from-amber-400/20 to-amber-400/5 border-amber-400/20 text-amber-400",
-            href: "/admin/newsletter",
-          },
-          {
-            label: "Gift Cards",
-            value: String(giftCards.length),
-            sub: `${giftCards.filter((g) => g.isActive).length} active`,
-            icon: Ticket,
-            accent: "from-pink-400/20 to-pink-400/5 border-pink-400/20 text-pink-400",
-            href: "/admin/gift-cards",
-          },
-          {
-            label: "Total Reviews",
-            value: String(reviews.length),
-            sub: `${reviews.filter((r) => r.rating >= 4).length} positive`,
-            icon: Star,
-            accent: "from-amber-400/20 to-amber-400/5 border-amber-400/20 text-amber-400",
-            href: "/admin/reviews",
-          },
-          {
-            label: "Catalogue",
-            value: `${products.filter((p) => p.isTrending).length}`,
-            sub: "Trending products",
-            icon: TrendingUp,
-            accent: "from-cyan-400/20 to-cyan-400/5 border-cyan-400/20 text-cyan-400",
-            href: "/admin/products",
-          },
-        ]);
-
-        setRecent(orders.slice(0, 6));
-      } catch (e) {
-        console.error(e);
+        setLoading(true);
+        const res = await fetch(getApiUrl("/api/analytics/dashboard"));
+        if (!res.ok) throw new Error("Data retrieval failed.");
+        const json = await res.json();
+        setData(json);
+      } catch (err: any) {
+        console.error(err);
+        setError("Unable to load analytics data.");
       } finally {
         setLoading(false);
       }
     };
-    load();
+    fetchAnalytics();
   }, []);
 
-  const card = `relative overflow-hidden rounded-2xl border p-5 transition-all duration-300 ${
-    isDark ? "bg-white/4 hover:bg-white/6" : "bg-white hover:bg-white shadow-sm hover:shadow-md"
+  // Professional Dynamic Colors
+  const chartColors = {
+    gold: isDark ? "#D4AF37" : "#B68F4C",
+    text: isDark ? "rgba(255,255,255,0.4)" : "rgba(18, 18, 18, 0.4)",
+    grid: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+    emerald: isDark ? "#34D399" : "#059669",
+    rose: isDark ? "#FB7185" : "#E11D48",
+    bg: isDark ? "bg-charcoal/40" : "bg-white",
+    border: isDark ? "border-white/5" : "border-charcoal/5",
+    subtext: isDark ? "text-slate-400" : "text-charcoal/60"
+  };
+
+  const cardBase = `relative overflow-hidden group rounded-[2rem] border backdrop-blur-3xl transition-all duration-500 hover:shadow-2xl ${
+    isDark 
+      ? "bg-charcoal/40 border-white/5 shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:border-gold/30" 
+      : "bg-white border-gold/5 shadow-[0_10px_40px_rgba(182,143,76,0.04)] hover:border-gold/20"
   }`;
 
   if (loading) {
     return (
-      <div className="h-[70vh] flex flex-col items-center justify-center gap-3">
-        <Loader2 size={32} className="animate-spin text-gold" />
-        <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-gold/60 animate-pulse">
-          Loading Dashboard…
-        </p>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-6">
+        <Loader2 size={40} className="animate-spin text-gold opacity-30" />
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/60">Loading statistics...</p>
       </div>
     );
   }
 
+  if (error || !data) {
+    return (
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in duration-700">
+        <AlertCircle size={48} className="text-rose-500/50 mb-6" />
+        <h3 className="text-2xl font-display font-bold mb-2">Connection Error</h3>
+        <p className={`text-sm mb-8 ${chartColors.subtext}`}>{error}</p>
+        <button onClick={() => window.location.reload()} className="px-8 py-3 bg-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-gold/20 hover:scale-105 transition-all">Reload Data</button>
+      </div>
+    );
+  }
+
+  const kpis = [
+    { label: "Total Revenue", value: `₹${data.summary.totalRevenue.value.toLocaleString('en-IN')}`, trendValue: data.summary.totalRevenue.change, trend: data.summary.totalRevenue.trend, icon: IndianRupee, color: "text-gold", bg: "bg-gold/10" },
+    { label: "Accounts", value: data.summary.activeUsers.value.toLocaleString(), trendValue: data.summary.activeUsers.change, trend: data.summary.activeUsers.trend, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Orders", value: data.summary.totalOrders.value.toLocaleString(), trendValue: data.summary.totalOrders.change, trend: data.summary.totalOrders.trend, icon: ShoppingBag, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { label: "Conversion Rate", value: `${data.summary.conversionRate.value}%`, trendValue: data.summary.conversionRate.change, trend: data.summary.conversionRate.trend, icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" }
+  ];
+
   return (
-    <div className="space-y-8 pb-10">
-      <AdminHeader
-        title="Platform"
-        highlightedWord="Dashboard"
-        subtitle="Real-time snapshot of your store's performance."
-        isDark={isDark}
-      />
-
-      {/* ── KPI Grid ───────────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((s, i) => {
-          const Icon = s.icon;
-          return (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05, duration: 0.4 }}
-            >
-              <Link to={s.href} className={`${card} group block bg-gradient-to-br border ${s.accent}`}>
-                {/* icon */}
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-4 bg-gradient-to-br ${s.accent} border`}>
-                  <Icon size={17} />
-                </div>
-
-                {/* value */}
-                <p className={`text-2xl font-bold tabular-nums leading-none mb-1 transition-colors ${
-                  isDark ? "text-white" : "text-charcoal"
-                }`}>
-                  {s.value}
-                </p>
-
-                {/* label */}
-                <p className={`text-[11px] font-semibold mb-0.5 ${isDark ? "text-white/60" : "text-charcoal/60"}`}>
-                  {s.label}
-                </p>
-
-                {/* sub */}
-                <p className={`text-[10px] font-medium ${isDark ? "text-white/30" : "text-charcoal/35"}`}>
-                  {s.sub}
-                </p>
-
-                {/* arrow on hover */}
-                <ArrowRight
-                  size={13}
-                  className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-60 transition-all group-hover:translate-x-0.5"
-                />
-              </Link>
-            </motion.div>
-          );
-        })}
+    <div className="space-y-12 pb-20 animate-in fade-in duration-1000">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 py-2">
+        <AdminHeader
+          title="Admin"
+          highlightedWord="Dashboard"
+          subtitle="Real-time store performance and analytics overview."
+          isDark={isDark}
+        />
+        <div className={`flex items-center gap-1 p-1 rounded-2xl border ${isDark ? "bg-white/5 border-white/10" : "bg-gold/5 border-gold/10"}`}>
+           <button className="px-6 py-2.5 bg-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-transform active:scale-95">Last 30 Days</button>
+           <button className="px-6 py-2.5 text-muted-foreground hover:text-gold rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors">All Time</button>
+        </div>
       </div>
 
-      {/* ── Recent Orders ──────────────────────────────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4, duration: 0.5 }}
-        className={`rounded-2xl border overflow-hidden ${
-          isDark ? "bg-white/4 border-white/8" : "bg-white border-charcoal/8 shadow-sm"
-        }`}
-      >
-        {/* header */}
-        <div className={`flex items-center justify-between px-6 py-4 border-b ${
-          isDark ? "border-white/6" : "border-charcoal/6"
-        }`}>
-          <div className="flex items-center gap-2.5">
-            <ShoppingBag size={16} className="text-gold" />
-            <h2 className={`text-sm font-bold ${isDark ? "text-white" : "text-charcoal"}`}>
-              Recent Orders
-            </h2>
-          </div>
-          <Link
-            to="/admin/orders"
-            className="flex items-center gap-1 text-[11px] font-semibold text-gold hover:text-gold/70 transition-colors"
+      {/* ── KPI Summary Cards ──────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+        {kpis.map((kpi, idx) => (
+          <motion.div
+            key={kpi.label}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1, duration: 0.8, ease: "easeOut" }}
+            className={cardBase}
           >
-            View all <ArrowRight size={11} />
-          </Link>
-        </div>
+            <div className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div className={`w-14 h-14 rounded-2xl ${kpi.bg} ${kpi.color} flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 duration-500`}>
+                  <kpi.icon size={26} strokeWidth={1.5} />
+                </div>
+                <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${kpi.trend === 'up' ? 'text-emerald-500 bg-emerald-500/5 border border-emerald-500/10' : 'text-rose-500 bg-rose-500/5 border border-rose-500/10'}`}>
+                  {kpi.trend === 'up' ? <TrendingUp size={12} strokeWidth={3} /> : <TrendingDown size={12} strokeWidth={3} />}
+                  {Math.abs(kpi.trendValue)}%
+                </div>
+              </div>
+              
+              <h4 className={`text-[10px] font-black uppercase tracking-[0.4em] mb-1.5 opacity-50`}>
+                {kpi.label}
+              </h4>
+              <p className={`text-4xl font-display font-bold tabular-nums tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
+                {kpi.value}
+              </p>
+              
+              <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-30">Data Updated</p>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
 
-        {/* table */}
-        {recentOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <AlertCircle size={28} className={isDark ? "text-white/20" : "text-charcoal/20"} />
-            <p className={`text-xs font-semibold ${isDark ? "text-white/30" : "text-charcoal/35"}`}>
-              No orders yet
-            </p>
+      {/* ── Main Performance Analytics ────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Revenue Area Chart */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4, duration: 0.8 }}
+          className={`lg:col-span-2 ${cardBase}`}
+        >
+          <div className="p-10">
+            <div className="flex items-center justify-between mb-12">
+              <div>
+                <h3 className="text-3xl font-display font-bold mb-1">Revenue Overview</h3>
+                <p className={`text-[10px] font-black uppercase tracking-[0.4em] opacity-40`}>Revenue trends over time</p>
+              </div>
+              <LayoutDashboard size={20} className="text-gold opacity-20" />
+            </div>
+            
+            <div className="h-[400px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.revenueTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartColors.gold} stopOpacity={0.25}/>
+                      <stop offset="95%" stopColor={chartColors.gold} stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="6 6" vertical={false} stroke={chartColors.grid} />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: chartColors.text, fontSize: 11, fontWeight: '800', letterSpacing: '0.1em' }} 
+                    dy={20}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: chartColors.text, fontSize: 11, fontWeight: '800' }}
+                    tickFormatter={(v) => v >= 1000 ? `₹${v/1000}k` : `₹${v}`}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: isDark ? '#141414' : '#fff', 
+                      borderRadius: '1.5rem', 
+                      border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}`,
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                      fontFamily: 'Outfit',
+                      fontSize: '11px',
+                      fontWeight: '700',
+                      textTransform: 'uppercase'
+                    }}
+                    cursor={{ stroke: chartColors.gold, strokeWidth: 1, strokeDasharray: '4 4' }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="revenue" 
+                    stroke={chartColors.gold} 
+                    strokeWidth={4}
+                    fillOpacity={1} 
+                    fill="url(#revenueGradient)" 
+                    animationDuration={2000}
+                    activeDot={{ r: 6, strokeWidth: 0, fill: chartColors.gold }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className={`text-[10px] font-black uppercase tracking-widest ${
-                  isDark ? "text-white/25 border-b border-white/5" : "text-charcoal/30 border-b border-charcoal/5"
-                }`}>
-                  <th className="text-left px-6 py-3 font-black">Order</th>
-                  <th className="text-left px-4 py-3 font-black">Customer</th>
-                  <th className="text-left px-4 py-3 font-black">Status</th>
-                  <th className="text-left px-4 py-3 font-black">Payment</th>
-                  <th className="text-right px-6 py-3 font-black">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/4">
-                {recentOrders.map((order, i) => {
-                  const StatusIcon = statusIcon[order.status] || Clock;
-                  const colorClass = statusColor[order.status] || "bg-white/10 text-white/50 border-white/10";
-                  return (
-                    <motion.tr
-                      key={order._id || i}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.45 + i * 0.04 }}
-                      className={`transition-colors ${
-                        isDark ? "hover:bg-white/3" : "hover:bg-charcoal/2"
-                      }`}
-                    >
-                      {/* Order # */}
-                      <td className="px-6 py-3.5">
-                        <span className={`text-[11px] font-bold font-mono ${
-                          isDark ? "text-gold/80" : "text-gold"
-                        }`}>
-                          {order.orderNumber || "—"}
-                        </span>
-                      </td>
+        </motion.div>
 
-                      {/* Customer */}
-                      <td className="px-4 py-3.5">
-                        <span className={`text-[12px] font-medium ${
-                          isDark ? "text-white/70" : "text-charcoal/70"
-                        }`}>
-                          {order.userMobile || "Guest"}
-                        </span>
-                      </td>
+        {/* Profit vs Expenses BarChart */}
+        <motion.div
+           initial={{ opacity: 0, x: 20 }}
+           animate={{ opacity: 1, x: 0 }}
+           transition={{ delay: 0.5, duration: 0.8 }}
+           className={cardBase}
+        >
+          <div className="p-10 flex flex-col h-full">
+            <div className="mb-12">
+               <h3 className="text-3xl font-display font-bold mb-1">Profit & Expenses</h3>
+               <p className={`text-[10px] font-black uppercase tracking-[0.4em] opacity-40`}>Financial balance overview</p>
+            </div>
+            
+            <div className="flex-1 min-h-[380px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.profitExpenses} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barGap={10}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{ fill: chartColors.text, fontSize: 11, fontWeight: '800' }}
+                    dy={20}
+                  />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(182, 143, 76, 0.05)' }} 
+                    contentStyle={{ borderRadius: '1.2rem', border: 'none', fontSize: '11px' }} 
+                  />
+                  <Bar dataKey="profit" fill={chartColors.gold} radius={[8, 8, 0, 0]} barSize={22} animationDuration={1500} />
+                  <Bar dataKey="expenses" fill={isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} radius={[8, 8, 0, 0]} barSize={22} animationDuration={2000} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
 
-                      {/* Status */}
-                      <td className="px-4 py-3.5">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${colorClass}`}>
-                          <StatusIcon size={10} />
-                          {order.status}
-                        </span>
-                      </td>
-
-                      {/* Payment */}
-                      <td className="px-4 py-3.5">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                          order.paymentStatus === "Paid"
-                            ? "bg-emerald-400/15 text-emerald-400 border-emerald-400/25"
-                            : "bg-amber-400/15 text-amber-400 border-amber-400/25"
-                        }`}>
-                          {order.paymentStatus === "Paid"
-                            ? <CheckCircle2 size={10} />
-                            : <Clock size={10} />
-                          }
-                          {order.paymentStatus || "Pending"}
-                        </span>
-                      </td>
-
-                      {/* Amount */}
-                      <td className="px-6 py-3.5 text-right">
-                        <span className={`text-[13px] font-bold tabular-nums ${
-                          isDark ? "text-white" : "text-charcoal"
-                        }`}>
-                          ₹{Number(order.totalAmount || 0).toLocaleString("en-IN")}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            <div className="mt-10 p-6 rounded-2xl bg-secondary/20 border border-white/5 flex items-center justify-between">
+               <div className="flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                     <div className="w-2.5 h-2.5 rounded-full bg-gold"></div>
+                     <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Profit</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                     <div className={`w-2.5 h-2.5 rounded-full ${isDark ? "bg-white/10" : "bg-charcoal/10"}`}></div>
+                     <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Expenses</span>
+                  </div>
+               </div>
+               <ShieldCheck size={16} className="text-gold opacity-30" />
+            </div>
           </div>
-        )}
-      </motion.div>
+        </motion.div>
+      </div>
 
-      {/* ── Quick Links ────────────────────────────────────────────────────── */}
+      {/* ── Transactional Lists ──────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
+        {/* Recent Orders Table List */}
+        <motion.div
+           initial={{ opacity: 0, y: 30 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.6, duration: 1 }}
+           className={cardBase}
+        >
+          <div className="p-10">
+            <div className="flex items-center justify-between mb-10">
+               <div>
+                  <h3 className="text-2xl font-display font-bold mb-1">Recent Transactions</h3>
+                  <p className="text-[10px] font-black text-gold uppercase tracking-[0.4em]">Latest store activity</p>
+               </div>
+               <Link to="/admin/orders" className="p-3 rounded-2xl bg-gold/5 text-gold hover:bg-gold hover:text-white transition-all duration-500 shadow-sm">
+                  <ExternalLink size={18} />
+               </Link>
+            </div>
+            
+            <div className="space-y-4">
+               {data.recentOrders.map((order, i) => (
+                  <div key={i} className={`flex items-center justify-between p-5 rounded-[1.5rem] border transition-all hover:bg-gold/5 ${isDark ? "bg-white/5 border-white/5" : "bg-charcoal/5 border-charcoal/5"}`}>
+                     <div className="flex items-center gap-5">
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center font-display font-bold text-xl shadow-md ${isDark ? "bg-gold/20 text-gold border border-gold/10" : "bg-gold text-white"}`}>
+                           {order.customer.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                           <p className={`text-sm font-bold tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>{order.customer}</p>
+                           <p className={`text-[10px] font-black uppercase tracking-widest opacity-40`}>{order.product}</p>
+                        </div>
+                     </div>
+                     <div className="text-right">
+                        <p className={`text-base font-display font-bold mb-1 ${isDark ? "text-white" : "text-charcoal"}`}>₹{order.amount.toLocaleString()}</p>
+                        <span className={`px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-colors ${
+                           order.status === 'Delivered' 
+                            ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
+                            : 'bg-amber-500/10 text-amber-500 border-amber-500/20'
+                        }`}>
+                           {order.status}
+                        </span>
+                     </div>
+                  </div>
+               ))}
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Top Products Rankings */}
+        <motion.div
+           initial={{ opacity: 0, y: 30 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.7, duration: 1 }}
+           className={cardBase}
+        >
+          <div className="p-10">
+            <div className="flex items-center justify-between mb-10">
+               <div>
+                  <h3 className="text-2xl font-display font-bold mb-1">Top Products</h3>
+                  <p className="text-[10px] font-black text-gold uppercase tracking-[0.4em]">Best performing products</p>
+               </div>
+               <Zap size={20} className="text-gold opacity-30" />
+            </div>
+
+            <div className="space-y-8">
+               {data.topProducts.map((product, i) => (
+                  <div key={i} className="group/product">
+                     <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                           <span className="text-[10px] font-black text-gold/30">0{i+1}</span>
+                           <p className={`text-[11px] font-black uppercase tracking-[0.15em] ${isDark ? "text-white/80" : "text-charcoal/80"}`}>{product.name}</p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                           <span className="text-sm font-display font-bold tabular-nums text-gold">{product.sales} Sales</span>
+                           <span className="text-[9px] font-black text-emerald-500 tracking-widest">+{product.growth}%</span>
+                        </div>
+                     </div>
+                     <div className={`w-full h-2 rounded-full overflow-hidden ${isDark ? "bg-white/5" : "bg-charcoal/5 shadow-inner"}`}>
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(product.sales / data.topProducts[0].sales) * 100}%` }}
+                          transition={{ delay: 1.2 + i * 0.1, duration: 1.5, ease: "easeOut" }}
+                          className="h-full bg-gradient-to-r from-gold/40 to-gold rounded-full shadow-[0_0_10px_rgba(182,143,76,0.3)]"
+                        />
+                     </div>
+                  </div>
+               ))}
+            </div>
+
+            <div className="mt-14 p-8 rounded-[2rem] bg-gold/5 border border-gold/10 relative overflow-hidden group/cta">
+               <div className="relative z-10 flex items-center justify-between">
+                  <div>
+                    <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold mb-1">Product Insights</h5>
+                    <p className={`text-xs font-semibold max-w-[220px] leading-relaxed opacity-60`}>Your trending products are showing high conversion across premium customer segments.</p>
+                  </div>
+                  <Link to="/admin/products" className="w-12 h-12 rounded-full bg-gold text-white flex items-center justify-center transform group-hover/cta:scale-110 transition-all duration-500 shadow-lg shadow-gold/20">
+                     <ArrowRight size={20} />
+                  </Link>
+               </div>
+               <IndianRupee size={150} className="absolute -right-16 -bottom-16 text-gold/5 transform rotate-[-15deg] group-hover/cta:rotate-0 transition-transform duration-1000" />
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* ── Quick Global Navigation ─────────────────────────────────────────── */}
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
+        transition={{ delay: 1 }}
+        className="grid grid-cols-2 md:grid-cols-4 gap-6"
       >
-        <h3 className={`text-[11px] font-black uppercase tracking-[0.3em] mb-3 ${
-          isDark ? "text-white/25" : "text-charcoal/30"
-        }`}>
-          Quick Actions
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          {[
-            { label: "Add Product",   href: "/admin/products",   icon: Package,      color: "text-emerald-400" },
-            { label: "View Orders",   href: "/admin/orders",     icon: ShoppingBag,  color: "text-sky-400" },
-            { label: "Manage Users",  href: "/admin/users",      icon: Users,        color: "text-violet-400" },
-            { label: "Gift Cards",    href: "/admin/gift-cards", icon: Ticket,       color: "text-pink-400" },
-            { label: "Settings",      href: "/admin/settings",   icon: Rss,          color: "text-amber-400" },
-          ].map((q) => (
-            <Link
-              key={q.href}
-              to={q.href}
-              className={`group flex flex-col items-center gap-2.5 p-4 rounded-2xl border transition-all duration-300 text-center ${
-                isDark
-                  ? "bg-white/4 border-white/6 hover:bg-white/8 hover:border-white/12"
-                  : "bg-white border-charcoal/8 hover:border-gold/25 hover:shadow-sm shadow-none"
-              }`}
-            >
-              <q.icon size={20} className={`${q.color} group-hover:scale-110 transition-transform`} />
-              <span className={`text-[11px] font-semibold leading-tight ${
-                isDark ? "text-white/60 group-hover:text-white/90" : "text-charcoal/55 group-hover:text-charcoal"
-              }`}>
-                {q.label}
-              </span>
-            </Link>
-          ))}
-        </div>
+        {[
+          { label: "Orders", icon: ShoppingBag, href: "/admin/orders" },
+          { label: "Users", icon: Users, href: "/admin/users" },
+          { label: "Products", icon: Package, href: "/admin/products" },
+          { label: "Settings", icon: ShieldCheck, href: "/admin/settings" }
+        ].map((item, i) => (
+          <Link 
+             key={i} 
+             to={item.href} 
+             className={`flex flex-col items-center gap-4 p-6 rounded-[2rem] border transition-all hover:-translate-y-1.5 ${
+               isDark ? "bg-white/4 border-white/5 hover:border-gold/20 hover:bg-gold/5" : "bg-white border-gold/10 hover:shadow-2xl hover:border-gold/30"
+             }`}
+          >
+             <div className="w-12 h-12 rounded-xl bg-gold/10 text-gold flex items-center justify-center">
+               <item.icon size={20} />
+             </div>
+             <span className={`text-[10px] font-black uppercase tracking-[0.3em] opacity-40 group-hover:opacity-100`}>{item.label}</span>
+          </Link>
+        ))}
       </motion.div>
     </div>
   );

@@ -38,7 +38,7 @@ const AdminReviews = () => {
         setReviews(data);
       }
     } catch (error) {
-      toast.error("Could not reach the review sanctuary.");
+      toast.error("Could not reach the review database.");
     } finally {
       setLoading(false);
     }
@@ -56,10 +56,10 @@ const AdminReviews = () => {
         method: "DELETE",
       });
       if (response.status === 204) {
-        toast.success("Feedback successfully purged.");
+        toast.success("Feedback successfully deleted.");
         fetchReviews();
       } else {
-        toast.error("Deletion ritual failed.");
+        toast.error("Deletion failed.");
       }
     } catch (error) {
       toast.error("System connection error.");
@@ -80,11 +80,11 @@ const AdminReviews = () => {
     <div className="space-y-6 pb-8">
       <AdminHeader 
         title="Customer"
-        highlightedWord="Chronicles"
+        highlightedWord="Reviews"
         subtitle="Manage and moderate product feedback and testimonials"
         isDark={isDark}
         action={{
-          label: "Add Chronicle",
+          label: "Add Review",
           onClick: () => setIsAddModalOpen(true),
           icon: Plus
         }}
@@ -124,7 +124,7 @@ const AdminReviews = () => {
                isDark ? "bg-white/[0.04] border-white/10 text-white/50" : "bg-charcoal/[0.04] border-charcoal/10 text-charcoal/80"
              }`}>
                 <tr>
-                   <th className="px-6 py-4 font-black uppercase tracking-[0.3em]">Chronicle Detail</th>
+                   <th className="px-6 py-4 font-black uppercase tracking-[0.3em]">Review Detail</th>
                    <th className="px-4 py-4 font-black uppercase tracking-[0.3em]">Customer</th>
                    <th className="px-4 py-4 font-black uppercase tracking-[0.3em]">Rating</th>
                    <th className="px-4 py-4 font-black uppercase tracking-[0.3em]">Testimonial</th>
@@ -195,7 +195,7 @@ const AdminReviews = () => {
                               <div className="flex flex-wrap gap-1.5 mt-3">
                                  {r.images.map((img: string, idx: number) => (
                                     <div key={idx} className="w-10 h-10 rounded-lg overflow-hidden border border-white/5 bg-charcoal/20">
-                                       <img src={getAssetUrl(img)} alt="Chronicle Image" className="w-full h-full object-cover" />
+                                       <img src={getAssetUrl(img)} alt="Review Image" className="w-full h-full object-cover" />
                                     </div>
                                  ))}
                               </div>
@@ -230,7 +230,7 @@ const AdminReviews = () => {
                              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
                                isDark ? "bg-white/5 text-white/20 hover:text-rose-light hover:bg-rose-light/10" : "bg-charcoal/5 text-charcoal/40 hover:text-rose-600 hover:bg-rose-50"
                              }`}
-                             title="Purge Feedback"
+                             title="Delete Feedback"
                           >
                              <Trash2 size={16} />
                           </button>
@@ -244,7 +244,7 @@ const AdminReviews = () => {
                        <div className="flex flex-col items-center gap-4">
                           <AlertCircle size={40} className="text-gold/20" />
                           <p className={`font-body text-base uppercase tracking-widest italic ${isDark ? "text-white/30" : "text-charcoal/50"}`}>
-                             The chronicle is currently silent. No reviews in repository.
+                             No reviews found in the database.
                           </p>
                        </div>
                     </td>
@@ -258,7 +258,7 @@ const AdminReviews = () => {
           isDark ? "bg-white/[0.01] border-white/5" : "bg-charcoal/[0.01] border-charcoal/5"
         }`}>
            <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/20" : "text-charcoal/40"}`}>
-              Displaying {filteredReviews.length} chronicles found in sanctuary
+              Displaying {filteredReviews.length} reviews found in database
            </p>
            <div className="flex items-center gap-4">
               <button disabled className="w-9 h-9 rounded-full border border-white/5 flex items-center justify-center text-white/10 cursor-not-allowed">

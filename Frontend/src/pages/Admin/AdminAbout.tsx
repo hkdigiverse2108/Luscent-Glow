@@ -71,7 +71,7 @@ const AdminAbout = () => {
         body: JSON.stringify(config)
       });
       if (response.ok) {
-        toast.success("Page configuration synchronized.");
+        toast.success("Page configuration saved.");
       } else {
         toast.error("Failed to commit settings.");
       }
@@ -85,18 +85,18 @@ const AdminAbout = () => {
   // Removed hardcoded resolveIcon in favor of DynamicIcon component
 
   if (loading || !config) {
-    return <div className="py-20 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing Ritual Connection...</div>;
+    return <div className="py-20 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Establishing System Connection...</div>;
   }
 
   return (
     <div className="space-y-2 pb-4">
       <AdminHeader 
         title="About Us"
-        highlightedWord="Concierge"
+        highlightedWord="Management"
         subtitle="Narrative & Philosophy Management"
         isDark={isDark}
         action={{
-          label: isConfigSaving ? "Synchronizing..." : "Commit Settings",
+          label: isConfigSaving ? "Saving..." : "Save Settings",
           onClick: handleSaveConfig,
           icon: isConfigSaving ? Sparkles : CheckCircle2,
           disabled: isConfigSaving
@@ -108,7 +108,7 @@ const AdminAbout = () => {
         <div className="space-y-6">
           <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
             <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3">
-              <Sparkles size={20} className="text-gold" /> Hero Sanctuary
+              <Sparkles size={20} className="text-gold" /> Hero Section
             </h3>
             <div className="grid gap-6">
               <div className="space-y-4">

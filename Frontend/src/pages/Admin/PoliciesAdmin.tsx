@@ -254,7 +254,7 @@ const PoliciesAdmin = () => {
         if (data.length > 0 && !selectedType) setSelectedType(data[0].type);
       }
     } catch {
-      toast.error("Could not reach the policy registry.");
+      toast.error("Could not reach the policy database.");
     }
   };
 
@@ -302,7 +302,7 @@ const PoliciesAdmin = () => {
     const body = {
       type: slug,
       title: newTitle,
-      subtitle: "Ensuring clarity and trust for our valued seekers.",
+      subtitle: "Ensuring clarity and trust for our valued users.",
       lastUpdated: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
       heroIcon: "Shield",
       insights: [{ icon: "Shield", title: "Protection", description: "Add your key highlight here." }],

@@ -23,14 +23,14 @@ import { getAssetUrl, getApiUrl } from "@/lib/api";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { toast } from "sonner";
 
-interface OrderRitualModalProps {
+interface OrderDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   order: any;
   onStatusUpdate: (id: string, status: string) => void;
 }
 
-const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitualModalProps) => {
+const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderDetailsModalProps) => {
   const { isDark } = useAdminTheme();
   const [trackingNumber, setTrackingNumber] = React.useState(order?.trackingNumber || "");
   const [courierPartner, setCourierPartner] = React.useState(order?.courierPartner || "Shiprocket");
@@ -79,14 +79,13 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
         });
         setTrackingNumber(data.tracking.trackingNumber);
         setCourierPartner(data.tracking.courierPartner || "Shiprocket");
-        // Trigger a refresh (the parent modal will re-fetch orders usually)
       } else {
         toast.error("Shiprocket Rejection", {
           description: data.detail || "Fulfillment failed."
         });
       }
     } catch (error) {
-      toast.error("Spirit connection failed.");
+      toast.error("Connection failed.");
     } finally {
       setIsAutoFulfilling(false);
     }
@@ -117,7 +116,6 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
   return (
     <AnimatePresence>
       <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-        {/* Backdrop */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -126,7 +124,6 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
           className="absolute inset-0 bg-black/80 backdrop-blur-sm"
         />
 
-        {/* Modal Stage */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 30 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -135,7 +132,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
             isDark ? "bg-charcoal/95 border-white/10 shadow-black/80" : "bg-white/95 border-charcoal/10 shadow-charcoal/30"
           }`}
         >
-          {/* Header Ritual */}
+          {/* Header */}
           <div className={`p-8 border-b flex items-center justify-between transition-colors duration-700 ${
             isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"
           }`}>
@@ -174,12 +171,11 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
 
           <div className="flex-1 overflow-y-auto p-8 md:p-12 space-y-12 custom-scrollbar">
             
-            {/* Visual Delivery Timeline */}
+            {/* Delivery Timeline */}
             <div className={`p-8 rounded-[2rem] border transition-all duration-700 ${
               isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"
             }`}>
                <div className="flex items-center justify-between relative max-w-2xl mx-auto">
-                  {/* Step Connector Line */}
                   <div className={`absolute top-1/2 left-0 w-full h-[2px] -translate-y-1/2 transition-all duration-1000 ${
                     isDark ? "bg-white/5" : "bg-charcoal/5"
                   }`} />
@@ -188,12 +184,11 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                     { id: 'Processing', icon: Clock, label: 'Order received' },
                     { id: 'Shipped', icon: Truck, label: 'Order in transit' },
                     { id: 'Delivered', icon: CheckCircle, label: 'Order delivered' }
-                  ].map((step, index, array) => {
+                  ].map((step, index) => {
                     const StepIcon = step.icon;
                     const steps = ['Processing', 'Shipped', 'Delivered'];
                     const currentIndex = steps.indexOf(order.status);
                     const isActive = currentIndex >= index;
-                    const isCompleted = currentIndex > index;
                     const isCurrent = currentIndex === index;
 
                     return (
@@ -234,10 +229,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                </div>
             </div>
             
-            {/* Grid for Logistics & Items */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-               
-               {/* Left: Items (8 cols) */}
                <div className="lg:col-span-12 space-y-8">
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Items ({order.items?.length || 0})</h4>
@@ -276,7 +268,6 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                   </div>
                </div>
 
-               {/* Logistics Section */}
                <div className="lg:col-span-7 space-y-8">
                   <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Customer Information</h4>
                   
@@ -315,7 +306,6 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                   </div>
                </div>
 
-               {/* Payment Breakdown */}
                <div className="lg:col-span-5 space-y-8">
                   <h4 className="text-xs font-bold text-gold uppercase tracking-[0.3em]">Payment Summary</h4>
                   
@@ -359,7 +349,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                </div>
             </div>
 
-            {/* Lifecycle Transitions (Admin Only) */}
+            {/* Status Updates */}
             <div className="space-y-8 pt-8 border-t border-white/5">
                 <h4 className="text-xs font-bold text-indigo-400 uppercase tracking-[0.3em]">Update Status</h4>
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -384,13 +374,13 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
                         } ${status.color} ${updatingStatus === status.id ? "animate-pulse" : ""}`}
                       >
                         {updatingStatus === status.id ? <Clock className="animate-spin" size={16} /> : status.icon}
-                        {updatingStatus === status.id ? "Synchronizing..." : status.id}
+                        {updatingStatus === status.id ? "Updating..." : status.id}
                       </button>
                    ))}
                 </div>
             </div>
 
-            {/* Tracking Integration Ritual */}
+            {/* Tracking Integration */}
             {(order.status === 'Shipped' || order.status === 'Delivered') && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
@@ -463,7 +453,7 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
             )}
           </div>
 
-          {/* Footer Ritual */}
+          {/* Footer */}
           <div className={`p-8 border-t flex justify-end transition-colors duration-700 ${
             isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"
           }`}>
@@ -483,4 +473,4 @@ const OrderRitualModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderRitua
   );
 };
 
-export default OrderRitualModal;
+export default OrderDetailsModal;

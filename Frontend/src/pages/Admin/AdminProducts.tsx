@@ -84,7 +84,7 @@ const AdminProducts = () => {
       <AdminHeader 
         title="Products"
         highlightedWord="Management"
-        subtitle="Live database management for the product catalog"
+        subtitle="Manage or update information for each of your products"
         isDark={isDark}
         action={{
           label: "Add New Product",
@@ -120,7 +120,7 @@ const AdminProducts = () => {
         </button>
       </div>
 
-      {/* Database Table */}
+      {/* Products Table */}
       <div className={`backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 min-h-[600px] ${
         isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
@@ -224,7 +224,7 @@ const AdminProducts = () => {
                                <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[12px] font-extrabold uppercase tracking-widest border border-gold/30 shadow-sm">Trending</span>
                              )}
                              {p.isBestSeller && (
-                               <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[12px] font-extrabold uppercase tracking-widest border border-gold/30 shadow-sm">Elite</span>
+                               <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[12px] font-extrabold uppercase tracking-widest border border-gold/30 shadow-sm">Best Seller</span>
                              )}
                           </div>
                        </td>

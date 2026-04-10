@@ -19,7 +19,7 @@ import {
 import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
-import OrderRitualModal from "@/components/Admin/OrderRitualModal.tsx";
+import OrderDetailsModal from "@/components/Admin/OrderDetailsModal.tsx";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
 const AdminOrders = () => {
@@ -66,7 +66,6 @@ const AdminOrders = () => {
         }
         await fetchOrders();
         
-        // Refresh the selected order in the modal if it's the one we just updated
         if (selectedOrder && (selectedOrder._id === id || selectedOrder.id === id)) {
           const freshRes = await fetch(getApiUrl(`/api/orders/${id}`));
           const freshData = await freshRes.json();
@@ -88,8 +87,8 @@ const AdminOrders = () => {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "delivered": return isDark ? "text-gold-400 bg-gold-400/10 border-gold-400/20" : "text-gold-600 bg-gold-50 border-gold-100";
-      case "shipped": return isDark ? "text-gold-400 bg-gold-400/10 border-gold-400/20" : "text-gold-600 bg-gold-50 border-gold-100";
+      case "delivered": return isDark ? "text-emerald-400 bg-emerald-400/10 border-emerald-400/20" : "text-emerald-600 bg-emerald-50 border-emerald-100";
+      case "shipped": return isDark ? "text-sky-400 bg-sky-400/10 border-sky-400/20" : "text-sky-600 bg-sky-50 border-sky-100";
       case "cancelled": return isDark ? "text-rose-400 bg-rose-400/10 border-rose-400/20" : "text-rose-600 bg-rose-50 border-rose-100";
       case "processing": return isDark ? "text-gold bg-gold/10 border-gold/20" : "text-gold bg-gold/5 border-gold/20";
       default: return isDark ? "text-white/40 bg-white/5 border-white/10" : "text-charcoal/40 bg-charcoal/5 border-charcoal/10";
@@ -145,7 +144,7 @@ const AdminOrders = () => {
         </button>
       </div>
 
-      {/* Order Table Ritual */}
+      {/* Orders Table */}
       <div className={`backdrop-blur-3xl border rounded-3xl shadow-2xl transition-all duration-700 min-h-[600px] ${
         isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
@@ -155,7 +154,7 @@ const AdminOrders = () => {
                isDark ? "bg-white/[0.04] border-white/12 text-white/70" : "bg-charcoal/[0.04] border-charcoal/12 text-charcoal/90"
              }`}>
                 <tr>
-                   <th className="px-4 py-2">Reference</th>
+                   <th className="px-4 py-2">Order No.</th>
                     <th className="px-4 py-2">Customer</th>
                     <th className="px-4 py-2">Total Amount</th>
                     <th className="px-4 py-2">Status</th>
@@ -195,10 +194,10 @@ const AdminOrders = () => {
                              <div>
                                 <h4 className={`text-[15px] font-extrabold transition-colors group-hover/row:text-gold ${
                                   isDark ? "text-white" : "text-charcoal"
-                                }`}>{o.orderNumber}</h4>
+                               }`}>{o.orderNumber}</h4>
                                 <p className={`text-[12px] font-extrabold uppercase tracking-widest transition-colors ${
                                   isDark ? "text-white/60" : "text-charcoal/80"
-                                }`}>{o.createdAt}</p>
+                               }`}>{o.createdAt}</p>
                              </div>
                           </div>
                        </td>
@@ -209,7 +208,7 @@ const AdminOrders = () => {
                              }`}>{o.userMobile}</span>
                              <span className={`text-[13px] font-bold uppercase tracking-widest italic transition-colors ${
                                isDark ? "text-white/60" : "text-charcoal/80"
-                             }`}>{o.shippingAddress?.fullName || "Mysterious Seeker"}</span>
+                             }`}>{o.shippingAddress?.fullName || "Guest Customer"}</span>
                           </div>
                        </td>
                        <td className={`px-6 py-5 font-display text-xl font-bold italic transition-colors ${
@@ -255,7 +254,7 @@ const AdminOrders = () => {
 
         </div>
 
-        {/* Footer Ritual */}
+        {/* Footer */}
         <div className={`px-8 py-4 border-t flex items-center justify-between transition-colors duration-700 ${
           isDark ? "bg-white/[0.01] border-white/5" : "bg-charcoal/[0.01] border-charcoal/5"
         }`}>
@@ -272,7 +271,7 @@ const AdminOrders = () => {
            </div>
         </div>
       </div>
-      <OrderRitualModal 
+      <OrderDetailsModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         order={selectedOrder}

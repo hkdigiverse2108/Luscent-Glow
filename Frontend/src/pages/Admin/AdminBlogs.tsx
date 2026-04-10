@@ -53,7 +53,7 @@ const AdminBlogs = () => {
       if (settingsRes.ok) setSettings(await settingsRes.json());
       if (voicesRes.ok) setVoices(await voicesRes.json());
     } catch (error) {
-      toast.error("Failed to fetch journal data.");
+      toast.error("Failed to fetch blog data.");
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ const AdminBlogs = () => {
         body: JSON.stringify(settings)
       });
       if (response.ok) {
-        toast.success("Editorial settings synchronized.");
+        toast.success("Blog settings saved.");
       } else {
         toast.error("Failed to save settings.");
       }
@@ -84,17 +84,16 @@ const AdminBlogs = () => {
   };
 
   const handleDeletePost = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this story from the chronicles?")) return;
-    
+    if (!confirm("Are you sure you want to delete this post?")) return;
     try {
-      const response = await fetch(getApiUrl(`blogs/${id}`), {
+      const response = await fetch(getApiUrl(`blogs/posts/${id}`), {
         method: "DELETE"
       });
       if (response.ok) {
-        toast.success("Story removed.");
+        toast.success("Post deleted.");
         fetchData();
       } else {
-        toast.error("Failed to remove story.");
+        toast.error("Failed to delete post.");
       }
     } catch (error) {
       toast.error("Delete operation failed.");
@@ -102,17 +101,17 @@ const AdminBlogs = () => {
   };
 
   const handleDeleteVoice = async (id: string) => {
-    if (!confirm("Are you sure you want to burn this editorial authority?")) return;
+    if (!confirm("Are you sure you want to delete this author?")) return;
     
     try {
       const response = await fetch(getApiUrl(`blogs/editorial-voices/${id}`), {
         method: "DELETE"
       });
       if (response.ok) {
-        toast.success("Voice removed.");
+        toast.success("Author removed.");
         fetchData();
       } else {
-        toast.error("Failed to remove voice.");
+        toast.error("Failed to remove author.");
       }
     } catch (error) {
       toast.error("Delete operation failed.");
@@ -130,18 +129,18 @@ const AdminBlogs = () => {
   );
 
   if (loading || !settings) {
-    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Opening The Journal...</div>;
+    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Loading Blog Posts...</div>;
   }
 
   return (
     <div className="space-y-2 pb-4">
       <AdminHeader
-        title="Journal"
-        highlightedWord="Concierge"
-        subtitle="Editorial authority and chronicled narratives"
+        title="Blog"
+        highlightedWord="Management"
+        subtitle="Manage your posts and authors"
         isDark={isDark}
         action={{
-          label: activeTab === "posts" ? "Compose Story" : "Archive Voice",
+          label: activeTab === "posts" ? "Create Post" : "Add Author",
           onClick: () => {
             if (activeTab === "posts") { setSelectedPost(null); setIsModalOpen(true); }
             else { setSelectedVoice(null); setIsVoiceModalOpen(true); }
@@ -156,7 +155,7 @@ const AdminBlogs = () => {
               activeTab === "posts" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Story Chronicles
+            Blog Posts
           </button>
           <button 
             onClick={() => setActiveTab("voices")}
@@ -164,7 +163,7 @@ const AdminBlogs = () => {
               activeTab === "voices" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            Editorial Authority
+            Author Voices
           </button>
         </div>
       </AdminHeader>
@@ -174,7 +173,7 @@ const AdminBlogs = () => {
         <div className="xl:col-span-1 space-y-4">
           <div className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
              <h3 className="font-display text-xl font-bold mb-2 flex items-center gap-3 text-gold">
-               <Sparkles size={20} /> Editorial Branding
+               <Sparkles size={20} /> Blog Settings
              </h3>
              <div className="space-y-6">
                 <div className="space-y-2">
@@ -215,7 +214,7 @@ const AdminBlogs = () => {
                   disabled={isSettingsSaving}
                   className="w-full flex items-center justify-center gap-3 bg-gold/10 hover:bg-gold text-gold hover:text-charcoal py-4 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
                 >
-                  {isSettingsSaving ? "Saving..." : "Update Brand Finale"}
+                  {isSettingsSaving ? "Saving..." : "Save Blog Settings"}
                 </button>
              </div>
           </div>
@@ -227,7 +226,7 @@ const AdminBlogs = () => {
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/50" size={20} />
               <input 
                 type="text"
-                placeholder={activeTab === "posts" ? "Search chronicles by title or author..." : "Search editorial authorities..."}
+                placeholder={activeTab === "posts" ? "Search posts by title or author..." : "Search authors..."}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={`w-full pl-16 pr-8 py-4 rounded-2xl border transition-all font-body text-sm ${isDark ? "bg-white/5 border-white/10 focus:border-gold/30" : "bg-white border-charcoal/10 focus:border-gold shadow-lg"}`}
@@ -297,7 +296,7 @@ const AdminBlogs = () => {
                     </div>
                   ))}
                   {filteredPosts.length === 0 && (
-                    <div className="py-20 text-center opacity-30 italic">No stories match your current search ritual...</div>
+                    <div className="py-20 text-center opacity-30 italic">No posts found...</div>
                   )}
                </motion.div>
              ) : (
@@ -323,12 +322,14 @@ const AdminBlogs = () => {
                           <div className="flex-1 space-y-4">
                              <div className="flex items-center gap-4">
                                 <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-gold/10 text-gold rounded-full border border-gold/20">{voice.badge}</span>
-                                {voice.isActive && <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Currently Illuminating</span>}
+                                {voice.isActive && <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Active Author</span>}
                              </div>
                              <h4 className="font-display text-4xl font-bold italic">{voice.name}</h4>
-                             <div className="relative">
-                               <Quote className="absolute -left-6 -top-2 opacity-10 text-gold" size={32} />
-                               <p className="text-sm text-muted-foreground italic leading-relaxed line-clamp-3">"{voice.quote}"</p>
+                             <div className="relative z-10 flex items-center justify-between">
+                                <div>
+                                  <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold mb-1">Blog Insights</h5>
+                                  <p className={`text-xs font-semibold max-w-[220px] leading-relaxed opacity-60`}>Maintain regular updates to engage with your customers effectively.</p>
+                                </div>
                              </div>
                           </div>
 
@@ -350,7 +351,7 @@ const AdminBlogs = () => {
                     </div>
                   ))}
                   {filteredVoices.length === 0 && (
-                    <div className="py-20 text-center opacity-30 italic">No editorial authorities archived in the sanctum...</div>
+                    <div className="py-20 text-center opacity-30 italic">No authors found...</div>
                   )}
                </motion.div>
              )}
