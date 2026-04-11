@@ -43,6 +43,8 @@ const Footer = () => {
               links: [
                 { label: "About Us", path: "/about" },
                 { label: "Contact Us", path: "/contact" },
+                { label: "Track Order", path: "/track-order" },
+                { label: "Blogs", path: "/blogs" },
                 { label: "FAQ's", path: "/faq" }
               ]
             },
