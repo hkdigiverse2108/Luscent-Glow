@@ -13,7 +13,7 @@ interface Message {
 const WELCOME_MESSAGE: Message = {
   id: "welcome",
   role: "model",
-  content: "Welcome to Luscent Glow ✨ I'm Lumina, your personal Beauty Concierge. I'm here to help you discover the perfect skincare ritual, find your ideal products, and illuminate your radiance journey. How may I assist you today?",
+  content: "Welcome to Luscent Glow ✨ I'm Lumina, your personal Beauty Assistant. I'm here to help you discover the perfect skincare ritual, find your ideal products, and illuminate your radiance journey. How may I assist you today?",
   timestamp: new Date(),
 };
 
@@ -256,7 +256,7 @@ const LuminaChatBot = () => {
                 </div>
                 <div>
                   <h3 className="font-display text-sm font-bold text-white">Lumina</h3>
-                  <p className="text-[10px] font-body text-gold/70 uppercase tracking-widest">Beauty AI Concierge</p>
+                  <p className="text-[10px] font-body text-gold/70 uppercase tracking-widest">Beauty AI Assistant</p>
                 </div>
               </div>
 

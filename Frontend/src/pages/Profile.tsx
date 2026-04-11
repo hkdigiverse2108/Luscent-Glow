@@ -12,10 +12,10 @@ import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import { Link } from "react-router-dom";
 import LogoutConfirmation from "@/components/auth/LogoutConfirmation";
 
-type ProfileView = "details" | "orders" | "wishlist" | "payments" | "password" | "giftcards";
+type ProfileView = "details" | "orders" | "wishlist" | "password" | "giftcards";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
@@ -293,7 +293,6 @@ const Profile = () => {
                   { id: "orders", label: "Order History", icon: <ShoppingBag size={18} /> },
                   { id: "wishlist", label: "My Wishlist", icon: <Heart size={18} /> },
                   { id: "giftcards", label: "My Gift Cards", icon: <Gift size={18} /> },
-                  { id: "payments", label: "Payment Methods", icon: <CreditCard size={18} /> },
                   { id: "password", label: "Security Settings", icon: <Lock size={18} /> },
                 ].map((item) => (
                   <button
@@ -587,96 +586,7 @@ const Profile = () => {
                   </motion.div>
                 )}
 
-                {activeView === "payments" && (
-                  <motion.div
-                    key="payments"
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 lg:p-20 shadow-ethereal border border-white/50 relative overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                    
-                    <div className="relative space-y-12">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-3 text-gold">
-                            <CreditCard size={14} className="opacity-50" />
-                            <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Payment Methods</span>
-                          </div>
-                          <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Saved <span className="text-gold italic font-light">Cards</span></h3>
-                        </div>
-                        <button className="flex items-center gap-3 px-8 py-4 bg-gold/10 text-gold rounded-full hover:bg-gold hover:text-charcoal transition-all duration-500 text-[10px] font-body font-bold uppercase tracking-[0.2em] shadow-lg shadow-gold/5">
-                          <Plus size={16} /> Add New Card
-                        </button>
-                      </div>
 
-                      <div className="space-y-8">
-                        {/* Premium Card Mockup 1 */}
-                        <motion.div 
-                          whileHover={{ y: -10 }}
-                          className="relative group overflow-hidden"
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-charcoal via-charcoal to-[#1a1a1a] rounded-[2rem] md:rounded-[2.5rem] transform transition-transform group-hover:scale-[1.03] duration-700 shadow-2xl" />
-                          <div className="relative p-10 md:p-12 flex flex-col justify-between h-[280px] md:h-[320px] text-white">
-                            <div className="flex justify-between items-start">
-                              <div className="w-16 h-12 bg-white/5 rounded-xl backdrop-blur-md flex items-center justify-center border border-white/10">
-                                <span className="font-display text-sm italic font-medium">LCSNT</span>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-[8px] uppercase tracking-[0.4em] text-gold opacity-60">Status</p>
-                                <p className="text-xs font-display italic">Premium Member</p>
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-6">
-                              <div className="space-y-2">
-                                <p className="text-[9px] uppercase tracking-[0.5em] text-white/30 font-body">Primary Payment Card</p>
-                                <p className="font-display text-2xl md:text-3xl tracking-[0.2em] font-light">•••• •••• •••• 4242</p>
-                              </div>
-                              <div className="flex gap-16 pt-4 border-t border-white/5">
-                                <div>
-                                  <p className="text-[8px] uppercase tracking-widest text-white/30">Validity</p>
-                                  <p className="text-xs font-body font-medium tracking-widest">12 / 26</p>
-                                </div>
-                                <div>
-                                  <p className="text-[8px] uppercase tracking-widest text-white/30">Holder</p>
-                                  <p className="text-xs font-body font-medium tracking-widest capitalize">{user.fullName}</p>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Decorative element */}
-                            <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-gold/10 rounded-full blur-[80px]" />
-                          </div>
-                        </motion.div>
-
-                        {/* Mockup 2 - UPI */}
-                        <div className="p-10 rounded-[2.5rem] border border-gold/5 bg-white shadow-xl shadow-gold/5 flex flex-col sm:flex-row justify-between items-center group hover:border-gold/30 transition-all duration-700 gap-8">
-                          <div className="flex items-center gap-8">
-                            <div className="w-16 h-16 bg-gold/5 rounded-[1.5rem] flex items-center justify-center text-charcoal transition-transform duration-500 group-hover:scale-110">
-                              <ShieldCheck size={28} className="text-gold" />
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-body font-bold text-charcoal/40 uppercase tracking-[0.3em] mb-1">Saved UPI</p>
-                              <p className="text-lg font-display font-medium text-charcoal tracking-tight">{user.mobileNumber}@upi</p>
-                            </div>
-                          </div>
-                          <button className="px-8 py-3 rounded-full text-[10px] font-body font-bold text-rose-brand border border-rose-brand/10 hover:bg-rose-brand hover:text-white transition-all duration-500 uppercase tracking-widest">Remove Card</button>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-12 p-10 bg-[#fdfcfb] rounded-[2.5rem] border border-gold/5 flex gap-6 items-start relative overflow-hidden group">
-                        <div className="p-3 bg-blue-50 rounded-xl text-blue-500 group-hover:scale-110 transition-transform">
-                          <AlertCircle size={20} />
-                        </div>
-                        <p className="text-[11px] text-muted-foreground/80 font-body leading-loose tracking-wide">
-                          Your payment details are protected within our <span className="text-charcoal font-bold">Secure Payment System</span>. We never retain full card details or CVVs on our servers, ensuring your details remain safe and secure.
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
 
                 {activeView === "giftcards" && (
                   <motion.div
@@ -752,7 +662,6 @@ const Profile = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
 
       <LogoutConfirmation 
         isOpen={isLogoutDialogOpen}

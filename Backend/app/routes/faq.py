@@ -12,7 +12,7 @@ async def get_faq_settings():
     if not settings:
         # Fallback if no settings exist in DB
         return {
-            "heroBadge": "Concierge Services",
+            "heroBadge": "Support Services",
             "heroTitle": "How can we assist you?",
             "heroDescription": "Explore our curated guide to the most frequent inquiries regarding your journey to radiant skin.",
             "categories": [],

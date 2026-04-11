@@ -4,7 +4,6 @@ import { Sparkles, Calendar, Clock, User, ArrowRight, Mail, Quote } from "lucide
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BlogCard from "@/components/BlogCard";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { Link } from "react-router-dom";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
@@ -198,7 +197,7 @@ const Blogs = () => {
                 >
                   {settings.heroTitle.split(' Chronicles').length > 1 ? (
                     <>
-                      {settings.heroTitle.split(' Chronicles')[0]} <span className="text-gradient-gold italic font-light">Concierge</span>
+                      {settings.heroTitle.split(' Chronicles')[0]}
                     </>
                   ) : settings.heroTitle}
                 </motion.h2>
@@ -365,7 +364,6 @@ const Blogs = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };

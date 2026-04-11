@@ -422,7 +422,7 @@ class BulkOrderSettingsModel(BaseModel):
     heroTitle: str = Field(default="Elevate Your Corporate Gifting.")
     heroDescription: str = Field(default="Transform business relationships into lasting impressions.")
     heroImage: str = Field(default="/assets/corporate-gifting.png")
-    heroBadge: str = Field(default="Corporate Concierge")
+    heroBadge: str = Field(default="Corporate Support")
     features: List[dict] = Field(default_factory=list) # {icon, title, desc}
     stats: List[dict] = Field(default_factory=list) # {icon, label}
     quantities: List[str] = Field(default_factory=list) # ["10-50", "50-100", ...]
@@ -465,7 +465,7 @@ class ContactSettingsModel(BaseModel):
     Model for the dynamic content of the Contact Us landing page.
     """
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    heroBadge: str = Field(default="The Glow Concierge")
+    heroBadge: str = Field(default="Glow Support")
     heroTitle: str = Field(default="Your Radiance, Our Priority.")
     heroDescription: str = Field(default="Whether you seek personalized product curation or require immediate support, our artisan team is here to illuminate your journey.")
     formTitle: str = Field(default="Initiate a Conversation")
@@ -486,13 +486,13 @@ class FAQSettingsModel(BaseModel):
     Model for the dynamic content of the FAQ landing page.
     """
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    heroBadge: str = Field(default="Concierge Services")
+    heroBadge: str = Field(default="Support Services")
     heroTitle: str = Field(default="How can we assist you?")
     heroDescription: str = Field(default="Explore our curated guide to the most frequent inquiries regarding your journey to radiant skin.")
     categories: List[dict] = Field(default_factory=list) # {id, icon, title, questions: [{id, question, answer}]}
     supportTitle: str = Field(default="Still have questions?")
-    supportDescription: str = Field(default="Our Glow Concierge team is here to assist you with any personalized requests.")
-    supportButtonText: str = Field(default="Contact Concierge")
+    supportDescription: str = Field(default="Our Support team is here to assist you with any personalized requests.")
+    supportButtonText: str = Field(default="Contact Support")
     supportButtonLink: str = Field(default="/contact")
     seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None

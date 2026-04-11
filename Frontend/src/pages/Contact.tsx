@@ -4,7 +4,6 @@ import { MessageSquare, Mail, MapPin, Send, CheckCircle2, ChevronDown, Phone, Za
 import DynamicIcon from "@/components/DynamicIcon";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 
 const glowTexture = "/assets/contact/glow-texture.png";
@@ -105,7 +104,7 @@ const Contact = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="font-display text-xs uppercase tracking-[0.3em] text-gold animate-pulse">
-            Establishing Concierge Ritual...
+            Connecting to Support...
         </div>
       </div>
     );
@@ -136,7 +135,7 @@ const Contact = () => {
                    <>
                       {config.heroTitle.split(' Priority. ')[0]}<br />Our <span className="italic font-light text-gold/80">Priority.</span>
                    </>
-                ) : config.heroTitle} <span className="text-gold italic font-light">Concierge</span>
+                ) : config.heroTitle}
               </h1>
               <p className="text-sm md:text-lg font-body text-white/60 leading-relaxed max-w-xl">
                 {config.heroDescription}
@@ -150,7 +149,7 @@ const Contact = () => {
           <div className="container mx-auto px-4">
             <div className="grid lg:grid-cols-2 gap-24 items-start">
               
-              {/* Interactive Concierge Form */}
+              {/* Interactive Support Form */}
               <motion.div 
                 variants={containerVariants}
                 initial="hidden"
@@ -341,7 +340,6 @@ const Contact = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };

@@ -146,7 +146,7 @@ const PolicyLayout: React.FC<PolicyLayoutProps> = ({
             
             <div className="mt-20 pt-12 border-t border-gold/10 text-center">
               <p className="font-body text-sm text-muted-foreground italic">
-                Need more information? Our <Link to="/contact" className="text-gold font-bold hover:underline">Glow Concierge</Link> is here to help.
+                Need more information? Our <Link to="/contact" className="text-gold font-bold hover:underline">Customer Service</Link> is here to help.
               </p>
             </div>
           </div>

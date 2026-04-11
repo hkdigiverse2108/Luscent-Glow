@@ -11,7 +11,6 @@ import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { useNavigate } from "react-router-dom";
 import ReviewModal from "@/components/ReviewModal";
 import OrderDetailsModal from "@/components/OrderDetailsModal";
@@ -309,11 +308,8 @@ const Orders = () => {
                         <button 
                           onClick={() => {
                             const hasRealTracking = order.trackingNumber && order.trackingNumber.toLowerCase() !== 'processing' && order.trackingNumber.trim() !== '';
-                            if (order.trackingUrl || hasRealTracking) {
-                              window.open(order.trackingUrl || `https://shiprocket.co/tracking/${order.trackingNumber}`, '_blank');
-                            } else {
-                              navigate(`/track-order?orderId=${order.orderNumber}&auto=true`);
-                            }
+                            const trackingId = hasRealTracking ? order.trackingNumber : order.orderNumber.replace('#', '');
+                            window.open(order.trackingUrl || `https://shiprocket.co/tracking/${trackingId}`, '_blank');
                           }}
                           className={`w-full py-3 text-xs font-bold rounded-xl transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2 ${
                             order.status === 'Cancelled'
@@ -386,7 +382,6 @@ const Orders = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
 
       <ReviewModal
         isOpen={isReviewModalOpen}

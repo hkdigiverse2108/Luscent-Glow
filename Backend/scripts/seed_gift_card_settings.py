@@ -33,7 +33,7 @@ async def seed_gift_card_settings():
             { "q": "How will the recipient receive the card?", "a": "Instantly upon checkout, we will generate a secure unique code and send a beautiful digital certificate to the email address provided in the recipient field." },
             { "q": "Can I use multiple gift cards on one order?", "a": "Absolutely. At checkout, you can stack multiple gift codes to cover your ritual's total value." },
             { "q": "Does the gift card cover shipping fees?", "a": "Yes, the balance on a Luscent Glow gift card can be applied to the entire order total, including taxes and delivery charges." },
-            { "q": "What happens if I lose my gift card email?", "a": "Do not worry. You can reach out to our Glow Concierge with your order ID, and we will resend the secure certificate to the original sender." }
+            { "q": "What happens if I lose my gift card email?", "a": "Do not worry. You can reach out to our Support Team with your order ID, and we will resend the secure certificate to the original sender." }
         ],
         "updatedAt": datetime.utcnow().isoformat()
     }

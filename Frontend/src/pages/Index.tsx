@@ -8,8 +8,6 @@ import NewArrivals from "@/components/home/NewArrivals";
 import BrandStory from "@/components/home/BrandStory";
 import DiscountBanner from "@/components/home/DiscountBanner";
 import InstagramFeed from "@/components/home/InstagramFeed";
-import WhatsAppButton from "@/components/WhatsAppButton";
-import LuminaChatBot from "@/components/LuminaChatBot";
 import { getApiUrl } from "@/lib/api";
 import { Loader2 } from "lucide-react";
 import SEO from "@/components/SEO";
@@ -64,8 +62,6 @@ const Index = () => {
         <InstagramFeed settings={settings?.instagram} />
       </main>
       <Footer />
-      <WhatsAppButton />
-      <LuminaChatBot />
     </div>
   );
 };

@@ -33,7 +33,6 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { load } from '@cashfreepayments/cashfree-js';
 
 const NYKAA_PINK = "hsl(var(--nykaa-pink))";
@@ -677,7 +676,6 @@ const Checkout = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };
