@@ -43,7 +43,7 @@ const AdminHome = () => {
   const fetchConfig = async () => {
     try {
       const [hResponse, cResponse, bResponse] = await Promise.all([
-        fetch(getApiUrl("/home/settings")),
+        fetch(getApiUrl("/api/home/settings")),
         fetch(getApiUrl("/api/categories/")),
         fetch(getApiUrl("/api/branding/"))
       ]);
@@ -135,7 +135,7 @@ const AdminHome = () => {
   const handleSaveConfig = async () => {
     setIsConfigSaving(true);
     try {
-      const response = await fetch(getApiUrl("/home/settings"), {
+      const response = await fetch(getApiUrl("/api/home/settings"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config)

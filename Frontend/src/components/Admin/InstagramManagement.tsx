@@ -12,23 +12,15 @@ const InstagramManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<any>(null);
-  const [useCustomFeed, setUseCustomFeed] = useState(false);
 
-  // Fetch both the settings and the posts
+  // Fetch all Instagram posts (admin endpoint)
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch Home Settings to get the 'useCustomFeed' flag
-      const settingsRes = await fetch(getApiUrl("/api/home/settings"));
-      if (settingsRes.ok) {
-        const data = await settingsRes.json();
-        setUseCustomFeed(data.instagram?.useCustomFeed || false);
-      }
-
-      // 2. Fetch all Instagram posts (admin endpoint)
-      const postsRes = await fetch(getApiUrl("/api/instagram/admin"));
+      const postsRes = await fetch(getApiUrl("/api/instagram/admin/"));
       if (postsRes.ok) {
-        setPosts(await postsRes.json());
+        const data = await postsRes.json();
+        setPosts(data);
       }
     } catch (err) {
       toast.error("Failed to sync with social database.");
@@ -41,39 +33,11 @@ const InstagramManagement = () => {
     fetchData();
   }, []);
 
-  const handleToggleFeedMode = async () => {
-    const newMode = !useCustomFeed;
-    try {
-      // We need to update the HomeSettings for the instagram block
-      const settingsRes = await fetch(getApiUrl("/api/home/settings"));
-      if (settingsRes.ok) {
-        const currentData = await settingsRes.json();
-        const updatedInstagram = {
-          ...currentData.instagram,
-          useCustomFeed: newMode
-        };
-
-        const updateRes = await fetch(getApiUrl("/api/home/settings"), {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ instagram: updatedInstagram }),
-        });
-
-        if (updateRes.ok) {
-          setUseCustomFeed(newMode);
-          toast.success(newMode ? "Custom Discovery Grid enabled." : "Automated Instagram Widget restored.");
-        }
-      }
-    } catch (err) {
-      toast.error("Failed to switch discovery modes.");
-    }
-  };
-
   const handleDelete = async (id: string) => {
     if (!window.confirm("Banish this entry from the sanctuary forever?")) return;
 
     try {
-      const response = await fetch(getApiUrl(`/api/instagram/${id}`), {
+      const response = await fetch(getApiUrl(`/api/instagram/${id}/`), {
         method: "DELETE",
       });
 
@@ -88,45 +52,18 @@ const InstagramManagement = () => {
 
   return (
     <div className="space-y-12">
-      {/* Configuration Hub */}
-      <div className={`p-8 rounded-[2.5rem] border ${isDark ? 'bg-white/5 border-white/10' : 'bg-charcoal/5 border-charcoal/5'} backdrop-blur-xl`}>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex items-center gap-6">
-            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${useCustomFeed ? 'bg-gold/20' : 'bg-muted/10'}`}>
-              <Instagram className={useCustomFeed ? 'text-gold' : 'text-muted-foreground'} size={32} />
-            </div>
-            <div>
-              <h3 className={`text-2xl font-display font-bold ${isDark ? 'text-white' : 'text-charcoal'}`}>DISCOVERY MODE</h3>
-              <p className="text-sm text-muted-foreground font-body">Choose between automated LightWidget or custom manual curation.</p>
-            </div>
-          </div>
-          
-          <button
-            onClick={handleToggleFeedMode}
-            className={`flex items-center gap-4 px-8 py-4 rounded-2xl font-body font-bold transition-all border-2 ${
-              useCustomFeed 
-                ? 'border-gold bg-gold/5 text-gold' 
-                : 'border-white/10 bg-white/5 text-muted-foreground'
-            }`}
-          >
-            {useCustomFeed ? <ToggleRight size={24} /> : <ToggleLeft size={24} />}
-            {useCustomFeed ? 'MANUAL CURATION ACTIVE' : 'LIGHTWIDGET ACTIVE'}
-          </button>
-        </div>
-      </div>
-
       {/* Gallery Title & Action */}
       <div className="flex flex-col md:flex-row items-end justify-between gap-6">
         <div>
-          <h2 className={`text-4xl font-display font-bold ${isDark ? 'text-white' : 'text-charcoal'}`}>CUSTOM GALLERY</h2>
-          <p className="text-muted-foreground font-body mt-2">Hand-pick the visual stories that define your brand ethos.</p>
+          <h2 className={`text-4xl font-display font-bold ${isDark ? 'text-white' : 'text-charcoal'}`}>CURATED DISCOVERY</h2>
+          <p className="text-muted-foreground font-body mt-2">Manage your hand-picked visual stories that define your brand ethos.</p>
         </div>
         <button
           onClick={() => { setSelectedPost(null); setIsModalOpen(true); }}
           className="flex items-center gap-3 px-8 py-4 bg-gold rounded-2xl text-white font-body font-bold tracking-widest hover:bg-gold/90 transition-all shadow-lg hover:shadow-gold/20"
         >
           <Plus size={20} />
-          ADD ENTRY
+          ADD DISCOVERY ENTRY
         </button>
       </div>
 
@@ -204,16 +141,6 @@ const InstagramManagement = () => {
               </motion.div>
             ))}
           </AnimatePresence>
-        </div>
-      )}
-
-      {/* Manual Curation Disclaimer */}
-      {!useCustomFeed && (
-        <div className={`p-6 rounded-3xl border ${isDark ? 'bg-gold/5 border-gold/20' : 'bg-gold/10 border-gold/20'} flex items-center gap-4`}>
-          <AlertCircle className="text-gold shrink-0" size={24} />
-          <p className={`text-sm font-body ${isDark ? 'text-gold/80' : 'text-gold/90'}`}>
-            Manual entries are currently hidden because <strong>LightWidget Mode</strong> is active. Enable "Manual Curation" above to switch to this custom gallery on the homepage.
-          </p>
         </div>
       )}
 
