@@ -23,7 +23,7 @@ const HeroCarousel = ({ slides }: HeroCarouselProps) => {
   const slide = activeSlides[current];
 
   return (
-    <section className="relative h-[90vh] md:h-screen min-h-[600px] md:min-h-[700px] overflow-hidden bg-charcoal">
+    <section className="relative h-[80vh] sm:h-[90vh] md:h-screen min-h-[500px] md:min-h-[700px] overflow-hidden bg-charcoal">
       <AnimatePresence mode="wait">
         <motion.div
           key={current}
@@ -85,7 +85,7 @@ const HeroCarousel = ({ slides }: HeroCarouselProps) => {
                     hidden: { opacity: 0, y: 30 },
                     visible: { opacity: 1, y: 0 }
                   }}
-                  className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.1] mb-6 drop-shadow-2xl"
+                  className="font-display text-3xl xs:text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-[1.1] mb-6 drop-shadow-2xl"
                 >
                   {slide.title}
                 </motion.h1>

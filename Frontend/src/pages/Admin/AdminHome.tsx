@@ -183,7 +183,7 @@ const AdminHome = () => {
           disabled: isConfigSaving
         }}
       >
-        <div className="flex items-center gap-6 mt-6 border-b border-white/5">
+        <div className="flex items-center gap-6 mt-6 border-b border-white/5 overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.id}

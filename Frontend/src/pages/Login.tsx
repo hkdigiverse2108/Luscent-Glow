@@ -246,7 +246,7 @@ const Login = () => {
           </Link>
         </div>
 
-        <div className="w-full max-w-md bg-white/[0.02] border border-white/5 p-8 lg:p-12 rounded-3xl backdrop-blur-xl shadow-2xl">
+        <div className="w-full max-w-md bg-white/[0.02] border border-white/5 border-white/5 p-5 sm:p-8 lg:p-12 rounded-3xl backdrop-blur-xl shadow-2xl">
           <AnimatePresence mode="wait">
             {/* --- SIGN IN FLOW --- */}
             {view === "login" && (

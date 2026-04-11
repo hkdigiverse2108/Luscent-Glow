@@ -41,7 +41,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gold/10 pb-4">
       <div className="space-y-1">
-        <h2 className={`font-body text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${
+        <h2 className={`font-body text-2xl sm:text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${
           isDark ? "text-white" : "text-charcoal"
         }`}>
           {title} {highlightedWord && <span className="text-gold">{highlightedWord}</span>}

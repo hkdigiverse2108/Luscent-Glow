@@ -187,7 +187,7 @@ const Header = () => {
             </button>
 
             {/* Logo and Shop by Category */}
-            <div className="flex items-center gap-3 md:gap-4 lg:gap-14">
+            <div className="flex items-center gap-2 sm:gap-4 lg:gap-14">
               <div className="flex items-center gap-2">
                 <Link to="/" className="flex items-center transform active:scale-95 transition-transform group">
                   {branding.useImage && branding.logoImage ? (
@@ -197,7 +197,7 @@ const Header = () => {
                       className="h-8 md:h-10 lg:h-12 w-auto object-contain"
                     />
                   ) : (
-                    <h1 className="font-display text-[17px] xs:text-xl md:text-2xl lg:text-3xl font-semibold tracking-wide text-foreground whitespace-nowrap">
+                    <h1 className="font-display text-[15px] xs:text-lg md:text-2xl lg:text-3xl font-semibold tracking-wide text-foreground whitespace-nowrap">
                       {branding.logoText.split(' ')[0]} <span className="text-gold">{branding.logoText.split(' ').slice(1).join(' ')}</span>
                     </h1>
                   )}
@@ -275,7 +275,7 @@ const Header = () => {
             </div>
 
             {/* Right actions */}
-            <div className="flex items-center gap-0.5 xs:gap-1.5 md:gap-2">
+            <div className="flex items-center gap-0">
               <div className="relative group flex flex-col items-center">
                 <button
                   onClick={() => setSearchOpen(!searchOpen)}
