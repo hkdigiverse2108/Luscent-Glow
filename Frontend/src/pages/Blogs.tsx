@@ -186,7 +186,7 @@ const Blogs = () => {
                   className="flex items-center gap-3 text-gold mb-4"
                 >
                   <div className="h-[1px] w-8 bg-gold" />
-                  <span className="text-[10px] font-body font-bold uppercase tracking-[0.25em]">{settings.heroBadge}</span>
+                  <span className="text-[10px] font-body font-bold uppercase tracking-[0.25em]">{settings?.heroBadge || "Journal"}</span>
                 </motion.div>
                 <motion.h2 
                   initial={{ opacity: 0, y: 20 }}
@@ -195,11 +195,11 @@ const Blogs = () => {
                   transition={{ delay: 0.1 }}
                   className="font-display text-3xl md:text-4xl lg:text-5xl font-bold text-foreground"
                 >
-                  {settings.heroTitle.split(' Chronicles').length > 1 ? (
+                  {(settings?.heroTitle || "").split(' Chronicles').length > 1 ? (
                     <>
-                      {settings.heroTitle.split(' Chronicles')[0]}
+                      {(settings?.heroTitle || "").split(' Chronicles')[0]}
                     </>
-                  ) : settings.heroTitle}
+                  ) : (settings?.heroTitle || "Glow Haven Chronicles")}
                 </motion.h2>
               </div>
             </div>

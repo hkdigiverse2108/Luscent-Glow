@@ -75,8 +75,8 @@ const AdminProducts = () => {
   };
 
   const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
+    (p.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.category || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

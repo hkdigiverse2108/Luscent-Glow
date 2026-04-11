@@ -20,9 +20,10 @@ import {
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
-import BlogPostModal from "../../components/Admin/BlogPostModal";
-import EditorialVoiceModal from "../../components/Admin/EditorialVoiceModal";
+import BlogPostModal from "../../components/Admin/BlogPostModal.tsx";
+import EditorialVoiceModal from "../../components/Admin/EditorialVoiceModal.tsx";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
+import SEOForm from "../../components/Admin/SEOForm.tsx";
 
 const AdminBlogs = () => {
   const { isDark } = useAdminTheme();
@@ -32,7 +33,7 @@ const AdminBlogs = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSettingsSaving, setIsSettingsSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"posts" | "voices">("posts");
+  const [activeTab, setActiveTab] = useState<"posts" | "voices" | "seo">("posts");
   
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,9 +50,17 @@ const AdminBlogs = () => {
         fetch(getApiUrl("blogs/editorial-voices"))
       ]);
       
-      if (postsRes.ok) setPosts(await postsRes.json());
-      if (settingsRes.ok) setSettings(await settingsRes.json());
-      if (voicesRes.ok) setVoices(await voicesRes.json());
+      if (postsRes.ok) {
+        const postsData = await postsRes.json();
+        setPosts(Array.isArray(postsData) ? postsData : []);
+      }
+      if (settingsRes.ok) {
+        setSettings(await settingsRes.json());
+      }
+      if (voicesRes.ok) {
+        const voicesData = await voicesRes.json();
+        setVoices(Array.isArray(voicesData) ? voicesData : []);
+      }
     } catch (error) {
       toast.error("Failed to fetch blog data.");
     } finally {
@@ -81,6 +90,10 @@ const AdminBlogs = () => {
     } finally {
       setIsSettingsSaving(false);
     }
+  };
+
+  const handleUpdateSeo = (newSeo: any) => {
+    setSettings({ ...settings, seo: newSeo });
   };
 
   const handleDeletePost = async (id: string) => {
@@ -118,26 +131,39 @@ const AdminBlogs = () => {
     }
   };
 
-  const filteredPosts = posts.filter(post => 
-    post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    post.author.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredPosts = (Array.isArray(posts) ? posts : []).filter(post => 
+    post && (
+      (post.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (post.author || "").toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
+  
+  const filteredVoices = (Array.isArray(voices) ? voices : []).filter(voice => 
+    voice && (
+      (voice.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (voice.insights || "").toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
-  const filteredVoices = voices.filter(voice => 
-    voice.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (voice.insights || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  if (loading || !settings) {
-    return <div className="py-10 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Loading Blog Posts...</div>;
+  if (loading) {
+    return <div className="py-20 text-center font-display text-xl animate-pulse text-gold uppercase tracking-[0.3em]">Loading Journal Records...</div>;
   }
+
+  // Fallback for settings if fetch failed but loading finished
+  const safeSettings = settings || {
+    heroBadge: "The Journal",
+    heroTitle: "Glow Haven Chronicles",
+    finaleTitle: "Stay Inspired",
+    finaleSubtitle: "Ritual of Radiance",
+    seo: { title: "", description: "", keywords: "" }
+  };
 
   return (
     <div className="space-y-2 pb-4">
       <AdminHeader
-        title="Blog"
-        highlightedWord="Management"
-        subtitle="Manage your posts and authors"
+        title="Journal"
+        highlightedWord="Sanctuary"
+        subtitle="Curate your stories and editorial voices"
         isDark={isDark}
         action={{
           label: activeTab === "posts" ? "Create Post" : "Add Author",
@@ -165,6 +191,14 @@ const AdminBlogs = () => {
           >
             Author Voices
           </button>
+          <button 
+            onClick={() => setActiveTab("seo")}
+            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "seo" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            SEO Settings
+          </button>
         </div>
       </AdminHeader>
 
@@ -179,32 +213,32 @@ const AdminBlogs = () => {
                 <div className="space-y-2">
                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Hero Badge</label>
                    <input 
-                     value={settings.heroBadge}
-                     onChange={(e) => setSettings({ ...settings, heroBadge: e.target.value })}
+                     value={safeSettings.heroBadge}
+                     onChange={(e) => setSettings({ ...safeSettings, heroBadge: e.target.value })}
                      className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
                    />
                 </div>
                 <div className="space-y-2">
                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Hero Title</label>
                    <input 
-                     value={settings.heroTitle}
-                     onChange={(e) => setSettings({ ...settings, heroTitle: e.target.value })}
+                     value={safeSettings.heroTitle}
+                     onChange={(e) => setSettings({ ...safeSettings, heroTitle: e.target.value })}
                      className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
                    />
                 </div>
                 <div className="space-y-2">
                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Finale Title</label>
                    <input 
-                     value={settings.finaleTitle}
-                     onChange={(e) => setSettings({ ...settings, finaleTitle: e.target.value })}
+                     value={safeSettings.finaleTitle}
+                     onChange={(e) => setSettings({ ...safeSettings, finaleTitle: e.target.value })}
                      className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
                    />
                 </div>
                 <div className="space-y-2">
                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Finale Subtitle</label>
                    <input 
-                     value={settings.finaleSubtitle}
-                     onChange={(e) => setSettings({ ...settings, finaleSubtitle: e.target.value })}
+                     value={safeSettings.finaleSubtitle}
+                     onChange={(e) => setSettings({ ...safeSettings, finaleSubtitle: e.target.value })}
                      className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
                    />
                 </div>
@@ -233,15 +267,15 @@ const AdminBlogs = () => {
               />
            </div>
 
-           <AnimatePresence mode="wait">
+            <AnimatePresence mode="wait">
              {activeTab === "posts" ? (
-               <motion.div 
-                 key="posts"
-                 initial={{ opacity: 0, y: 10 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 exit={{ opacity: 0, y: -10 }}
-                 className="grid gap-6 min-h-[600px]"
-               >
+                <motion.div 
+                  key="posts"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="grid gap-6 min-h-[600px]"
+                >
                   {filteredPosts.map((post) => (
                     <div key={post._id || post.id} className={`group p-4 rounded-3xl border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-gold/30" : "bg-white border-charcoal/10 shadow-lg hover:border-gold/50"}`}>
                        <div className="flex flex-col lg:flex-row gap-6 items-center">
@@ -298,69 +332,94 @@ const AdminBlogs = () => {
                   {filteredPosts.length === 0 && (
                     <div className="py-20 text-center opacity-30 italic">No posts found...</div>
                   )}
-               </motion.div>
-             ) : (
-               <motion.div 
-                 key="voices"
-                 initial={{ opacity: 0, y: 10 }}
-                 animate={{ opacity: 1, y: 0 }}
-                 exit={{ opacity: 0, y: -10 }}
-                 className="grid gap-6 min-h-[600px]"
-               >
-                   {filteredVoices.map((voice) => {
-                     const initials = voice.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
-                     return (
-                      <div key={voice._id || voice.id} className={`group p-6 rounded-[2.5rem] border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-gold/30" : "bg-white border-charcoal/10 shadow-lg hover:border-gold/50"}`}>
-                        <div className="flex flex-col lg:flex-row gap-8 items-center">
-                           <div className="w-32 h-32 rounded-full overflow-hidden shrink-0 border-2 border-gold/20 shadow-xl relative bg-secondary/30 flex items-center justify-center">
-                              {voice.image ? (
-                                <img src={getAssetUrl(voice.image)} alt={voice.name} className="w-full h-full object-cover" />
-                              ) : (
-                                <span className="font-display text-4xl font-bold text-gold/30 uppercase tracking-widest">{initials}</span>
-                              )}
-                              {voice.isActive && (
-                                <div className="absolute -bottom-1 -right-1 bg-gold text-charcoal p-1 rounded-full border-2 border-[#121212]">
-                                  <CheckCircle2 size={14} />
-                                </div>
-                              )}
+                </motion.div>
+             ) : activeTab === "voices" ? (
+                <motion.div 
+                  key="voices"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="grid gap-6 min-h-[600px]"
+                >
+                    {filteredVoices.map((voice) => {
+                      const initials = (voice.name || "A V").split(' ').map((n: string) => n[0]).join('').slice(0, 2);
+                      return (
+                       <div key={voice._id || voice.id} className={`group p-6 rounded-[2.5rem] border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-gold/30" : "bg-white border-charcoal/10 shadow-lg hover:border-gold/50"}`}>
+                         <div className="flex flex-col lg:flex-row gap-8 items-center">
+                            <div className="w-32 h-32 rounded-full overflow-hidden shrink-0 border-2 border-gold/20 shadow-xl relative bg-secondary/30 flex items-center justify-center">
+                               {voice.image ? (
+                                 <img src={getAssetUrl(voice.image)} alt={voice.name} className="w-full h-full object-cover" />
+                               ) : (
+                                 <span className="font-display text-4xl font-bold text-gold/30 uppercase tracking-widest">{initials}</span>
+                               )}
+                               {voice.isActive && (
+                                 <div className="absolute -bottom-1 -right-1 bg-gold text-charcoal p-1 rounded-full border-2 border-[#121212]">
+                                   <CheckCircle2 size={14} />
+                                 </div>
+                               )}
+                            </div>
+                           
+                           <div className="flex-1 space-y-4">
+                              <div className="flex items-center gap-4">
+                                 <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-gold/10 text-gold rounded-full border border-gold/20">{voice.badge}</span>
+                                 {voice.isActive && <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Active Author</span>}
+                              </div>
+                              <h4 className="font-display text-4xl font-bold italic">{voice.name}</h4>
+                              <div className="relative z-10 flex items-center justify-between">
+                                 <div>
+                                   <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold mb-1">Blog Insights</h5>
+                                   <p className={`text-xs font-semibold max-w-sm leading-relaxed opacity-60 line-clamp-2 italic`}>{voice.insights}</p>
+                                 </div>
+                              </div>
                            </div>
-                          
-                          <div className="flex-1 space-y-4">
-                             <div className="flex items-center gap-4">
-                                <span className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-gold/10 text-gold rounded-full border border-gold/20">{voice.badge}</span>
-                                {voice.isActive && <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Active Author</span>}
-                             </div>
-                             <h4 className="font-display text-4xl font-bold italic">{voice.name}</h4>
-                             <div className="relative z-10 flex items-center justify-between">
-                                <div>
-                                  <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold mb-1">Blog Insights</h5>
-                                  <p className={`text-xs font-semibold max-w-sm leading-relaxed opacity-60 line-clamp-2 italic`}>{voice.insights}</p>
-                                </div>
-                             </div>
-                          </div>
 
-                          <div className="flex lg:flex-col gap-3">
-                             <button 
-                               onClick={() => { setSelectedVoice(voice); setIsVoiceModalOpen(true); }}
-                               className="p-3 rounded-2xl bg-gold/10 text-gold hover:bg-gold hover:text-charcoal transition-all"
-                             >
-                                <Edit2 size={18} />
-                             </button>
-                             <button 
-                               onClick={() => handleDeleteVoice(voice._id || voice.id)}
-                               className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
-                             >
-                                <Trash2 size={18} />
-                             </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {filteredVoices.length === 0 && (
-                    <div className="py-20 text-center opacity-30 italic">No authors found...</div>
-                  )}
-               </motion.div>
+                           <div className="flex lg:flex-col gap-3">
+                              <button 
+                                onClick={() => { setSelectedVoice(voice); setIsVoiceModalOpen(true); }}
+                                className="p-3 rounded-2xl bg-gold/10 text-gold hover:bg-gold hover:text-charcoal transition-all"
+                              >
+                                 <Edit2 size={18} />
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteVoice(voice._id || voice.id)}
+                                className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+                              >
+                                 <Trash2 size={18} />
+                              </button>
+                           </div>
+                         </div>
+                       </div>
+                     );
+                   })}
+                   {filteredVoices.length === 0 && (
+                     <div className="py-20 text-center opacity-30 italic">No authors found...</div>
+                   )}
+                </motion.div>
+             ) : (
+                <motion.div
+                  key="seo"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-8"
+                >
+                  <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
+                    <SEOForm 
+                      seo={safeSettings.seo || { title: "", description: "", keywords: "" }} 
+                      onChange={handleUpdateSeo} 
+                      isDark={isDark} 
+                    />
+                    <div className="mt-10 pt-8 border-t border-gold/10">
+                      <button 
+                        onClick={handleSaveSettings}
+                        disabled={isSettingsSaving}
+                        className="w-full flex items-center justify-center gap-3 bg-gold text-charcoal py-5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 shadow-xl shadow-gold/20"
+                      >
+                        {isSettingsSaving ? "Securing Archives..." : "Save Blog SEO Settings"}
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
              )}
            </AnimatePresence>
         </div>
