@@ -83,7 +83,7 @@ const EditorialVoiceModal = ({ isOpen, onClose, voice, onSuccess }: any) => {
 
     setIsSaving(true);
     try {
-      const url = voice ? getApiUrl(`blogs/editorial-voices/${voice._id || voice.id}`) : getApiUrl("blogs/editorial-voices");
+      const url = voice ? getApiUrl(`blogs/editorial-voices/${voice._id || voice.id}/`) : getApiUrl("blogs/editorial-voices/");
       const method = voice ? "PUT" : "POST";
       
       const response = await fetch(url, {

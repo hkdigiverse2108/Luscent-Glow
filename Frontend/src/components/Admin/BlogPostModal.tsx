@@ -84,10 +84,22 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
   };
 
   const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    
+    // Validation
+    if (!formData.title || !formData.excerpt || !formData.content) {
+      toast.error("Please illuminate all textual fields.");
+      return;
+    }
+
+    if (!formData.image) {
+      toast.error("A story requires a visual anchor (image).");
+      return;
+    }
+
     setIsSaving(true);
     try {
-      const url = post ? getApiUrl(`blogs/${post._id || post.id}`) : getApiUrl("blogs");
+      const url = post ? getApiUrl(`blogs/${post._id || post.id}/`) : getApiUrl("blogs/");
       const method = post ? "PUT" : "POST";
       
       const response = await fetch(url, {
@@ -101,10 +113,13 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
         onSuccess();
         onClose();
       } else {
-        toast.error("Failed to save story.");
+        const errorData = await response.json().catch(() => ({}));
+        const message = errorData.detail || "Validation ritual failed on the server.";
+        toast.error(`Failed to save story: ${message}`);
+        console.error("Save Error:", errorData);
       }
     } catch (error) {
-      toast.error("Network ritual failed.");
+      toast.error("Network ritual failed. Please check your connection.");
     } finally {
       setIsSaving(false);
     }

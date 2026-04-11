@@ -45,9 +45,9 @@ const AdminBlogs = () => {
   const fetchData = async () => {
     try {
       const [postsRes, settingsRes, voicesRes] = await Promise.all([
-        fetch(getApiUrl("blogs")),
-        fetch(getApiUrl("blogs/settings")),
-        fetch(getApiUrl("blogs/editorial-voices"))
+        fetch(getApiUrl("blogs/")),
+        fetch(getApiUrl("blogs/settings/")),
+        fetch(getApiUrl("blogs/editorial-voices/"))
       ]);
       
       if (postsRes.ok) {
@@ -75,7 +75,7 @@ const AdminBlogs = () => {
   const handleSaveSettings = async () => {
     setIsSettingsSaving(true);
     try {
-      const response = await fetch(getApiUrl("blogs/settings"), {
+      const response = await fetch(getApiUrl("blogs/settings/"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(settings)
@@ -93,13 +93,13 @@ const AdminBlogs = () => {
   };
 
   const handleUpdateSeo = (newSeo: any) => {
-    setSettings({ ...settings, seo: newSeo });
+    setSettings({ ...(settings || safeSettings), seo: newSeo });
   };
 
   const handleDeletePost = async (id: string) => {
     if (!confirm("Are you sure you want to delete this post?")) return;
     try {
-      const response = await fetch(getApiUrl(`blogs/posts/${id}`), {
+      const response = await fetch(getApiUrl(`blogs/${id}/`), {
         method: "DELETE"
       });
       if (response.ok) {
@@ -117,7 +117,7 @@ const AdminBlogs = () => {
     if (!confirm("Are you sure you want to delete this author?")) return;
     
     try {
-      const response = await fetch(getApiUrl(`blogs/editorial-voices/${id}`), {
+      const response = await fetch(getApiUrl(`blogs/editorial-voices/${id}/`), {
         method: "DELETE"
       });
       if (response.ok) {
