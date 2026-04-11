@@ -26,9 +26,9 @@ const SEO: React.FC<SEOProps> = ({ seo }) => {
 
   const defaultSEO = globalSettings?.seo || {};
   
-  const title = seo?.title || defaultSEO.title || "Luscent Glow | Pure Botanical Radiance";
-  const description = seo?.description || defaultSEO.description || "Premium, cruelty-free botanical skincare and makeup crafted for your authentic brilliance.";
-  const keywords = seo?.keywords || defaultSEO.keywords || "skincare, beauty, botanical, cruelty-free, luscent glow";
+  const title = (seo?.title?.trim() ? seo.title : null) || (defaultSEO.title?.trim() ? defaultSEO.title : null) || "Luscent Glow | Pure Botanical Radiance";
+  const description = (seo?.description?.trim() ? seo.description : null) || (defaultSEO.description?.trim() ? defaultSEO.description : null) || "Premium, cruelty-free botanical skincare and makeup crafted for your authentic brilliance.";
+  const keywords = (seo?.keywords?.trim() ? seo.keywords : null) || (defaultSEO.keywords?.trim() ? defaultSEO.keywords : null) || "skincare, beauty, botanical, cruelty-free, luscent glow";
   const ogImage = seo?.ogImage || defaultSEO.ogImage || "/og-image.png";
 
   return (

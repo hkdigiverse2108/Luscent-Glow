@@ -82,7 +82,9 @@ const AdminPayments = () => {
   const filteredPayments = payments.filter(p => {
     const matchesSearch = 
       (p.orderNumber || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.merchantTransactionId || "").toLowerCase().includes(searchQuery.toLowerCase());
+      (p.merchantTransactionId || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.userMobile || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.providerReferenceId || "").toLowerCase().includes(searchQuery.toLowerCase());
     
     if (statusFilter === "all") return matchesSearch;
     return matchesSearch && p.status === statusFilter.toUpperCase();
@@ -160,11 +162,15 @@ const AdminPayments = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className={isDark ? "bg-white/2" : "bg-charcoal/2"}>
-                  <th className={`px-6 py-5 text-[10px] font-black uppercase tracking-[0.4em] ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Transaction Details</th>
-                  <th className={`px-6 py-5 text-[10px] font-black uppercase tracking-[0.4em] ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Amount</th>
-                  <th className={`px-6 py-5 text-[10px] font-black uppercase tracking-[0.4em] ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Gateway</th>
-                  <th className={`px-6 py-5 text-[10px] font-black uppercase tracking-[0.4em] ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Status</th>
-                  <th className={`px-6 py-5 text-[10px] font-black uppercase tracking-[0.4em] ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Date</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Order #</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Customer</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>TXN ID</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Platform</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Ref ID</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Method</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Amount</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Status</th>
+                  <th className={`px-4 py-5 text-[9px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/40"}`}>Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gold/5">
@@ -177,7 +183,7 @@ const AdminPayments = () => {
                   </tr>
                 ) : filteredPayments.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-20 text-center">
+                    <td colSpan={9} className="py-20 text-center">
                       <AlertCircle size={24} className="text-gold mx-auto mb-3 opacity-20" />
                       <p className={`text-xs font-bold uppercase tracking-widest ${isDark ? "text-white/20" : "text-charcoal/20"}`}>No matching records found.</p>
                     </td>
@@ -193,52 +199,58 @@ const AdminPayments = () => {
                         key={p.id || p._id}
                         className={`group hover:bg-gold/5 transition-all cursor-default`}
                       >
-                        <td className="px-6 py-6 border-transparent relative">
-                          <Link to="/admin/orders" className="flex flex-col gap-1 group/link">
-                            <span className={`text-[13px] font-bold transition-colors ${isDark ? "text-white group-hover/link:text-gold" : "text-charcoal group-hover/link:text-gold"}`}>
-                              {p.orderNumber || "LG-UNKNOWN"}
-                            </span>
-                            <span className={`text-[10px] font-mono opacity-40 group-hover:opacity-100 transition-opacity`}>
-                              {p.merchantTransactionId}
-                            </span>
+                        <td className="px-4 py-6 border-transparent relative">
+                          <Link to="/admin/orders" className="text-[12px] font-bold transition-colors hover:text-gold block">
+                            {p.orderNumber || "LG-UNKNOWN"}
                           </Link>
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gold rounded-r-full scale-y-0 group-hover:scale-y-100 transition-transform" />
                         </td>
-                        <td className="px-6 py-6 border-transparent">
-                          <div className="flex items-center gap-1.5">
-                            <HandCoins size={14} className="text-gold" />
-                            <span className={`text-sm font-black ${isDark ? "text-white" : "text-charcoal"}`}>
-                              ₹{Number(p.amount).toLocaleString('en-IN')}
-                            </span>
-                          </div>
+                        <td className="px-4 py-6 border-transparent">
+                          <span className={`text-[11px] font-black tracking-widest ${isDark ? "text-white/80" : "text-charcoal/80"}`}>
+                            {p.userMobile || "GUEST"}
+                          </span>
                         </td>
-                        <td className="px-6 py-6 border-transparent">
-                          <span className={`px-3 py-1.5 rounded-xl border text-[9px] font-black uppercase tracking-widest ${
+                        <td className="px-4 py-6 border-transparent">
+                          <span className={`text-[9px] font-mono opacity-60`}>
+                            {p.merchantTransactionId}
+                          </span>
+                        </td>
+                        <td className="px-4 py-6 border-transparent">
+                          <span className={`px-2 py-1 rounded-lg border text-[8px] font-black uppercase tracking-widest ${
                             isDark ? "bg-white/5 border-white/10 text-white/50" : "bg-charcoal/5 border-charcoal/10 text-charcoal/50"
                           }`}>
                             {p.merchantId || "Manual"}
                           </span>
                         </td>
-                        <td className="px-6 py-6 border-transparent">
-                          <span className={`px-2.5 py-1.5 rounded-xl border inline-flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest ${statusCfg.color}`}>
-                            <statusCfg.icon size={11} strokeWidth={3} />
+                        <td className="px-4 py-6 border-transparent">
+                          <span className={`text-[9px] font-mono opacity-60 truncate max-w-[100px] block`}>
+                            {p.providerReferenceId || "—"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-6 border-transparent">
+                          <span className={`text-[9px] font-black uppercase tracking-widest opacity-60`}>
+                            {p.paymentMode || "—"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-6 border-transparent">
+                          <span className={`text-sm font-black ${isDark ? "text-white" : "text-charcoal"}`}>
+                            ₹{Number(p.amount).toLocaleString('en-IN')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-6 border-transparent">
+                          <span className={`px-2 py-1 rounded-xl border inline-flex items-center gap-1.5 text-[8px] font-black uppercase tracking-widest ${statusCfg.color}`}>
+                            <statusCfg.icon size={10} strokeWidth={3} />
                             {statusCfg.label}
                           </span>
                         </td>
-                        <td className="px-6 py-6 border-transparent">
-                          <div className="flex flex-col gap-1 opacity-50">
-                            <div className="flex items-center gap-1.5">
-                              <Calendar size={11} />
-                              <span className="text-[10px] font-bold tracking-tight">
-                                {p.createdAt ? format(new Date(p.createdAt), "MMM dd, yyyy") : "N/A"}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-1.5">
-                              <Clock size={11} />
-                              <span className="text-[9px] font-bold tracking-widest">
-                                {p.createdAt ? format(new Date(p.createdAt), "hh:mm a") : "N/A"}
-                              </span>
-                            </div>
+                        <td className="px-4 py-6 border-transparent">
+                          <div className="flex flex-col gap-0.5 opacity-40">
+                            <span className="text-[10px] font-bold whitespace-nowrap">
+                              {p.createdAt ? format(new Date(p.createdAt), "MMM dd, yyyy") : "N/A"}
+                            </span>
+                            <span className="text-[8px] font-bold tracking-widest">
+                              {p.createdAt ? format(new Date(p.createdAt), "hh:mm a") : "N/A"}
+                            </span>
                           </div>
                         </td>
                       </motion.tr>

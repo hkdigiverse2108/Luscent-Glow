@@ -225,10 +225,11 @@ const ProductDetail = () => {
     "Blonde": "#f0d5a0", "Brunette": "#7b5b3a", "Dark Brown": "#4a3728", "Black": "#1a1a1a",
   };
 
-  const productSEO = (product as any)?.seo || {
+  const productSEO = (product as any)?.seo?.title?.trim() ? (product as any).seo : {
     title: product ? `${product.name} | ${product.brand} | Luscent Glow` : "Product Details | Luscent Glow",
     description: product ? product.description?.substring(0, 160) : "Discover our premium botanical skincare ritual.",
-    ogImage: product?.image
+    ogImage: product?.image,
+    keywords: product?.tags?.join(", ") || "skincare, beauty, botanical"
   };
 
   return (

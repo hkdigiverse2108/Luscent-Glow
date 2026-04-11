@@ -252,6 +252,14 @@ async def verify_payment(payload: dict = Body(...)):
                 'razorpay_signature': razorpay_signature
             }
             client.utility.verify_payment_signature(params_dict)
+            
+            # Fetch payment details to get method
+            try:
+                payment_info = client.payment.fetch(razorpay_payment_id)
+                payment_mode = payment_info.get("method", "Unknown")
+            except:
+                payment_mode = "Razorpay"
+                
             provider_reference_id = razorpay_payment_id
             is_verified = True
 
@@ -273,6 +281,18 @@ async def verify_payment(payload: dict = Body(...)):
             if data.get("order_status") == "PAID":
                 is_verified = True
                 provider_reference_id = data.get("cf_order_id", merchant_txn_id)
+                
+                # Fetch payment method from CF payments endpoint
+                try:
+                    p_url = f"https://sandbox.cashfree.com/pg/orders/{merchant_txn_id}/payments" if cf_mode == "sandbox" else f"https://api.cashfree.com/pg/orders/{merchant_txn_id}/payments"
+                    p_res = requests.get(p_url, headers=headers)
+                    p_data = p_res.json()
+                    if isinstance(p_data, list) and len(p_data) > 0:
+                        payment_mode = p_data[0].get("payment_group", "Cashfree")
+                    else:
+                        payment_mode = "Cashfree"
+                except:
+                    payment_mode = "Cashfree"
             else:
                 raise Exception("Cashfree order status not PAID")
 
@@ -346,6 +366,7 @@ async def verify_payment(payload: dict = Body(...)):
                 {"$set": {
                     "status": "SUCCESS", 
                     "providerReferenceId": provider_reference_id,
+                    "paymentMode": payment_mode if 'payment_mode' in locals() else "Unknown",
                     "updatedAt": datetime.utcnow().isoformat()
                 }}
             )

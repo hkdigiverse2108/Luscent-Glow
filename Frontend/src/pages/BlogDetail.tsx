@@ -2,8 +2,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { 
-  ArrowLeft, Calendar, User, Share2, Facebook, Twitter, 
-  Link as LinkIcon, Mail, ArrowRight, ChevronRight, ShoppingBag,
+  ArrowLeft, Calendar, User, Mail, ArrowRight, ChevronRight, ShoppingBag,
   Sparkles, Heart
 } from "lucide-react";
 import Header from "@/components/Header";
@@ -83,10 +82,6 @@ const BlogDetail = () => {
     );
   }
 
-  const copyLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    toast.success("Article link copied to sanctuary!");
-  };
 
   return (
     <div className="min-h-screen bg-[#faf9f6] selection:bg-gold/20 selection:text-gold">
@@ -168,29 +163,6 @@ const BlogDetail = () => {
           <div className="container mx-auto px-4 md:px-6 lg:px-12">
             <div className="flex flex-col xl:flex-row gap-12 md:gap-24 relative">
               
-              {/* Sticky Social Intelligence Sidebar */}
-              <aside className="hidden xl:block w-16 relative">
-                <div className="sticky top-40 space-y-6 flex flex-col items-center">
-                  <p className="text-[10px] font-body font-bold text-gold uppercase tracking-[0.3em] origin-left rotate-90 translate-y-12 whitespace-nowrap opacity-40">
-                    Share Story
-                  </p>
-                  <div className="pt-24 space-y-4">
-                    <button className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:bg-gold hover:text-charcoal hover:border-gold transition-all duration-500 shadow-ethereal group">
-                      <Facebook size={18} />
-                    </button>
-                    <button className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:bg-gold hover:text-charcoal hover:border-gold transition-all duration-500 shadow-ethereal group">
-                      <Twitter size={18} />
-                    </button>
-                    <button 
-                      onClick={copyLink}
-                      className="w-12 h-12 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:bg-gold hover:text-charcoal hover:border-gold transition-all duration-500 shadow-ethereal group"
-                    >
-                      <LinkIcon size={18} />
-                    </button>
-                  </div>
-                </div>
-              </aside>
-
               {/* High-Legibility Article Body */}
               <article className="flex-1 max-w-[850px] mx-auto xl:mx-0">
                   <motion.div
