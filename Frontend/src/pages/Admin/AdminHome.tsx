@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 import AdminBrandingModal from "../../components/Header/AdminBrandingModal.tsx";
+import InstagramManagement from "../../components/Admin/InstagramManagement.tsx";
 
 const AdminHome = () => {
   const { isDark } = useAdminTheme();
@@ -587,6 +588,10 @@ const AdminHome = () => {
               ))}
             </div>
           </motion.div>
+        )}
+
+        {activeTab === "social" && (
+          <InstagramManagement />
         )}
 
         {/* Category Modal Ceremony */}

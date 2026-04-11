@@ -104,8 +104,8 @@ const AdminOrders = () => {
   };
 
   const filteredOrders = orders.filter(o => 
-    o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    o.userMobile.toLowerCase().includes(searchQuery.toLowerCase())
+    (o.orderNumber || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (o.userMobile || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

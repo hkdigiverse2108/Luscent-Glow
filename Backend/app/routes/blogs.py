@@ -19,6 +19,11 @@ async def get_blog_settings():
             "heroTitle": "Glow Haven Chronicles",
             "finaleTitle": "Stay Inspired",
             "finaleSubtitle": "Ritual of Radiance",
+            "seo": {
+                "title": "The Journal | Luscent Glow",
+                "description": "Explore the chronicles of botanical radiance and modern alchemy.",
+                "keywords": "skincare blog, beauty rituals, organic ingredients"
+            },
             "updatedAt": datetime.utcnow().isoformat()
         }
     return settings

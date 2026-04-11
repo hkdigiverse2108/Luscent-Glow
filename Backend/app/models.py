@@ -530,6 +530,7 @@ class BlogSettingsModel(BaseModel):
     heroTitle: str = Field(default="Glow Haven Chronicles")
     finaleTitle: str = Field(default="Stay Inspired")
     finaleSubtitle: str = Field(default="Ritual of Radiance")
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -797,6 +798,42 @@ class HomeInstagramModel(BaseModel):
     profileHandle: str = Field(default="@hk_digiverse")
     widgetId: str = Field(default="YOUR_LIGHTWIDGET_ID_HERE")
     description: str = Field(default="Explore our latest innovations and milestones.")
+    useCustomFeed: bool = Field(default=False)
+
+class InstagramPostModel(BaseModel):
+    """
+    Model for an individual manual Instagram post or reel entry.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    type: str = Field(default="post") # post or reel
+    imageUrl: str = Field(...)
+    postUrl: str = Field(...)
+    caption: Optional[str] = Field(default=None)
+    order: int = Field(default=0)
+    isActive: bool = Field(default=True)
+    createdAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "type": "reel",
+                "imageUrl": "https://...",
+                "postUrl": "https://instagram.com/reels/...",
+                "order": 1
+            }
+        }
+
+class UpdateInstagramPostModel(BaseModel):
+    """
+    Schema for updating individual manual Instagram entries.
+    """
+    type: Optional[str] = None
+    imageUrl: Optional[str] = None
+    postUrl: Optional[str] = None
+    caption: Optional[str] = None
+    order: Optional[int] = None
+    isActive: Optional[bool] = None
 
 class HomeSettingsModel(BaseModel):
     """
