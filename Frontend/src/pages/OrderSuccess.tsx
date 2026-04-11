@@ -6,7 +6,8 @@ import {
   ArrowRight, 
   ShoppingBag,
   Sparkles,
-  Heart
+  Heart,
+  ExternalLink
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -77,10 +78,19 @@ const OrderSuccess = () => {
           <div className="pt-6 space-y-6">
             <Link 
               to="/products"
-              className="group w-full flex items-center justify-center gap-4 px-12 py-6 bg-charcoal text-white rounded-full font-body font-bold uppercase tracking-[0.3em] text-xs hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl"
+              className="group w-full flex items-center justify-center gap-4 px-12 py-5 bg-charcoal text-white rounded-xl font-body font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl"
             >
               Continue Your Journey <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
             </Link>
+
+            <a 
+              href={`https://shiprocket.co/tracking/${orderNumber.replace('#', '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group w-full flex items-center justify-center gap-4 px-12 py-5 border border-gold/30 text-gold rounded-xl font-body font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-lg shadow-gold/5"
+            >
+              Track Order <ExternalLink size={18} className="transition-transform group-hover:translate-x-1" />
+            </a>
             
             <Link 
               to="/orders"

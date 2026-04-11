@@ -24,6 +24,11 @@ interface TrackStep {
 }
 
 const TrackOrder = () => {
+  useEffect(() => {
+    // Immediate redirect to Shiprocket tracking as requested
+    window.location.href = "https://shiprocket.co/tracking";
+  }, []);
+
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
