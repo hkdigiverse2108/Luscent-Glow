@@ -918,3 +918,43 @@ class SmtpCredentialsModel(BaseModel):
 
     class Config:
         populate_by_name = True
+
+class CouponModel(BaseModel):
+    """
+    Schema for promotional discount coupons.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    code: str = Field(...)
+    discountType: str = Field(...) # percentage, fixed, shipping
+    value: float = Field(..., ge=0)
+    minPurchase: float = Field(default=0, ge=0)
+    expiryDate: str = Field(...)
+    description: Optional[str] = Field(default=None)
+    isActive: bool = Field(default=True)
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "code": "GLOW20",
+                "discountType": "percentage",
+                "value": 20,
+                "minPurchase": 1000,
+                "expiryDate": "2026-05-31",
+                "isActive": True
+            }
+        }
+
+class UpdateCouponModel(BaseModel):
+    """
+    Schema for updating coupons.
+    """
+    code: Optional[str] = None
+    discountType: Optional[str] = None
+    value: Optional[float] = None
+    minPurchase: Optional[float] = None
+    expiryDate: Optional[str] = None
+    description: Optional[str] = None
+    isActive: Optional[bool] = None

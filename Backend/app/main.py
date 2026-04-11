@@ -9,6 +9,7 @@ from .database import connect_to_mongo, close_mongo_connection
 from .services.seo_injector import get_seo_data, inject_seo, INDEX_HTML_PATH
 from .routes.products import router as product_router
 from .routes.auth import router as auth_router
+from .routes.coupons import router as coupons_router
 from .routes.wishlist import router as wishlist_router
 from .routes.cart import router as cart_router
 from .routes.contact import router as contact_router
@@ -57,6 +58,7 @@ app.add_middleware(
 # Add routes
 app.include_router(product_router, prefix="/api", tags=["Products"])
 app.include_router(auth_router, prefix="/api", tags=["Auth"])
+app.include_router(coupons_router, prefix="/api", tags=["Coupons"])
 app.include_router(wishlist_router, prefix="/api", tags=["Wishlist"])
 app.include_router(cart_router, prefix="/api", tags=["Cart"])
 app.include_router(contact_router, prefix="/api/contact", tags=["Contact"])
