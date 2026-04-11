@@ -40,42 +40,42 @@ const OrderSuccess = () => {
         />
       </div>
 
-      <main className="flex-1 container mx-auto px-4 py-32 flex items-center justify-center relative z-10">
+      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 flex items-center justify-center relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 50, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-xl w-full bg-white/40 backdrop-blur-3xl p-12 md:p-20 rounded-[4rem] shadow-ethereal border border-white/50 text-center space-y-12 relative overflow-hidden"
+          className="max-w-xl w-full bg-white/40 backdrop-blur-3xl p-6 md:p-10 rounded-[2.5rem] shadow-ethereal border border-white/50 text-center space-y-6 relative overflow-hidden"
         >
           {/* Decorative Sparkles */}
           <div className="absolute top-10 left-10 text-gold/20 animate-pulse"><Sparkles size={24} /></div>
           <div className="absolute bottom-10 right-10 text-gold/20 animate-pulse delay-700"><Heart size={20} /></div>
 
-          <div className="relative mx-auto w-32 h-32">
+          <div className="relative mx-auto w-20 h-20">
             <motion.div 
               initial={{ scale: 0, rotate: -20 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 200, delay: 0.4 }}
               className="w-full h-full bg-gold rounded-full flex items-center justify-center text-white shadow-2xl relative z-10"
             >
-              <CheckCircle2 size={60} strokeWidth={1} />
+              <CheckCircle2 size={40} strokeWidth={1} />
             </motion.div>
             <div className="absolute inset-0 bg-gold/30 rounded-full blur-3xl animate-ping opacity-20" />
           </div>
           
-          <div className="space-y-4">
-            <h1 className="font-display text-5xl md:text-6xl font-light text-charcoal tracking-tight">Order <span className="text-gold italic font-normal">Placed</span></h1>
-            <p className="text-muted-foreground/60 font-body text-lg italic max-w-sm mx-auto leading-relaxed">
+          <div className="space-y-1.5">
+            <h1 className="font-display text-4xl md:text-5xl font-light text-charcoal tracking-tight">Order <span className="text-gold italic font-normal">Placed</span></h1>
+            <p className="text-muted-foreground/60 font-body text-base italic max-w-sm mx-auto leading-relaxed">
               Your curated selection has been successfully recorded in our boutique database.
             </p>
           </div>
 
-          <div className="py-8 px-10 bg-white/60 rounded-[2.5rem] border border-gold/10 inline-block shadow-sm">
+          <div className="py-5 px-6 bg-white/60 rounded-[1.5rem] border border-gold/10 inline-block shadow-sm">
             <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.5em] mb-2 leading-none">Your Order Number</p>
             <p className="font-display text-4xl text-charcoal tracking-tighter">{orderNumber}</p>
           </div>
 
-          <div className="pt-6 space-y-6">
+          <div className="pt-4 space-y-4">
             <Link 
               to="/products"
               className="group w-full flex items-center justify-center gap-4 px-12 py-5 bg-charcoal text-white rounded-xl font-body font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl"
