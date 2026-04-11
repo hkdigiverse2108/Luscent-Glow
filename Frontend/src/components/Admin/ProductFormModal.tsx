@@ -5,6 +5,7 @@ import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { categories } from "@/data/products";
+import SEOForm from "./SEOForm";
 
 
 interface ProductFormModalProps {
@@ -32,7 +33,8 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     isBestSeller: false,
     description: "",
     ingredients: "",
-    howToUse: ""
+    howToUse: "",
+    seo: { title: "", description: "", keywords: "" }
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -98,7 +100,8 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
         isBestSeller: false,
         description: "",
         ingredients: "",
-        howToUse: ""
+        howToUse: "",
+        seo: { title: "", description: "", keywords: "" }
       });
     }
   }, [product, isOpen]);
@@ -455,6 +458,13 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                     </div>
                  </div>
             </div>
+
+            {/* SEO Section */}
+            <SEOForm 
+              seo={formData.seo || { title: "", description: "", keywords: "" }} 
+              onChange={(seo) => setFormData(prev => ({ ...prev, seo }))}
+              isDark={isDark}
+            />
           </form>
 
            {/* Footer Action Bar */}

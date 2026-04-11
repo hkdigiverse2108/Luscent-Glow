@@ -5,6 +5,15 @@ from bson import ObjectId
 # Represents an ObjectId field in the database.
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
+class SEOModel(BaseModel):
+    """
+    Schema for SEO metadata used across the platform.
+    """
+    title: Optional[str] = Field(default=None)
+    description: Optional[str] = Field(default=None)
+    keywords: Optional[str] = Field(default=None)
+    ogImage: Optional[str] = Field(default=None)
+
 class ProductModel(BaseModel):
     """
     Full schema for Products, matching frontend interface.
@@ -29,6 +38,7 @@ class ProductModel(BaseModel):
     description: Optional[str] = Field(default=None)
     ingredients: Optional[str] = Field(default=None)
     howToUse: Optional[str] = Field(default=None)
+    seo: Optional[SEOModel] = Field(default=None)
 
     class Config:
         populate_by_name = True
@@ -70,6 +80,7 @@ class UpdateProductModel(BaseModel):
     description: Optional[str] = None
     ingredients: Optional[str] = None
     howToUse: Optional[str] = None
+    seo: Optional[SEOModel] = None
 
     class Config:
         json_schema_extra = {
@@ -346,6 +357,7 @@ class GiftCardSettingsModel(BaseModel):
     benefitsDescription: str = Field(default="Choosing the perfect skincare ritual for someone else can be challenging.")
     benefitsList: List[str] = Field(default_factory=list)
     faqs: List[dict] = Field(default_factory=list) # {q, a}
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -381,6 +393,7 @@ class CategoryModel(BaseModel):
     name: str = Field(...)
     slug: str = Field(...)
     image: Optional[str] = Field(default=None)
+    seo: Optional[SEOModel] = Field(default=None)
 
     class Config:
         populate_by_name = True
@@ -399,6 +412,7 @@ class UpdateCategoryModel(BaseModel):
     name: Optional[str] = None
     slug: Optional[str] = None
     image: Optional[str] = None
+    seo: Optional[SEOModel] = None
 
 class BulkOrderSettingsModel(BaseModel):
     """
@@ -414,6 +428,7 @@ class BulkOrderSettingsModel(BaseModel):
     quantities: List[str] = Field(default_factory=list) # ["10-50", "50-100", ...]
     inquiryTitle: str = Field(default="The Inquiry Portal")
     inquiryDescription: str = Field(default="Share your requirements and our team will reach out.")
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -439,6 +454,7 @@ class AboutSettingsModel(BaseModel):
     curatorQuote: str = Field(default="I wanted to create a space where beauty wasn't about concealment, but about enhancement.")
     curatorName: str = Field(default="Janvi Vasani, Founder & Curator")
     commitments: List[str] = Field(default_factory=list)
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -459,6 +475,7 @@ class ContactSettingsModel(BaseModel):
     faqTitle: str = Field(default="Seeking Instant Curation?")
     faqSubtitle: str = Field(default="Most inquiries are illuminated in our FAQ registry.")
     faqLinks: List[str] = Field(default_factory=list)
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -477,6 +494,7 @@ class FAQSettingsModel(BaseModel):
     supportDescription: str = Field(default="Our Glow Concierge team is here to assist you with any personalized requests.")
     supportButtonText: str = Field(default="Contact Concierge")
     supportButtonLink: str = Field(default="/contact")
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -497,6 +515,7 @@ class BlogPostModel(BaseModel):
     readTime: str = Field(default="5 min read")
     featured: bool = Field(default=False)
     relatedProducts: List[str] = Field(default_factory=list)
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -655,6 +674,7 @@ class GlobalSettingsModel(BaseModel):
     promoText: str = Field(default="Use Code")
     promoCode: str = Field(default="GLOW15")
     copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -838,6 +858,7 @@ class HomeSettingsModel(BaseModel):
     brandStory: HomeBrandStoryModel = Field(...)
     discountBanner: HomeDiscountBannerModel = Field(...)
     instagram: HomeInstagramModel = Field(...)
+    seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
     class Config:

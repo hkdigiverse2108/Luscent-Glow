@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { Product, products } from "@/data/products";
+import SEO from "@/components/SEO";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
@@ -224,8 +225,15 @@ const ProductDetail = () => {
     "Blonde": "#f0d5a0", "Brunette": "#7b5b3a", "Dark Brown": "#4a3728", "Black": "#1a1a1a",
   };
 
+  const productSEO = (product as any)?.seo || {
+    title: product ? `${product.name} | ${product.brand} | Luscent Glow` : "Product Details | Luscent Glow",
+    description: product ? product.description?.substring(0, 160) : "Discover our premium botanical skincare ritual.",
+    ogImage: product?.image
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO seo={productSEO} />
       <Header />
       <main className="container mx-auto px-4 py-8">
         <nav className="text-[10px] md:text-sm font-body font-bold text-muted-foreground mb-4 md:md-6 tracking-widest flex items-center gap-2 flex-wrap">
