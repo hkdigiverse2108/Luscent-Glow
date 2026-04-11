@@ -79,7 +79,7 @@ const InstagramManagement = () => {
           <div className="w-20 h-20 rounded-full bg-gold/10 flex items-center justify-center mx-auto mb-6">
             <Instagram size={40} className="text-gold" />
           </div>
-          <h3 className="text-2xl font-display font-bold text-white mb-2">The Sanctuary is Empty</h3>
+          <h3 className={`text-2xl font-display font-bold ${isDark ? 'text-white' : 'text-charcoal'} mb-2`}>The Sanctuary is Empty</h3>
           <p className="text-muted-foreground font-body">Start curating your visual ritual by adding your first Instagram post or reel.</p>
         </div>
       ) : (
