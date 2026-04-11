@@ -231,10 +231,10 @@ const Profile = () => {
         />
       </div>
       
-      <main className="container mx-auto px-4 md:px-6 py-12 md:py-20 lg:py-32 relative z-10">
+      <main className="container mx-auto px-4 md:px-6 py-10 md:py-14 lg:py-16 relative z-10">
         <div className="max-w-6xl mx-auto">
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center md:items-start mb-16 md:mb-24 text-center md:text-left relative">
+          <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center md:items-start mb-10 md:mb-14 text-center md:text-left relative">
             <div className="relative group">
               <div className="relative z-10 w-36 h-36 md:w-48 md:h-48 rounded-full p-1.5 bg-gradient-to-tr from-gold/40 via-gold/10 to-transparent">
                 <div className="w-full h-full rounded-full bg-white border border-gold/10 flex items-center justify-center text-gold overflow-hidden">
@@ -264,7 +264,7 @@ const Profile = () => {
               <div className="absolute inset-0 bg-gold/10 rounded-full blur-2xl -z-10 animate-pulse" />
             </div>
             
-            <div className="space-y-4 md:space-y-6 pt-0 md:pt-4">
+            <div className="space-y-2 md:space-y-4 pt-0 md:pt-4">
               <div className="flex items-center justify-center md:justify-start gap-4 text-gold">
                 <div className="h-[1px] w-8 bg-gold/40" />
                 <span className="text-[10px] md:text-xs font-body font-bold uppercase tracking-[0.4em] mb-0.5">Verified Member</span>
@@ -283,9 +283,9 @@ const Profile = () => {
             </div>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-16">
+          <div className="grid lg:grid-cols-3 gap-8 md:gap-10">
             {/* Sidebar Navigation */}
-            <div className="lg:col-span-1 space-y-10">
+            <div className="lg:col-span-1 space-y-6">
 
               <nav className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 gap-2 md:gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                 {[
@@ -306,7 +306,7 @@ const Profile = () => {
                         setActiveView(item.id as ProfileView);
                       }
                     }}
-                    className={`flex-shrink-0 lg:flex-shrink-1 flex items-center justify-between p-4 md:p-6 rounded-2xl md:rounded-[2rem] transition-all duration-500 group relative overflow-hidden ${
+                    className={`flex-shrink-0 lg:flex-shrink-1 flex items-center justify-between py-3 px-4 md:py-4 md:px-6 rounded-2xl md:rounded-[2rem] transition-all duration-500 group relative overflow-hidden ${
                       activeView === item.id 
                         ? "bg-white shadow-xl shadow-gold/5 text-charcoal translate-x-2" 
                         : "text-muted-foreground/60 hover:text-gold hover:bg-white/50"
@@ -330,7 +330,7 @@ const Profile = () => {
                 
                 <button 
                   onClick={() => setIsLogoutDialogOpen(true)}
-                  className="flex-shrink-0 lg:flex-shrink-1 flex items-center gap-4 p-4 md:p-6 rounded-2xl md:rounded-[2rem] text-rose-brand/60 hover:text-rose-brand hover:bg-rose-brand/5 transition-all mt-0 lg:mt-10 group"
+                  className="flex-shrink-0 lg:flex-shrink-1 flex items-center gap-4 py-3 px-4 md:py-4 md:px-6 rounded-2xl md:rounded-[2rem] text-rose-brand/60 hover:text-rose-brand hover:bg-rose-brand/5 transition-all mt-0 lg:mt-4 group"
                 >
                   <div className="p-2 rounded-xl bg-rose-brand/5">
                     <LogOut size={18} className="group-hover:rotate-12 transition-transform duration-500" />
@@ -349,11 +349,11 @@ const Profile = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 lg:p-20 shadow-ethereal border border-white/50 relative overflow-hidden"
+                    className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-10 lg:p-12 shadow-ethereal border border-white/50 relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                     
-                    <div className="relative space-y-12">
+                    <div className="relative space-y-6">
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 text-gold">
                           <Sparkles size={14} className="opacity-50" />
@@ -362,8 +362,8 @@ const Profile = () => {
                         <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Profile <span className="text-gold italic font-light">Details</span></h3>
                       </div>
                       
-                      <form onSubmit={handleUpdate} className="space-y-12">
-                        <div className="space-y-5 group">
+                      <form onSubmit={handleUpdate} className="space-y-6">
+                        <div className="space-y-1.5 group">
                           <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
                             <span className="w-1 h-1 bg-gold rounded-full" />
                             Full Name
@@ -380,8 +380,8 @@ const Profile = () => {
                         </div>
                       </div>
 
-                        <div className="grid md:grid-cols-2 gap-10 lg:gap-14">
-                          <div className="space-y-5 group">
+                        <div className="grid md:grid-cols-2 gap-6 lg:gap-8">
+                          <div className="space-y-1.5 group">
                             <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
                               <span className="w-1 h-1 bg-gold rounded-full" />
                               Email Address
@@ -397,7 +397,7 @@ const Profile = () => {
                               />
                           </div>
                         </div>
-                          <div className="space-y-5 group">
+                          <div className="space-y-1.5 group">
                             <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
                               <span className="w-1 h-1 bg-gold rounded-full" />
                               Mobile Number
@@ -415,14 +415,14 @@ const Profile = () => {
                         </div>
                       </div>
 
-                      <div className="pt-8 border-t border-gold/10">
-                        <div className="flex items-center gap-3 text-gold mb-8">
+                      <div className="pt-4 border-t border-gold/10">
+                        <div className="flex items-center gap-3 text-gold mb-4">
                           <MapPin size={22} className="opacity-80" />
                           <h4 className="font-display text-xl md:text-2xl font-bold text-charcoal">Shipping Address</h4>
                         </div>
                         
-                        <div className="space-y-8">
-                          <div className="space-y-4 group">
+                        <div className="space-y-4">
+                          <div className="space-y-1.5 group">
                             <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">Street Address</label>
                             <div className="relative">
                               <Home className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors" size={18} />
@@ -436,8 +436,8 @@ const Profile = () => {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-8">
-                            <div className="space-y-4 group">
+                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="space-y-1.5 group">
                               <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">City</label>
                               <div className="relative">
                                 <Building className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors" size={18} />
@@ -449,7 +449,7 @@ const Profile = () => {
                                 />
                               </div>
                             </div>
-                            <div className="space-y-4 group">
+                            <div className="space-y-1.5 group">
                               <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">State</label>
                               <div className="relative">
                                 <Globe className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors z-10" size={18} />
@@ -466,7 +466,7 @@ const Profile = () => {
                                 <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/30 pointer-events-none group-focus-within:text-gold transition-colors" size={16} />
                               </div>
                             </div>
-                            <div className="col-span-2 lg:col-span-1 space-y-4 group">
+                            <div className="col-span-2 lg:col-span-1 space-y-1.5 group">
                               <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">ZIP Code</label>
                               <div className="relative">
                                 <ShieldCheck className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors" size={18} />
@@ -512,11 +512,11 @@ const Profile = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 lg:p-20 shadow-ethereal border border-white/50 relative overflow-hidden"
+                    className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-10 lg:p-12 shadow-ethereal border border-white/50 relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-rose-brand/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                     
-                    <div className="relative space-y-12">
+                    <div className="relative space-y-6">
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 text-gold">
                           <Lock size={14} className="opacity-50" />
@@ -525,8 +525,8 @@ const Profile = () => {
                         <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Security <span className="text-gold italic font-light">Settings</span></h3>
                       </div>
                       
-                      <form onSubmit={handleChangePassword} className="space-y-10">
-                        <div className="space-y-5 group">
+                      <form onSubmit={handleChangePassword} className="space-y-6">
+                        <div className="space-y-1.5 group">
                           <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
                             <span className="w-1 h-1 bg-gold rounded-full" />
                             Current Password
@@ -542,7 +542,7 @@ const Profile = () => {
                         </div>
                         
                         <div className="grid md:grid-cols-2 gap-10">
-                          <div className="space-y-5 group">
+                          <div className="space-y-1.5 group">
                             <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
                               <span className="w-1 h-1 bg-gold rounded-full" />
                               New Password
@@ -556,7 +556,7 @@ const Profile = () => {
                               required
                             />
                           </div>
-                          <div className="space-y-5 group">
+                          <div className="space-y-1.5 group">
                             <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
                               <span className="w-1 h-1 bg-gold rounded-full" />
                               Confirm Password
@@ -594,11 +594,11 @@ const Profile = () => {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-16 lg:p-20 shadow-ethereal border border-white/50 relative overflow-hidden"
+                    className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-10 lg:p-12 shadow-ethereal border border-white/50 relative overflow-hidden"
                   >
                     <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                     
-                    <div className="relative space-y-12">
+                    <div className="relative space-y-6">
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 text-gold">
                           <Gift size={14} className="opacity-50" />
