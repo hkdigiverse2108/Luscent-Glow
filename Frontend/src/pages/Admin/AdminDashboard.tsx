@@ -112,8 +112,7 @@ const AdminDashboard = () => {
   const kpis = [
     { label: "Total Revenue", value: `₹${data.summary.totalRevenue.value.toLocaleString('en-IN')}`, trendValue: data.summary.totalRevenue.change, trend: data.summary.totalRevenue.trend, icon: IndianRupee, color: "text-gold", bg: "bg-gold/10" },
     { label: "Accounts", value: data.summary.activeUsers.value.toLocaleString(), trendValue: data.summary.activeUsers.change, trend: data.summary.activeUsers.trend, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Orders", value: data.summary.totalOrders.value.toLocaleString(), trendValue: data.summary.totalOrders.change, trend: data.summary.totalOrders.trend, icon: ShoppingBag, color: "text-violet-500", bg: "bg-violet-500/10" },
-    { label: "Conversion Rate", value: `${data.summary.conversionRate.value}%`, trendValue: data.summary.conversionRate.change, trend: data.summary.conversionRate.trend, icon: ShieldCheck, color: "text-emerald-500", bg: "bg-emerald-500/10" }
+    { label: "Orders", value: data.summary.totalOrders.value.toLocaleString(), trendValue: data.summary.totalOrders.change, trend: data.summary.totalOrders.trend, icon: ShoppingBag, color: "text-violet-500", bg: "bg-violet-500/10" }
   ];
 
   return (
@@ -124,19 +123,12 @@ const AdminDashboard = () => {
           highlightedWord="Dashboard"
           subtitle="Real-time store performance and analytics overview."
           isDark={isDark}
-        >
-          <div className="flex items-center gap-4 ml-auto">
-            <div className={`flex items-center gap-1 p-1 rounded-2xl border ${isDark ? "bg-white/5 border-white/10" : "bg-gold/5 border-gold/10"}`}>
-               <button className="px-6 py-2.5 bg-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-transform active:scale-95">Last 30 Days</button>
-               <button className="px-6 py-2.5 text-muted-foreground hover:text-gold rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors">All Time</button>
-            </div>
-          </div>
-        </AdminHeader>
+        />
       </div>
 
 
       {/* ── KPI Summary Cards ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
         {kpis.map((kpi, idx) => (
           <motion.div
             key={kpi.label}

@@ -14,7 +14,6 @@ import {
   AlertTriangle,
   Eye,
   EyeOff,
-  RotateCcw,
   ShieldCheck,
   FlaskConical,
   Mail,
@@ -23,8 +22,7 @@ import {
   Tag,
   Copyright,
   Store,
-  MapPin,
-  ShieldAlert
+  MapPin
 } from "lucide-react";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { getApiUrl } from "../../lib/api";
@@ -93,14 +91,11 @@ const AdminSettings = () => {
   const [payment, setPayment] = useState<PaymentCreds>(DEFAULT_PAYMENT);
   const [paymentLoading, setPaymentLoading] = useState(true);
   const [paymentSaving, setPaymentSaving] = useState(false);
-  const [paymentResetting, setPaymentResetting] = useState(false);
   
   // Shiprocket state
   const [shiprocket, setShiprocket] = useState<ShiprocketCreds>(DEFAULT_SHIPROCKET);
   const [shiprocketLoading, setShiprocketLoading] = useState(true);
   const [shiprocketSaving, setShiprocketSaving] = useState(false);
-
-  const [shiprocketResetting, setShiprocketResetting] = useState(false);
 
   const [showKeySecret, setShowKeySecret] = useState(false);
   const [showCashfreeSecret, setShowCashfreeSecret] = useState(false);
@@ -242,38 +237,6 @@ const AdminSettings = () => {
     }
   };
 
-
-  const handleResetPayment = async () => {
-    if (!confirm("This will reset payment credentials to defaults from .env. Are you sure?")) return;
-    try {
-      setPaymentResetting(true);
-      const res = await fetch(getApiUrl("/api/settings/global/payment-credentials"), { method: "DELETE" });
-      if (res.ok) {
-        toast.success("Payment credentials reset and persisted.");
-        await fetchPayment();
-      } else toast.error("Reset failed.");
-    } catch {
-      toast.error("Reset failure.");
-    } finally {
-      setPaymentResetting(false);
-    }
-  };
-
-  const handleResetShiprocket = async () => {
-    if (!confirm("This will reset logistics credentials to defaults from .env. Are you sure?")) return;
-    try {
-      setShiprocketResetting(true);
-      const res = await fetch(getApiUrl("/api/settings/global/shiprocket-credentials"), { method: "DELETE" });
-      if (res.ok) {
-        toast.success("Logistics credentials reset and persisted.");
-        await fetchShiprocket();
-      } else toast.error("Reset failed.");
-    } catch {
-      toast.error("Logistics reset failure.");
-    } finally {
-      setShiprocketResetting(false);
-    }
-  };
 
   const cardClass = `relative overflow-hidden backdrop-blur-3xl border rounded-[2.5rem] p-8 md:p-10 transition-all duration-700 ${
     isDark ? "bg-charcoal/40 border-white/12 shadow-2xl" : "bg-white border-charcoal/12 shadow-xl"
@@ -667,14 +630,6 @@ const AdminSettings = () => {
                   <RefreshCcw size={14} />
                   Sync
                 </button>
-                <button
-                  onClick={handleResetPayment}
-                  disabled={paymentResetting}
-                  className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold uppercase tracking-[0.15em] text-xs border-2 border-rose-500/30 text-rose-400 hover:bg-rose-500/10 transition-all disabled:opacity-50 ml-auto"
-                >
-                  {paymentResetting ? <RefreshCcw size={14} className="animate-spin" /> : <RotateCcw size={14} />}
-                  Reset Defaults
-                </button>
               </div>
             </div>
           )}
@@ -790,14 +745,6 @@ const AdminSettings = () => {
                 >
                   <RefreshCcw size={14} />
                   Re-Sync
-                </button>
-                <button
-                  onClick={handleResetShiprocket}
-                  disabled={shiprocketResetting}
-                  className={`flex items-center justify-center gap-2 px-6 py-4 rounded-2xl font-bold uppercase tracking-[0.15em] text-xs border border-rose-500/20 text-rose-500/60 hover:bg-rose-500/5 transition-all disabled:opacity-50`}
-                >
-                  {shiprocketResetting ? <RefreshCcw size={14} className="animate-spin" /> : <ShieldAlert size={14} />}
-                  Reset Defaults
                 </button>
               </div>
             </>
