@@ -89,7 +89,7 @@ const AdminLayout = () => {
   const { isDark, toggleTheme } = useAdminTheme();
 
   return (
-    <div className={`min-h-screen flex font-body relative transition-colors duration-700 ${
+    <div className={`min-h-screen flex overflow-hidden font-body relative transition-colors duration-700 ${
       isDark ? "bg-[#0f0f0f] text-white" : "bg-[#faf9f6] text-charcoal"
     }`}>
       {/* Cinematic Backdrop Glow */}
@@ -108,10 +108,10 @@ const AdminLayout = () => {
       </AnimatePresence>
 
       {/* ── Sidebar ────────────────────────────────────────────────────────── */}
-      <aside className={`w-[230px] flex-shrink-0 border-r flex flex-col sticky top-0 h-screen z-20 ${
+      <aside className={`w-[230px] flex-shrink-0 backdrop-blur-3xl border-r flex flex-col relative z-20 transition-all duration-700 ${
         isDark
-          ? "bg-[#121212] border-white/5 shadow-[0_0_60px_rgba(0,0,0,0.4)]"
-          : "bg-white border-gold/10 shadow-[0_0_40px_rgba(0,0,0,0.06)]"
+          ? "bg-charcoal/80 border-white/5 shadow-[0_0_60px_rgba(0,0,0,0.4)]"
+          : "bg-white/95 border-gold/10 shadow-[0_0_40px_rgba(0,0,0,0.06)]"
       }`}>
 
         {/* Brand Mark */}
@@ -216,7 +216,7 @@ const AdminLayout = () => {
       </aside>
 
       {/* ── Main Stage ─────────────────────────────────────────────────────── */}
-      <main className="flex-1 relative z-10 flex flex-col">
+      <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide flex flex-col">
         <div className="relative z-10 p-4 md:p-8 lg:p-12 max-w-[1600px] mx-auto w-full">
           <Outlet />
         </div>
