@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { Product, products } from "@/data/products";
 import SEO from "@/components/SEO";
 import { useCart } from "@/context/CartContext";
@@ -697,7 +696,7 @@ const ProductDetail = () => {
         )}
       </main>
       <Footer />
-      <WhatsAppButton />
+    
 
       {/* Review Modal */}
       {product && (

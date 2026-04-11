@@ -4,12 +4,11 @@ import {
   Package, Truck, CheckCircle2, Search, MapPin, 
   Calendar, ShoppingBag, ArrowRight, ShieldCheck, 
   HelpCircle, ChevronRight, Clock, Box, Mail, Sparkles, ChevronLeft,
-  RotateCcw, Copy, ExternalLink, MessageCircle
+  RotateCcw, Copy, ExternalLink, MessageCircle, Share2, Clipboard, Printer, Phone
 } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
@@ -425,7 +424,6 @@ const TrackOrder = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };

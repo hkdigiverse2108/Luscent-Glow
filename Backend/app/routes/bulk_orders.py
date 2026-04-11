@@ -15,7 +15,7 @@ async def get_bulk_order_settings():
             "heroTitle": "Elevate Your Corporate Gifting.",
             "heroDescription": "Transform business relationships into lasting impressions with our bespoke curation service.",
             "heroImage": "/assets/corporate-gifting.png",
-            "heroBadge": "Corporate Concierge",
+            "heroBadge": "Corporate Support",
             "features": [
                 {"icon": "Layers", "title": "Bespoke Curation", "desc": "Tailored product selections."},
                 {"icon": "Truck", "title": "Priority Logistics", "desc": "White-glove delivery service."},

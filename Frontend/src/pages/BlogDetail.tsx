@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { toast } from "sonner";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 
@@ -210,7 +209,6 @@ const BlogDetail = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };

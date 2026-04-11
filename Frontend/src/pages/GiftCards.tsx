@@ -116,7 +116,7 @@ const GiftCards = () => {
                 <span className="text-[10px] font-body font-bold text-white uppercase tracking-[0.25em]">The Ultimate Expression</span>
               </div>
               <h1 className="font-display text-5xl lg:text-8xl font-bold text-white leading-tight uppercase">
-                {config.heroTitle.split(' ')[0]} <span className="italic font-light text-gold/80">{config.heroTitle.split(' ').length > 1 ? config.heroTitle.split(' ').slice(1).join(' ') : "Gift"}</span> <span className="text-gold italic font-light whitespace-nowrap">Concierge</span>
+                {config.heroTitle.split(' ')[0]} <span className="italic font-light text-gold/80">{config.heroTitle.split(' ').length > 1 ? config.heroTitle.split(' ').slice(1).join(' ') : "Gift"}</span>
               </h1>
               <p className="text-white/80 font-body text-lg lg:text-xl max-w-xl mx-auto font-light leading-relaxed">
                 {config.heroDescription}

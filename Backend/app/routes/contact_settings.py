@@ -12,7 +12,7 @@ async def get_contact_settings():
     if not settings:
         # Fallback if no settings exist in DB
         return {
-            "heroBadge": "The Glow Concierge",
+            "heroBadge": "Glow Support",
             "heroTitle": "Your Radiance, Our Priority.",
             "heroDescription": "Whether you seek personalized product curation or require immediate support, our artisan team is here to illuminate your journey.",
             "formTitle": "Initiate a Conversation",
@@ -24,7 +24,7 @@ async def get_contact_settings():
                 "General Exploration"
             ],
             "channels": [
-                {"icon": "Phone", "badge": "Digital Concierge", "value": "+91 97126 63607", "desc": "Available for one-on-one WhatsApp curation."},
+                {"icon": "Phone", "badge": "Support Care", "value": "+91 97126 63607", "desc": "Available for one-on-one WhatsApp curation."},
                 {"icon": "Mail", "badge": "Artisan Support", "value": "hello@luscentglow.com", "desc": "For deeper inquiries and shared visions."}
             ],
             "boutiqueImage": "/assets/contact/boutique-storefront.png",

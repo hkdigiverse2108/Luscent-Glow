@@ -17,7 +17,7 @@ const WhatsAppButton = () => {
           }
         }
       } catch (error) {
-        console.error("Failed to sync WhatsApp Concierge:", error);
+        console.error("Failed to sync WhatsApp Support:", error);
       }
     };
 
@@ -33,7 +33,7 @@ const WhatsAppButton = () => {
       animate={{ scale: 1 }}
       transition={{ delay: 1, type: "spring" }}
       className="fixed bottom-[88px] right-6 z-[190] w-14 h-14 bg-[#25D366] rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 transition-all cursor-pointer"
-      title="Chat with Concierge"
+      title="Chat with Support"
     >
       <MessageCircle size={26} className="text-white" />
     </motion.a>

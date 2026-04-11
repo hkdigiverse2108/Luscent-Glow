@@ -74,7 +74,7 @@ app.include_router(footer_router, prefix="/api", tags=["Footer"])
 app.include_router(settings_router, prefix="/api", tags=["Global Settings"])
 app.include_router(home_router, prefix="/api", tags=["Home Page"])
 app.include_router(reviews_router, prefix="/api", tags=["Reviews"])
-app.include_router(chat_router, prefix="/api", tags=["AI Concierge"])
+app.include_router(chat_router, prefix="/api", tags=["AI Assistant"])
 app.include_router(analytics_router, prefix="/api", tags=["Analytics"])
 
 @app.get("/", tags=["Root"])

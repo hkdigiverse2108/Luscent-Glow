@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { categories, Product, products } from "@/data/products";
 import SEO from "@/components/SEO";
 import { 
@@ -277,7 +276,6 @@ const Products = () => {
         </div>
       </main>
       <Footer />
-      <WhatsAppButton />
 
       {/* Mobile filter drawer */}
       <AnimatePresence>

@@ -12,7 +12,7 @@ async def seed_faq_settings():
     db = client['luscent_glow_db']
     
     settings = {
-        "heroBadge": "Concierge Services",
+        "heroBadge": "Support Services",
         "heroTitle": "How can we assist you?",
         "heroDescription": "Explore our curated guide to the most frequent inquiries regarding your journey to radiant skin.",
         "categories": [
@@ -80,14 +80,14 @@ async def seed_faq_settings():
                     {
                         "id": "r2",
                         "question": "How do I start a return?",
-                        "answer": "Simply contact our 'Glow Concierge' via the Contact page or email us at support@luscentglow.com with your order number, and we will guide you through the process."
+                        "answer": "Simply contact our 'Support Team' via the Contact page or email us at support@luscentglow.com with your order number, and we will guide you through the process."
                     }
                 ]
             }
         ],
         "supportTitle": "Still have questions?",
-        "supportDescription": "Our Glow Concierge team is here to assist you with any personalized requests.",
-        "supportButtonText": "Contact Concierge",
+        "supportDescription": "Our Support team is here to assist you with any personalized requests.",
+        "supportButtonText": "Contact Support",
         "supportButtonLink": "/contact",
         "updatedAt": datetime.utcnow().isoformat()
     }

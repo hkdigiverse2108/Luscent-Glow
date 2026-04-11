@@ -4,7 +4,7 @@ import { ArrowRight, Sparkles, Check, ChevronLeft, RefreshCw, ShoppingBag, Heart
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import { Helmet } from "react-helmet-async";
 import { products, Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -234,7 +234,6 @@ const RadianceQuiz = () => {
         </div>
       </main>
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };

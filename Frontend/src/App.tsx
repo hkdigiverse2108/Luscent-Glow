@@ -50,6 +50,23 @@ import AdminFooter from "./pages/Admin/AdminFooter.tsx";
 import AdminPayments from "./pages/Admin/AdminPayments.tsx";
 import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute.tsx";
 import { AdminThemeProvider } from "./context/AdminThemeContext.tsx";
+import WhatsAppButton from "./components/WhatsAppButton";
+import LuminaChatBot from "./components/LuminaChatBot";
+import { useLocation } from "react-router-dom";
+
+const GlobalFloatingButtons = () => {
+  const location = useLocation();
+  const isAdminPath = location.pathname.startsWith('/admin');
+
+  if (isAdminPath) return null;
+
+  return (
+    <>
+      <WhatsAppButton />
+      <LuminaChatBot />
+    </>
+  );
+};
 
 const queryClient = new QueryClient();
 
@@ -122,6 +139,7 @@ const App = () => (
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <GlobalFloatingButtons />
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>

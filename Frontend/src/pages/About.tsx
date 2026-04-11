@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Leaf, Heart, Globe, Shield, Sparkles, Zap } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import DynamicIcon from "@/components/DynamicIcon";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 
@@ -89,7 +88,7 @@ const About = () => {
                   {config.heroTitle.split(' Convention. ')[0]}<br className="hidden md:block" />
                   Defying <span className="italic font-light text-gold/80">Convention.</span>
                 </>
-              ) : config.heroTitle} <span className="text-gold italic font-light">Concierge</span>
+              ) : config.heroTitle}
             </motion.h1>
           </div>
         </section>
@@ -220,7 +219,6 @@ const About = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };

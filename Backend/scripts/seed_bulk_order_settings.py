@@ -15,7 +15,7 @@ async def seed_bulk_order_settings():
         "heroTitle": "Elevate Your Corporate Gifting.",
         "heroDescription": "Transform business relationships into lasting impressions with our bespoke curation service for events, employees, and executive partners.",
         "heroImage": "/assets/corporate-gifting.png",
-        "heroBadge": "Corporate Concierge",
+        "heroBadge": "Corporate Support",
         "features": [
             {
                 "icon": "Layers",

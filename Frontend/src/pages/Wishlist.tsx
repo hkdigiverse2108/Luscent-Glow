@@ -5,7 +5,6 @@ import { Heart, ShoppingBag, ArrowRight, ChevronLeft, Trash2 } from "lucide-reac
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 
@@ -144,7 +143,6 @@ const Wishlist = () => {
         </div>
       </main>
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };

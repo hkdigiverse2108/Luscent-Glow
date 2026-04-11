@@ -12,7 +12,7 @@ import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import { Link } from "react-router-dom";
 import LogoutConfirmation from "@/components/auth/LogoutConfirmation";
 
 type ProfileView = "details" | "orders" | "wishlist" | "payments" | "password" | "giftcards";
@@ -752,7 +752,6 @@ const Profile = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
 
       <LogoutConfirmation 
         isOpen={isLogoutDialogOpen}

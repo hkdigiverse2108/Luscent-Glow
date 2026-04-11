@@ -11,7 +11,6 @@ import { useAuth } from "@/context/AuthContext";
 import { getApiUrl } from "@/lib/api";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import { useNavigate } from "react-router-dom";
 import ReviewModal from "@/components/ReviewModal";
 import OrderDetailsModal from "@/components/OrderDetailsModal";
@@ -386,7 +385,6 @@ const Orders = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
 
       <ReviewModal
         isOpen={isReviewModalOpen}

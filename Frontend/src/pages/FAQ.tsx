@@ -14,7 +14,6 @@ import {
 import DynamicIcon from "@/components/DynamicIcon";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import WhatsAppButton from "@/components/WhatsAppButton";
 import {
   Accordion,
   AccordionContent,
@@ -68,7 +67,7 @@ const FAQ = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="font-display text-xs uppercase tracking-[0.3em] text-gold animate-pulse">
-            Establishing Concierge Connection...
+            Establishing Support Connection...
         </div>
       </div>
     );
@@ -99,7 +98,7 @@ const FAQ = () => {
                 <>
                   How can we <span className="italic font-light">assist you?</span>
                 </>
-              ) : config.heroTitle} <span className="text-gold italic font-light">Concierge</span>
+              ) : config.heroTitle}
             </motion.h1>
             <motion.p 
               initial={{ opacity: 0 }}
@@ -229,7 +228,6 @@ const FAQ = () => {
       </main>
 
       <Footer />
-      <WhatsAppButton />
     </div>
   );
 };
