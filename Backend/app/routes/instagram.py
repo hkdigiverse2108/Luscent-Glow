@@ -14,7 +14,7 @@ async def list_instagram_posts():
     posts = await db["instagram_posts"].find({"isActive": True}).sort("order", 1).to_list(100)
     return posts
 
-@router.get("/admin", response_description="List all Instagram posts for management", response_model=List[InstagramPostModel])
+@router.get("/admin/", response_description="List all Instagram posts for management", response_model=List[InstagramPostModel])
 async def list_all_instagram_posts():
     db = await get_database()
     # Fetch all posts for admin management
@@ -31,7 +31,7 @@ async def create_instagram_post(post: InstagramPostModel = Body(...)):
     created_post = await db["instagram_posts"].find_one({"_id": new_post.inserted_id})
     return created_post
 
-@router.put("/{id}", response_description="Update an Instagram post", response_model=InstagramPostModel)
+@router.put("/{id}/", response_description="Update an Instagram post", response_model=InstagramPostModel)
 async def update_instagram_post(id: str, post: UpdateInstagramPostModel = Body(...)):
     db = await get_database()
     update_data = {k: v for k, v in post.model_dump().items() if v is not None}
@@ -51,7 +51,7 @@ async def update_instagram_post(id: str, post: UpdateInstagramPostModel = Body(.
 
     raise HTTPException(status_code=404, detail=f"Instagram post {id} not found")
 
-@router.delete("/{id}", response_description="Delete an Instagram post")
+@router.delete("/{id}/", response_description="Delete an Instagram post")
 async def delete_instagram_post(id: str):
     db = await get_database()
     delete_result = await db["instagram_posts"].delete_one({"_id": ObjectId(id)})

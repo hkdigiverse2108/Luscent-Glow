@@ -798,9 +798,7 @@ class HomeInstagramModel(BaseModel):
     Schema for the Instagram feed integration.
     """
     profileHandle: str = Field(default="@hk_digiverse")
-    widgetId: str = Field(default="YOUR_LIGHTWIDGET_ID_HERE")
     description: str = Field(default="Explore our latest innovations and milestones.")
-    useCustomFeed: bool = Field(default=False)
 
 class InstagramPostModel(BaseModel):
     """

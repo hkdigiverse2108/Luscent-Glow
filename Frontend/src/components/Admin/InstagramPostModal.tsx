@@ -66,7 +66,7 @@ const InstagramPostModal = ({ isOpen, onClose, post, onSuccess }: InstagramPostM
 
     try {
       const url = post 
-        ? getApiUrl(`/api/instagram/${post._id}`) 
+        ? getApiUrl(`/api/instagram/${post._id}/`) 
         : getApiUrl("/api/instagram/");
       
       const method = post ? "PUT" : "POST";
