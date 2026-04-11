@@ -189,9 +189,10 @@ class PasswordResetModel(BaseModel):
     """
     Schema for password reset.
     """
-    mobileNumber: str = Field(...)
+    mobileNumber: Optional[str] = Field(default=None)
     otp: str = Field(...)
     newPassword: str = Field(...)
+    userId: Optional[str] = Field(default=None)
 
 class CartItemModel(BaseModel):
     """
@@ -278,6 +279,7 @@ class OrderModel(BaseModel):
     status: str = Field(default="Processing") # Processing, Quality Check, Shipped, Delivered, Cancelled
     paymentStatus: str = Field(default="Pending")
     shippingAddress: Optional[dict] = Field(default=None)
+    userName: Optional[str] = Field(default=None)
     createdAt: str = Field(...)
     orderNumber: str = Field(...)
     merchantTransactionId: Optional[str] = Field(default=None)
@@ -866,10 +868,16 @@ class NewsletterEmailSettingsModel(BaseModel):
             }
         }
 
+class PriceFilterModel(BaseModel):
+    label: str
+    min: float
+    max: float
+
 class GlobalSettingsModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     whatsappNumber: str = Field(default="919537150942")
     copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
+    priceFilters: List[PriceFilterModel] = Field(default_factory=list)
     updatedAt: Optional[str] = None
 
     class Config:

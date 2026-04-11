@@ -118,18 +118,22 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-12 pb-20 animate-in fade-in duration-1000">
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 py-2">
+      <div className="py-2">
         <AdminHeader
           title="Admin"
           highlightedWord="Dashboard"
           subtitle="Real-time store performance and analytics overview."
           isDark={isDark}
-        />
-        <div className={`flex items-center gap-1 p-1 rounded-2xl border ${isDark ? "bg-white/5 border-white/10" : "bg-gold/5 border-gold/10"}`}>
-           <button className="px-6 py-2.5 bg-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-transform active:scale-95">Last 30 Days</button>
-           <button className="px-6 py-2.5 text-muted-foreground hover:text-gold rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors">All Time</button>
-        </div>
+        >
+          <div className="flex items-center gap-4 ml-auto">
+            <div className={`flex items-center gap-1 p-1 rounded-2xl border ${isDark ? "bg-white/5 border-white/10" : "bg-gold/5 border-gold/10"}`}>
+               <button className="px-6 py-2.5 bg-gold text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg transition-transform active:scale-95">Last 30 Days</button>
+               <button className="px-6 py-2.5 text-muted-foreground hover:text-gold rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors">All Time</button>
+            </div>
+          </div>
+        </AdminHeader>
       </div>
+
 
       {/* ── KPI Summary Cards ──────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">

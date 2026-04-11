@@ -208,7 +208,7 @@ const AdminOrders = () => {
                              }`}>{o.userMobile}</span>
                              <span className={`text-[13px] font-bold uppercase tracking-widest italic transition-colors ${
                                isDark ? "text-white/60" : "text-charcoal/80"
-                             }`}>{o.shippingAddress?.fullName || "Guest Customer"}</span>
+                             }`}>{o.userName || o.shippingAddress?.fullName || "Guest Customer"}</span>
                           </div>
                        </td>
                        <td className={`px-6 py-5 font-display text-xl font-bold italic transition-colors ${

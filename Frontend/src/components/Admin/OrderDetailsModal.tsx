@@ -281,7 +281,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderDeta
                        </div>
                        <div>
                           <p className={`text-lg font-bold leading-tight mb-1 ${isDark ? "text-white" : "text-charcoal"}`}>
-                            {order.shippingAddress?.fullName || "Customer"}
+                            {order.userName || order.shippingAddress?.fullName || "Valued Customer"}
                           </p>
                           <div className="flex items-center gap-2 text-xs font-medium opacity-40">
                              <Phone size={12} />

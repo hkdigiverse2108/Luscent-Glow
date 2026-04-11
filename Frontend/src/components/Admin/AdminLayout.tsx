@@ -211,43 +211,11 @@ const AdminLayout = () => {
           })}
         </nav>
 
-        {/* ── Footer ───────────────────────────────────────────────────────── */}
-        <div className={`px-3 pt-2 pb-3 border-t space-y-1 transition-colors duration-700 ${
-          isDark ? "border-white/5" : "border-charcoal/6"
-        }`}>
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all duration-400 group ${
-              isDark
-                ? "bg-white/3 border-white/8 text-white/35 hover:text-gold hover:border-gold/25 hover:bg-gold/5"
-                : "bg-charcoal/4 border-charcoal/8 text-charcoal/50 hover:text-gold hover:border-gold/25 hover:bg-gold/5"
-            }`}
-          >
-            <span className="text-[0.7rem] font-bold uppercase tracking-widest leading-none">
-              {isDark ? "Dark Mode" : "Light Mode"}
-            </span>
-            {isDark ? <Moon size={13} /> : <Sun size={13} />}
-          </button>
-
-          {/* Logout */}
-          <button
-            onClick={adminLogout}
-            className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-300 group ${
-              isDark
-                ? "text-white/30 hover:text-rose-light hover:bg-rose-light/8"
-                : "text-charcoal/45 hover:text-rose-600 hover:bg-rose-50"
-            }`}
-          >
-            <LogOut size={14} className="group-hover:-translate-x-0.5 transition-transform flex-shrink-0" />
-            <span className="text-[0.78rem] font-semibold tracking-wide">Logout</span>
-          </button>
-        </div>
       </aside>
 
       {/* ── Main Stage ─────────────────────────────────────────────────────── */}
-      <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide">
-        <div className="relative z-10 p-4 md:p-6 max-w-[1600px] mx-auto w-full">
+      <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide flex flex-col">
+        <div className="relative z-10 p-4 md:p-8 lg:p-12 max-w-[1600px] mx-auto w-full">
           <Outlet />
         </div>
       </main>

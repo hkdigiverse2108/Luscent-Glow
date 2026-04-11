@@ -104,6 +104,7 @@ async def initiate_payment(order_data: dict = Body(...)):
     if order_data.get("paymentMethod") == "COD":
         new_order = {
             "userMobile": order_data.get("userMobile"),
+            "userName": order_data.get("userName") or "Guest Customer",
             "items": order_data.get("items"),
             "totalAmount": order_data.get("totalAmount"),
             "status": "Processing",
@@ -306,6 +307,7 @@ async def verify_payment(payload: dict = Body(...)):
                     
                     new_order = {
                         "userMobile": order_data.get("userMobile"),
+                        "userName": order_data.get("userName") or "Guest Customer",
                         "items": order_data.get("items"),
                         "totalAmount": order_data.get("totalAmount"),
                         "status": "Processing",

@@ -1,5 +1,7 @@
 import React from "react";
-import { Plus, LucideIcon } from "lucide-react";
+import { Plus, LucideIcon, Sun, Moon, LogOut } from "lucide-react";
+import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
+import { useAuth } from "../../context/AuthContext.tsx";
 
 interface AdminHeaderProps {
   title: string;
@@ -32,6 +34,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   actions,
   children 
 }) => {
+  const { toggleTheme } = useAdminTheme();
+  const { adminLogout } = useAuth();
   const allActions = actions || (action ? [action] : []);
 
   return (
@@ -47,10 +51,10 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
         }`}>
           {subtitle}
         </p>
-        {children}
       </div>
       
       <div className="flex items-center gap-4 shrink-0">
+        {children}
         {allActions.map((action, idx) => (
           <button 
             key={idx}
@@ -68,6 +72,35 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
             <span>{action.label}</span>
           </button>
         ))}
+
+        {/* ── Global Utility Capsule ── */}
+        <div className={`flex items-center gap-1 p-1 rounded-2xl border transition-all duration-500 ${
+          isDark 
+            ? "bg-white/5 border-white/10" 
+            : "bg-charcoal/5 border-charcoal/10"
+        }`}>
+          <button
+            onClick={toggleTheme}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
+              isDark ? "text-gold hover:bg-white/5" : "text-gold hover:bg-gold/10"
+            }`}
+            title="Toggle Theme"
+          >
+            {isDark ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+
+          <div className={`w-px h-5 mx-0.5 ${isDark ? "bg-white/10" : "bg-charcoal/10"}`} />
+
+          <button
+            onClick={adminLogout}
+            className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-90 ${
+              isDark ? "text-rose-400 hover:bg-rose-500/10" : "text-rose-500 hover:bg-rose-50"
+            }`}
+            title="Logout"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
       </div>
     </div>
   );

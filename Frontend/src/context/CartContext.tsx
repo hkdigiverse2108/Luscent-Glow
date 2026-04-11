@@ -140,22 +140,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.removeItem("luscent-glow-applied-giftcard");
     }
   }, [appliedGiftCard]);
-  
-  useEffect(() => {
-    if (appliedCoupon) {
-      localStorage.setItem("luscent-glow-applied-coupon", JSON.stringify(appliedCoupon));
-    } else {
-      localStorage.removeItem("luscent-glow-applied-coupon");
-    }
-  }, [appliedCoupon]);
-
-  useEffect(() => {
-    if (appliedGiftCard) {
-      localStorage.setItem("luscent-glow-applied-giftcard", JSON.stringify(appliedGiftCard));
-    } else {
-      localStorage.removeItem("luscent-glow-applied-giftcard");
-    }
-  }, [appliedGiftCard]);
 
   const addItem = async (newItem: CartItem) => {
     const user = getLoggedInUser();
@@ -299,7 +283,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("luscent-glow-cart");
     localStorage.removeItem("luscent-glow-applied-coupon");
     localStorage.removeItem("luscent-glow-applied-giftcard");
-    toast.info("Cart cleared");
   };
 
   const availableCoupons: Coupon[] = [
