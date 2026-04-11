@@ -76,26 +76,80 @@ async def verify_otp(data: OTPVerifyModel = Body(...)):
     
     return {"message": "Identity verified successfully"}
 
+import secrets
+from ..utils.email_service import send_password_reset_otp_email
+
+import re
+
+def sanitize_mobile(mobile: str) -> str:
+    """Strips All non-numeric characters for absolute ritual alignment."""
+    if not mobile: return ""
+    clean = re.sub(r'\D', '', mobile)
+    # If it has more than 10 digits (e.g. 91 prefix), take last 10
+    return clean[-10:] if len(clean) > 10 else clean
+
 @router.post("/forgot-password")
 async def forgot_password(data: ForgotPasswordModel = Body(...)):
     db = await get_database()
-    user = await db["users"].find_one({"mobileNumber": data.mobileNumber})
-    if not user:
-        raise HTTPException(status_code=404, detail="Mobile number not found")
+    clean_mobile = sanitize_mobile(data.mobileNumber)
+    user = await db["users"].find_one({"mobileNumber": {"$regex": f"{clean_mobile}$"}})
     
-    # Generate new OTP
-    otp = "123456" # Mock OTP
+    if not user:
+        raise HTTPException(status_code=404, detail="Identity not found in the sanctuary registry.")
+    
+    # Generate cryptographically secure 6-digit OTP
+    otp = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
     await db["users"].update_one({"_id": user["_id"]}, {"$set": {"otp": otp}})
     
-    return {"message": "Password reset token sent via SMS"}
+    # If Admin, send direct Email Ritual
+    if user.get("isAdmin", False) and user.get("email"):
+        await send_password_reset_otp_email(user["email"], otp)
+        return {
+            "message": "Success! A secure reset code has been sent to your administrative email.",
+            "userId": str(user["_id"])
+        }
+    
+    return {
+        "message": "Password reset ritual initiated. Check your secure channels.",
+        "userId": str(user["_id"])
+    }
 
 @router.post("/reset-password")
 async def reset_password(data: PasswordResetModel = Body(...)):
     db = await get_database()
-    user = await db["users"].find_one({"mobileNumber": data.mobileNumber, "otp": data.otp})
+    user = None
     
+    # --- Multi-Vector Identity Ritual ---
+    # Vector 1: Unique Database Identifier
+    if data.userId:
+        try:
+            user = await db["users"].find_one({"_id": ObjectId(data.userId)})
+        except:
+             pass # Fall through to next vector
+
+    # Vector 2: Mobile Number Ritual Alignment
+    if not user and data.mobileNumber:
+        clean_mobile = sanitize_mobile(data.mobileNumber)
+        user = await db["users"].find_one({"mobileNumber": {"$regex": f"{clean_mobile}$"}})
+
+    # Vector 3: Secondary email lookup (Strictly for Admins)
     if not user:
-        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+        # We can't use email from data because it's not in the model yet, 
+        # but we found the admin earlier. This fallback is for 
+        # when the frontend state is preserved but format differs.
+        pass
+
+    if not user:
+         raise HTTPException(status_code=400, detail="Identity could not be anchored in the sanctuary.")
+
+    # --- String-Strict OTP Comparison ---
+    stored_otp = str(user.get("otp", "")).strip()
+    received_otp = str(data.otp).strip().replace(" ", "")
+
+    if stored_otp != received_otp or not stored_otp:
+         # Internal Diagnostic Registry
+         print(f"DEBUG: Ritual Mismatch. Expected: '{stored_otp}', Received: '{received_otp}'")
+         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
     
     hashed_password = hash_password(data.newPassword)
     await db["users"].update_one(
@@ -103,7 +157,7 @@ async def reset_password(data: PasswordResetModel = Body(...)):
         {"$set": {"password": hashed_password, "otp": None}}
     )
     
-    return {"message": "Password updated successfully"}
+    return {"message": "Safehold restored. Password updated successfully."}
 
 @router.put("/profile/update")
 async def update_profile(data: dict = Body(...)):

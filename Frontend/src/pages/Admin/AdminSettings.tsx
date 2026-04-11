@@ -84,6 +84,7 @@ const AdminSettings = () => {
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [copyrightText, setCopyrightText] = useState("");
   const [seo, setSeo] = useState({ title: "", description: "", keywords: "" });
+  const [priceFilters, setPriceFilters] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -126,6 +127,7 @@ const AdminSettings = () => {
         setWhatsappNumber(data.whatsappNumber || "");
         setCopyrightText(data.copyrightText || "");
         setSeo(data.seo || { title: "", description: "", keywords: "" });
+        setPriceFilters(data.priceFilters || []);
       }
     } catch (error) {
       toast.error("Could not reach the Settings Database.");
@@ -143,7 +145,8 @@ const AdminSettings = () => {
         body: JSON.stringify({ 
           whatsappNumber,
           copyrightText,
-          seo
+          seo,
+          priceFilters
         })
       });
       if (response.ok) {
@@ -800,30 +803,6 @@ const AdminSettings = () => {
             </>
           )}
         </motion.section>
-
-
-        {/* ── System Health ── */}
-        <div className={`p-6 border rounded-[2rem] flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-700 ${
-          isDark ? "bg-white/5 border-white/12" : "bg-charcoal/5 border-charcoal/12"
-        }`}>
-          <div className="flex items-center gap-5">
-            <div className="w-12 h-12 rounded-full bg-gold/10 flex items-center justify-center text-gold shadow-xl">
-              <Sparkles size={22} />
-            </div>
-            <div>
-              <p className={`text-[11px] font-extrabold uppercase tracking-[0.3em] ${isDark ? "text-white/40" : "text-charcoal/60"}`}>
-                System Health Status
-              </p>
-              <p className={`text-lg font-extrabold uppercase tracking-[0.08em] ${isDark ? "text-white" : "text-charcoal"}`}>
-                Connectivity Optimized
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 text-gold font-bold uppercase tracking-widest text-[10px]">
-            <CheckCircle2 size={14} />
-            Cloud Synchronization Active
-          </div>
-        </div>
       </div>
     </div>
   );

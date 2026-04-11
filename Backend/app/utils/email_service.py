@@ -133,3 +133,94 @@ async def send_welcome_email(to_email: str):
         logger.info(f"Successfully sent welcome email to {to_email}")
     except Exception as e:
         logger.error(f"Failed to send welcome email to {to_email}: {str(e)}")
+
+async def send_password_reset_otp_email(to_email: str, otp: str):
+    """
+    Sends a high-fidelity, luxury-branded password reset OTP email to an administrator.
+    """
+    db = await get_database()
+    db_creds = await get_smtp_credentials()
+    
+    # Credentials & Content Setup (matching welcome email logic)
+    smtp_host = (db_creds or {}).get("smtpHost") or settings.SMTP_HOST
+    smtp_port = (db_creds or {}).get("smtpPort") or settings.SMTP_PORT
+    smtp_user = (db_creds or {}).get("smtpUser") or settings.SMTP_USER
+    smtp_pass = (db_creds or {}).get("smtpPassword") or settings.SMTP_PASSWORD
+    smtp_from_db = (db_creds or {}).get("smtpFromEmail")
+    
+    from_email = smtp_from_db or smtp_user or settings.SMTP_FROM_EMAIL
+    from_name = settings.SMTP_FROM_NAME or "Luscent Glow Sanctuary"
+    
+    if not smtp_user or not smtp_pass:
+        logger.warning(f"SMTP credentials not configured. Skipping password reset email to {to_email}")
+        return
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = f"{from_name} <{from_email}>"
+        msg['To'] = to_email
+        msg['Subject'] = "Your Access Ritual: Password Recovery"
+
+        html = f"""
+        <html>
+        <body style="margin: 0; padding: 0; font-family: 'Playfair Display', serif; background-color: #0c0c0c; color: #ffffff;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0c0c0c;">
+                <tr>
+                    <td align="center" style="padding: 40px 0;">
+                        <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #1a1a1a; border: 1px solid #c5a059; border-radius: 8px; overflow: hidden;">
+                            <!-- Header -->
+                            <tr>
+                                <td align="center" style="padding: 40px 0; background-color: #111111;">
+                                    <h1 style="margin: 0; font-size: 28px; letter-spacing: 3px; color: #c5a059; text-transform: uppercase;">Luscent Glow</h1>
+                                    <p style="margin: 10px 0 0; font-size: 10px; letter-spacing: 4px; color: #888888; text-transform: uppercase;">Administrative Sanctuary</p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Body -->
+                            <tr>
+                                <td style="padding: 40px 30px;">
+                                    <h2 style="margin: 0; font-size: 22px; color: #ffffff; font-weight: 300; text-align: center;">Identity Authentication</h2>
+                                    <p style="margin: 25px 0; font-size: 16px; line-height: 1.6; color: #aaaaaa; text-align: center; font-style: italic;">
+                                        A request has been initiated to reset the access credentials for your administrative profile. 
+                                        Please use the sacred code below to authorize this ritual.
+                                    </p>
+                                    
+                                    <!-- OTP Ritual -->
+                                    <div align="center" style="margin: 40px 0; background-color: #111111; padding: 30px; border: 1px dashed #c5a059; border-radius: 4px;">
+                                        <span style="font-size: 48px; letter-spacing: 15px; color: #c5a059; font-weight: bold; font-family: 'Courier New', monospace;">{otp}</span>
+                                    </div>
+                                    
+                                    <p style="margin: 25px 0; font-size: 13px; line-height: 1.6; color: #888888; text-align: center;">
+                                        This code is only valid for a limited window. If you did not initiate this recovery, 
+                                        please secure your workstation immediately.
+                                    </p>
+                                </td>
+                            </tr>
+                            
+                            <!-- Footer -->
+                            <tr>
+                                <td style="padding: 30px; background-color: #111111; border-top: 1px solid #333333; text-align: center;">
+                                    <p style="margin: 0; font-size: 10px; color: #555555; letter-spacing: 1px; text-transform: uppercase;">
+                                        &copy; 2026 Luscent Glow Management Portal<br>
+                                        Confidential Administrative Communication
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+
+        msg.attach(MIMEText(html, 'html'))
+        server = smtplib.SMTP(smtp_host, smtp_port)
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+        server.quit()
+        
+        logger.info(f"Successfully sent password reset OTP to {to_email}")
+    except Exception as e:
+        logger.error(f"Failed to send password reset email to {to_email}: {str(e)}")

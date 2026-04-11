@@ -15,6 +15,12 @@ async def get_global_settings():
         return {
             "whatsappNumber": "919537150942",
             "copyrightText": "© 2026 Luscent Glow. All rights reserved.",
+            "priceFilters": [
+                { "label": "Under ₹500", "min": 0, "max": 500 },
+                { "label": "₹500 – ₹1000", "min": 500, "max": 1000 },
+                { "label": "₹1000 – ₹2000", "min": 1000, "max": 2000 },
+                { "label": "Above ₹2000", "min": 2000, "max": 999999 }
+            ],
             "updatedAt": datetime.utcnow().isoformat()
         }
     return settings

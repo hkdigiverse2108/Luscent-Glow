@@ -22,63 +22,35 @@ const AdminLogin = () => {
   const { admin, adminLogin } = useAuth();
   const from = location.state?.from?.pathname || "/admin/dashboard";
 
-  // Stages: 'credentials', 'otp', 'forgot-password'
-  const [stage, setStage] = useState<'credentials' | 'otp' | 'forgot-password'>('credentials');
+  // Stages: 'credentials', 'otp', 'forgot-password', 'new-password'
+  const [stage, setStage] = useState<'credentials' | 'otp' | 'forgot-password' | 'new-password'>('credentials');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isMobileFocused, setIsMobileFocused] = useState(false);
+  const [isRecoveryFlow, setIsRecoveryFlow] = useState(false);
+  const [recoveryUserId, setRecoveryUserId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
     mobileNumber: "",
     password: "",
     otp: "",
-    newPassword: ""
+    newPassword: "",
+    confirmPassword: ""
   });
+
+  // Sanitization Ritual: Strips non-numerics and keeps last 10 digits
+  const sanitizeInput = (input: string) => {
+    const clean = input.replace(/\D/g, "");
+    return clean.length > 10 ? clean.slice(-10) : clean;
+  };
   
-  // Automatic Admin Login Link
+  // Ensure we are not already logged in
   useEffect(() => {
-    const performAutoLogin = async () => {
-      // Small delay for cinematic effect and to ensure the UI has mounted
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      if (!admin) {
-        setLoading(true);
-        // Default Industrial Credentials
-        const autoData = {
-          mobileNumber: "82005489888",
-          password: "Admin@123"
-        };
-        
-        try {
-          const response = await fetch(getApiUrl("/api/auth/signin"), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(autoData),
-          });
-
-          const data = await response.json();
-
-          if (response.ok && data.status === "success" && data.user.isAdmin) {
-            adminLogin(data.user);
-            toast.success("Authenticated: Access Granted.");
-            navigate(from, { replace: true });
-          }
-        } catch (error) {
-          // Silent fail to manual login if auto-login fails
-          console.error("Auto-login failed.");
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    if (!admin) {
-      performAutoLogin();
-    } else {
+    if (admin) {
       navigate(from, { replace: true });
     }
-  }, [admin, navigate, from, adminLogin]);
+  }, [admin, navigate, from]);
 
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,7 +61,7 @@ const AdminLogin = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mobileNumber: formData.mobileNumber,
+          mobileNumber: sanitizeInput(formData.mobileNumber),
           password: formData.password
         }),
       });
@@ -99,6 +71,7 @@ const AdminLogin = () => {
       if (response.ok) {
         if (data.status === "unverified") {
           toast.info("Identity verification required.");
+          setIsRecoveryFlow(false);
           setStage("otp");
         } else if (data.status === "success") {
           if (!data.user.isAdmin) {
@@ -123,19 +96,25 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
 
+    if (isRecoveryFlow) {
+      // Transition to password reset ritual
+      setStage("new-password");
+      setLoading(false);
+      return;
+    }
+
     try {
       const response = await fetch(getApiUrl("/api/auth/verify-otp"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mobileNumber: formData.mobileNumber,
-          otp: formData.otp
+          mobileNumber: sanitizeInput(formData.mobileNumber),
+          otp: formData.otp.trim()
         }),
       });
 
       if (response.ok) {
         toast.success("Access identity verified.");
-        // Re-signin to get user data or manual state update
         handleCredentialsSubmit(new Event('submit') as any);
       } else {
         const data = await response.json();
@@ -155,10 +134,13 @@ const AdminLogin = () => {
         const response = await fetch(getApiUrl("/api/auth/forgot-password"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mobileNumber: formData.mobileNumber }),
+            body: JSON.stringify({ mobileNumber: sanitizeInput(formData.mobileNumber) }),
         });
         if (response.ok) {
-            toast.success("Reset code sent to your mobile.");
+            const data = await response.json();
+            toast.success(data.message || "Reset ritual initiated. Check your email.");
+            setRecoveryUserId(data.userId);
+            setIsRecoveryFlow(true);
             setStage("otp");
         } else {
             const data = await response.json();
@@ -168,6 +150,51 @@ const AdminLogin = () => {
         toast.error("Recovery system error.");
     } finally {
         setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.newPassword !== formData.confirmPassword) {
+      toast.error(" Ritual mismatch: Passwords do not align.");
+      return;
+    }
+
+    if (formData.otp.trim().length !== 6) {
+      toast.error("Invalid Ritual Code: Must be exactly 6 digits.");
+      return;
+    }
+
+    setLoading(true);
+    const cleanOTP = formData.otp.trim().replace(/\s/g, "");
+    const resetPayload = {
+      mobileNumber: sanitizeInput(formData.mobileNumber),
+      otp: cleanOTP,
+      newPassword: formData.newPassword,
+      userId: recoveryUserId
+    };
+
+    console.log("Initiating Safehold Restoration with Failsafe Payload:", { ...resetPayload, newPassword: "****" });
+
+    try {
+      const response = await fetch(getApiUrl("/api/auth/reset-password"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(resetPayload),
+      });
+
+      if (response.ok) {
+        toast.success("Safehold restored. Password updated successfully.");
+        setStage("credentials");
+        setFormData({ ...formData, password: "", otp: "", newPassword: "", confirmPassword: "" });
+      } else {
+        const data = await response.json();
+        toast.error(data.detail || "Recovery finalization failed.");
+      }
+    } catch (error) {
+      toast.error("System synchronization failed.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -282,11 +309,15 @@ const AdminLogin = () => {
                 onSubmit={handleOTPSubmit} 
                 className="space-y-6"
               >
-                <div className="text-center space-y-4">
-                   <ShieldCheck className="text-gold mx-auto" size={48} />
-                   <h3 className="text-xl font-bold uppercase tracking-tight">OTP Verification</h3>
-                   <p className="text-white/40 text-sm italic">Enter the 6-digit code sent to your mobile.</p>
-                </div>
+                 <div className="text-center space-y-4">
+                    <ShieldCheck className="text-gold mx-auto" size={48} />
+                    <h3 className="text-xl font-bold uppercase tracking-tight">Recovery Verification</h3>
+                    <p className="text-white/40 text-sm italic">
+                      {isRecoveryFlow 
+                        ? "Enter the 6-digit ritual code sent to your administrative email." 
+                        : "Enter the code sent to your registered mobile number."}
+                    </p>
+                 </div>
 
                 <div className="space-y-6">
                   <input 
@@ -369,6 +400,78 @@ const AdminLogin = () => {
                     className="bg-gold hover:bg-white text-charcoal font-bold py-3 rounded-2xl transition-all uppercase tracking-widest text-xs disabled:opacity-50"
                   >
                     Send Reset Link
+                  </button>
+                </div>
+              </motion.form>
+            )}
+
+            {stage === 'new-password' && (
+              <motion.form 
+                key="new-password"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                onSubmit={handleResetPassword} 
+                className="space-y-6"
+              >
+                <div className="text-center space-y-4">
+                   <Lock className="text-gold mx-auto" size={48} />
+                   <h3 className="text-xl font-bold uppercase tracking-tight">Set New Password</h3>
+                   <p className="text-white/40 text-sm italic">Define your new administrative access credentials.</p>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-4 text-left">
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] ml-2">New Password</label>
+                    <div className="relative group/field">
+                      <KeyRound className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-gold transition-colors" size={20} />
+                      <input 
+                        type={showPassword ? "text" : "password"}
+                        required
+                        value={formData.newPassword}
+                        onChange={(e) => setFormData({...formData, newPassword: e.target.value})}
+                        placeholder="••••••••"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-16 pr-16 text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all font-body"
+                      />
+                      <button 
+                         type="button"
+                         onClick={() => setShowPassword(!showPassword)}
+                         className="absolute right-6 top-1/2 -translate-y-1/2 text-white/20 hover:text-gold transition-colors"
+                      >
+                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 text-left">
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] ml-2">Confirm Password</label>
+                    <div className="relative group/field">
+                      <ShieldCheck className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/field:text-gold transition-colors" size={20} />
+                      <input 
+                        type="password"
+                        required
+                        value={formData.confirmPassword}
+                        onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                        placeholder="••••••••"
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-16 pr-6 text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all font-body"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4">
+                  <button 
+                    disabled={loading}
+                    className="bg-gold hover:bg-white text-charcoal font-bold py-4 rounded-2xl transition-all uppercase tracking-widest text-xs disabled:opacity-50 shadow-xl shadow-gold/10"
+                  >
+                    {loading ? "Re-syncing..." : "Update Credentials"}
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => setStage('credentials')}
+                    className="text-xs font-bold text-white/20 hover:text-gold uppercase tracking-widest transition-colors py-2"
+                  >
+                    Cancel Ritual
                   </button>
                 </div>
               </motion.form>

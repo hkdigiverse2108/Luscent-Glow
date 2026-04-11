@@ -189,9 +189,10 @@ class PasswordResetModel(BaseModel):
     """
     Schema for password reset.
     """
-    mobileNumber: str = Field(...)
+    mobileNumber: Optional[str] = Field(default=None)
     otp: str = Field(...)
     newPassword: str = Field(...)
+    userId: Optional[str] = Field(default=None)
 
 class CartItemModel(BaseModel):
     """
@@ -278,6 +279,7 @@ class OrderModel(BaseModel):
     status: str = Field(default="Processing") # Processing, Quality Check, Shipped, Delivered, Cancelled
     paymentStatus: str = Field(default="Pending")
     shippingAddress: Optional[dict] = Field(default=None)
+    userName: Optional[str] = Field(default=None)
     createdAt: str = Field(...)
     orderNumber: str = Field(...)
     merchantTransactionId: Optional[str] = Field(default=None)
@@ -903,10 +905,16 @@ class NewsletterEmailSettingsModel(BaseModel):
             }
         }
 
+class PriceFilterModel(BaseModel):
+    label: str
+    min: float
+    max: float
+
 class GlobalSettingsModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     whatsappNumber: str = Field(default="919537150942")
     copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
+    priceFilters: List[PriceFilterModel] = Field(default_factory=list)
     updatedAt: Optional[str] = None
 
     class Config:
@@ -947,3 +955,43 @@ class SmtpCredentialsModel(BaseModel):
 
     class Config:
         populate_by_name = True
+
+class CouponModel(BaseModel):
+    """
+    Schema for promotional discount coupons.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    code: str = Field(...)
+    discountType: str = Field(...) # percentage, fixed, shipping
+    value: float = Field(..., ge=0)
+    minPurchase: float = Field(default=0, ge=0)
+    expiryDate: str = Field(...)
+    description: Optional[str] = Field(default=None)
+    isActive: bool = Field(default=True)
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+        json_schema_extra = {
+            "example": {
+                "code": "GLOW20",
+                "discountType": "percentage",
+                "value": 20,
+                "minPurchase": 1000,
+                "expiryDate": "2026-05-31",
+                "isActive": True
+            }
+        }
+
+class UpdateCouponModel(BaseModel):
+    """
+    Schema for updating coupons.
+    """
+    code: Optional[str] = None
+    discountType: Optional[str] = None
+    value: Optional[float] = None
+    minPurchase: Optional[float] = None
+    expiryDate: Optional[str] = None
+    description: Optional[str] = None
+    isActive: Optional[bool] = None

@@ -164,6 +164,7 @@ const Checkout = () => {
         totalAmount: total,
         paymentStatus: "Pending",
         shippingAddress: {
+          fullName: address.fullName || user?.fullName || "Guest",
           street: address.street,
           city: address.city,
           state: address.state,

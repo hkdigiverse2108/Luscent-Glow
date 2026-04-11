@@ -420,13 +420,21 @@ const Cart = () => {
                                          <div className="flex justify-between items-start gap-4 mb-6">
                                            <div className="space-y-3 flex-1">
                                               <h6 className="font-display text-lg font-bold text-gold/80 tracking-tight uppercase italic">Glow Boutique</h6>
-                                              <h4 className="text-xl font-display font-medium text-charcoal leading-tight tracking-tight">{coupon.code === "GLOW20" ? "20% Radiance" : coupon.code === "FESTIVE15" ? "15% Celebration" : coupon.code === "FREESHIP" ? "Free Logistics" : "₹500 Ritual Offset"}</h4>
+                                              <h4 className="text-xl font-display font-medium text-charcoal leading-tight tracking-tight">
+                                                {coupon.description || (
+                                                  coupon.discountType === "percentage" ? `${coupon.value}% Radiance` :
+                                                  coupon.discountType === "fixed" ? `₹${coupon.value} Ritual Offset` :
+                                                  "Free Logistics"
+                                                )}
+                                              </h4>
                                            </div>
                                            <button disabled={appliedCoupon?.code === coupon.code} onClick={() => { applyCoupon(coupon.code); setIsCouponsModalOpen(false); }} className={`px-8 py-3 rounded-full border text-[10px] font-body font-bold uppercase tracking-widest transition-all ${appliedCoupon?.code === coupon.code ? 'bg-gold/10 border-gold/20 text-gold cursor-default' : 'bg-charcoal text-white hover:bg-gold hover:text-charcoal border-transparent active:scale-95'}`}>{appliedCoupon?.code === coupon.code ? "Active" : "Apply"}</button>
                                          </div>
                                           <div className="flex items-center justify-between bg-secondary rounded-xl px-4 py-3 border border-gold/5">
                                             <span className="text-[11px] font-mono font-bold text-charcoal tracking-widest">{coupon.code}</span>
-                                            <span className="text-[8px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">Sacred until May 2026</span>
+                                            <span className="text-[8px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.2em]">
+                                              Sacred until {new Date(coupon.expiryDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                            </span>
                                           </div>
                                        </div>
                                      ))}

@@ -16,11 +16,11 @@ import {
 } from "@/components/ui/select";
 import { getApiUrl } from "@/lib/api";
 
-const priceRanges = [
+const DEFAULT_PRICE_RANGES = [
   { label: "Under ₹500", min: 0, max: 500 },
   { label: "₹500 – ₹1000", min: 500, max: 1000 },
   { label: "₹1000 – ₹2000", min: 1000, max: 2000 },
-  { label: "Above ₹2000", min: 2000, max: Infinity },
+  { label: "Above ₹2000", min: 2000, max: 999999 },
 ];
 
 const sortOptions = [
@@ -42,6 +42,7 @@ const Products = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
   const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
+  const [dynamicPriceRanges, setDynamicPriceRanges] = useState<any[]>(DEFAULT_PRICE_RANGES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,9 +55,10 @@ const Products = () => {
     const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const [prodRes, catRes] = await Promise.all([
+        const [prodRes, catRes, settingsRes] = await Promise.all([
           fetch(getApiUrl("/api/products/")),
-          fetch(getApiUrl("/api/categories/"))
+          fetch(getApiUrl("/api/categories/")),
+          fetch(getApiUrl("/api/settings/global/"))
         ]);
 
         if (prodRes.ok) {
@@ -69,6 +71,13 @@ const Products = () => {
         if (catRes.ok) {
           const cats = await catRes.json();
           if (cats.length > 0) setDynamicCategories(cats);
+        }
+
+        if (settingsRes.ok) {
+          const settingsData = await settingsRes.json();
+          if (settingsData.priceFilters && settingsData.priceFilters.length > 0) {
+            setDynamicPriceRanges(settingsData.priceFilters);
+          }
         }
 
         setError(null);
@@ -99,8 +108,10 @@ const Products = () => {
     );
   }
   if (selectedPriceRange !== null) {
-    const range = priceRanges[selectedPriceRange];
-    filtered = filtered.filter((p) => p.price >= range.min && p.price < range.max);
+    const range = dynamicPriceRanges[selectedPriceRange];
+    if (range) {
+      filtered = filtered.filter((p) => p.price >= range.min && p.price < range.max);
+    }
   }
 
   if (sortBy === "price-asc") filtered = [...filtered].sort((a, b) => a.price - b.price);
@@ -154,7 +165,7 @@ const Products = () => {
       <div>
         <h3 className="font-display text-lg font-semibold mb-4 text-foreground">Price Range</h3>
         <div className="space-y-2">
-          {priceRanges.map((range, i) => (
+          {dynamicPriceRanges.map((range, i) => (
             <button
               key={i}
               onClick={() => setSelectedPriceRange(selectedPriceRange === i ? null : i)}
@@ -205,8 +216,10 @@ const Products = () => {
           {/* Main content */}
           <div className="flex-1">
             {/* Top bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-                Showing <span className="text-foreground font-semibold">{filtered.length}</span> products
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-6 border-b border-gold/10 pb-6">
+              <p className="text-xs md:text-sm font-body font-medium text-muted-foreground order-2 sm:order-1 tracking-wide">
+                Showing <span className="text-charcoal font-bold px-1.5 py-0.5 bg-gold/5 rounded-md border border-gold/10">{filtered.length}</span> luxury items
+              </p>
               <div className="flex items-center justify-between sm:justify-end gap-3 order-1 sm:order-2">
                 <button
                   onClick={() => setSidebarOpen(true)}

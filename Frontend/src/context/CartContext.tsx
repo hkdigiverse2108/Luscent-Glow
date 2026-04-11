@@ -16,9 +16,15 @@ export interface CartItem {
 }
 
 export interface Coupon {
+  id?: string;
+  _id?: string;
   code: string;
   discountType: "percentage" | "fixed" | "shipping";
   value: number;
+  minPurchase?: number;
+  expiryDate: string;
+  description?: string;
+  isActive: boolean;
 }
 
 export interface AppliedGiftCard {
@@ -82,6 +88,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : null;
   });
   const [receivedGiftCards, setReceivedGiftCards] = useState<AppliedGiftCard[]>([]);
+  const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
+
+  const fetchCoupons = useCallback(async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/coupons/"));
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableCoupons(data);
+      }
+    } catch (error) {
+      console.error("Error fetching available coupons:", error);
+    }
+  }, []);
 
   const fetchServerCart = useCallback(async () => {
     const user = getLoggedInUser();
@@ -117,30 +136,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    fetchCoupons();
     fetchServerCart();
     fetchReceivedGiftCards();
-  }, [fetchServerCart, fetchReceivedGiftCards]);
+  }, [fetchCoupons, fetchServerCart, fetchReceivedGiftCards]);
 
   useEffect(() => {
     localStorage.setItem("luscent-glow-cart", JSON.stringify(items));
   }, [items]);
 
-  useEffect(() => {
-    if (appliedCoupon) {
-      localStorage.setItem("luscent-glow-applied-coupon", JSON.stringify(appliedCoupon));
-    } else {
-      localStorage.removeItem("luscent-glow-applied-coupon");
-    }
-  }, [appliedCoupon]);
-
-  useEffect(() => {
-    if (appliedGiftCard) {
-      localStorage.setItem("luscent-glow-applied-giftcard", JSON.stringify(appliedGiftCard));
-    } else {
-      localStorage.removeItem("luscent-glow-applied-giftcard");
-    }
-  }, [appliedGiftCard]);
-  
   useEffect(() => {
     if (appliedCoupon) {
       localStorage.setItem("luscent-glow-applied-coupon", JSON.stringify(appliedCoupon));
@@ -299,19 +303,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("luscent-glow-cart");
     localStorage.removeItem("luscent-glow-applied-coupon");
     localStorage.removeItem("luscent-glow-applied-giftcard");
-    toast.info("Cart cleared");
   };
-
-  const availableCoupons: Coupon[] = [
-    { code: "GLOW20", discountType: "percentage", value: 20 },
-    { code: "FESTIVE15", discountType: "percentage", value: 15 },
-    { code: "FREESHIP", discountType: "shipping", value: 0 },
-    { code: "GLOWUP", discountType: "fixed", value: 500 }
-  ];
 
   const applyCoupon = (code: string): boolean => {
     const coupon = availableCoupons.find((c) => c.code.toUpperCase() === code.toUpperCase());
     if (coupon) {
+      if (!coupon.isActive) {
+        toast.error("This coupon is no longer active");
+        return false;
+      }
       setAppliedCoupon(coupon);
       toast.success(`Coupon ${coupon.code} applied successfully!`);
       return true;

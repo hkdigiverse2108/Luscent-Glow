@@ -20,6 +20,7 @@ def serialize_order(o: dict) -> dict:
     o.setdefault("totalAmount", 0)
     o.setdefault("status", "Processing")
     o.setdefault("paymentStatus", "Pending")
+    o.setdefault("userName", "Guest Customer")
     o.setdefault("items", [])
     o.setdefault("createdAt", datetime.utcnow().isoformat())
     
@@ -52,6 +53,7 @@ async def create_order(order_data: dict = Body(...)):
     
     new_order = {
         "userMobile": order_data.get("userMobile"),
+        "userName": order_data.get("userName") or "Guest Customer",
         "items": order_data.get("items"),
         "totalAmount": order_data.get("totalAmount"),
         "status": "Processing",
