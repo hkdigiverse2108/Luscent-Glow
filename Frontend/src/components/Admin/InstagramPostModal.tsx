@@ -142,7 +142,7 @@ const InstagramPostModal = ({ isOpen, onClose, post, onSuccess }: InstagramPostM
                   className={`py-4 rounded-2xl border-2 transition-all font-body font-bold capitalize tracking-wider ${
                     formData.type === type 
                       ? 'border-gold bg-gold/5 text-gold' 
-                      : 'border-transparent bg-white/5 text-muted-foreground'
+                      : `border-transparent ${isDark ? 'bg-white/5' : 'bg-charcoal/5'} ${isDark ? 'text-white/40' : 'text-charcoal/40'}`
                   }`}
                 >
                   {type}
@@ -183,7 +183,7 @@ const InstagramPostModal = ({ isOpen, onClose, post, onSuccess }: InstagramPostM
                     value={formData.imageUrl}
                     onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
                     placeholder="Or paste external URL"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2 text-sm text-white focus:border-gold/50 outline-none transition-all font-body"
+                    className={`w-full ${isDark ? 'bg-white/5 border-white/10' : 'bg-charcoal/5 border-charcoal/10'} rounded-xl px-4 py-2 text-sm ${isDark ? 'text-white' : 'text-charcoal'} focus:border-gold/50 outline-none transition-all font-body`}
                   />
                 </div>
               </div>
@@ -200,7 +200,7 @@ const InstagramPostModal = ({ isOpen, onClose, post, onSuccess }: InstagramPostM
                   value={formData.postUrl}
                   onChange={(e) => setFormData(prev => ({ ...prev, postUrl: e.target.value }))}
                   placeholder="https://instagram.com/p/..."
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-gold/50 outline-none transition-all font-body"
+                  className={`w-full ${isDark ? 'bg-white/5 border-white/10' : 'bg-charcoal/5 border-charcoal/10'} rounded-2xl px-6 py-4 ${isDark ? 'text-white' : 'text-charcoal'} focus:border-gold/50 outline-none transition-all font-body`}
                   required
                 />
               </div>
@@ -213,7 +213,7 @@ const InstagramPostModal = ({ isOpen, onClose, post, onSuccess }: InstagramPostM
                   type="number"
                   value={formData.order}
                   onChange={(e) => setFormData(prev => ({ ...prev, order: parseInt(e.target.value) }))}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-gold/50 outline-none transition-all font-body"
+                  className={`w-full ${isDark ? 'bg-white/5 border-white/10' : 'bg-charcoal/5 border-charcoal/10'} rounded-2xl px-6 py-4 ${isDark ? 'text-white' : 'text-charcoal'} focus:border-gold/50 outline-none transition-all font-body`}
                 />
               </div>
             </div>
@@ -227,7 +227,7 @@ const InstagramPostModal = ({ isOpen, onClose, post, onSuccess }: InstagramPostM
                 onChange={(e) => setFormData(prev => ({ ...prev, caption: e.target.value }))}
                 placeholder="Brief internal note or actual caption..."
                 rows={3}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-gold/50 outline-none transition-all font-body"
+                className={`w-full ${isDark ? 'bg-white/5 border-white/10' : 'bg-charcoal/5 border-charcoal/10'} rounded-2xl px-6 py-4 ${isDark ? 'text-white' : 'text-charcoal'} focus:border-gold/50 outline-none transition-all font-body`}
               />
             </div>
 
@@ -238,7 +238,7 @@ const InstagramPostModal = ({ isOpen, onClose, post, onSuccess }: InstagramPostM
                 onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                 className="w-5 h-5 accent-gold cursor-pointer"
               />
-              <span className="text-sm font-body text-white">Active in Gallery</span>
+              <span className={`text-sm font-body ${isDark ? 'text-white' : 'text-charcoal'}`}>Active in Gallery</span>
             </div>
           </form>
 
