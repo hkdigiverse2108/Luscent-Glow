@@ -18,21 +18,27 @@ const EditorialVoiceModal = ({ isOpen, onClose, voice, onSuccess }: any) => {
   const [formData, setFormData] = useState<any>({
     name: "",
     badge: "EDITORIAL VOICE",
-    quote: "",
+    insights: "",
     image: "",
     isActive: false
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
+    setImgError(false);
     if (voice) {
-      setFormData({ ...voice });
+      const mappedVoice = { ...voice };
+      if (!mappedVoice.insights && mappedVoice.quote) {
+        mappedVoice.insights = mappedVoice.quote;
+      }
+      setFormData(mappedVoice);
     } else {
       setFormData({
         name: "",
         badge: "EDITORIAL VOICE",
-        quote: "",
+        insights: "",
         image: "",
         isActive: false
       });
@@ -56,6 +62,7 @@ const EditorialVoiceModal = ({ isOpen, onClose, voice, onSuccess }: any) => {
       if (response.ok) {
         const data = await response.json();
         setFormData({ ...formData, image: data.url });
+        setImgError(false);
         toast.success("Portrait archived in the project.");
       } else {
         toast.error("Failed to archive portrait.");
@@ -69,7 +76,7 @@ const EditorialVoiceModal = ({ isOpen, onClose, voice, onSuccess }: any) => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.quote || !formData.image) {
+    if (!formData.name || !formData.insights || !formData.image) {
       toast.error("Please illuminate all required fields.");
       return;
     }
@@ -115,17 +122,23 @@ const EditorialVoiceModal = ({ isOpen, onClose, voice, onSuccess }: any) => {
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
-            className={`relative w-full max-w-3xl overflow-hidden rounded-[3.5rem] border shadow-2xl flex flex-col ${isDark ? "bg-[#121212] border-white/10" : "bg-white border-gold/20"}`}
+            className={`relative w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-[3.5rem] border shadow-2xl flex flex-col ${isDark ? "bg-[#121212] border-white/10" : "bg-white border-gold/20"}`}
           >
-            <div className="p-10 border-b border-gold/10 flex items-center justify-between shrink-0 bg-gradient-to-r from-gold/5 via-transparent to-transparent">
+            <div className="p-10 border-b border-gold/10 flex items-center justify-between shrink-0 bg-gradient-to-r from-gold/10 via-transparent to-transparent">
                <div className="space-y-1">
-                  <h3 className="font-display text-3xl font-bold uppercase tracking-tight">
-                    {voice ? "Refine The" : "Archive A New"} <span className="text-gold italic">Voice</span>
+                  <h3 className="font-display text-4xl font-bold uppercase tracking-tight">
+                    {voice ? "Refine The" : "Archive A New"} <span className="text-gold italic text-5xl">Voice</span>
                   </h3>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] opacity-40">Editorial Authority & Philosophy</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold/60">Editorial Authority & Philosophy</p>
                </div>
-               <button onClick={onClose} className="p-4 bg-secondary/50 rounded-full hover:bg-rose-500/10 hover:text-rose-500 transition-all">
-                 <X size={24} />
+               <button 
+                onClick={onClose} 
+                className="group p-4 bg-secondary shadow-lg rounded-full hover:bg-rose-500 transition-all duration-500 flex items-center gap-3 pr-8"
+               >
+                 <div className="bg-white/10 p-2 rounded-full group-hover:bg-white/20 transition-colors">
+                    <X size={24} className={isDark ? "text-white" : "text-charcoal group-hover:text-white"} />
+                 </div>
+                 <span className="text-xs font-bold uppercase tracking-widest group-hover:text-white">Close Window</span>
                </button>
             </div>
 
@@ -138,23 +151,34 @@ const EditorialVoiceModal = ({ isOpen, onClose, voice, onSuccess }: any) => {
                               <Sparkles size={40} className="text-gold/40 mb-3" />
                               <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Illuminating...</p>
                            </div>
-                         ) : formData.image ? (
+                         ) : formData.image && !imgError ? (
                            <>
-                             <img src={getAssetUrl(formData.image)} alt="Preview" className="w-full h-full object-cover" />
+                             <img 
+                                src={getAssetUrl(formData.image)} 
+                                alt="Preview" 
+                                className="w-full h-full object-cover" 
+                                onError={() => setImgError(true)}
+                             />
                              <div className="absolute inset-0 bg-charcoal/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                <button 
                                  type="button" 
-                                 onClick={() => setFormData({...formData, image: ""})} 
-                                 className="p-3 bg-rose-500 text-white rounded-full shadow-xl"
+                                 onClick={() => { setFormData({...formData, image: ""}); setImgError(false); }} 
+                                 className="p-3 bg-rose-500 text-white rounded-full shadow-xl hover:scale-110 transition-transform"
                                >
                                  <X size={20} />
                                </button>
                              </div>
                            </>
                          ) : (
-                           <div className="flex flex-col items-center">
-                              <ImageIcon size={40} className="text-gold/20 mb-3" />
-                              <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 text-center">Portrait Reveal</p>
+                           <div className="flex flex-col items-center w-full h-full justify-center bg-secondary/20">
+                              {formData.name ? (
+                                <span className="font-display text-6xl font-bold text-gold/20 uppercase tracking-widest">
+                                   {formData.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                                </span>
+                              ) : (
+                                <ImageIcon size={40} className="text-gold/20 mb-3" />
+                              )}
+                              <p className="text-[10px] font-bold uppercase tracking-widest opacity-40 mt-3">{imgError ? "File Not Found" : "Portrait Reveal"}</p>
                               <input 
                                 type="file" 
                                 accept="image/*"
@@ -220,12 +244,12 @@ const EditorialVoiceModal = ({ isOpen, onClose, voice, onSuccess }: any) => {
                </div>
 
                <div className="space-y-4">
-                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 flex items-center gap-2"><Quote size={12} /> Signature Philosophy</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 flex items-center gap-2"><Quote size={12} /> Editorial Bio / Insights</label>
                   <textarea 
                     required 
-                    value={formData.quote}
-                    onChange={(e) => setFormData({...formData, quote: e.target.value})}
-                    placeholder="The core belief or philosophy that guides this voice..."
+                    value={formData.insights}
+                    onChange={(e) => setFormData({...formData, insights: e.target.value})}
+                    placeholder="The core belief, insights, or bio that defines this authority voice..."
                     className={`w-full p-8 rounded-[2.5rem] border min-h-[150px] font-body text-base italic leading-relaxed outline-none focus:border-gold/50 transition-all ${isDark ? "bg-white/5 border-white/5" : "bg-secondary/10 border-charcoal/5"}`}
                   />
                </div>
@@ -254,13 +278,30 @@ const EditorialVoiceModal = ({ isOpen, onClose, voice, onSuccess }: any) => {
             </form>
 
             <div className="p-10 border-t border-gold/10 flex items-center justify-end gap-10 shrink-0 bg-secondary/5">
-               <button onClick={onClose} className="text-[11px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity">Burn Draft</button>
+               <button 
+                type="button"
+                onClick={onClose} 
+                className="group flex items-center gap-3 text-[11px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity"
+               >
+                 <X size={14} className="group-hover:rotate-90 transition-transform" />
+                 Dismiss Window
+               </button>
                <button 
                  onClick={handleSave}
                  disabled={isSaving}
-                 className="flex items-center gap-4 bg-gold hover:bg-gold/80 text-charcoal px-14 py-6 rounded-full font-body font-bold text-[11px] uppercase tracking-[0.25em] transition-all disabled:opacity-50 shadow-2xl shadow-gold/30"
+                 className="flex items-center gap-4 bg-gold hover:bg-gold/80 hover:scale-105 active:scale-95 text-charcoal px-20 py-6 rounded-full font-body font-bold text-xs uppercase tracking-[0.3em] transition-all disabled:opacity-50 shadow-[0_20px_50px_rgba(212,175,55,0.3)] hover:shadow-gold/40 border-2 border-gold/50"
                >
-                 {isSaving ? "Archiving..." : <><Save size={20} /> {voice ? "Refine Voice" : "Archive Voice"}</>}
+                 {isSaving ? (
+                   <div className="flex items-center gap-3">
+                     <Sparkles size={18} className="animate-spin" />
+                     <span>Archiving...</span>
+                   </div>
+                 ) : (
+                   <>
+                     <Save size={20} className="drop-shadow-sm" /> 
+                     <span>{voice ? "Synchronize Voice" : "Communicate Voice"}</span>
+                   </>
+                 )}
                </button>
             </div>
           </motion.div>

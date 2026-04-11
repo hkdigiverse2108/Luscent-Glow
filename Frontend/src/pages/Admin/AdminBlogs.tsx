@@ -125,7 +125,7 @@ const AdminBlogs = () => {
 
   const filteredVoices = voices.filter(voice => 
     voice.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    voice.quote.toLowerCase().includes(searchQuery.toLowerCase())
+    (voice.insights || "").toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading || !settings) {
@@ -307,17 +307,23 @@ const AdminBlogs = () => {
                  exit={{ opacity: 0, y: -10 }}
                  className="grid gap-6 min-h-[600px]"
                >
-                  {filteredVoices.map((voice) => (
-                    <div key={voice._id || voice.id} className={`group p-6 rounded-[2.5rem] border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-gold/30" : "bg-white border-charcoal/10 shadow-lg hover:border-gold/50"}`}>
-                       <div className="flex flex-col lg:flex-row gap-8 items-center">
-                          <div className="w-32 h-32 rounded-full overflow-hidden shrink-0 border-2 border-gold/20 shadow-xl relative">
-                             <img src={getAssetUrl(voice.image)} alt={voice.name} className="w-full h-full object-cover" />
-                             {voice.isActive && (
-                               <div className="absolute -bottom-1 -right-1 bg-gold text-charcoal p-1 rounded-full border-2 border-[#121212]">
-                                 <CheckCircle2 size={14} />
-                               </div>
-                             )}
-                          </div>
+                   {filteredVoices.map((voice) => {
+                     const initials = voice.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2);
+                     return (
+                      <div key={voice._id || voice.id} className={`group p-6 rounded-[2.5rem] border transition-all hover:scale-[1.01] ${isDark ? "bg-white/5 border-white/10 hover:border-gold/30" : "bg-white border-charcoal/10 shadow-lg hover:border-gold/50"}`}>
+                        <div className="flex flex-col lg:flex-row gap-8 items-center">
+                           <div className="w-32 h-32 rounded-full overflow-hidden shrink-0 border-2 border-gold/20 shadow-xl relative bg-secondary/30 flex items-center justify-center">
+                              {voice.image ? (
+                                <img src={getAssetUrl(voice.image)} alt={voice.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="font-display text-4xl font-bold text-gold/30 uppercase tracking-widest">{initials}</span>
+                              )}
+                              {voice.isActive && (
+                                <div className="absolute -bottom-1 -right-1 bg-gold text-charcoal p-1 rounded-full border-2 border-[#121212]">
+                                  <CheckCircle2 size={14} />
+                                </div>
+                              )}
+                           </div>
                           
                           <div className="flex-1 space-y-4">
                              <div className="flex items-center gap-4">
@@ -328,7 +334,7 @@ const AdminBlogs = () => {
                              <div className="relative z-10 flex items-center justify-between">
                                 <div>
                                   <h5 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold mb-1">Blog Insights</h5>
-                                  <p className={`text-xs font-semibold max-w-[220px] leading-relaxed opacity-60`}>Maintain regular updates to engage with your customers effectively.</p>
+                                  <p className={`text-xs font-semibold max-w-sm leading-relaxed opacity-60 line-clamp-2 italic`}>{voice.insights}</p>
                                 </div>
                              </div>
                           </div>
@@ -338,18 +344,19 @@ const AdminBlogs = () => {
                                onClick={() => { setSelectedVoice(voice); setIsVoiceModalOpen(true); }}
                                className="p-3 rounded-2xl bg-gold/10 text-gold hover:bg-gold hover:text-charcoal transition-all"
                              >
-                               <Edit2 size={18} />
+                                <Edit2 size={18} />
                              </button>
                              <button 
                                onClick={() => handleDeleteVoice(voice._id || voice.id)}
                                className="p-3 rounded-2xl bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
                              >
-                               <Trash2 size={18} />
+                                <Trash2 size={18} />
                              </button>
                           </div>
-                       </div>
-                    </div>
-                  ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                   {filteredVoices.length === 0 && (
                     <div className="py-20 text-center opacity-30 italic">No authors found...</div>
                   )}

@@ -523,7 +523,7 @@ class EditorialVoiceModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: str = Field(...)
     badge: str = Field(default="EDITORIAL VOICE")
-    quote: str = Field(...)
+    insights: str = Field(...)
     image: str = Field(...)
     isActive: bool = Field(default=False)
     updatedAt: Optional[str] = None
@@ -534,7 +534,7 @@ class EditorialVoiceModel(BaseModel):
             "example": {
                 "name": "Dr. Marcus Chen",
                 "badge": "EDITORIAL VOICE",
-                "quote": "Beauty is the outward reflection of a harmonious soul.",
+                "insights": "Beauty is the outward reflection of a harmonious soul.",
                 "image": "/assets/blog/authors/marcus.png",
                 "isActive": True
             }
@@ -673,52 +673,6 @@ class GlobalSettingsModel(BaseModel):
             }
         }
 
-class PaymentCredentialsModel(BaseModel):
-    """
-    Model for payment gateway credentials stored in the database.
-    These override the .env defaults at runtime.
-    """
-    id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    activeGateway: str = Field(default="razorpay") # "razorpay" or "cashfree"
-    
-    # Razorpay Credentials
-    keyId: str = Field(default="")
-    keySecret: str = Field(default="")
-    mode: str = Field(default="sandbox")  # "sandbox" or "live"
-    
-    # Cashfree Credentials
-    cashfreeAppId: str = Field(default="")
-    cashfreeSecretKey: str = Field(default="")
-    cashfreeMode: str = Field(default="sandbox") # "sandbox" or "live"
-    
-    # Shiprocket Credentials
-    shiprocketEmail: str = Field(default="")
-    shiprocketPassword: str = Field(default="")
-    shiprocketPickupLocation: str = Field(default="Primary")
-    
-    # SMTP Credentials
-    smtpHost: str = Field(default="smtp.gmail.com")
-    smtpPort: int = Field(default=587)
-    smtpUser: str = Field(default="")
-    smtpPassword: str = Field(default="")
-    smtpFromEmail: str = Field(default="")
-    
-    updatedAt: Optional[str] = None
-
-    class Config:
-        populate_by_name = True
-        json_schema_extra = {
-            "example": {
-                "activeGateway": "razorpay",
-                "keyId": "",
-                "keySecret": "",
-                "mode": "sandbox",
-                "cashfreeAppId": "",
-                "cashfreeSecretKey": "",
-                "cashfreeMode": "sandbox",
-                "smtpUser": "admin@example.com"
-            }
-        }
 
 class OfferModel(BaseModel):
     """

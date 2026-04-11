@@ -10,7 +10,7 @@ router = APIRouter(prefix="/upload", tags=["Upload"])
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 UPLOAD_DIR = os.path.join(PROJECT_ROOT, "Frontend", "public", "uploads")
 
-@router.post("/", response_description="Upload a file")
+@router.post("", response_description="Upload a file")
 async def upload_file(file: UploadFile = File(...)):
     # Create directory if it doesn't exist
     if not os.path.exists(UPLOAD_DIR):

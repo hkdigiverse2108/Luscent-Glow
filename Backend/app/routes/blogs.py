@@ -43,6 +43,12 @@ async def update_blog_settings(settings: BlogSettingsModel):
 async def list_editorial_voices():
     db = await get_database()
     voices = await db["editorial_voices"].find().to_list(100)
+    
+    # Data migration fallback: convert 'quote' to 'insights' if 'insights' is missing
+    for voice in voices:
+        if "insights" not in voice and "quote" in voice:
+            voice["insights"] = voice.pop("quote")
+            
     return voices
 
 @router.post("/editorial-voices", response_description="Create a new editorial voice", response_model=EditorialVoiceModel)

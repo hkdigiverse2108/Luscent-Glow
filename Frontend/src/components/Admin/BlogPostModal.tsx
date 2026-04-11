@@ -30,8 +30,10 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
+    setImgError(false);
     if (post) {
       setFormData({
         ...post,
@@ -69,6 +71,7 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
       if (response.ok) {
         const data = await response.json();
         setFormData({ ...formData, image: data.url });
+        setImgError(false);
         toast.success("Story visual archived in the project.");
       } else {
         toast.error("Failed to archive visual.");
@@ -127,15 +130,21 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             className={`relative w-full max-w-5xl h-[90vh] overflow-hidden rounded-[3rem] border shadow-2xl flex flex-col ${isDark ? "bg-charcoal border-white/10" : "bg-white border-gold/20"}`}
           >
-            <div className="p-8 border-b border-gold/10 flex items-center justify-between shrink-0">
+            <div className="p-8 border-b border-gold/10 flex items-center justify-between shrink-0 bg-gradient-to-r from-gold/10 via-transparent to-transparent">
                <div className="space-y-1">
-                  <h3 className="font-display text-2xl font-bold uppercase tracking-tight">
-                    {post ? "Refine The" : "Compose A New"} <span className="text-gold italic">Story</span>
+                  <h3 className="font-display text-3xl font-bold uppercase tracking-tight">
+                    {post ? "Refine The" : "Compose A New"} <span className="text-gold italic text-4xl">Story</span>
                   </h3>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Markdown & Ritual Settings</p>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold/60">Markdown & Ritual Settings</p>
                </div>
-               <button onClick={onClose} className="p-3 bg-secondary/50 rounded-full hover:bg-rose-500/10 hover:text-rose-500 transition-all">
-                 <X size={20} />
+               <button 
+                onClick={onClose} 
+                className="group p-3 bg-secondary shadow-lg rounded-full hover:bg-rose-500 transition-all duration-500 flex items-center gap-3 pr-6"
+               >
+                 <div className="bg-white/10 p-2 rounded-full group-hover:bg-white/20 transition-colors">
+                    <X size={20} className={isDark ? "text-white" : "text-charcoal group-hover:text-white"} />
+                 </div>
+                 <span className="text-[10px] font-bold uppercase tracking-widest group-hover:text-white">Close</span>
                </button>
             </div>
 
@@ -173,13 +182,18 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
                               <Sparkles size={32} className="text-gold/40 mb-2" />
                               <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Archiving Visual...</p>
                            </div>
-                         ) : formData.image ? (
+                         ) : formData.image && !imgError ? (
                            <>
-                             <img src={getAssetUrl(formData.image)} alt="Preview" className="w-full h-full object-cover" />
+                             <img 
+                                src={getAssetUrl(formData.image)} 
+                                alt="Preview" 
+                                className="w-full h-full object-cover" 
+                                onError={() => setImgError(true)}
+                             />
                              <div className="absolute inset-0 bg-charcoal/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                <button 
                                  type="button" 
-                                 onClick={() => setFormData({...formData, image: ""})} 
+                                 onClick={() => { setFormData({...formData, image: ""}); setImgError(false); }} 
                                  className="p-3 bg-rose-500 text-white rounded-xl shadow-xl hover:scale-110 transition-transform"
                                >
                                  <X size={16} />
@@ -187,16 +201,16 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
                              </div>
                            </>
                          ) : (
-                           <>
-                             <ImageIcon size={32} className="text-gold/30 mb-2" />
-                             <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">Archive Visual</p>
-                             <input 
-                               type="file" 
-                               accept="image/*"
-                               onChange={handleFileChange}
-                               className="absolute inset-0 opacity-0 cursor-pointer"
-                             />
-                           </>
+                           <div className="flex flex-col items-center w-full h-full justify-center bg-secondary/20">
+                              <ImageIcon size={32} className="text-gold/20 mb-2" />
+                              <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">{imgError ? "File Not Found" : "Archive Visual"}</p>
+                              <input 
+                                type="file" 
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                              />
+                           </div>
                          )}
                       </div>
                       
@@ -264,14 +278,31 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
             </form>
 
             <div className="p-8 border-t border-gold/10 flex items-center justify-end gap-6 shrink-0 bg-secondary/10">
-               <button onClick={onClose} className="text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity px-8">Discard Draft</button>
-               <button 
-                 onClick={handleSave}
-                 disabled={isSaving}
-                 className="flex items-center gap-3 bg-gold hover:bg-gold/80 text-charcoal px-12 py-5 rounded-full font-body font-bold text-xs uppercase tracking-[0.2em] transition-all disabled:opacity-50 shadow-xl shadow-gold/20"
-               >
-                 {isSaving ? "Publishing..." : <><Save size={18} /> {post ? "Synchronize" : "Illuminate Story"}</>}
-               </button>
+                <button 
+                  type="button"
+                  onClick={onClose} 
+                  className="group flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity px-8"
+                >
+                  <X size={14} className="group-hover:rotate-90 transition-transform" />
+                  Dismiss
+                </button>
+                <button 
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="flex items-center gap-4 bg-gold hover:bg-gold/80 hover:scale-105 active:scale-95 text-charcoal px-16 py-5 rounded-full font-body font-bold text-xs uppercase tracking-[0.25em] transition-all disabled:opacity-50 shadow-[0_15px_35px_rgba(212,175,55,0.2)] hover:shadow-gold/40 border-[1px] border-gold/40"
+                >
+                  {isSaving ? (
+                    <div className="flex items-center gap-3">
+                      <Sparkles size={16} className="animate-spin" />
+                      <span>Synchronizing...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Save size={18} className="drop-shadow-sm" /> 
+                      <span>{post ? "Synchronize Story" : "Illuminate Story"}</span>
+                    </>
+                  )}
+                </button>
             </div>
           </motion.div>
         </div>

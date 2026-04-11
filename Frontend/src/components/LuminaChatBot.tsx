@@ -93,9 +93,18 @@ const LuminaChatBot = () => {
   }, [messages, isOpen, scrollToBottom]);
 
   useEffect(() => {
+    if (isOpen && !isLoading && !isMinimized) {
+      // Small delay to ensure the textarea is no longer disabled in the DOM
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, isLoading, isMinimized]);
+
+  useEffect(() => {
     if (isOpen) {
       setUnreadCount(0);
-      setTimeout(() => inputRef.current?.focus(), 300);
     }
   }, [isOpen]);
 
@@ -113,9 +122,6 @@ const LuminaChatBot = () => {
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
-
-    // Auto-focus after sending
-    setTimeout(() => inputRef.current?.focus(), 10);
 
     // Build history for API (exclude welcome message)
     const history = messages
@@ -151,8 +157,6 @@ const LuminaChatBot = () => {
       setMessages((prev) => [...prev, errMsg]);
     } finally {
       setIsLoading(false);
-      // Ensure cursor returns after response
-      setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
 
@@ -166,6 +170,7 @@ const LuminaChatBot = () => {
   const handleReset = () => {
     setMessages([WELCOME_MESSAGE]);
     setInput("");
+    setTimeout(() => inputRef.current?.focus(), 10);
   };
 
   return (

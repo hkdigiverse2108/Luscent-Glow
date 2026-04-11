@@ -260,8 +260,14 @@ const Blogs = () => {
                   >
                     <div className="relative shrink-0">
                       <div className={`absolute -inset-4 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 ${voice.isActive ? "bg-gold/20" : "bg-black/5"}`} />
-                      <div className={`relative w-32 h-32 md:w-40 md:h-40 rounded-full border-2 overflow-hidden transition-all duration-700 ${voice.isActive ? "border-gold scale-105 shadow-2xl" : "border-white/50 group-hover:border-gold/30 grayscale-[50%] group-hover:grayscale-0"}`}>
-                        <img src={getAssetUrl(voice.image)} alt={voice.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <div className={`relative w-32 h-32 md:w-40 md:h-40 rounded-full border-2 overflow-hidden transition-all duration-700 flex items-center justify-center bg-secondary/30 ${voice.isActive ? "border-gold scale-105 shadow-2xl" : "border-white/50 group-hover:border-gold/30 grayscale-[50%] group-hover:grayscale-0"}`}>
+                        {voice.image ? (
+                          <img src={getAssetUrl(voice.image)} alt={voice.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        ) : (
+                          <span className="font-display text-4xl md:text-5xl font-bold text-gold/30 uppercase tracking-widest">
+                            {voice.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+                          </span>
+                        )}
                       </div>
                       {voice.isActive && (
                         <div className="absolute -bottom-2 -right-2 bg-gold text-charcoal p-2 rounded-full shadow-xl border-4 border-white animate-bounce-slow">
@@ -283,7 +289,7 @@ const Blogs = () => {
                       <div className="relative">
                         <Quote className="absolute -left-6 -top-2 opacity-5 text-gold hidden lg:block" size={32} />
                         <p className="text-charcoal/60 font-body text-sm md:text-base leading-relaxed italic line-clamp-3">
-                          "{voice.quote}"
+                          "{voice.insights}"
                         </p>
                       </div>
                     </div>
