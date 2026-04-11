@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import WhatsAppButton from "@/components/WhatsAppButton";
 import { categories, Product, products } from "@/data/products";
+import SEO from "@/components/SEO";
 import { 
   Select,
   SelectContent,
@@ -179,8 +180,15 @@ const Products = () => {
     </div>
   );
 
+  const currentCategory = selectedCategory ? dynamicCategories.find(c => c.slug === selectedCategory) : null;
+  const pageSEO = currentCategory?.seo || {
+    title: selectedCategory ? `${currentCategory?.name || "Category"} | Luscent Glow` : "All Products | Luscent Glow",
+    description: selectedCategory ? `Explore our premium ${currentCategory?.name || "Category"} collection.` : "Discover our full range of botanical skincare rituals."
+  };
+
   return (
     <div className="min-h-screen bg-background">
+      <SEO seo={pageSEO} />
       <Header />
       <main className="container mx-auto px-4 py-6 md:py-8 lg:py-12">
         {/* Breadcrumb */}

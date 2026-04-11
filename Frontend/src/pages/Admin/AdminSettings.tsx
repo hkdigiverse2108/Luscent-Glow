@@ -30,6 +30,7 @@ import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { getApiUrl } from "../../lib/api";
 import { toast } from "sonner";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
+import SEOForm from "../../components/Admin/SEOForm.tsx";
 
 type PaymentCreds = {
   activeGateway: "razorpay" | "cashfree";
@@ -82,6 +83,7 @@ const AdminSettings = () => {
   
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [copyrightText, setCopyrightText] = useState("");
+  const [seo, setSeo] = useState({ title: "", description: "", keywords: "" });
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -123,6 +125,7 @@ const AdminSettings = () => {
         const data = await response.json();
         setWhatsappNumber(data.whatsappNumber || "");
         setCopyrightText(data.copyrightText || "");
+        setSeo(data.seo || { title: "", description: "", keywords: "" });
       }
     } catch (error) {
       toast.error("Could not reach the Settings Database.");
@@ -139,7 +142,8 @@ const AdminSettings = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           whatsappNumber,
-          copyrightText
+          copyrightText,
+          seo
         })
       });
       if (response.ok) {
@@ -421,6 +425,30 @@ const AdminSettings = () => {
             >
               <RefreshCcw size={14} />
               Re-Sync
+            </button>
+          </div>
+        </motion.section>
+
+        {/* ── Global SEO Settings ── */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className={cardClass}
+        >
+          <SEOForm 
+            seo={seo} 
+            onChange={setSeo} 
+            isDark={isDark} 
+          />
+          <div className="flex flex-col sm:flex-row gap-3 mt-10">
+            <button
+              onClick={handleUpdate}
+              disabled={saving}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-gold text-white rounded-2xl font-bold uppercase tracking-[0.15em] text-xs hover:bg-gold/80 transition-all shadow-lg shadow-gold/20 disabled:opacity-50"
+            >
+              {saving ? <RefreshCcw size={14} className="animate-spin" /> : <Save size={14} />}
+              {saving ? "Saving Changes..." : "Save Global SEO"}
             </button>
           </div>
         </motion.section>

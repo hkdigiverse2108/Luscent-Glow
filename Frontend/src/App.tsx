@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/CartContext.tsx";
 import { WishlistProvider } from "./context/WishlistContext.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index.tsx";
 import Products from "./pages/Products.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
@@ -53,9 +54,10 @@ import { AdminThemeProvider } from "./context/AdminThemeContext.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <WishlistProvider>
-      <CartProvider>
+  <HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <WishlistProvider>
+        <CartProvider>
         <AuthProvider>
           <TooltipProvider>
             <Toaster />
@@ -125,7 +127,8 @@ const App = () => (
         </AuthProvider>
       </CartProvider>
     </WishlistProvider>
-  </QueryClientProvider>
+    </QueryClientProvider>
+  </HelmetProvider>
 );
 
 export default App;

@@ -12,6 +12,7 @@ import WhatsAppButton from "@/components/WhatsAppButton";
 import LuminaChatBot from "@/components/LuminaChatBot";
 import { getApiUrl } from "@/lib/api";
 import { Loader2 } from "lucide-react";
+import SEO from "@/components/SEO";
 
 const Index = () => {
   const [settings, setSettings] = useState<any>(null);
@@ -45,6 +46,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO seo={settings?.seo} />
       <Header />
       <main>
         <HeroCarousel slides={settings?.heroSlides} />
