@@ -19,9 +19,9 @@ const Blogs = () => {
   const fetchData = async () => {
     try {
       const [postsRes, settingsRes, voicesRes] = await Promise.all([
-        fetch(getApiUrl("blogs")),
-        fetch(getApiUrl("blogs/settings")),
-        fetch(getApiUrl("blogs/editorial-voices"))
+        fetch(getApiUrl("blogs/")),
+        fetch(getApiUrl("blogs/settings/")),
+        fetch(getApiUrl("blogs/editorial-voices/"))
       ]);
       
       if (postsRes.ok) {
@@ -85,17 +85,17 @@ const Blogs = () => {
     );
   }
 
-  const featuredPost = posts.length > 0 
+  const featuredPost = (posts && Array.isArray(posts) && posts.length > 0)
     ? (posts.find(post => post.featured === true) || posts[0])
     : null;
 
   // Filter out the featured post from the grid, comparing both _id and id safely
-  const filteredPosts = posts.filter(post => {
+  const filteredPosts = (posts && Array.isArray(posts)) ? posts.filter(post => {
     if (!featuredPost) return true;
     const postId = String(post._id || post.id);
     const featuredId = String(featuredPost._id || featuredPost.id);
     return postId !== featuredId;
-  });
+  }) : [];
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">

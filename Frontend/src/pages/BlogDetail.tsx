@@ -21,8 +21,8 @@ const BlogDetail = () => {
     const fetchData = async () => {
       try {
         const [postRes, voicesRes] = await Promise.all([
-          fetch(getApiUrl(`blogs/${id}`)),
-          fetch(getApiUrl("blogs/editorial-voices"))
+          fetch(getApiUrl(`blogs/${id}/`)),
+          fetch(getApiUrl("blogs/editorial-voices/"))
         ]);
         
         let postData = null;
@@ -33,15 +33,17 @@ const BlogDetail = () => {
 
         if (voicesRes.ok) {
           const voicesData = await voicesRes.json();
-          // Find the specific voice matching this post's author
-          const matchedVoice = voicesData.find((v: any) => v.name === postData?.author);
-          
-          if (matchedVoice) {
-            setActiveVoice(matchedVoice);
-          } else {
-            // Fallback: Use the 'active' featured voice or the first available
-            const active = voicesData.find((v: any) => v.isActive);
-            setActiveVoice(active || (voicesData.length > 0 ? voicesData[0] : null));
+          if (Array.isArray(voicesData)) {
+            // Find the specific voice matching this post's author
+            const matchedVoice = voicesData.find((v: any) => v.name === postData?.author);
+            
+            if (matchedVoice) {
+              setActiveVoice(matchedVoice);
+            } else {
+              // Fallback: Use the 'active' featured voice or the first available
+              const active = voicesData.find((v: any) => v.isActive);
+              setActiveVoice(active || (voicesData.length > 0 ? voicesData[0] : null));
+            }
           }
         }
       } catch (error) {

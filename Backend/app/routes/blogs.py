@@ -9,7 +9,7 @@ router = APIRouter(prefix="/blogs", tags=["Blogs"])
 
 # --- Blog Settings Endpoints ---
 
-@router.get("/settings", response_description="Get blog page settings", response_model=BlogSettingsModel)
+@router.get("/settings/", response_description="Get blog page settings", response_model=BlogSettingsModel)
 async def get_blog_settings():
     db = await get_database()
     settings = await db["blog_settings"].find_one({})
@@ -28,7 +28,7 @@ async def get_blog_settings():
         }
     return settings
 
-@router.put("/settings", response_description="Update blog page settings", response_model=BlogSettingsModel)
+@router.put("/settings/", response_description="Update blog page settings", response_model=BlogSettingsModel)
 async def update_blog_settings(settings: BlogSettingsModel):
     db = await get_database()
     settings_dict = settings.model_dump(by_alias=True, exclude=["id"])
@@ -44,7 +44,7 @@ async def update_blog_settings(settings: BlogSettingsModel):
 
 # --- Editorial Voice Endpoints ---
 
-@router.get("/editorial-voices", response_description="List all editorial voices", response_model=List[EditorialVoiceModel])
+@router.get("/editorial-voices/", response_description="List all editorial voices", response_model=List[EditorialVoiceModel])
 async def list_editorial_voices():
     db = await get_database()
     voices = await db["editorial_voices"].find().to_list(100)
@@ -56,7 +56,7 @@ async def list_editorial_voices():
             
     return voices
 
-@router.post("/editorial-voices", response_description="Create a new editorial voice", response_model=EditorialVoiceModel)
+@router.post("/editorial-voices/", response_description="Create a new editorial voice", response_model=EditorialVoiceModel)
 async def create_editorial_voice(voice: EditorialVoiceModel):
     db = await get_database()
     voice_dict = voice.model_dump(by_alias=True, exclude=["id"])
@@ -70,7 +70,7 @@ async def create_editorial_voice(voice: EditorialVoiceModel):
     created_voice = await db["editorial_voices"].find_one({"_id": new_voice.inserted_id})
     return created_voice
 
-@router.put("/editorial-voices/{id}", response_description="Update an editorial voice", response_model=EditorialVoiceModel)
+@router.put("/editorial-voices/{id}/", response_description="Update an editorial voice", response_model=EditorialVoiceModel)
 async def update_editorial_voice(id: str, voice: EditorialVoiceModel):
     db = await get_database()
     voice_dict = voice.model_dump(by_alias=True, exclude=["id"])
@@ -92,7 +92,7 @@ async def update_editorial_voice(id: str, voice: EditorialVoiceModel):
         raise HTTPException(status_code=404, detail=f"Voice with ID {id} not found")
     return result
 
-@router.delete("/editorial-voices/{id}", response_description="Delete an editorial voice")
+@router.delete("/editorial-voices/{id}/", response_description="Delete an editorial voice")
 async def delete_editorial_voice(id: str):
     db = await get_database()
     query = {"_id": ObjectId(id)} if ObjectId.is_valid(id) else {"id": id}
@@ -112,7 +112,7 @@ async def list_blog_posts():
     posts = await db["blog_posts"].find().sort([("featured", -1), ("date", -1)]).to_list(1000)
     return posts
 
-@router.get("/{id}", response_description="Get a single blog post", response_model=BlogPostModel)
+@router.get("/{id}/", response_description="Get a single blog post", response_model=BlogPostModel)
 async def get_blog_post(id: str):
     db = await get_database()
     if not ObjectId.is_valid(id):
@@ -143,7 +143,7 @@ async def create_blog_post(post: BlogPostModel):
     created_post = await db["blog_posts"].find_one({"_id": new_post.inserted_id})
     return created_post
 
-@router.put("/{id}", response_description="Update a blog post", response_model=BlogPostModel)
+@router.put("/{id}/", response_description="Update a blog post", response_model=BlogPostModel)
 async def update_blog_post(id: str, post: BlogPostModel):
     db = await get_database()
     post_dict = post.model_dump(by_alias=True, exclude=["id"])
@@ -164,7 +164,7 @@ async def update_blog_post(id: str, post: BlogPostModel):
         raise HTTPException(status_code=404, detail=f"Story with ID {id} not found")
     return result
 
-@router.delete("/{id}", response_description="Delete a blog post")
+@router.delete("/{id}/", response_description="Delete a blog post")
 async def delete_blog_post(id: str):
     db = await get_database()
     query = {"_id": ObjectId(id)} if ObjectId.is_valid(id) else {"id": id}
