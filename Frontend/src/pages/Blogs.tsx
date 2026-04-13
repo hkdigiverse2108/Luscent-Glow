@@ -7,6 +7,7 @@ import BlogCard from "@/components/BlogCard";
 import { Link } from "react-router-dom";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
+import SEO from "@/components/SEO";
 
 const Blogs = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -99,6 +100,7 @@ const Blogs = () => {
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
+      <SEO seo={settings?.seo} />
       <Header />
       
       <main className="pt-24">

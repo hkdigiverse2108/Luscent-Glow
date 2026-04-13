@@ -191,14 +191,6 @@ const AdminBlogs = () => {
           >
             Author Voices
           </button>
-          <button 
-            onClick={() => setActiveTab("seo")}
-            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "seo" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            SEO Settings
-          </button>
         </div>
       </AdminHeader>
 
@@ -329,18 +321,18 @@ const AdminBlogs = () => {
                        </div>
                     </div>
                   ))}
-                  {filteredPosts.length === 0 && (
-                    <div className="py-20 text-center opacity-30 italic">No posts found...</div>
-                  )}
-                </motion.div>
-             ) : activeTab === "voices" ? (
-                <motion.div 
-                  key="voices"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="grid gap-6 min-h-[600px]"
-                >
+                    {filteredPosts.length === 0 && (
+                      <div className="py-20 text-center opacity-30 italic">No posts found...</div>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="voices"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="grid gap-6 min-h-[600px]"
+                  >
                     {filteredVoices.map((voice) => {
                       const initials = (voice.name || "A V").split(' ').map((n: string) => n[0]).join('').slice(0, 2);
                       return (
@@ -394,34 +386,9 @@ const AdminBlogs = () => {
                    {filteredVoices.length === 0 && (
                      <div className="py-20 text-center opacity-30 italic">No authors found...</div>
                    )}
-                </motion.div>
-             ) : (
-                <motion.div
-                  key="seo"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-8"
-                >
-                  <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-                    <SEOForm 
-                      seo={safeSettings.seo || { title: "", description: "", keywords: "" }} 
-                      onChange={handleUpdateSeo} 
-                      isDark={isDark} 
-                    />
-                    <div className="mt-10 pt-8 border-t border-gold/10">
-                      <button 
-                        onClick={handleSaveSettings}
-                        disabled={isSettingsSaving}
-                        className="w-full flex items-center justify-center gap-3 bg-gold text-charcoal py-5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 shadow-xl shadow-gold/20"
-                      >
-                        {isSettingsSaving ? "Securing Archives..." : "Save Blog SEO Settings"}
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-             )}
-           </AnimatePresence>
+                 </motion.div>
+              )}
+            </AnimatePresence>
         </div>
       </div>
 
