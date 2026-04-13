@@ -61,8 +61,8 @@ const Index = () => {
           title={settings?.newArrivalsTitle} 
           subtitle={settings?.newArrivalsSubtitle} 
         />
-        {settings?.discountBanner?.isActive && (
-          <DiscountBanner banner={settings?.discountBanner} />
+        {(promotion?.isActive || settings?.discountBanner?.isActive) && (
+          <DiscountBanner banner={promotion?.isActive ? promotion : settings?.discountBanner} />
         )}
         <InstagramFeed settings={settings?.instagram} />
       </main>

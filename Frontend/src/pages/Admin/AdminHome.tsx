@@ -32,6 +32,7 @@ import InstagramManagement from "../../components/Admin/InstagramManagement.tsx"
 const AdminHome = () => {
   const { isDark } = useAdminTheme();
   const [config, setConfig] = useState<any>(null);
+  const [activePromotion, setActivePromotion] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [branding, setBranding] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -43,13 +44,27 @@ const AdminHome = () => {
 
   const fetchConfig = async () => {
     try {
-      const [hResponse, cResponse, bResponse] = await Promise.all([
+      const [hResponse, cResponse, bResponse, pResponse] = await Promise.all([
         fetch(getApiUrl("/api/home/settings")),
         fetch(getApiUrl("/api/categories/")),
-        fetch(getApiUrl("/api/branding/"))
+        fetch(getApiUrl("/api/branding/")),
+        fetch(getApiUrl("/api/promotions/active"))
       ]);
 
-      if (hResponse.ok) setConfig(await hResponse.json());
+      if (pResponse.ok) {
+        const promo = await pResponse.json();
+        setActivePromotion(promo);
+        if (promo && hResponse.ok) {
+          const mainConfig = await hResponse.json();
+          // Merge library promo into the editor view
+          setConfig({ ...mainConfig, discountBanner: { ...promo, isActive: true } });
+        } else if (hResponse.ok) {
+          setConfig(await hResponse.json());
+        }
+      } else if (hResponse.ok) {
+        setConfig(await hResponse.json());
+      }
+      
       if (cResponse.ok) setCategories(await cResponse.json());
       if (bResponse.ok) setBranding(await bResponse.json());
     } catch (error) {
@@ -142,7 +157,15 @@ const AdminHome = () => {
         body: JSON.stringify(config)
       });
       if (response.ok) {
-        toast.success("Home page settings saved.");
+        if (activePromotion) {
+          // If we are editing a library banner, update it too
+          await fetch(getApiUrl(`/api/promotions/${activePromotion._id}`), {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(config.discountBanner)
+          });
+        }
+        toast.success("Home page settings & active promotion saved.");
       } else {
         toast.error("Failed to save changes.");
       }
