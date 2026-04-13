@@ -677,6 +677,7 @@ class GlobalSettingsModel(BaseModel):
     promoText: str = Field(default="Use Code")
     promoCode: str = Field(default="GLOW15")
     copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
+    priceFilters: List[dict] = Field(default_factory=list)
     seo: Optional[SEOModel] = Field(default=None)
     updatedAt: Optional[str] = None
 
@@ -908,15 +909,7 @@ class PriceFilterModel(BaseModel):
     min: float
     max: float
 
-class GlobalSettingsModel(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    whatsappNumber: str = Field(default="919537150942")
-    copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
-    priceFilters: List[PriceFilterModel] = Field(default_factory=list)
-    updatedAt: Optional[str] = None
 
-    class Config:
-        populate_by_name = True
 
 class PaymentCredentialsModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
