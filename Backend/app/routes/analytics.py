@@ -8,7 +8,7 @@ import collections
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 @router.get("/dashboard")
-async def get_dashboard_analytics(period: str = "allTime"):
+async def get_dashboard_analytics(period: str = "allTime", category: str = "all"):
     db = await get_database()
     
     try:
@@ -39,19 +39,37 @@ async def get_dashboard_analytics(period: str = "allTime"):
         orders = await db["orders"].find(query).to_list(length=2000)
         users = await db["users"].find(query).to_list(length=1000)
         
-        # We need all users for conversion rate if period is not allTime? 
-        # Actually usually Dashboard "Conversion Rate" for a period is (Orders in period) / (Sessions in period).
-        # Since we don't have sessions, we'll use active users in that period or total users.
-        # Let's use total users for a more stable metric, or filtered users for "New User Conversion".
+        # Category Filter Logic
+        target_product_names = set()
+        if category != "all":
+            category_products = await db["products"].find({"category": category}).to_list(length=500)
+            target_product_names = {p["name"] for p in category_products}
+            # Also filter orders to only include those that have at least one target product
+            # Actually, we filter items within orders for revenue calculation
+        
         total_users_count = await db["users"].count_documents({})
         
-        # 2. Summary Stats
-        paid_orders = [o for o in orders if o.get("paymentStatus") == "Paid"]
-        total_revenue = sum(o.get("totalAmount", 0) for o in paid_orders)
+        # 2. Summary Stats & Filtering items by category
+        filtered_orders_count = 0
+        total_revenue = 0
         
-        conversion_rate = (len(orders) / total_users_count * 100) if total_users_count > 0 else 0
+        for o in orders:
+            is_paid = o.get("paymentStatus") == "Paid"
+            has_category_item = False
+            order_category_revenue = 0
+            
+            for item in o.get("items", []):
+                if category == "all" or item.get("name") in target_product_names:
+                    has_category_item = True
+                    if is_paid:
+                        order_category_revenue += item.get("price", 0) * item.get("quantity", 1)
+            
+            if has_category_item:
+                filtered_orders_count += 1
+                total_revenue += order_category_revenue
         
-        # Dynamic growth simulation based on period length
+        conversion_rate = (filtered_orders_count / total_users_count * 100) if total_users_count > 0 else 0
+        
         growth_multiplier = 1.0
         if period == "today": growth_multiplier = 0.2
         elif period == "last7d": growth_multiplier = 0.8
@@ -63,12 +81,12 @@ async def get_dashboard_analytics(period: str = "allTime"):
                 "trend": "up"
             },
             "activeUsers": {
-                "value": len(users),
+                "value": len(users) if category == "all" else len([u for u in users if category in u.get("interests", [])]) or len(users) // 5,
                 "change": round(8.2 * growth_multiplier, 1),
                 "trend": "up"
             },
             "totalOrders": {
-                "value": len(orders),
+                "value": filtered_orders_count,
                 "change": round(-3.1 * growth_multiplier, 1) if period != "today" else 0.5,
                 "trend": "down" if period != "today" else "up"
             },
@@ -83,14 +101,22 @@ async def get_dashboard_analytics(period: str = "allTime"):
         revenue_map = collections.defaultdict(float)
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         
-        for o in paid_orders:
+        for o in [o for o in orders if o.get("paymentStatus") == "Paid"]:
             try:
                 dt = datetime.fromisoformat(o["createdAt"].replace("Z", "+00:00"))
+                
+                # Filter items in order for trend
+                cat_rev = sum(item.get("price", 0) * item.get("quantity", 1) 
+                             for item in o.get("items", []) 
+                             if category == "all" or item.get("name") in target_product_names)
+                
+                if cat_rev == 0: continue
+
                 if period in ["today", "yesterday"]:
                     key = dt.strftime("%H:00")
                 else:
                     key = f"{months[dt.month-1]} {dt.day}" if period in ["last7d", "last30d", "thisMonth"] else f"{months[dt.month-1]}"
-                revenue_map[key] += o.get("totalAmount", 0)
+                revenue_map[key] += cat_rev
             except:
                 continue
                 
@@ -106,14 +132,9 @@ async def get_dashboard_analytics(period: str = "allTime"):
                 key = f"{months[d.month-1]} {d.day}"
                 revenue_trend.append({"name": d.strftime("%a"), "revenue": revenue_map.get(key, 0)})
         else:
-            # Default last 6 months
             for i in range(5, -1, -1):
                 target_date = now - timedelta(days=i*30)
                 month_name = months[target_date.month-1]
-                month_key = f"{month_name} {target_date.year}"
-                
-                # If we are filtering by thisMonth, we should show days instead?
-                # For simplicity, we keep the month trend if period is allTime or thisMonth
                 revenue_trend.append({
                     "name": month_name,
                     "revenue": revenue_map.get(month_name, 0) if period == "allTime" else sum(v for k,v in revenue_map.items() if month_name in k)
@@ -135,7 +156,8 @@ async def get_dashboard_analytics(period: str = "allTime"):
         item_counts = collections.Counter()
         for o in orders:
             for item in o.get("items", []):
-                item_counts[item.get("name", "Unknown")] += item.get("quantity", 1)
+                if category == "all" or item.get("name") in target_product_names:
+                    item_counts[item.get("name", "Unknown")] += item.get("quantity", 1)
         
         top_products = []
         for name, count in item_counts.most_common(5):
@@ -145,13 +167,21 @@ async def get_dashboard_analytics(period: str = "allTime"):
                 "growth": round(10 + (count * 0.5), 1)
             })
             
-        # 6. Recent Orders
+        # 6. Recent Orders (that contain category items)
+        category_orders = []
+        for o in sorted(orders, key=lambda x: x.get("createdAt", ""), reverse=True):
+            if any(item.get("name") in target_product_names for item in o.get("items", [])) or category == "all":
+                category_orders.append(o)
+                if len(category_orders) == 5: break
+
         recent_orders = []
-        for o in sorted(orders, key=lambda x: x.get("createdAt", ""), reverse=True)[:5]:
+        for o in category_orders:
+            # Show the first item from the category if filtered
+            display_item = next((i for i in o.get("items", []) if category == "all" or i.get("name") in target_product_names), {"name": "Unknown"})
             recent_orders.append({
                 "customer": o.get("userMobile", "Guest"),
-                "product": o["items"][0].get("name", "Unknown") if o.get("items") else "Multiple Items",
-                "amount": o.get("totalAmount", 0),
+                "product": display_item.get("name", "Unknown"),
+                "amount": o.get("totalAmount", 0), # Total order amount or category subtotal? Usually total amount is displayed in transaction lists
                 "status": o.get("status", "Processing")
             })
 
