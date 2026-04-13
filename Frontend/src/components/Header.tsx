@@ -88,7 +88,7 @@ const Header = () => {
     const fetchHeaderData = async () => {
       try {
         const [catRes, brandRes] = await Promise.all([
-          fetch(getApiUrl("/api/categories/")),
+          fetch(getApiUrl("/api/categories/?hide_empty=true")),
           fetch(getApiUrl("/api/branding/"))
         ]);
 
@@ -653,7 +653,7 @@ const Header = () => {
           const fetchHeaderData = async () => {
             try {
               const [catRes, brandRes] = await Promise.all([
-                fetch(getApiUrl("/api/categories/")),
+                fetch(getApiUrl("/api/categories/?hide_empty=true")),
                 fetch(getApiUrl("/api/branding/"))
               ]);
       

@@ -57,7 +57,7 @@ const Products = () => {
         setLoading(true);
         const [prodRes, catRes, settingsRes] = await Promise.all([
           fetch(getApiUrl("/api/products/")),
-          fetch(getApiUrl("/api/categories/")),
+          fetch(getApiUrl("/api/categories/?hide_empty=true")),
           fetch(getApiUrl("/api/settings/global/"))
         ]);
 
