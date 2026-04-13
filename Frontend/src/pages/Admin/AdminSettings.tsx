@@ -81,6 +81,9 @@ const AdminSettings = () => {
   
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [copyrightText, setCopyrightText] = useState("");
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(999);
+  const [promoText, setPromoText] = useState("");
+  const [promoCode, setPromoCode] = useState("");
   const [seo, setSeo] = useState({ title: "", description: "", keywords: "" });
   const [priceFilters, setPriceFilters] = useState<any[]>([]);
   
@@ -121,6 +124,9 @@ const AdminSettings = () => {
         const data = await response.json();
         setWhatsappNumber(data.whatsappNumber || "");
         setCopyrightText(data.copyrightText || "");
+        setFreeShippingThreshold(data.freeShippingThreshold || 999);
+        setPromoText(data.promoText || "");
+        setPromoCode(data.promoCode || "");
         setSeo(data.seo || { title: "", description: "", keywords: "" });
         setPriceFilters(data.priceFilters || []);
       }
@@ -140,6 +146,9 @@ const AdminSettings = () => {
         body: JSON.stringify({ 
           whatsappNumber,
           copyrightText,
+          freeShippingThreshold,
+          promoText,
+          promoCode,
           seo,
           priceFilters
         })
@@ -297,7 +306,7 @@ const AdminSettings = () => {
                 WhatsApp Number
               </label>
               <div className="relative">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">
                   <MessageCircle size={18} />
                 </div>
                 <input
@@ -307,6 +316,68 @@ const AdminSettings = () => {
                   className={`${inputClass} pl-12`}
                   placeholder="919537150942"
                 />
+              </div>
+            </div>
+
+            {/* Announcement Bar Section */}
+            <div className="md:col-span-2 pt-6 border-t border-gold/10 mt-2">
+              <h4 className={`text-sm font-bold uppercase tracking-widest mb-6 flex items-center gap-2 ${isDark ? "text-white" : "text-charcoal"}`}>
+                <Tag size={16} className="text-gold" /> Announcement Bar
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-3">
+                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                    Free Shipping Threshold (₹)
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                      <Truck size={14} />
+                    </div>
+                    <input
+                      type="number"
+                      value={freeShippingThreshold}
+                      onChange={(e) => setFreeShippingThreshold(Number(e.target.value))}
+                      className={`${inputClass} pl-12`}
+                      placeholder="999"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                    Promo Text
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                      <Sparkles size={14} />
+                    </div>
+                    <input
+                      type="text"
+                      value={promoText}
+                      onChange={(e) => setPromoText(e.target.value)}
+                      className={`${inputClass} pl-12`}
+                      placeholder="Use Code"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                    Promo Code
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                      <Hash size={14} />
+                    </div>
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      className={`${inputClass} pl-12`}
+                      placeholder="GLOW15"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

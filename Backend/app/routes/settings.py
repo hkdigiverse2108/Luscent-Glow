@@ -15,6 +15,9 @@ async def get_global_settings():
         return {
             "whatsappNumber": "919537150942",
             "copyrightText": "© 2026 Luscent Glow. All rights reserved.",
+            "freeShippingThreshold": 999,
+            "promoText": "Use Code",
+            "promoCode": "GLOW15",
             "priceFilters": [
                 { "label": "Under ₹500", "min": 0, "max": 500 },
                 { "label": "₹500 – ₹1000", "min": 500, "max": 1000 },
@@ -29,15 +32,22 @@ async def get_global_settings():
 async def update_global_settings(settings: GlobalSettingsModel):
     db = await get_database()
     
-    settings_dict = settings.model_dump(by_alias=True, exclude=["id"])
+    # Use model_dump without excessive exclusions to ensure all model fields persist
+    settings_dict = settings.model_dump(by_alias=True, exclude={"id"})
     settings_dict["updatedAt"] = datetime.utcnow().isoformat()
     
+    # Perform an atomic update/upsert on the single settings document
     result = await db["global_settings"].find_one_and_update(
         {}, 
         {"$set": settings_dict}, 
         upsert=True, 
         return_document=True
     )
+    
+    if not result:
+        # Fallback if find_one_and_update fails to return the document
+        return settings
+        
     return result
 
 
