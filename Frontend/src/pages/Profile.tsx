@@ -5,7 +5,8 @@ import {
   Settings, LogOut, ChevronRight, 
   Camera, ShoppingBag, Heart, CreditCard, Gift,
   Lock, CheckCircle2, AlertCircle, Plus,
-  MapPin, Home, Globe, Building, Sparkles, ChevronDown
+  MapPin, Home, Globe, Building, Sparkles, ChevronDown, X,
+  Tag, Landmark, Scan, Smartphone, ArrowRight, Eye, EyeOff
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
@@ -14,8 +15,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "react-router-dom";
 import LogoutConfirmation from "@/components/auth/LogoutConfirmation";
+import { PhoneInput } from "@/components/PhoneInput";
 
-type ProfileView = "details" | "orders" | "wishlist" | "password" | "giftcards";
+type ProfileView = "details" | "orders" | "wishlist" | "password" | "giftcards" | "addresses";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", 
@@ -43,6 +45,20 @@ const Profile = () => {
   const [state, setState] = useState(user?.shippingAddress?.state || "");
   const [zipCode, setZipCode] = useState(user?.shippingAddress?.zipCode || "");
 
+  const [addresses, setAddresses] = useState<any[]>(user?.addresses || []);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<any>(null);
+  const [addressForm, setAddressForm] = useState({
+    label: "Home",
+    fullName: "",
+    mobile: "",
+    street: "",
+    city: "",
+    state: "Gujarat",
+    zipCode: "",
+    isDefault: false
+  });
+
   const [loading, setLoading] = useState(false);
   
   // Password State
@@ -50,6 +66,12 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [isOldPasswordVerified, setIsOldPasswordVerified] = useState(false);
+  const [verifyingOldPassword, setVerifyingOldPassword] = useState(false);
+  const [oldPasswordError, setOldPasswordError] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   
@@ -67,6 +89,7 @@ const Profile = () => {
       setCity(user.shippingAddress?.city || "");
       setState(user.shippingAddress?.state || "");
       setZipCode(user.shippingAddress?.zipCode || "");
+      setAddresses(user.addresses || []);
     }
   }, [user]);
 
@@ -75,6 +98,46 @@ const Profile = () => {
       fetchReceivedCards();
     }
   }, [activeView, user]);
+
+  useEffect(() => {
+    if (oldPassword.length > 0 && !isOldPasswordVerified && !verifyingOldPassword) {
+      const timer = setTimeout(() => {
+        handleAutoVerifyPassword();
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (oldPassword.length === 0) {
+      setOldPasswordError("");
+    }
+  }, [oldPassword]);
+
+  const handleAutoVerifyPassword = async () => {
+    if (!user || !oldPassword) return;
+    
+    setVerifyingOldPassword(true);
+    setOldPasswordError("");
+    try {
+      const response = await fetch(getApiUrl("/api/auth/verify-password"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mobileNumber: user.mobileNumber,
+          password: oldPassword
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.isValid) {
+        setIsOldPasswordVerified(true);
+        toast.success("Identity verified.");
+      } else {
+        setOldPasswordError(data.detail || "Incorrect password.");
+      }
+    } catch (error: any) {
+      setOldPasswordError("System connection error.");
+    } finally {
+      setVerifyingOldPassword(false);
+    }
+  };
 
   const fetchReceivedCards = async () => {
     setCardsLoading(true);
@@ -119,9 +182,54 @@ const Profile = () => {
     }
   };
 
+  const handleSubmitAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      const isEditing = !!editingAddress;
+      const url = isEditing 
+        ? getApiUrl(`/api/auth/addresses/${editingAddress.id}`)
+        : getApiUrl("/api/auth/addresses");
+      
+      const response = await fetch(url, {
+        method: isEditing ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user.id || user._id,
+          address: addressForm
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.status === "success") {
+        setAddresses(data.addresses);
+        syncUser(data.user);
+        setIsAddressModalOpen(false);
+        toast.success(isEditing ? "Address updated successfully." : "Address added successfully.");
+      } else {
+        throw new Error(data.detail || "Failed to save address.");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    // Validation for mobile number (last part should be 10 digits)
+    const mobileParts = mobileNumber.split(" ");
+    const pureNumber = mobileParts.length === 2 ? mobileParts[1] : mobileNumber.replace(/\D/g, "");
+    
+    if (pureNumber.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -133,13 +241,7 @@ const Profile = () => {
           mobileNumber,
           fullName,
           email,
-          profilePicture,
-          shippingAddress: {
-            street,
-            city,
-            state,
-            zipCode
-          }
+          profilePicture
         }),
       });
 
@@ -155,6 +257,11 @@ const Profile = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleVerifyOldPassword = async () => {
+    // Keep this for manual backup if needed, but UI now uses handleAutoVerifyPassword
+    handleAutoVerifyPassword();
   };
 
   const handleChangePassword = async (e: React.FormEvent) => {
@@ -184,6 +291,7 @@ const Profile = () => {
         setOldPassword("");
         setNewPassword("");
         setConfirmPassword("");
+        setIsOldPasswordVerified(false);
         setActiveView("details");
       } else {
         throw new Error(data.detail || "Password change failed");
@@ -274,7 +382,7 @@ const Profile = () => {
                   {user.fullName}
                 </h1>
                 <p className="font-display text-xl md:text-2xl text-muted-foreground/60 italic font-light lowercase">
-                  the <span className="text-charcoal font-medium">Valued Member</span>
+                  our <span className="text-charcoal font-medium">Valued Member</span>
                 </p>
               </div>
               <p className="text-sm md:text-base text-muted-foreground font-body max-w-sm italic leading-relaxed">
@@ -290,6 +398,7 @@ const Profile = () => {
               <nav className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-x-visible pb-4 lg:pb-0 gap-2 md:gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
                 {[
                   { id: "details", label: "Profile Details", icon: <User size={18} /> },
+                  { id: "addresses", label: "Saved Addresses", icon: <MapPin size={18} /> },
                   { id: "orders", label: "Order History", icon: <ShoppingBag size={18} /> },
                   { id: "wishlist", label: "My Wishlist", icon: <Heart size={18} /> },
                   { id: "giftcards", label: "My Gift Cards", icon: <Gift size={18} /> },
@@ -306,7 +415,7 @@ const Profile = () => {
                         setActiveView(item.id as ProfileView);
                       }
                     }}
-                    className={`flex-shrink-0 lg:flex-shrink-1 flex items-center justify-between py-3 px-4 md:py-4 md:px-6 rounded-2xl md:rounded-[2rem] transition-all duration-500 group relative overflow-hidden ${
+                    className={`flex-shrink-0 lg:flex-shrink-1 flex items-center justify-between py-3 px-4 md:py-3 md:px-5 rounded-2xl md:rounded-[2rem] transition-all duration-500 group relative overflow-hidden ${
                       activeView === item.id 
                         ? "bg-white shadow-xl shadow-gold/5 text-charcoal translate-x-2" 
                         : "text-muted-foreground/60 hover:text-gold hover:bg-white/50"
@@ -330,7 +439,7 @@ const Profile = () => {
                 
                 <button 
                   onClick={() => setIsLogoutDialogOpen(true)}
-                  className="flex-shrink-0 lg:flex-shrink-1 flex items-center gap-4 py-3 px-4 md:py-4 md:px-6 rounded-2xl md:rounded-[2rem] text-rose-brand/60 hover:text-rose-brand hover:bg-rose-brand/5 transition-all mt-0 lg:mt-4 group"
+                  className="flex-shrink-0 lg:flex-shrink-1 flex items-center gap-4 py-3 px-4 md:py-3 md:px-5 rounded-2xl md:rounded-[2rem] text-rose-brand/60 hover:text-rose-brand hover:bg-rose-brand/5 transition-all mt-0 lg:mt-4 group"
                 >
                   <div className="p-2 rounded-xl bg-rose-brand/5">
                     <LogOut size={18} className="group-hover:rotate-12 transition-transform duration-500" />
@@ -374,7 +483,7 @@ const Profile = () => {
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
+                            className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-4 md:py-5 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
                             required
                           />
                         </div>
@@ -392,7 +501,7 @@ const Profile = () => {
                               type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
+                                className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-4 md:py-5 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
                                 required
                               />
                           </div>
@@ -404,90 +513,22 @@ const Profile = () => {
                             </label>
                           <div className="relative">
                             <Phone className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors" size={18} />
-                            <input
-                              type="text"
-                                value={mobileNumber}
-                                onChange={(e) => setMobileNumber(e.target.value)}
-                                className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                                required
-                              />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-gold/10">
-                        <div className="flex items-center gap-3 text-gold mb-4">
-                          <MapPin size={22} className="opacity-80" />
-                          <h4 className="font-display text-xl md:text-2xl font-bold text-charcoal">Shipping Address</h4>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div className="space-y-1.5 group">
-                            <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">Street Address</label>
-                            <div className="relative">
-                              <Home className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors" size={18} />
-                              <input
-                                type="text"
-                                value={street}
-                                onChange={(e) => setStreet(e.target.value)}
-                                className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                                placeholder="House no., Street name, Area"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-                            <div className="space-y-1.5 group">
-                              <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">City</label>
-                              <div className="relative">
-                                <Building className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors" size={18} />
-                                <input
-                                  type="text"
-                                  value={city}
-                                  onChange={(e) => setCity(e.target.value)}
-                                  className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                                />
-                              </div>
-                            </div>
-                            <div className="space-y-1.5 group">
-                              <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">State</label>
-                              <div className="relative">
-                                <Globe className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors z-10" size={18} />
-                                <select
-                                  value={state}
-                                  onChange={(e) => setState(e.target.value)}
-                                  className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-12 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500 appearance-none cursor-pointer"
-                                >
-                                  <option value="" disabled className="text-muted-foreground">Select State</option>
-                                  {INDIAN_STATES.map((s) => (
-                                    <option key={s} value={s} className="bg-white text-charcoal">{s}</option>
-                                  ))}
-                                </select>
-                                <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/30 pointer-events-none group-focus-within:text-gold transition-colors" size={16} />
-                              </div>
-                            </div>
-                            <div className="col-span-2 lg:col-span-1 space-y-1.5 group">
-                              <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-2">ZIP Code</label>
-                              <div className="relative">
-                                <ShieldCheck className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/30 group-focus-within:text-gold transition-colors" size={18} />
-                                <input
-                                  type="text"
-                                  value={zipCode}
-                                  onChange={(e) => setZipCode(e.target.value)}
-                                  className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                                />
-                              </div>
-                            </div>
+                            <PhoneInput 
+                              value={mobileNumber}
+                              onChange={(val) => setMobileNumber(val)}
+                              className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-2 md:py-2.5 pl-12 md:pl-16 pr-8 font-body text-sm md:text-base focus-within:bg-white focus-within:border-gold/30 focus-within:shadow-xl focus-within:shadow-gold/5 outline-none transition-all duration-500"
+                              placeholder="00000 00000"
+                            />
                           </div>
                         </div>
                       </div>
 
                       <div className="pt-10">
-                        <button
-                          disabled={loading}
-                          type="submit"
-                          className="w-full py-6 md:py-8 bg-charcoal text-white font-body font-bold uppercase tracking-[0.3em] rounded-2xl md:rounded-[2rem] hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl relative overflow-hidden group"
-                        >
+                          <button
+                            disabled={loading}
+                            type="submit"
+                            className="w-full py-3 md:py-4 bg-charcoal text-white font-body font-bold uppercase tracking-[0.3em] rounded-xl md:rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl relative overflow-hidden group"
+                          >
                           <span className="relative z-10 flex items-center justify-center gap-3">
                             {loading ? (
                               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -525,68 +566,322 @@ const Profile = () => {
                         <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Security <span className="text-gold italic font-light">Settings</span></h3>
                       </div>
                       
-                      <form onSubmit={handleChangePassword} className="space-y-6">
-                        <div className="space-y-1.5 group">
+                      <form onSubmit={handleChangePassword} className="space-y-8">
+                        <div className="space-y-4 group">
                           <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
                             <span className="w-1 h-1 bg-gold rounded-full" />
                             Current Password
                           </label>
-                          <input
-                            type="password"
-                            value={oldPassword}
-                            onChange={(e) => setOldPassword(e.target.value)}
-                            className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 px-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                            placeholder="••••••••"
-                            required
-                          />
+                          <div className="flex flex-col gap-3">
+                            <div className="relative">
+                              <input
+                                type={showOldPassword ? "text" : "password"}
+                                value={oldPassword}
+                                disabled={isOldPasswordVerified}
+                                onChange={(e) => {
+                                  setOldPassword(e.target.value);
+                                  setOldPasswordError("");
+                                }}
+                                className={`w-full bg-white/40 border rounded-2xl md:rounded-[1.2rem] py-3 md:py-4 pl-8 pr-16 font-body text-sm md:text-base outline-none transition-all duration-500 ${
+                                  isOldPasswordVerified 
+                                    ? "border-emerald-500/30 bg-emerald-500/[0.02] text-emerald-600" 
+                                    : oldPasswordError 
+                                      ? "border-rose-500/30 bg-rose-500/[0.02]" 
+                                      : "border-gold/5 focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5"
+                                }`}
+                                placeholder="••••••••"
+                                required
+                              />
+                              
+                              <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                                {verifyingOldPassword && (
+                                  <div className="w-4 h-4 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+                                )}
+                                
+                                {isOldPasswordVerified && (
+                                  <div className="text-emerald-500 flex items-center gap-2 pr-2">
+                                    <ShieldCheck size={18} />
+                                    <span className="hidden md:inline text-[9px] font-black uppercase tracking-widest">Verified</span>
+                                  </div>
+                                )}
+
+                                {!isOldPasswordVerified && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowOldPassword(!showOldPassword)}
+                                    className="text-muted-foreground hover:text-gold transition-colors"
+                                  >
+                                    {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                  </button>
+                                )}
+
+                                {isOldPasswordVerified && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setIsOldPasswordVerified(false);
+                                      setOldPassword("");
+                                      setOldPasswordError("");
+                                    }}
+                                    className="text-[9px] font-black uppercase tracking-widest text-gold hover:underline"
+                                  >
+                                    Change
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {oldPasswordError && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/20 rounded-xl"
+                              >
+                                <AlertCircle size={14} className="text-rose-500" />
+                                <span className="text-[10px] font-bold text-rose-500/80 uppercase tracking-widest">{oldPasswordError}</span>
+                              </motion.div>
+                            )}
+                          </div>
                         </div>
                         
-                        <div className="grid md:grid-cols-2 gap-10">
-                          <div className="space-y-1.5 group">
-                            <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
-                              <span className="w-1 h-1 bg-gold rounded-full" />
-                              New Password
-                            </label>
-                            <input
-                              type="password"
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 px-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                              placeholder="••••••••"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-1.5 group">
-                            <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
-                              <span className="w-1 h-1 bg-gold rounded-full" />
-                              Confirm Password
-                            </label>
-                            <input
-                              type="password"
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                              className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 px-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                              placeholder="••••••••"
-                              required
-                            />
-                          </div>
-                        </div>
+                        <AnimatePresence>
+                          {isOldPasswordVerified && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0, y: -20 }}
+                              animate={{ opacity: 1, height: "auto", y: 0 }}
+                              exit={{ opacity: 0, height: 0, y: -20 }}
+                              className="overflow-hidden space-y-8"
+                            >
+                              <div className="h-[1px] bg-gradient-to-r from-transparent via-gold/10 to-transparent" />
+                              
+                              <div className="grid md:grid-cols-2 gap-10">
+                                <div className="space-y-1.5 group">
+                                  <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-gold rounded-full" />
+                                    New Password
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={showNewPassword ? "text" : "password"}
+                                      value={newPassword}
+                                      onChange={(e) => setNewPassword(e.target.value)}
+                                      className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.2rem] py-3 md:py-4 pl-8 pr-16 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
+                                      placeholder="••••••••"
+                                      required
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowNewPassword(!showNewPassword)}
+                                      className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gold transition-colors"
+                                    >
+                                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="space-y-1.5 group">
+                                  <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-gold rounded-full" />
+                                    Confirm Password
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={showConfirmPassword ? "text" : "password"}
+                                      value={confirmPassword}
+                                      onChange={(e) => setConfirmPassword(e.target.value)}
+                                      className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.2rem] py-3 md:py-4 pl-8 pr-16 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
+                                      placeholder="••••••••"
+                                      required
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                      className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gold transition-colors"
+                                    >
+                                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
 
-                        <div className="pt-10">
-                          <button
-                            disabled={passwordLoading}
-                            type="submit"
-                            className="w-full py-6 md:py-8 bg-charcoal text-white font-body font-bold uppercase tracking-[0.3em] rounded-2xl md:rounded-[2rem] hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl overflow-hidden"
-                          >
-                            {passwordLoading ? "Updating..." : "Update Password"}
-                          </button>
-                        </div>
+                              <div className="pt-2">
+                                <button
+                                  disabled={passwordLoading}
+                                  type="submit"
+                                  className="w-full py-3 md:py-4 bg-charcoal text-white font-body font-bold uppercase tracking-[0.3em] rounded-xl md:rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl overflow-hidden group relative"
+                                >
+                                  <span className="relative z-10 flex items-center justify-center gap-3">
+                                    {passwordLoading ? (
+                                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                      <>
+                                        <ShieldCheck size={18} />
+                                        <span>Update Password</span>
+                                      </>
+                                    )}
+                                  </span>
+                                  <div className="absolute inset-0 bg-gradient-to-r from-gold/0 via-gold/10 to-gold/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </form>
                     </div>
                   </motion.div>
                 )}
 
 
+
+                {activeView === "addresses" && (
+                  <motion.div
+                    key="addresses"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-8"
+                  >
+                    <div className="bg-white/70 backdrop-blur-3xl rounded-[2.5rem] md:rounded-[4rem] p-6 md:p-10 lg:p-12 shadow-ethereal border border-white/50 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                        
+                        <div className="relative space-y-10">
+                            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 text-gold">
+                                        <MapPin size={14} className="opacity-50" />
+                                        <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Addresses</span>
+                                    </div>
+                                    <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Saved <span className="text-gold italic font-light">Addresses</span></h3>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setEditingAddress(null);
+                                        setAddressForm({
+                                            label: "Home",
+                                            fullName: user?.fullName || "",
+                                            mobile: user?.mobileNumber || "",
+                                            street: "",
+                                            city: "",
+                                            state: "Gujarat",
+                                            zipCode: "",
+                                            isDefault: addresses.length === 0
+                                        });
+                                        setIsAddressModalOpen(true);
+                                    }}
+                                    className="flex items-center gap-3 px-5 py-2.5 bg-charcoal text-white rounded-full font-body text-[10px] font-bold uppercase tracking-widest hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-xl shadow-charcoal/10"
+                                >
+                                    <Plus size={16} /> Add New Address
+                                </button>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {addresses.map((addr, idx) => (
+                                    <motion.div
+                                        key={addr.id || idx}
+                                        whileHover={{ y: -5 }}
+                                        className="bg-white p-8 rounded-[2rem] border border-gold/10 hover:border-gold/30 hover:shadow-2xl hover:shadow-gold/5 transition-all duration-500 relative group"
+                                    >
+                                        {addr.isDefault && (
+                                            <div className="absolute top-6 right-6 flex items-center gap-2 px-3 py-1 bg-gold/10 rounded-full">
+                                                <Sparkles size={10} className="text-gold" />
+                                                <span className="text-[9px] font-bold text-gold uppercase tracking-widest">Default</span>
+                                            </div>
+                                        )}
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-3 text-gold/40">
+                                                {addr.label === "Home" ? <Home size={18} /> : addr.label === "Work" ? <Building size={18} /> : <MapPin size={18} />}
+                                                <span className="text-xs font-bold uppercase tracking-[0.2em]">{addr.label}</span>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="font-display text-xl font-bold text-charcoal">{addr.fullName}</p>
+                                                <p className="font-body text-xs text-muted-foreground uppercase tracking-widest">{addr.state}</p>
+                                            </div>
+                                            <div className="space-y-1">
+                                                <p className="font-body text-sm text-charcoal/80 leading-relaxed italic">
+                                                    {addr.street}, {addr.city} - {addr.zipCode}
+                                                </p>
+                                                <p className="font-body text-[10px] text-muted-foreground/50">
+                                                    Mobile: {addr.mobile}
+                                                </p>
+                                            </div>
+                                            <div className="pt-4 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button 
+                                                    onClick={() => {
+                                                        setEditingAddress(addr);
+                                                        setAddressForm(addr);
+                                                        setIsAddressModalOpen(true);
+                                                    }}
+                                                    className="text-[10px] font-bold uppercase tracking-widest text-gold hover:underline"
+                                                >
+                                                    Edit
+                                                </button>
+                                                {!addr.isDefault && (
+                                                    <>
+                                                        <button 
+                                                            onClick={async () => {
+                                                                try {
+                                                                    const res = await fetch(getApiUrl(`/api/auth/addresses/${addr.id}/default`), {
+                                                                        method: "PUT",
+                                                                        headers: { "Content-Type": "application/json" },
+                                                                        body: JSON.stringify({ userId: user.id })
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        const data = await res.json();
+                                                                        setAddresses(data.addresses);
+                                                                        syncUser(data.user);
+                                                                        toast.success("Default address updated.");
+                                                                    }
+                                                                } catch (err) {
+                                                                    toast.error("Failed to update address.");
+                                                                }
+                                                            }}
+                                                            className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 hover:text-gold transition-colors"
+                                                        >
+                                                            Set as Default
+                                                        </button>
+                                                        <button 
+                                                            onClick={async () => {
+                                                                if (!confirm("Are you sure you want to delete this address?")) return;
+                                                                try {
+                                                                    const res = await fetch(getApiUrl(`/api/auth/addresses/${addr.id}?userId=${user.id}`), {
+                                                                        method: "DELETE"
+                                                                    });
+                                                                    if (res.ok) {
+                                                                        const data = await res.json();
+                                                                        setAddresses(data.addresses);
+                                                                        syncUser(data.user);
+                                                                        toast.success("Address removed from the network.");
+                                                                    }
+                                                                } catch (err) {
+                                                                    toast.error("Failed to remove the address.");
+                                                                }
+                                                            }}
+                                                            className="text-[10px] font-bold uppercase tracking-widest text-rose-500/60 hover:text-rose-500 transition-colors"
+                                                        >
+                                                            Delete
+                                                        </button>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                                
+                                {addresses.length === 0 && (
+                                    <div className="md:col-span-2 text-center py-20 border-2 border-dashed border-gold/10 rounded-[3rem] space-y-6">
+                                        <div className="w-24 h-24 bg-gold/5 rounded-full flex items-center justify-center mx-auto text-gold/30">
+                                            <MapPin size={40} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h4 className="font-display text-2xl font-bold text-charcoal">No Saved Addresses.</h4>
+                                            <p className="text-xs font-body text-muted-foreground uppercase tracking-widest italic font-light">Add an address to speed up your checkout.</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                  </motion.div>
+                )}
 
                 {activeView === "giftcards" && (
                   <motion.div
@@ -602,7 +897,7 @@ const Profile = () => {
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 text-gold">
                           <Gift size={14} className="opacity-50" />
-                          <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Personal Sanctuary</span>
+                          <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">My Account</span>
                         </div>
                         <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Gifting <span className="text-gold italic font-light">History</span></h3>
                       </div>
@@ -672,6 +967,178 @@ const Profile = () => {
           window.location.href = "/";
         }}
       />
+
+      {/* Address Modal */}
+      <AnimatePresence>
+        {isAddressModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsAddressModalOpen(false)}
+              className="absolute inset-0 bg-charcoal/60 backdrop-blur-md"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-2xl bg-[#faf9f6] rounded-[3rem] shadow-2xl overflow-hidden"
+            >
+              <div className="p-8 md:p-12">
+                <div className="flex justify-between items-start mb-10">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 text-gold">
+                      <MapPin size={14} className="opacity-50" />
+                      <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">Address Manager</span>
+                    </div>
+                    <h3 className="font-display text-4xl font-bold text-charcoal">{editingAddress ? "Update" : "Add New"} <span className="text-gold italic font-light">Address</span></h3>
+                  </div>
+                  <button 
+                    onClick={() => setIsAddressModalOpen(false)}
+                    className="w-10 h-10 border border-gold/10 rounded-full flex items-center justify-center text-charcoal/40 hover:text-gold hover:border-gold/30 transition-all"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmitAddress} className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3 group">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 pl-1 group-focus-within:text-gold transition-colors flex items-center gap-2">
+                        <Tag size={10} /> Address Type
+                      </label>
+                      <div className="relative">
+                        <select 
+                          value={addressForm.label}
+                          onChange={(e) => setAddressForm({...addressForm, label: e.target.value})}
+                          className="w-full h-16 bg-white border border-gold/10 rounded-2xl px-6 font-body text-charcoal focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all appearance-none shadow-sm"
+                        >
+                          <option value="Home">Home Address</option>
+                          <option value="Work">Office Address</option>
+                          <option value="Other">Other Address</option>
+                        </select>
+                        <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/40 pointer-events-none" size={18} />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 group">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 pl-1 group-focus-within:text-gold transition-colors flex items-center gap-2">
+                        <User size={10} /> Full Name
+                      </label>
+                      <div className="relative">
+                        <input 
+                          type="text" required
+                          className="w-full h-16 bg-white border border-gold/10 rounded-2xl px-6 font-body text-charcoal focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all shadow-sm"
+                          value={addressForm.fullName}
+                          onChange={(e) => setAddressForm({...addressForm, fullName: e.target.value})}
+                          placeholder="Recipient Name"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 group">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 pl-1 group-focus-within:text-gold transition-colors flex items-center gap-2">
+                      <Building size={10} /> Street Address
+                    </label>
+                    <textarea 
+                      required rows={2}
+                      className="w-full bg-white border border-gold/10 rounded-2xl p-6 font-body text-charcoal focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all shadow-sm resize-none"
+                      value={addressForm.street}
+                      onChange={(e) => setAddressForm({...addressForm, street: e.target.value})}
+                      placeholder="Street, Building, Unit"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3 group">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 pl-1 group-focus-within:text-gold transition-colors flex items-center gap-2">
+                        <MapPin size={10} /> City
+                      </label>
+                      <input 
+                        type="text" required
+                        className="w-full h-16 bg-white border border-gold/10 rounded-2xl px-6 font-body text-charcoal focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all shadow-sm"
+                        value={addressForm.city}
+                        onChange={(e) => setAddressForm({...addressForm, city: e.target.value})}
+                        placeholder="City"
+                      />
+                    </div>
+                    <div className="space-y-3 group">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 pl-1 group-focus-within:text-gold transition-colors flex items-center gap-2">
+                        <Landmark size={10} /> State
+                      </label>
+                      <div className="relative">
+                        <select 
+                          value={addressForm.state}
+                          onChange={(e) => setAddressForm({...addressForm, state: e.target.value})}
+                          className="w-full h-16 bg-white border border-gold/10 rounded-2xl px-6 font-body text-charcoal focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all appearance-none shadow-sm"
+                        >
+                          {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                        <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/40 pointer-events-none" size={18} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-3 group">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 pl-1 group-focus-within:text-gold transition-colors flex items-center gap-2">
+                        <Scan size={10} /> Pincode
+                      </label>
+                      <input 
+                        type="text" required maxLength={6}
+                        className="w-full h-16 bg-white border border-gold/10 rounded-2xl px-6 font-body text-charcoal focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all shadow-sm"
+                        value={addressForm.zipCode}
+                        onChange={(e) => setAddressForm({...addressForm, zipCode: e.target.value.replace(/\D/g, "")})}
+                        placeholder="6-digit Pincode"
+                      />
+                    </div>
+                    <div className="space-y-3 group">
+                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-charcoal/40 pl-1 group-focus-within:text-gold transition-colors flex items-center gap-2">
+                        <Smartphone size={10} /> Mobile Number
+                      </label>
+                      <input 
+                        type="tel" required
+                        className="w-full h-16 bg-white border border-gold/10 rounded-2xl px-6 font-body text-charcoal focus:ring-2 focus:ring-gold/20 focus:border-gold transition-all shadow-sm"
+                        value={addressForm.mobile}
+                        onChange={(e) => setAddressForm({...addressForm, mobile: e.target.value})}
+                        placeholder="Mobile Number"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 py-4 pl-2">
+                    <input 
+                      type="checkbox"
+                      id="isDefault"
+                      className="w-5 h-5 rounded-lg border-gold/30 text-gold focus:ring-gold/20"
+                      checked={addressForm.isDefault}
+                      onChange={(e) => setAddressForm({...addressForm, isDefault: e.target.checked})}
+                    />
+                    <label htmlFor="isDefault" className="text-xs font-bold text-charcoal/60 uppercase tracking-widest cursor-pointer hover:text-gold transition-colors">
+                      Set as default shipping address
+                    </label>
+                  </div>
+
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-14 md:h-16 bg-charcoal text-white rounded-2xl font-black uppercase tracking-[0.4em] text-[10px] hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-2xl shadow-charcoal/20 flex items-center justify-center gap-4 group"
+                  >
+                    {loading ? "Saving..." : (
+                      <>
+                        {editingAddress ? "Update Address" : "Save Address"}
+                        <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                      </>
+                    )}
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -152,15 +152,6 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
                   </h3>
                   <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gold/60">Markdown & Ritual Settings</p>
                </div>
-               <button 
-                onClick={onClose} 
-                className="group p-3 bg-secondary shadow-lg rounded-full hover:bg-rose-500 transition-all duration-500 flex items-center gap-3 pr-6"
-               >
-                 <div className="bg-white/10 p-2 rounded-full group-hover:bg-white/20 transition-colors">
-                    <X size={20} className={isDark ? "text-white" : "text-charcoal group-hover:text-white"} />
-                 </div>
-                 <span className="text-[10px] font-bold uppercase tracking-widest group-hover:text-white">Close</span>
-               </button>
             </div>
 
             <form onSubmit={handleSave} className="flex-1 overflow-y-auto p-8 space-y-12">

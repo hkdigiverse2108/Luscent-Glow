@@ -103,6 +103,7 @@ async def create_order(order_data: dict = Body(...)):
                 "initialBalance": item.get("price", 0),
                 "currentBalance": item.get("price", 0),
                 "senderMobile": order_data.get("userMobile"),
+                "senderName": metadata.get("senderName"),
                 "recipientName": metadata.get("recipient", "Valued Customer"),
                 "recipientMobile": metadata.get("recipientMobile"),
                 "message": metadata.get("message"),

@@ -104,6 +104,7 @@ class UserModel(BaseModel):
     otp: Optional[str] = Field(default=None)
     profilePicture: Optional[str] = Field(default=None)
     shippingAddress: Optional[dict] = Field(default=None)
+    addresses: List[dict] = Field(default_factory=list)
     createdAt: Optional[str] = Field(default=None)
 
     class Config:
@@ -311,6 +312,7 @@ class GiftCardModel(BaseModel):
     initialBalance: float = Field(..., gt=0)
     currentBalance: float = Field(..., ge=0)
     senderMobile: str = Field(...)
+    senderName: Optional[str] = Field(default=None)
     recipientName: str = Field(...)
     recipientMobile: Optional[str] = Field(default=None)
     message: Optional[str] = Field(default=None)

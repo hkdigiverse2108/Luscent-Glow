@@ -41,6 +41,7 @@ interface CartContextType {
   updateQuantity: (id: string, quantity: number, selectedShade?: string, selectedSize?: string, metadata?: any) => void;
   clearCart: () => void;
   totalItems: number;
+  productCount: number;
   subtotal: number;
   appliedCoupon: Coupon | null;
   applyCoupon: (code: string) => boolean;
@@ -60,7 +61,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const getLoggedInUser = () => {
     const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr || userStr === "undefined") return null;
+    try {
+        return JSON.parse(userStr);
+    } catch (e) {
+        return null;
+    }
 };
 
 // Helper for Guest ID
@@ -352,6 +358,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const productCount = items.length;
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   
   let discountAmount = 0;
@@ -372,6 +379,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateQuantity,
         clearCart,
         totalItems,
+        productCount,
         subtotal,
         appliedCoupon,
         applyCoupon,

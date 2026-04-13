@@ -15,7 +15,7 @@ const CategorySection = ({ title }: CategorySectionProps) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(getApiUrl("/api/categories/"));
+        const response = await fetch(getApiUrl("/api/categories/?hide_empty=true"));
         if (response.ok) {
           const data = await response.json();
           setCategories(data);

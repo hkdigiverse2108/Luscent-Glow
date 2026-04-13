@@ -8,9 +8,16 @@ from ..database import get_database
 router = APIRouter(prefix="/categories", tags=["categories"])
 
 @router.get("/", response_description="List all categories", response_model=List[CategoryModel])
-async def list_categories():
+async def list_categories(hide_empty: bool = False):
     db = await get_database()
-    categories = await db["categories"].find().to_list(100)
+    
+    if hide_empty:
+        # Get slugs of all categories that have at least one product
+        active_category_slugs = await db["products"].distinct("category")
+        categories = await db["categories"].find({"slug": {"$in": active_category_slugs}}).to_list(100)
+    else:
+        categories = await db["categories"].find().to_list(100)
+        
     return categories
 
 @router.post("/", response_description="Add new category", response_model=CategoryModel, status_code=status.HTTP_201_CREATED)

@@ -30,19 +30,19 @@ const LogoutConfirmation: React.FC<LogoutConfirmationProps> = ({
             <LogOut size={32} />
           </div>
           <AlertDialogTitle className="font-display text-2xl text-center text-charcoal">
-            Logout <span className="text-gold italic font-light">Confirmation</span>
+            Confirm <span className="text-gold italic font-light">Logout</span>
           </AlertDialogTitle>
           <AlertDialogDescription className="text-center font-body text-sm text-muted-foreground px-4">
             Are you sure you want to logout from your account?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-col sm:flex-row gap-3 pt-6">
-          <AlertDialogCancel onClick={onClose} className="rounded-full border-gold/20 text-[10px] font-body font-bold uppercase tracking-widest hover:bg-gold/5 mt-0 sm:mt-0">
+          <AlertDialogCancel onClick={onClose} className="rounded-full px-6 py-2.5 border-gold/20 text-[10px] font-body font-bold uppercase tracking-widest hover:bg-gold/5 mt-0 sm:mt-0 h-auto">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction 
             onClick={onConfirm}
-            className="rounded-full bg-charcoal text-white hover:bg-gold hover:text-charcoal transition-all text-[10px] font-body font-bold uppercase tracking-widest"
+            className="rounded-full px-6 py-2.5 bg-charcoal text-white hover:bg-gold hover:text-charcoal transition-all text-[10px] font-body font-bold uppercase tracking-widest h-auto"
           >
             Logout
           </AlertDialogAction>

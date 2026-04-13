@@ -12,15 +12,32 @@ import {
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
+import { Copy, Check } from "lucide-react";
 
 const OrderSuccess = () => {
   const [searchParams] = useSearchParams();
   const orderNumber = searchParams.get("orderNumber") || "LG-" + Math.floor(Math.random() * 1000000);
   const { clearCart } = useCart();
+  const [copied, setCopied] = React.useState(false);
+  const hasCopied = React.useRef(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(orderNumber);
+    setCopied(true);
+    toast.success("Order number copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   React.useEffect(() => {
     clearCart();
-  }, [clearCart]);
+    // Automatic copy - only once
+    if (orderNumber && !hasCopied.current) {
+      navigator.clipboard.writeText(orderNumber);
+      toast.info("Order number automatically copied!");
+      hasCopied.current = true;
+    }
+  }, [clearCart, orderNumber]);
 
   return (
     <div className="min-h-screen bg-[#faf9f6] flex flex-col relative overflow-hidden">
@@ -70,9 +87,18 @@ const OrderSuccess = () => {
             </p>
           </div>
 
-          <div className="py-5 px-6 bg-white/60 rounded-[1.5rem] border border-gold/10 inline-block shadow-sm">
+          <div className="py-5 px-8 bg-white/60 rounded-[1.5rem] border border-gold/10 inline-flex flex-col items-center shadow-sm relative group">
             <p className="text-[10px] font-body font-bold text-gold/60 uppercase tracking-[0.5em] mb-2 leading-none">Your Order Number</p>
-            <p className="font-display text-4xl text-charcoal tracking-tighter">{orderNumber}</p>
+            <div className="flex items-center gap-4">
+              <p className="font-display text-4xl text-charcoal tracking-tighter">{orderNumber}</p>
+              <button 
+                onClick={handleCopy}
+                className="p-2 bg-gold/5 hover:bg-gold/10 text-gold rounded-lg transition-all group-hover:scale-110 active:scale-95 border border-gold/10"
+                title="Copy Order Number"
+              >
+                {copied ? <Check size={18} /> : <Copy size={18} />}
+              </button>
+            </div>
           </div>
 
           <div className="pt-4 space-y-4">

@@ -45,6 +45,7 @@ const Cart = () => {
     updateQuantity, 
     subtotal, 
     totalItems, 
+    productCount,
     clearCart,
     appliedCoupon,
     applyCoupon,
@@ -227,7 +228,7 @@ const Cart = () => {
                 </button>
                 <div className="px-4 py-3.5 bg-gold/5 border border-gold/10 rounded-2xl flex items-center gap-2">
                   <ShoppingBag size={14} className="text-gold" />
-                  <span className="text-[10px] font-body font-bold text-charcoal">{totalItems}</span>
+                  <span className="text-[10px] font-body font-bold text-charcoal">{productCount}</span>
                 </div>
               </div>
             </div>
@@ -242,7 +243,7 @@ const Cart = () => {
                 </button>
                 <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-full border border-white/50 shadow-sm">
                   <ShoppingBag size={18} className="text-gold" />
-                  <p className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">{totalItems} Total Items</p>
+                  <p className="text-[10px] font-body font-bold text-charcoal uppercase tracking-[0.3em]">{productCount} Total Items</p>
                 </div>
               </div>
             </div>

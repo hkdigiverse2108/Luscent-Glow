@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 
@@ -43,9 +44,15 @@ const AdminUsers = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showAddPassword, setShowAddPassword] = useState(false);
+  const { user: adminUser } = useAuth();
+  const [isAdminVerified, setIsAdminVerified] = useState(false);
+  const [adminAuthPassword, setAdminAuthPassword] = useState("");
+  const [verifyingAdmin, setVerifyingAdmin] = useState(false);
+  const [adminAuthError, setAdminAuthError] = useState("");
+  const [showAdminAuthPassword, setShowAdminAuthPassword] = useState(false);
   
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "cart" | "wishlist" | "giftcards">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "cart" | "wishlist" | "giftcards" | "addresses">("profile");
   const [isQuickView, setIsQuickView] = useState(false);
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -98,6 +105,46 @@ const AdminUsers = () => {
       toast.error("User details could not be loaded.");
     } finally {
       setLoadingDetails(false);
+    }
+  };
+
+  useEffect(() => {
+    if (adminAuthPassword.length > 0 && !isAdminVerified && !verifyingAdmin) {
+      const timer = setTimeout(() => {
+        handleAutoVerifyAdminAction();
+      }, 800);
+      return () => clearTimeout(timer);
+    } else if (adminAuthPassword.length === 0) {
+      setAdminAuthError("");
+    }
+  }, [adminAuthPassword]);
+
+  const handleAutoVerifyAdminAction = async () => {
+    if (!adminUser || !adminAuthPassword) return;
+    
+    setVerifyingAdmin(true);
+    setAdminAuthError("");
+    try {
+      const response = await fetch(getApiUrl("/api/auth/verify-password"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mobileNumber: adminUser.mobileNumber,
+          password: adminAuthPassword
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.isValid) {
+        setIsAdminVerified(true);
+        toast.success("Password verified. Password settings unlocked.");
+      } else {
+        setAdminAuthError(data.detail || "Incorrect admin password.");
+      }
+    } catch (error: any) {
+      setAdminAuthError("Connection error.");
+    } finally {
+      setVerifyingAdmin(false);
     }
   };
 
@@ -169,24 +216,22 @@ const AdminUsers = () => {
     if (userDetails.user.password !== confirmPassword) return toast.error("Passwords do not match.");
 
     try {
-      const response = await fetch(getApiUrl(`/api/users/${userDetails.user.id}`), {
+      const response = await fetch(getApiUrl(`/api/users/${userDetails.user.id || userDetails.user._id}/password`), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password: userDetails.user.password }),
+        body: JSON.stringify({ password: userDetails.user.password })
       });
-
       if (response.ok) {
-        toast.success("Password reset successfully.");
-        setUserDetails({
-          ...userDetails,
-          user: { ...userDetails.user, password: "" }
-        });
+        toast.success("User password updated successfully.");
+        setUserDetails({...userDetails, user: {...userDetails.user, password: ""}});
         setConfirmPassword("");
+        setIsAdminVerified(false);
+        setAdminAuthPassword("");
       } else {
-        toast.error("Password reset failed.");
+        toast.error("Error updating user password.");
       }
-    } catch (error) {
-      toast.error("Connection error.");
+    } catch {
+      toast.error("System error.");
     }
   };
 
@@ -371,6 +416,15 @@ const AdminUsers = () => {
                              >
                                 <Heart size={18} />
                              </button>
+                              <button 
+                                 onClick={() => openUserDetails(u, "addresses", false)}
+                                 title="View Addresses"
+                                 className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-xl ${
+                                   isDark ? "bg-white/5 text-white/40 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold hover:bg-gold/10"
+                                 }`}
+                              >
+                                 <MapPin size={18} />
+                              </button>
                              <button 
                                 onClick={() => openUserDetails(u, "profile", false)}
                                 title="View Profile"
@@ -780,21 +834,25 @@ const AdminUsers = () => {
                       { id: "profile", label: "Profile", icon: Edit2 },
                       { id: "cart", label: "Cart", icon: ShoppingBag },
                       { id: "wishlist", label: "Wishlist", icon: Heart },
-                      { id: "giftcards", label: "Gift Cards", icon: Gift }
+                      { id: "giftcards", label: "Gift Cards", icon: Gift },
+                      { id: "addresses", label: "Addresses", icon: MapPin }
                     ].map((tab) => (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
-                        className={`flex items-center gap-3 px-6 py-6 text-[12px] font-black uppercase tracking-[0.2em] relative transition-all ${
+                        className={`flex items-center gap-2 px-4 py-6 text-[10px] font-black uppercase tracking-[0.25em] relative transition-all duration-500 whitespace-nowrap ${
                           activeTab === tab.id 
-                          ? "text-gold" 
-                          : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
+                          ? "text-gold translate-y-[-1px]" 
+                          : isDark ? "text-white/30 hover:text-white" : "text-charcoal/30 hover:text-charcoal"
                         }`}
                       >
-                        <tab.icon size={14} />
-                        {tab.label}
+                        <tab.icon size={11} className={activeTab === tab.id ? "text-gold" : "opacity-40"} />
+                        <span>{tab.label}</span>
                         {activeTab === tab.id && (
-                          <motion.div layoutId="tabUnderline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />
+                          <motion.div 
+                            layoutId="tabUnderline" 
+                            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[3px] bg-gold rounded-full shadow-[0_-4px_12px_rgba(212,175,55,0.4)]" 
+                          />
                         )}
                       </button>
                     ))}
@@ -927,77 +985,165 @@ const AdminUsers = () => {
                           </form>
 
                           {/* Security Reset Section */}
-                          <div className={`p-12 rounded-[50px] border shadow-2xl transition-all duration-700 ${
+                          <div className={`p-10 rounded-[4rem] border transition-all duration-700 ${
                              isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-gold/10 shadow-charcoal/5"
                           }`}>
-                             <div className="space-y-3 mb-10">
+                             <div className="space-y-3 mb-8">
                                 <div className="flex items-center gap-2 opacity-60">
                                    <Lock size={12} className="text-gold" />
-                                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Credential Recovery</span>
+                                   <span className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Vault Security</span>
                                 </div>
                                 <h3 className={`text-4xl font-serif tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
-                                   Reset <span className="text-gold italic font-normal">Password</span>
+                                   Credential <span className="text-gold italic font-normal">Management</span>
                                 </h3>
                              </div>
 
-                             <form onSubmit={handleUpdatePassword} className="space-y-10">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                                   <div className="space-y-3">
-                                      <label className="text-[10px] font-black uppercase tracking-widest ml-1 flex items-center gap-2">
-                                         <div className="w-1 h-1 rounded-full bg-gold" /> New Password
-                                      </label>
-                                      <div className="relative group">
+                             <form onSubmit={handleUpdatePassword} className="space-y-8">
+                                <div className="space-y-4">
+                                   <label className="text-[10px] font-black uppercase tracking-widest ml-1 flex items-center gap-2">
+                                      <div className="w-1 h-1 rounded-full bg-gold" /> Admin Identity Verification
+                                   </label>
+                                   <div className="flex flex-col gap-3">
+                                      <div className="relative">
                                          <input 
-                                            type={showNewPassword ? "text" : "password"} 
-                                            placeholder="••••••••"
-                                            value={userDetails.user.password || ""}
-                                            onChange={(e) => setUserDetails({...userDetails, user: {...userDetails.user, password: e.target.value}})}
-                                            className={`w-full px-8 py-5 pr-14 rounded-[2.5rem] border font-bold transition-all focus:outline-none focus:border-gold/40 ${
-                                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal shadow-sm"
+                                            type={showAdminAuthPassword ? "text" : "password"} 
+                                            placeholder="Enter your admin password to unlock"
+                                            value={adminAuthPassword}
+                                            disabled={isAdminVerified}
+                                            onChange={(e) => {
+                                               setAdminAuthPassword(e.target.value);
+                                               setAdminAuthError("");
+                                            }}
+                                            className={`w-full px-8 py-4 pr-32 rounded-3xl border font-bold transition-all focus:outline-none ${
+                                              isAdminVerified 
+                                                ? "border-emerald-500/30 bg-emerald-500/[0.02] text-emerald-600" 
+                                                : adminAuthError
+                                                  ? "border-rose-500/30 bg-rose-500/[0.02]"
+                                                  : isDark ? "bg-white/5 border-white/10 text-white focus:border-gold/30" : "bg-charcoal/5 border-charcoal/10 text-charcoal shadow-sm focus:border-gold/30"
                                             }`}
                                          />
-                                         <button 
-                                            type="button"
-                                            onClick={() => setShowNewPassword(!showNewPassword)}
-                                            className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/40 hover:text-gold transition-colors focus:outline-none"
-                                         >
-                                            {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                         </button>
+                                         <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                                            {verifyingAdmin && (
+                                              <div className="w-4 h-4 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+                                            )}
+                                            
+                                            {isAdminVerified && (
+                                              <div className="text-emerald-500 flex items-center gap-2">
+                                                <ShieldCheck size={18} />
+                                                <span className="hidden md:inline text-[9px] font-black uppercase tracking-widest">Authorized</span>
+                                              </div>
+                                            )}
+
+                                            {!isAdminVerified && (
+                                              <button 
+                                                type="button"
+                                                onClick={() => setShowAdminAuthPassword(!showAdminAuthPassword)}
+                                                className="text-gold/40 hover:text-gold transition-colors focus:outline-none"
+                                              >
+                                                {showAdminAuthPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                              </button>
+                                            )}
+
+                                            {isAdminVerified && (
+                                              <button
+                                                type="button"
+                                                onClick={() => {
+                                                  setIsAdminVerified(false);
+                                                  setAdminAuthPassword("");
+                                                  setAdminAuthError("");
+                                                }}
+                                                className="text-[9px] font-black uppercase tracking-widest text-gold hover:underline"
+                                              >
+                                                Switch
+                                              </button>
+                                            )}
+                                         </div>
                                       </div>
-                                   </div>
-                                   <div className="space-y-3">
-                                      <label className="text-[10px] font-black uppercase tracking-widest ml-1 flex items-center gap-2">
-                                         <div className="w-1 h-1 rounded-full bg-gold" /> Confirm Password
-                                      </label>
-                                      <div className="relative group">
-                                         <input 
-                                            type={showConfirmPassword ? "text" : "password"} 
-                                            placeholder="••••••••"
-                                            value={confirmPassword}
-                                            onChange={(e) => setConfirmPassword(e.target.value)}
-                                            className={`w-full px-8 py-5 pr-14 rounded-[2.5rem] border font-bold transition-all focus:outline-none focus:border-gold/40 ${
-                                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal shadow-sm"
-                                            }`}
-                                         />
-                                         <button 
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/40 hover:text-gold transition-colors focus:outline-none"
-                                         >
-                                            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                         </button>
-                                      </div>
+
+                                      {adminAuthError && (
+                                        <motion.div 
+                                          initial={{ opacity: 0, scale: 0.95 }}
+                                          animate={{ opacity: 1, scale: 1 }}
+                                          className="flex items-center gap-2 px-5 py-3 bg-rose-500/10 border border-rose-500/20 rounded-2xl"
+                                        >
+                                          <AlertCircle size={14} className="text-rose-500" />
+                                          <span className="text-[10px] font-black text-rose-500/80 uppercase tracking-widest">{adminAuthError}</span>
+                                        </motion.div>
+                                      )}
                                    </div>
                                 </div>
 
-                                <div className="pt-4">
-                                   <button 
-                                      type="submit"
-                                      className="w-full py-6 bg-charcoal text-white font-black uppercase tracking-[0.2em] text-[13px] rounded-[2.5rem] shadow-2xl hover:bg-gold transition-all duration-500 active:scale-95"
-                                   >
-                                      Confirm Reset process
-                                   </button>
-                                </div>
+                                <AnimatePresence>
+                                   {isAdminVerified && (
+                                      <motion.div
+                                         initial={{ opacity: 0, height: 0 }}
+                                         animate={{ opacity: 1, height: "auto" }}
+                                         exit={{ opacity: 0, height: 0 }}
+                                         className="overflow-hidden space-y-8 pt-4"
+                                      >
+                                         <div className="h-[1px] bg-gradient-to-r from-transparent via-gold/10 to-transparent" />
+                                         
+                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
+                                            <div className="space-y-3">
+                                               <label className="text-[10px] font-black uppercase tracking-widest ml-1 flex items-center gap-2">
+                                                  <div className="w-1 h-1 rounded-full bg-gold" /> Customer's New Password
+                                               </label>
+                                               <div className="relative group">
+                                                  <input 
+                                                     type={showNewPassword ? "text" : "password"} 
+                                                     placeholder="••••••••"
+                                                     value={userDetails.user.password || ""}
+                                                     onChange={(e) => setUserDetails({...userDetails, user: {...userDetails.user, password: e.target.value}})}
+                                                     className={`w-full px-8 py-4 pr-14 rounded-3xl border font-bold transition-all focus:outline-none focus:border-gold/40 ${
+                                                       isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal shadow-sm"
+                                                     }`}
+                                                  />
+                                                  <button 
+                                                     type="button"
+                                                     onClick={() => setShowNewPassword(!showNewPassword)}
+                                                     className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/40 hover:text-gold transition-colors focus:outline-none"
+                                                  >
+                                                     {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                  </button>
+                                               </div>
+                                            </div>
+                                            <div className="space-y-3">
+                                               <label className="text-[10px] font-black uppercase tracking-widest ml-1 flex items-center gap-2">
+                                                  <div className="w-1 h-1 rounded-full bg-gold" /> Confirm User Credentials
+                                               </label>
+                                               <div className="relative group">
+                                                  <input 
+                                                     type={showConfirmPassword ? "text" : "password"} 
+                                                     placeholder="••••••••"
+                                                     value={confirmPassword}
+                                                     onChange={(e) => setConfirmPassword(e.target.value)}
+                                                     className={`w-full px-8 py-4 pr-14 rounded-3xl border font-bold transition-all focus:outline-none focus:border-gold/40 ${
+                                                       isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal shadow-sm"
+                                                     }`}
+                                                  />
+                                                  <button 
+                                                     type="button"
+                                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                     className="absolute right-6 top-1/2 -translate-y-1/2 text-gold/40 hover:text-gold transition-colors focus:outline-none"
+                                                  >
+                                                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                  </button>
+                                               </div>
+                                            </div>
+                                         </div>
+
+                                         <div className="pt-4">
+                                            <button 
+                                               type="submit"
+                                               className="w-full py-6 bg-charcoal text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-[2.5rem] shadow-2xl hover:bg-gold transition-all duration-500 active:scale-95 group relative overflow-hidden"
+                                            >
+                                               <span className="relative z-10">Authorize Security Reset</span>
+                                               <div className="absolute inset-0 bg-gradient-to-r from-gold/0 via-gold/10 to-gold/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                            </button>
+                                         </div>
+                                      </motion.div>
+                                   )}
+                                </AnimatePresence>
                              </form>
                           </div>
                         </div>
@@ -1129,6 +1275,67 @@ const AdminUsers = () => {
                                <div className="py-24 text-center opacity-20">
                                  <Gift size={48} className="mx-auto mb-4" />
                                  <p className="text-base font-bold uppercase tracking-widest italic">No gift cards found.</p>
+                               </div>
+                            )}
+                        </div>
+                      )}
+
+                      {activeTab === "addresses" && (
+                        <div className="space-y-8">
+                             <div className="flex items-center justify-between pb-4 border-b border-gold/10">
+                                 <div>
+                                    <h5 className="text-[14px] font-black uppercase tracking-[0.3em] text-gold">Archived Locations</h5>
+                                    <p className="text-[10px] opacity-40 uppercase tracking-widest mt-1">Shipping rituals & shipping destination history</p>
+                                 </div>
+                                 <span className="px-3 py-1 bg-gold/5 border border-gold/10 rounded-full text-[9px] font-black uppercase tracking-widest text-gold/60">{userDetails.user.addresses?.length || 0} Saved Rituals</span>
+                             </div>
+
+                            {userDetails.user.addresses && userDetails.user.addresses.length > 0 ? (
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  {userDetails.user.addresses.map((addr: any, idx: number) => (
+                                     <div 
+                                      key={idx}
+                                      className={`p-8 rounded-[2.5rem] border transition-all duration-700 relative flex flex-col justify-between group overflow-hidden ${
+                                        isDark 
+                                        ? "bg-gradient-to-br from-white/[0.03] to-transparent border-white/5 hover:border-gold/30 hover:bg-gold/[0.03]" 
+                                        : "bg-white border-gold/10 hover:border-gold/30 shadow-xl shadow-charcoal/5"
+                                      }`}
+                                     >
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full -mr-16 -mt-16 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        
+                                        <div className="relative z-10 space-y-6">
+                                            <div className="flex justify-between items-start">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-3">
+                                                      <p className={`font-body font-bold text-lg transition-colors ${isDark ? "text-white group-hover:text-gold" : "text-charcoal group-hover:text-gold"}`}>{addr.fullName}</p>
+                                                      {addr.isDefault && (
+                                                          <span className="text-[8px] font-black bg-gold text-charcoal px-2.5 py-1 rounded-full uppercase tracking-widest leading-none shadow-lg shadow-gold/20">Default</span>
+                                                      )}
+                                                    </div>
+                                                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold opacity-60">Verified Identity</p>
+                                                </div>
+                                                <div className={`p-3 rounded-2xl transition-all duration-500 ${isDark ? "bg-white/5 text-white/20 group-hover:text-gold group-hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/20 group-hover:text-gold group-hover:bg-gold/10"}`}>
+                                                    {addr.label === "Home" ? <User size={16} /> : addr.label === "Work" ? <ShoppingBag size={16} /> : <MapPin size={16} />}
+                                                </div>
+                                            </div>
+
+                                            <div className={`space-y-2 text-[13px] font-body leading-relaxed font-light ${isDark ? "text-white/60" : "text-charcoal/60"}`}>
+                                                <p className="flex items-center gap-3"><MapPin size={12} className="text-gold/40 flex-shrink-0" /> {addr.street}</p>
+                                                <p className="pl-6">{addr.city}, {addr.state} - <span className="font-bold text-gold">{addr.zipCode}</span></p>
+                                                <div className="pt-4 flex items-center gap-3 border-t border-gold/5">
+                                                   <Phone size={14} className="text-gold" />
+                                                   <p className={`font-black tracking-widest ${isDark ? "text-white/90" : "text-charcoal/90"}`}>{addr.mobile}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                     </div>
+                                  ))}
+                               </div>
+                            ) : (
+                               <div className={`py-32 text-center rounded-[3rem] border border-dashed transition-colors ${isDark ? "bg-white/[0.02] border-white/10" : "bg-charcoal/[0.02] border-charcoal/10"}`}>
+                                 <MapPin size={48} className="mx-auto mb-6 text-gold/20" />
+                                 <h6 className={`text-xl font-bold tracking-tight mb-2 ${isDark ? "text-white/40" : "text-charcoal/40"}`}>No Shipping Legacy Found</h6>
+                                 <p className="text-[11px] font-black uppercase tracking-widest text-gold opacity-40">This user has not established any delivery portals yet</p>
                                </div>
                             )}
                         </div>

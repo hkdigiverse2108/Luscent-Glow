@@ -117,6 +117,49 @@ async def initiate_payment(order_data: dict = Body(...)):
         }
         await db["orders"].insert_one(new_order)
         
+        # Process Gift Card Redemption for COD
+        applied_gc_code = order_data.get("appliedGiftCardCode")
+        gc_discount = order_data.get("giftCardDiscount", 0)
+        if applied_gc_code and gc_discount > 0:
+            gc = await db["gift_cards"].find_one({"code": applied_gc_code.upper()})
+            if gc:
+                new_balance = max(0, gc.get("currentBalance", 0) - gc_discount)
+                await db["gift_cards"].update_one(
+                    {"_id": gc["_id"]},
+                    {"$set": {
+                        "currentBalance": new_balance,
+                        "isActive": new_balance > 0,
+                        "lastUsedAt": datetime.utcnow().isoformat(),
+                        "lastOrderNumber": order_number
+                    }}
+                )
+
+        # Process Purchase of New Gift Cards for COD
+        for item in order_data.get("items", []):
+            if item.get("productId", "").startswith("giftcard-") or item.get("category") == "Gift Cards":
+                gift_code = "LG-GIFT-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4)) + "-" + "".join(random.choices(string.ascii_uppercase + string.digits, k=4))
+                from datetime import timedelta
+                expiry_date = (datetime.utcnow() + timedelta(days=365)).isoformat()
+                metadata = item.get("metadata", {})
+                
+                gift_card = {
+                    "code": gift_code,
+                    "initialBalance": item.get("price", 0),
+                    "currentBalance": item.get("price", 0),
+                    "senderMobile": order_data.get("userMobile"),
+                    "senderName": metadata.get("senderName"),
+                    "recipientName": metadata.get("recipient", "Valued Customer"),
+                    "recipientMobile": metadata.get("recipientMobile"),
+                    "message": metadata.get("message"),
+                    "theme": metadata.get("theme", "Gold Radiance"),
+                    "image": metadata.get("image"),
+                    "isActive": True,
+                    "expiryDate": expiry_date,
+                    "createdAt": datetime.utcnow().isoformat(),
+                    "orderNumber": order_number
+                }
+                await db["gift_cards"].insert_one(gift_card)
+
         # Cleanup cart
         identifier = order_data.get("userMobile")
         if identifier:

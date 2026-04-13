@@ -28,6 +28,7 @@ import { getApiUrl } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
+import { PhoneInput } from "@/components/PhoneInput";
 
 type ViewState = "login" | "signup" | "forgot-password" | "verify-otp" | "new-password";
 
@@ -42,6 +43,7 @@ const Login = () => {
   const [otpValue, setOtpValue] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [prevView, setPrevView] = useState<ViewState | null>(null);
+  const [targetUserId, setTargetUserId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { syncCart } = useCart();
   const { syncWithServer: syncWishlist } = useWishlist();
@@ -60,6 +62,16 @@ const Login = () => {
 
   const handleAction = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation for mobile number (last part should be 10 digits)
+    const mobileParts = mobileNumber.split(" ");
+    const pureNumber = mobileParts.length === 2 ? mobileParts[1] : mobileNumber.replace(/\D/g, "");
+    
+    if (pureNumber.length !== 10) {
+      toast.error("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -92,7 +104,7 @@ const Login = () => {
           return;
         }
         endpoint = getApiUrl("/api/auth/reset-password");
-        payload = { mobileNumber, otp: otpValue, newPassword: password };
+        payload = { mobileNumber, otp: otpValue, newPassword: password, userId: targetUserId };
       }
 
       const response = await fetch(endpoint, {
@@ -132,6 +144,7 @@ const Login = () => {
         toast.success("Account created! Please verify your mobile.");
       } else if (view === "forgot-password") {
         setView("verify-otp");
+        if (data.userId) setTargetUserId(data.userId);
         toast.success("OTP sent for password reset.");
       } else if (view === "verify-otp") {
         toast.success("Verification successful!");
@@ -270,14 +283,11 @@ const Login = () => {
                       <Label htmlFor="mobile" className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold group-focus-within:text-gold transition-colors">Mobile Number</Label>
                       <div className="relative group/field">
                         <Smartphone className="absolute left-0 top-1/2 -translate-y-1/2 text-white/10 group-focus-within/field:text-gold transition-all duration-500" size={18} />
-                        <Input 
-                          id="mobile"
-                          type="tel" 
-                          placeholder="+91 00000 00000"
+                        <PhoneInput 
                           value={mobileNumber}
-                          onChange={(e) => setMobileNumber(e.target.value)}
-                          className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-12 h-12 focus:border-gold transition-all duration-500 placeholder:text-white/5 ring-0 focus-visible:ring-0"
-                          required
+                          onChange={(val) => setMobileNumber(val)}
+                          className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-8 h-12 focus-within:border-gold transition-all duration-500"
+                          placeholder="00000 00000"
                         />
                       </div>
                     </motion.div>
@@ -380,13 +390,11 @@ const Login = () => {
                       <Label className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold">Mobile Number</Label>
                       <div className="relative">
                         <Phone className="absolute left-0 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-gold transition-colors" size={18} />
-                        <Input 
-                          type="tel"
-                          placeholder="+91 00000 00000"
+                        <PhoneInput 
                           value={mobileNumber}
-                          onChange={(e) => setMobileNumber(e.target.value)}
-                          className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-12 h-12 focus:border-gold transition-all duration-500 placeholder:text-white/5 ring-0 focus-visible:ring-0"
-                          required
+                          onChange={(val) => setMobileNumber(val)}
+                          className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-8 h-12 focus-within:border-gold transition-all duration-500"
+                          placeholder="00000 00000"
                         />
                       </div>
                     </motion.div>
@@ -468,13 +476,11 @@ const Login = () => {
                     <Label className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold">Mobile Number</Label>
                     <div className="relative">
                       <Phone className="absolute left-0 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-gold transition-colors" size={18} />
-                      <Input 
-                        type="tel"
-                        placeholder="+91 00000 00000"
-                        value={mobileNumber}
-                        onChange={(e) => setMobileNumber(e.target.value)}
-                        className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-12 h-12 focus:border-gold transition-all duration-500 placeholder:text-white/5 ring-0 focus-visible:ring-0"
-                        required
+                      <PhoneInput 
+                         value={mobileNumber}
+                         onChange={(val) => setMobileNumber(val)}
+                         className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-8 h-12 focus-within:border-gold transition-all duration-500"
+                         placeholder="00000 00000"
                       />
                     </div>
                   </motion.div>
