@@ -17,12 +17,14 @@ import {
 } from "lucide-react";
 import DynamicIcon from "@/components/DynamicIcon";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 
 // Dynamic Icon Resolver removed in favor of DynamicIcon component
 
 const GiftCards = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState<any>(null);
   
@@ -74,6 +76,7 @@ const GiftCards = () => {
         theme: selectedTheme?.id, 
         recipient: recipientName, 
         recipientMobile,
+        senderName,
         message,
         price: finalAmount,
         image: selectedTheme?.image
@@ -206,6 +209,11 @@ const GiftCards = () => {
                       type="text"
                       placeholder="Your Name"
                       value={senderName}
+                      onFocus={() => {
+                        if (user && !senderName) {
+                          setSenderName(user.fullName);
+                        }
+                      }}
                       onChange={(e) => setSenderName(e.target.value)}
                       className="w-full py-4 px-6 bg-white border-2 border-border rounded-2xl font-body text-sm focus:outline-none focus:border-gold transition-colors"
                     />

@@ -40,7 +40,7 @@ const GOLD = "hsl(var(--gold))";
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { items, subtotal, discountAmount, giftCardDiscount, clearCart } = useCart();
+  const { items, subtotal, discountAmount, giftCardDiscount, appliedGiftCard, clearCart } = useCart();
   const { user } = useAuth();
   
   const [step, setStep] = useState(1); // 1: Identify, 2: Address
@@ -162,6 +162,8 @@ const Checkout = () => {
           metadata: item.metadata
         })),
         totalAmount: total,
+        appliedGiftCardCode: appliedGiftCard?.code || null,
+        giftCardDiscount: giftCardDiscount || 0,
         paymentStatus: "Pending",
         shippingAddress: {
           fullName: address.fullName || user?.fullName || "Guest",

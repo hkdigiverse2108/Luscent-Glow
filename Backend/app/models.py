@@ -311,6 +311,7 @@ class GiftCardModel(BaseModel):
     initialBalance: float = Field(..., gt=0)
     currentBalance: float = Field(..., ge=0)
     senderMobile: str = Field(...)
+    senderName: Optional[str] = Field(default=None)
     recipientName: str = Field(...)
     recipientMobile: Optional[str] = Field(default=None)
     message: Optional[str] = Field(default=None)
