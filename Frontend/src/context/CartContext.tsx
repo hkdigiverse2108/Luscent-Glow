@@ -318,6 +318,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.error("This coupon is no longer active");
         return false;
       }
+      if (appliedGiftCard) {
+        setAppliedGiftCard(null);
+        toast.info("Gift card removed. Only one offer can be applied at a time.");
+      }
       setAppliedCoupon(coupon);
       toast.success(`Coupon ${coupon.code} applied successfully!`);
       return true;
@@ -336,6 +340,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const response = await fetch(getApiUrl(`/api/gift-cards/validate/${code}`));
       if (response.ok) {
         const data = await response.json();
+        if (appliedCoupon) {
+          setAppliedCoupon(null);
+          toast.info("Coupon removed. Only one offer can be applied at a time.");
+        }
         setAppliedGiftCard({
           code: data.code,
           balance: data.balance,
