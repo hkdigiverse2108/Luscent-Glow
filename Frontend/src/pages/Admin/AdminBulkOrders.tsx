@@ -147,7 +147,9 @@ const AdminBulkOrders = () => {
           <button 
             onClick={() => setActiveTab("inquiries")}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "inquiries" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+              activeTab === "inquiries" 
+                ? "bg-gold text-charcoal" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
             Inquiry List
@@ -155,7 +157,9 @@ const AdminBulkOrders = () => {
           <button 
             onClick={() => setActiveTab("config")}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "config" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+              activeTab === "config" 
+                ? "bg-gold text-charcoal" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
             Page Settings

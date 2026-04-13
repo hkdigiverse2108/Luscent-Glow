@@ -151,8 +151,26 @@ const AdminInquiries = () => {
         isDark={isDark}
       >
         <div className={`p-1.5 backdrop-blur-2xl rounded-2xl flex items-center gap-2 border mt-2 w-fit ${isDark ? "bg-white/[0.05] border-white/5 shadow-2xl" : "bg-charcoal/[0.05] border-charcoal/5 shadow-lg"}`}>
-          <button onClick={() => setActiveTab('standard')} className={`px-8 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-500 ${activeTab === 'standard' ? "bg-gold text-charcoal shadow-lg" : "text-inherit opacity-40 hover:opacity-100"}`}>General</button>
-          <button onClick={() => setActiveTab('bulk')} className={`px-8 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-500 ${activeTab === 'bulk' ? "bg-gold text-charcoal shadow-lg" : "text-inherit opacity-40 hover:opacity-100"}`}>Corporate</button>
+          <button 
+            onClick={() => setActiveTab('standard')} 
+            className={`px-8 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-500 ${
+              activeTab === 'standard' 
+                ? "bg-gold text-charcoal shadow-lg" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
+            }`}
+          >
+            General
+          </button>
+          <button 
+            onClick={() => setActiveTab('bulk')} 
+            className={`px-8 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-500 ${
+              activeTab === 'bulk' 
+                ? "bg-gold text-charcoal shadow-lg" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
+            }`}
+          >
+            Corporate
+          </button>
         </div>
       </AdminHeader>
 

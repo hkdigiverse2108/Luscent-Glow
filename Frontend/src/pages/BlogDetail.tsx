@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
+import SEO from "@/components/SEO";
 import { 
   ArrowLeft, Calendar, User, Mail, ArrowRight, ChevronRight, ShoppingBag,
   Sparkles, Heart
@@ -86,6 +87,12 @@ const BlogDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#faf9f6] selection:bg-gold/20 selection:text-gold">
+      <SEO seo={{
+        title: post.seo?.title || post.title,
+        description: post.seo?.description || post.excerpt,
+        keywords: post.seo?.keywords,
+        ogImage: post.image
+      }} />
       <Header />
 
       <main>

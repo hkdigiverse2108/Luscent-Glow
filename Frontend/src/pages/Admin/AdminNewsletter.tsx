@@ -144,7 +144,9 @@ const AdminNewsletter = () => {
           <button 
             onClick={() => setActiveTab("list")}
             className={`px-8 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeTab === "list" ? "bg-gold text-charcoal shadow-lg shadow-gold/20" : "text-muted-foreground hover:text-foreground"
+              activeTab === "list" 
+                ? "bg-gold text-charcoal shadow-lg shadow-gold/20" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
             Subscriber List
@@ -152,10 +154,12 @@ const AdminNewsletter = () => {
           <button 
             onClick={() => setActiveTab("config")}
             className={`px-8 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-              activeTab === "config" ? "bg-gold text-charcoal shadow-lg shadow-gold/20" : "text-muted-foreground hover:text-foreground"
+              activeTab === "config" 
+                ? "bg-gold text-charcoal shadow-lg shadow-gold/20" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
-            Newsletter Settings
+            Welcome Email
           </button>
         </div>
       </AdminHeader>

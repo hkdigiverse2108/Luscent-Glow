@@ -1,11 +1,11 @@
 import React from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  ClipboardList, 
-  Users, 
-  Settings, 
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  ClipboardList,
+  Users,
+  Settings,
   LogOut,
   Sparkles,
   ChevronRight,
@@ -37,15 +37,17 @@ const menuGroups = [
   {
     label: "Overview",
     items: [
-      { icon: LayoutDashboard, label: "Dashboard",     path: "/admin/dashboard" },
+      { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
     ]
   },
   {
     label: "Content",
     items: [
-      { icon: Layout,          label: "Home Page",     path: "/admin/home" },
-      { icon: ShoppingBag,     label: "Products",      path: "/admin/products" },
-      { icon: Edit2,           label: "Journal Management", path: "/admin/blogs" },
+      { icon: Layout, label: "Home Page", path: "/admin/home" },
+      { icon: ShoppingBag, label: "Products", path: "/admin/products" },
+      { icon: Tag, label: "Categories", path: "/admin/categories" },
+      { icon: Edit2, label: "Journal Management", path: "/admin/blogs" },
+      { icon: Instagram, label: "Social Media", path: "/admin/social-media" },
     ]
   },
   {
@@ -62,25 +64,25 @@ const menuGroups = [
   {
     label: "Audience",
     items: [
-      { icon: Users,           label: "Users",         path: "/admin/users" },
-      { icon: Star,            label: "Reviews",       path: "/admin/reviews" },
-      { icon: Rss,             label: "Subscribers",   path: "/admin/newsletter" },
+      { icon: Users, label: "Users", path: "/admin/users" },
+      { icon: Star, label: "Reviews", path: "/admin/reviews" },
+      { icon: Rss, label: "Subscribers", path: "/admin/newsletter" },
     ]
   },
   {
     label: "Site",
     items: [
-      { icon: Sparkles,        label: "About Us",      path: "/admin/about" },
-      { icon: Phone,           label: "Contact Us",    path: "/admin/contact" },
-      { icon: HelpCircle,      label: "FAQ",           path: "/admin/faq" },
-      { icon: Shield,          label: "Policies",      path: "/admin/policies" },
-      { icon: Globe,           label: "Global Footer", path: "/admin/footer" },
+      { icon: Sparkles, label: "About Us", path: "/admin/about" },
+      { icon: Phone, label: "Contact Us", path: "/admin/contact" },
+      { icon: HelpCircle, label: "FAQ", path: "/admin/faq" },
+      { icon: Shield, label: "Policies", path: "/admin/policies" },
+      { icon: Globe, label: "Global Footer", path: "/admin/footer" },
     ]
   },
   {
     label: "System",
     items: [
-      { icon: Settings,        label: "Settings",      path: "/admin/settings" },
+      { icon: Settings, label: "Settings", path: "/admin/settings" },
     ]
   },
 ];
@@ -91,9 +93,8 @@ const AdminLayout = () => {
   const { isDark, toggleTheme } = useAdminTheme();
 
   return (
-    <div className={`min-h-screen flex overflow-hidden font-body relative transition-colors duration-700 ${
-      isDark ? "bg-[#0f0f0f] text-white" : "bg-[#faf9f6] text-charcoal"
-    }`}>
+    <div className={`min-h-screen flex overflow-hidden font-body relative transition-colors duration-700 ${isDark ? "bg-[#0f0f0f] text-white" : "bg-[#faf9f6] text-charcoal"
+      }`}>
       {/* Cinematic Backdrop Glow */}
       <AnimatePresence>
         {isDark && (
@@ -110,11 +111,10 @@ const AdminLayout = () => {
       </AnimatePresence>
 
       {/* ── Sidebar ────────────────────────────────────────────────────────── */}
-      <aside className={`w-[230px] flex-shrink-0 backdrop-blur-3xl border-r flex flex-col relative z-20 transition-all duration-700 ${
-        isDark
+      <aside className={`w-[230px] flex-shrink-0 backdrop-blur-3xl border-r flex flex-col relative z-20 transition-all duration-700 ${isDark
           ? "bg-charcoal/80 border-white/5 shadow-[0_0_60px_rgba(0,0,0,0.4)]"
           : "bg-white/95 border-gold/10 shadow-[0_0_40px_rgba(0,0,0,0.06)]"
-      }`}>
+        }`}>
 
         {/* Brand Mark */}
         <div className="px-5 pt-6 pb-5">
@@ -123,14 +123,12 @@ const AdminLayout = () => {
               <Sparkles className="text-white" size={18} />
             </div>
             <div className="leading-none">
-              <h1 className={`font-display text-[1.05rem] font-bold tracking-tight italic transition-colors duration-700 ${
-                isDark ? "text-white" : "text-charcoal"
-              }`}>
+              <h1 className={`font-display text-[1.05rem] font-bold tracking-tight italic transition-colors duration-700 ${isDark ? "text-white" : "text-charcoal"
+                }`}>
                 Luscent <span className="text-gold">Glow</span>
               </h1>
-              <p className={`text-[8px] font-black uppercase tracking-[0.5em] mt-0.5 transition-colors duration-700 ${
-                isDark ? "text-white/30" : "text-charcoal/35"
-              }`}>Admin Panel</p>
+              <p className={`text-[8px] font-black uppercase tracking-[0.5em] mt-0.5 transition-colors duration-700 ${isDark ? "text-white/30" : "text-charcoal/35"
+                }`}>Admin Panel</p>
             </div>
           </Link>
         </div>
@@ -144,9 +142,8 @@ const AdminLayout = () => {
             return (
               <div key={group.label}>
                 {/* Group Label */}
-                <p className={`px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.35em] ${
-                  isDark ? "text-white/20" : "text-charcoal/30"
-                }`}>
+                <p className={`px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.35em] ${isDark ? "text-white/20" : "text-charcoal/30"
+                  }`}>
                   {group.label}
                 </p>
 
@@ -164,15 +161,14 @@ const AdminLayout = () => {
                       >
                         <Link
                           to={item.path}
-                          className={`group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 relative overflow-hidden ${
-                            isActive
+                          className={`group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 relative overflow-hidden ${isActive
                               ? isDark
                                 ? "bg-gold/12 border border-gold/25"
                                 : "bg-gold/10 border border-gold/25"
                               : isDark
                                 ? "text-white/45 hover:text-white hover:bg-white/5 border border-transparent"
                                 : "text-charcoal/60 hover:text-charcoal hover:bg-charcoal/5 border border-transparent"
-                          }`}
+                            }`}
                         >
                           {isActive && (
                             <motion.div
@@ -184,17 +180,15 @@ const AdminLayout = () => {
                           <div className="flex items-center gap-2.5 relative z-10">
                             <item.icon
                               size={15}
-                              className={`flex-shrink-0 transition-colors ${
-                                isActive
+                              className={`flex-shrink-0 transition-colors ${isActive
                                   ? "text-gold"
                                   : "text-inherit group-hover:text-gold"
-                              }`}
+                                }`}
                             />
-                            <span className={`text-[0.78rem] font-semibold tracking-wide transition-colors leading-none ${
-                              isActive
+                            <span className={`text-[0.78rem] font-semibold tracking-wide transition-colors leading-none ${isActive
                                 ? isDark ? "text-white" : "text-charcoal"
                                 : "text-inherit"
-                            }`}>
+                              }`}>
                               {item.label}
                             </span>
                           </div>

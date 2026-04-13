@@ -178,7 +178,9 @@ const AdminBlogs = () => {
           <button 
             onClick={() => setActiveTab("posts")}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "posts" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+              activeTab === "posts" 
+                ? "bg-gold text-charcoal" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
             Blog Posts
@@ -186,18 +188,12 @@ const AdminBlogs = () => {
           <button 
             onClick={() => setActiveTab("voices")}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "voices" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+              activeTab === "voices" 
+                ? "bg-gold text-charcoal" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
             Author Voices
-          </button>
-          <button 
-            onClick={() => setActiveTab("seo")}
-            className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "seo" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            SEO Settings
           </button>
         </div>
       </AdminHeader>
@@ -215,7 +211,9 @@ const AdminBlogs = () => {
                    <input 
                      value={safeSettings.heroBadge}
                      onChange={(e) => setSettings({ ...safeSettings, heroBadge: e.target.value })}
-                     className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
+                     className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold ${
+                       isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                     }`}
                    />
                 </div>
                 <div className="space-y-2">
@@ -223,7 +221,9 @@ const AdminBlogs = () => {
                    <input 
                      value={safeSettings.heroTitle}
                      onChange={(e) => setSettings({ ...safeSettings, heroTitle: e.target.value })}
-                     className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
+                     className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold ${
+                       isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                     }`}
                    />
                 </div>
                 <div className="space-y-2">
@@ -231,7 +231,9 @@ const AdminBlogs = () => {
                    <input 
                      value={safeSettings.finaleTitle}
                      onChange={(e) => setSettings({ ...safeSettings, finaleTitle: e.target.value })}
-                     className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
+                     className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold ${
+                       isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                     }`}
                    />
                 </div>
                 <div className="space-y-2">
@@ -239,7 +241,9 @@ const AdminBlogs = () => {
                    <input 
                      value={safeSettings.finaleSubtitle}
                      onChange={(e) => setSettings({ ...safeSettings, finaleSubtitle: e.target.value })}
-                     className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
+                     className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold ${
+                       isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                     }`}
                    />
                 </div>
                 
@@ -329,18 +333,18 @@ const AdminBlogs = () => {
                        </div>
                     </div>
                   ))}
-                  {filteredPosts.length === 0 && (
-                    <div className="py-20 text-center opacity-30 italic">No posts found...</div>
-                  )}
-                </motion.div>
-             ) : activeTab === "voices" ? (
-                <motion.div 
-                  key="voices"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="grid gap-6 min-h-[600px]"
-                >
+                    {filteredPosts.length === 0 && (
+                      <div className="py-20 text-center opacity-30 italic">No posts found...</div>
+                    )}
+                  </motion.div>
+                ) : (
+                  <motion.div 
+                    key="voices"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="grid gap-6 min-h-[600px]"
+                  >
                     {filteredVoices.map((voice) => {
                       const initials = (voice.name || "A V").split(' ').map((n: string) => n[0]).join('').slice(0, 2);
                       return (
@@ -394,34 +398,9 @@ const AdminBlogs = () => {
                    {filteredVoices.length === 0 && (
                      <div className="py-20 text-center opacity-30 italic">No authors found...</div>
                    )}
-                </motion.div>
-             ) : (
-                <motion.div
-                  key="seo"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="space-y-8"
-                >
-                  <div className={`p-8 rounded-[2.5rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-xl"}`}>
-                    <SEOForm 
-                      seo={safeSettings.seo || { title: "", description: "", keywords: "" }} 
-                      onChange={handleUpdateSeo} 
-                      isDark={isDark} 
-                    />
-                    <div className="mt-10 pt-8 border-t border-gold/10">
-                      <button 
-                        onClick={handleSaveSettings}
-                        disabled={isSettingsSaving}
-                        className="w-full flex items-center justify-center gap-3 bg-gold text-charcoal py-5 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all disabled:opacity-50 shadow-xl shadow-gold/20"
-                      >
-                        {isSettingsSaving ? "Securing Archives..." : "Save Blog SEO Settings"}
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-             )}
-           </AnimatePresence>
+                 </motion.div>
+              )}
+            </AnimatePresence>
         </div>
       </div>
 

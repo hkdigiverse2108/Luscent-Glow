@@ -26,7 +26,8 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
     category: "Rituals",
     image: "",
     featured: false,
-    relatedProducts: []
+    relatedProducts: [],
+    seo: { title: "", description: "", keywords: "" }
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -37,7 +38,8 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
     if (post) {
       setFormData({
         ...post,
-        relatedProducts: (post as any).relatedProducts || []
+        relatedProducts: (post as any).relatedProducts || [],
+        seo: (post as any).seo || { title: "", description: "", keywords: "" }
       });
     } else {
       setFormData({
@@ -49,7 +51,8 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
         category: "Rituals",
         image: "",
         featured: false,
-        relatedProducts: []
+        relatedProducts: [],
+        seo: { title: "", description: "", keywords: "" }
       });
     }
   }, [post, isOpen]);
@@ -280,6 +283,40 @@ const BlogPostModal = ({ isOpen, onClose, post, onSuccess, voices = [] }: any) =
                     placeholder="Once upon a radiance..."
                     className={`w-full p-8 rounded-[2rem] border min-h-[400px] font-body text-base leading-relaxed outline-none focus:border-gold/50 transition-all ${isDark ? "bg-white/5 border-white/5" : "bg-secondary/10 border-charcoal/5"}`}
                   />
+               </div>
+
+               {/* SEO Settings */}
+               <div className="space-y-6 pt-6 border-t border-gold/10">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-gold italic">SEO Configuration</h4>
+                  <div className="grid grid-cols-1 gap-6">
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Meta Title</label>
+                       <input 
+                         value={formData.seo?.title || ""}
+                         onChange={(e) => setFormData({...formData, seo: {...formData.seo, title: e.target.value}})}
+                         placeholder="SEO Title (Leave blank to use story title)"
+                         className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold outline-none focus:border-gold transition-all ${isDark ? "border-white/10" : "border-gold/20"}`}
+                       />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Meta Description</label>
+                       <textarea 
+                         value={formData.seo?.description || ""}
+                         onChange={(e) => setFormData({...formData, seo: {...formData.seo, description: e.target.value}})}
+                         placeholder="SEO Description (Leave blank to use story excerpt)"
+                         className={`w-full p-4 rounded-xl border bg-transparent text-sm font-body italic outline-none focus:border-gold transition-all resize-none h-20 ${isDark ? "border-white/10" : "border-gold/20"}`}
+                       />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">Keywords</label>
+                       <input 
+                         value={formData.seo?.keywords || ""}
+                         onChange={(e) => setFormData({...formData, seo: {...formData.seo, keywords: e.target.value}})}
+                         placeholder="e.g. rituals, skincare, radiance"
+                         className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold outline-none focus:border-gold transition-all ${isDark ? "border-white/10" : "border-gold/20"}`}
+                       />
+                    </div>
+                  </div>
                </div>
             </form>
 

@@ -139,16 +139,16 @@ const Footer = () => {
             </div>
             <div className="pt-2 space-y-2 text-sm text-primary-foreground/50 font-body">
               <a 
-                href={`mailto:$"hello@luscentglow.com"`} 
+                href={`mailto:${footer.email}`} 
                 className="hover:text-gold hover:underline transition-all flex items-center gap-2 cursor-pointer w-fit"
               >
-                <Mail size={14} className="opacity-60" /> "hello@luscentglow.com"
+                <Mail size={14} className="opacity-60" /> {footer.email}
               </a>
               <a 
-                href={`tel:$"+91 97126 63607"`} 
+                href={`tel:${footer.phone}`} 
                 className="hover:text-gold hover:underline transition-all flex items-center gap-2 cursor-pointer w-fit"
               >
-                <Phone size={14} className="opacity-60" /> "+91 97126 63607"
+                <Phone size={14} className="opacity-60" /> {footer.phone}
               </a>
             </div>
           </div>
