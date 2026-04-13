@@ -29,7 +29,7 @@ interface AuthContextType {
   adminLogout: () => void;
   isAuthenticated: boolean;
   isAdminAuthenticated: boolean;
-  syncUser: (userData: User) => void;
+  syncUser: (userData: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,9 +37,14 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(() => {
     const savedUser = localStorage.getItem("user");
+    if (!savedUser || savedUser === "undefined") {
+      if (savedUser === "undefined") localStorage.removeItem("user");
+      return null;
+    }
     try {
-      return savedUser ? JSON.parse(savedUser) : null;
+      return JSON.parse(savedUser);
     } catch {
+      localStorage.removeItem("user");
       return null;
     }
   });
@@ -56,9 +61,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { syncCart, clearCart } = useCart();
   const { syncWithServer: syncWishlist, clearWishlist } = useWishlist();
 
-  const syncUser = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
+  const syncUser = (userData: User | null) => {
+    if (!userData) {
+      setUser(null);
+      localStorage.removeItem("user");
+    } else {
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
   };
 
   const refreshUser = async () => {
@@ -71,7 +81,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (response.ok) {
         const data = await response.json();
         const userData = data.user;
-        // Only update if there's a difference to avoid infinite loops
         if (JSON.stringify(userData) !== JSON.stringify(user)) {
           syncUser(userData);
           console.log("Profile synchronized with sanctuary.");
@@ -82,7 +91,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Handle server-side data sync on mount if logged in
   useEffect(() => {
     if (user) {
       refreshUser();
@@ -94,7 +102,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = (userData: User) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
-    // Trigger background syncs immediately
     syncCart();
     syncWishlist();
   };

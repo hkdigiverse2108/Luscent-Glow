@@ -45,7 +45,7 @@ const AdminUsers = () => {
   const [showAddPassword, setShowAddPassword] = useState(false);
   
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [activeTab, setActiveTab] = useState<"profile" | "cart" | "wishlist" | "giftcards">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "cart" | "wishlist" | "giftcards" | "addresses">("profile");
   const [isQuickView, setIsQuickView] = useState(false);
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -371,6 +371,15 @@ const AdminUsers = () => {
                              >
                                 <Heart size={18} />
                              </button>
+                              <button 
+                                 onClick={() => openUserDetails(u, "addresses", false)}
+                                 title="View Addresses"
+                                 className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-xl ${
+                                   isDark ? "bg-white/5 text-white/40 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold hover:bg-gold/10"
+                                 }`}
+                              >
+                                 <MapPin size={18} />
+                              </button>
                              <button 
                                 onClick={() => openUserDetails(u, "profile", false)}
                                 title="View Profile"
@@ -780,21 +789,25 @@ const AdminUsers = () => {
                       { id: "profile", label: "Profile", icon: Edit2 },
                       { id: "cart", label: "Cart", icon: ShoppingBag },
                       { id: "wishlist", label: "Wishlist", icon: Heart },
-                      { id: "giftcards", label: "Gift Cards", icon: Gift }
+                      { id: "giftcards", label: "Gift Cards", icon: Gift },
+                      { id: "addresses", label: "Addresses", icon: MapPin }
                     ].map((tab) => (
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as any)}
-                        className={`flex items-center gap-3 px-6 py-6 text-[12px] font-black uppercase tracking-[0.2em] relative transition-all ${
+                        className={`flex items-center gap-2 px-4 py-6 text-[10px] font-black uppercase tracking-[0.25em] relative transition-all duration-500 whitespace-nowrap ${
                           activeTab === tab.id 
-                          ? "text-gold" 
-                          : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
+                          ? "text-gold translate-y-[-1px]" 
+                          : isDark ? "text-white/30 hover:text-white" : "text-charcoal/30 hover:text-charcoal"
                         }`}
                       >
-                        <tab.icon size={14} />
-                        {tab.label}
+                        <tab.icon size={11} className={activeTab === tab.id ? "text-gold" : "opacity-40"} />
+                        <span>{tab.label}</span>
                         {activeTab === tab.id && (
-                          <motion.div layoutId="tabUnderline" className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold" />
+                          <motion.div 
+                            layoutId="tabUnderline" 
+                            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-[3px] bg-gold rounded-full shadow-[0_-4px_12px_rgba(212,175,55,0.4)]" 
+                          />
                         )}
                       </button>
                     ))}
@@ -1129,6 +1142,67 @@ const AdminUsers = () => {
                                <div className="py-24 text-center opacity-20">
                                  <Gift size={48} className="mx-auto mb-4" />
                                  <p className="text-base font-bold uppercase tracking-widest italic">No gift cards found.</p>
+                               </div>
+                            )}
+                        </div>
+                      )}
+
+                      {activeTab === "addresses" && (
+                        <div className="space-y-8">
+                             <div className="flex items-center justify-between pb-4 border-b border-gold/10">
+                                 <div>
+                                    <h5 className="text-[14px] font-black uppercase tracking-[0.3em] text-gold">Archived Locations</h5>
+                                    <p className="text-[10px] opacity-40 uppercase tracking-widest mt-1">Shipping rituals & shipping destination history</p>
+                                 </div>
+                                 <span className="px-3 py-1 bg-gold/5 border border-gold/10 rounded-full text-[9px] font-black uppercase tracking-widest text-gold/60">{userDetails.user.addresses?.length || 0} Saved Rituals</span>
+                             </div>
+
+                            {userDetails.user.addresses && userDetails.user.addresses.length > 0 ? (
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                  {userDetails.user.addresses.map((addr: any, idx: number) => (
+                                     <div 
+                                      key={idx}
+                                      className={`p-8 rounded-[2.5rem] border transition-all duration-700 relative flex flex-col justify-between group overflow-hidden ${
+                                        isDark 
+                                        ? "bg-gradient-to-br from-white/[0.03] to-transparent border-white/5 hover:border-gold/30 hover:bg-gold/[0.03]" 
+                                        : "bg-white border-gold/10 hover:border-gold/30 shadow-xl shadow-charcoal/5"
+                                      }`}
+                                     >
+                                        <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full -mr-16 -mt-16 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                                        
+                                        <div className="relative z-10 space-y-6">
+                                            <div className="flex justify-between items-start">
+                                                <div className="space-y-1">
+                                                    <div className="flex items-center gap-3">
+                                                      <p className={`font-body font-bold text-lg transition-colors ${isDark ? "text-white group-hover:text-gold" : "text-charcoal group-hover:text-gold"}`}>{addr.fullName}</p>
+                                                      {addr.isDefault && (
+                                                          <span className="text-[8px] font-black bg-gold text-charcoal px-2.5 py-1 rounded-full uppercase tracking-widest leading-none shadow-lg shadow-gold/20">Default</span>
+                                                      )}
+                                                    </div>
+                                                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold opacity-60">Verified Identity</p>
+                                                </div>
+                                                <div className={`p-3 rounded-2xl transition-all duration-500 ${isDark ? "bg-white/5 text-white/20 group-hover:text-gold group-hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/20 group-hover:text-gold group-hover:bg-gold/10"}`}>
+                                                    {addr.label === "Home" ? <User size={16} /> : addr.label === "Work" ? <ShoppingBag size={16} /> : <MapPin size={16} />}
+                                                </div>
+                                            </div>
+
+                                            <div className={`space-y-2 text-[13px] font-body leading-relaxed font-light ${isDark ? "text-white/60" : "text-charcoal/60"}`}>
+                                                <p className="flex items-center gap-3"><MapPin size={12} className="text-gold/40 flex-shrink-0" /> {addr.street}</p>
+                                                <p className="pl-6">{addr.city}, {addr.state} - <span className="font-bold text-gold">{addr.zipCode}</span></p>
+                                                <div className="pt-4 flex items-center gap-3 border-t border-gold/5">
+                                                   <Phone size={14} className="text-gold" />
+                                                   <p className={`font-black tracking-widest ${isDark ? "text-white/90" : "text-charcoal/90"}`}>{addr.mobile}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                     </div>
+                                  ))}
+                               </div>
+                            ) : (
+                               <div className={`py-32 text-center rounded-[3rem] border border-dashed transition-colors ${isDark ? "bg-white/[0.02] border-white/10" : "bg-charcoal/[0.02] border-charcoal/10"}`}>
+                                 <MapPin size={48} className="mx-auto mb-6 text-gold/20" />
+                                 <h6 className={`text-xl font-bold tracking-tight mb-2 ${isDark ? "text-white/40" : "text-charcoal/40"}`}>No Shipping Legacy Found</h6>
+                                 <p className="text-[11px] font-black uppercase tracking-widest text-gold opacity-40">This user has not established any delivery portals yet</p>
                                </div>
                             )}
                         </div>

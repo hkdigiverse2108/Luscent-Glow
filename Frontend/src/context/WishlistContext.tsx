@@ -22,7 +22,12 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const getLoggedInUser = () => {
     const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr || userStr === "undefined") return null;
+    try {
+        return JSON.parse(userStr);
+    } catch (e) {
+        return null;
+    }
   };
 
   const fetchServerWishlist = useCallback(async () => {

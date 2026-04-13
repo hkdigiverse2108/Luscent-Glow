@@ -13,8 +13,12 @@ import {
   Wallet,
   Mail,
   ShieldCheck,
-  Zap
+  Zap,
+  ChevronRight,
+  MousePointer2,
+  X
 } from "lucide-react";
+import { PhoneInput } from "@/components/PhoneInput";
 import DynamicIcon from "@/components/DynamicIcon";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
@@ -60,6 +64,15 @@ const GiftCards = () => {
   const finalAmount = customAmount ? parseInt(customAmount) : amount;
 
   const handleAddToBag = () => {
+    // Validation for mobile number (last part should be 10 digits)
+    const mobileParts = recipientMobile.split(" ");
+    const pureNumber = mobileParts.length === 2 ? mobileParts[1] : recipientMobile.replace(/\D/g, "");
+    
+    if (pureNumber.length !== 10) {
+      toast.error("Please enter a valid 10-digit recipient mobile number");
+      return;
+    }
+
     if (!recipientName || !senderName || !recipientMobile) {
       toast.error("Please provide recipient name, mobile, and sender name");
       return;
@@ -198,12 +211,11 @@ const GiftCards = () => {
                       onChange={(e) => setRecipientName(e.target.value)}
                       className="w-full py-4 px-6 bg-white border-2 border-border rounded-2xl font-body text-sm focus:outline-none focus:border-gold transition-colors"
                     />
-                    <input
-                      type="tel"
-                      placeholder="Recipient Mobile Number"
+                    <PhoneInput 
                       value={recipientMobile}
-                      onChange={(e) => setRecipientMobile(e.target.value)}
-                      className="w-full py-4 px-6 bg-white border-2 border-border rounded-2xl font-body text-sm focus:outline-none focus:border-gold transition-colors"
+                      onChange={(val) => setRecipientMobile(val)}
+                      className="w-full bg-white border-2 border-border rounded-2xl font-body text-sm focus-within:border-gold transition-colors"
+                      placeholder="00000 00000"
                     />
                     <input
                       type="text"

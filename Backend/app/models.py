@@ -104,6 +104,7 @@ class UserModel(BaseModel):
     otp: Optional[str] = Field(default=None)
     profilePicture: Optional[str] = Field(default=None)
     shippingAddress: Optional[dict] = Field(default=None)
+    addresses: List[dict] = Field(default_factory=list)
     createdAt: Optional[str] = Field(default=None)
 
     class Config:

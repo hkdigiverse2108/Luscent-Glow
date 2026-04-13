@@ -16,6 +16,14 @@ def hash_password(password: str):
 def verify_password(password: str, hashed_password: str):
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
+def serialize_user(user):
+    user_data = dict(user)
+    user_data["id"] = str(user_data["_id"])
+    del user_data["_id"]
+    if "password" in user_data: del user_data["password"]
+    if "otp" in user_data: del user_data["otp"]
+    return user_data
+
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def signup(user: UserModel = Body(...)):
     db = await get_database()
@@ -37,7 +45,9 @@ async def signup(user: UserModel = Body(...)):
 @router.post("/signin")
 async def signin(auth: UserAuthModel = Body(...)):
     db = await get_database()
-    user = await db["users"].find_one({"mobileNumber": auth.mobileNumber})
+    
+    clean_mobile = sanitize_mobile(auth.mobileNumber)
+    user = await db["users"].find_one({"mobileNumber": {"$regex": f"{clean_mobile}$"}})
     
     if not user:
         raise HTTPException(status_code=401, detail="Invalid mobile number or password")
@@ -57,7 +67,8 @@ async def signin(auth: UserAuthModel = Body(...)):
             "email": user["email"],
             "isAdmin": user.get("isAdmin", False),
             "profilePicture": user.get("profilePicture"),
-            "shippingAddress": user.get("shippingAddress")
+            "shippingAddress": user.get("shippingAddress"),
+            "addresses": user.get("addresses", [])
         }
     }
 
@@ -134,9 +145,6 @@ async def reset_password(data: PasswordResetModel = Body(...)):
 
     # Vector 3: Secondary email lookup (Strictly for Admins)
     if not user:
-        # We can't use email from data because it's not in the model yet, 
-        # but we found the admin earlier. This fallback is for 
-        # when the frontend state is preserved but format differs.
         pass
 
     if not user:
@@ -157,7 +165,8 @@ async def reset_password(data: PasswordResetModel = Body(...)):
         {"$set": {"password": hashed_password, "otp": None}}
     )
     
-    return {"message": "Safehold restored. Password updated successfully."}
+    updated_user = await db["users"].find_one({"_id": user["_id"]})
+    return {"message": "Safehold restored. Password updated successfully.", "user": serialize_user(updated_user)}
 
 @router.put("/profile/update")
 async def update_profile(data: dict = Body(...)):
@@ -251,15 +260,7 @@ async def update_profile(data: dict = Body(...)):
     
     return {
         "status": "success",
-        "user": {
-            "id": str(updated_user["_id"]),
-            "fullName": updated_user["fullName"],
-            "mobileNumber": updated_user["mobileNumber"],
-            "email": updated_user["email"],
-            "isAdmin": updated_user.get("isAdmin", False),
-            "profilePicture": updated_user.get("profilePicture"),
-            "shippingAddress": updated_user.get("shippingAddress")
-        }
+        "user": serialize_user(updated_user)
     }
 
 @router.put("/change-password")
@@ -285,4 +286,150 @@ async def change_password(data: dict = Body(...)):
         {"$set": {"password": hashed_password}}
     )
     
-    return {"status": "success", "message": "Password updated successfully"}
+    updated_user = await db["users"].find_one({"mobileNumber": mobileNumber})
+    return {"status": "success", "message": "Password updated successfully", "user": serialize_user(updated_user)}
+
+# --- Multiple Address Management ---
+
+@router.post("/addresses")
+async def add_address(data: dict = Body(...)):
+    db = await get_database()
+    userId = data.get("userId")
+    address = data.get("address")
+    
+    if not userId or not address:
+        raise HTTPException(status_code=400, detail="User ID and address data are required")
+    
+    # Generate an ID for the address if not present
+    if "id" not in address:
+        address["id"] = str(ObjectId())
+    
+    # If this is the first address or marked as default, handle default logic
+    db_user = await db["users"].find_one({"_id": ObjectId(userId)})
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    current_addresses = db_user.get("addresses", [])
+    
+    if not current_addresses or address.get("isDefault"):
+        # Set all others to false
+        for addr in current_addresses:
+            addr["isDefault"] = False
+        address["isDefault"] = True
+        # Also update the legacy shippingAddress for compatibility
+        await db["users"].update_one(
+            {"_id": ObjectId(userId)},
+            {"$set": {"shippingAddress": address}}
+        )
+
+    await db["users"].update_one(
+        {"_id": ObjectId(userId)},
+        {"$set": {"addresses": current_addresses + [address]}} 
+    )
+    
+    updated_user = await db["users"].find_one({"_id": ObjectId(userId)})
+    return {"status": "success", "user": serialize_user(updated_user), "addresses": updated_user.get("addresses", [])}
+
+@router.put("/addresses/{address_id}")
+async def update_address(address_id: str, data: dict = Body(...)):
+    db = await get_database()
+    userId = data.get("userId")
+    updated_address = data.get("address")
+    
+    if not userId or not updated_address:
+        raise HTTPException(status_code=400, detail="User ID and address data are required")
+    
+    db_user = await db["users"].find_one({"_id": ObjectId(userId)})
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    current_addresses = db_user.get("addresses", [])
+    new_addresses = []
+    
+    for addr in current_addresses:
+        if addr.get("id") == address_id:
+            # Preserve ID
+            updated_address["id"] = address_id
+            new_addresses.append(updated_address)
+        else:
+            if updated_address.get("isDefault"):
+                addr["isDefault"] = False
+            new_addresses.append(addr)
+            
+    if updated_address.get("isDefault"):
+         await db["users"].update_one(
+            {"_id": ObjectId(userId)},
+            {"$set": {"shippingAddress": updated_address}}
+        )
+
+    await db["users"].update_one(
+        {"_id": ObjectId(userId)},
+        {"$set": {"addresses": new_addresses}}
+    )
+    
+    updated_user = await db["users"].find_one({"_id": ObjectId(userId)})
+    return {"status": "success", "user": serialize_user(updated_user), "addresses": new_addresses}
+
+@router.delete("/addresses/{address_id}")
+async def delete_address(address_id: str, userId: str):
+    db = await get_database()
+    
+    db_user = await db["users"].find_one({"_id": ObjectId(userId)})
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    current_addresses = db_user.get("addresses", [])
+    new_addresses = [addr for addr in current_addresses if addr.get("id") != address_id]
+    
+    # If we deleted the default address, set the first remaining one as default
+    if any(addr.get("id") == address_id and addr.get("isDefault") for addr in current_addresses):
+        if new_addresses:
+            new_addresses[0]["isDefault"] = True
+            await db["users"].update_one(
+                {"_id": ObjectId(userId)},
+                {"$set": {"shippingAddress": new_addresses[0]}}
+            )
+        else:
+            await db["users"].update_one(
+                {"_id": ObjectId(userId)},
+                {"$unset": {"shippingAddress": ""}}
+            )
+
+    await db["users"].update_one(
+        {"_id": ObjectId(userId)},
+        {"$set": {"addresses": new_addresses}}
+    )
+    
+    updated_user = await db["users"].find_one({"_id": ObjectId(userId)})
+    return {"status": "success", "user": serialize_user(updated_user), "addresses": new_addresses}
+
+@router.put("/addresses/{address_id}/default")
+async def set_default_address(address_id: str, userId: str = Body(..., embed=True)):
+    db = await get_database()
+    
+    db_user = await db["users"].find_one({"_id": ObjectId(userId)})
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    current_addresses = db_user.get("addresses", [])
+    default_addr = None
+    new_addresses = []
+    
+    for addr in current_addresses:
+        if addr.get("id") == address_id:
+            addr["isDefault"] = True
+            default_addr = addr
+        else:
+            addr["isDefault"] = False
+        new_addresses.append(addr)
+        
+    if not default_addr:
+        raise HTTPException(status_code=404, detail="Address not found")
+        
+    await db["users"].update_one(
+        {"_id": ObjectId(userId)},
+        {"$set": {"addresses": new_addresses, "shippingAddress": default_addr}}
+    )
+    
+    updated_user = await db["users"].find_one({"_id": ObjectId(userId)})
+    return {"status": "success", "user": serialize_user(updated_user), "addresses": new_addresses}

@@ -60,7 +60,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const getLoggedInUser = () => {
     const userStr = localStorage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr || userStr === "undefined") return null;
+    try {
+        return JSON.parse(userStr);
+    } catch (e) {
+        return null;
+    }
 };
 
 // Helper for Guest ID
