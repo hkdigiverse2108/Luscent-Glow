@@ -6,7 +6,7 @@ import {
   Camera, ShoppingBag, Heart, CreditCard, Gift,
   Lock, CheckCircle2, AlertCircle, Plus,
   MapPin, Home, Globe, Building, Sparkles, ChevronDown, X,
-  Tag, Landmark, Scan, Smartphone, ArrowRight
+  Tag, Landmark, Scan, Smartphone, ArrowRight, Eye, EyeOff
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
@@ -66,6 +66,12 @@ const Profile = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [isOldPasswordVerified, setIsOldPasswordVerified] = useState(false);
+  const [verifyingOldPassword, setVerifyingOldPassword] = useState(false);
+  const [oldPasswordError, setOldPasswordError] = useState("");
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   
@@ -92,6 +98,46 @@ const Profile = () => {
       fetchReceivedCards();
     }
   }, [activeView, user]);
+
+  useEffect(() => {
+    if (oldPassword.length > 0 && !isOldPasswordVerified && !verifyingOldPassword) {
+      const timer = setTimeout(() => {
+        handleAutoVerifyPassword();
+      }, 1000);
+      return () => clearTimeout(timer);
+    } else if (oldPassword.length === 0) {
+      setOldPasswordError("");
+    }
+  }, [oldPassword]);
+
+  const handleAutoVerifyPassword = async () => {
+    if (!user || !oldPassword) return;
+    
+    setVerifyingOldPassword(true);
+    setOldPasswordError("");
+    try {
+      const response = await fetch(getApiUrl("/api/auth/verify-password"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mobileNumber: user.mobileNumber,
+          password: oldPassword
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.isValid) {
+        setIsOldPasswordVerified(true);
+        toast.success("Identity verified.");
+      } else {
+        setOldPasswordError(data.detail || "Incorrect password.");
+      }
+    } catch (error: any) {
+      setOldPasswordError("System connection error.");
+    } finally {
+      setVerifyingOldPassword(false);
+    }
+  };
 
   const fetchReceivedCards = async () => {
     setCardsLoading(true);
@@ -213,6 +259,11 @@ const Profile = () => {
     }
   };
 
+  const handleVerifyOldPassword = async () => {
+    // Keep this for manual backup if needed, but UI now uses handleAutoVerifyPassword
+    handleAutoVerifyPassword();
+  };
+
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -240,6 +291,7 @@ const Profile = () => {
         setOldPassword("");
         setNewPassword("");
         setConfirmPassword("");
+        setIsOldPasswordVerified(false);
         setActiveView("details");
       } else {
         throw new Error(data.detail || "Password change failed");
@@ -330,7 +382,7 @@ const Profile = () => {
                   {user.fullName}
                 </h1>
                 <p className="font-display text-xl md:text-2xl text-muted-foreground/60 italic font-light lowercase">
-                  the <span className="text-charcoal font-medium">Valued Member</span>
+                  our <span className="text-charcoal font-medium">Valued Member</span>
                 </p>
               </div>
               <p className="text-sm md:text-base text-muted-foreground font-body max-w-sm italic leading-relaxed">
@@ -363,7 +415,7 @@ const Profile = () => {
                         setActiveView(item.id as ProfileView);
                       }
                     }}
-                    className={`flex-shrink-0 lg:flex-shrink-1 flex items-center justify-between py-3 px-4 md:py-4 md:px-6 rounded-2xl md:rounded-[2rem] transition-all duration-500 group relative overflow-hidden ${
+                    className={`flex-shrink-0 lg:flex-shrink-1 flex items-center justify-between py-3 px-4 md:py-3 md:px-5 rounded-2xl md:rounded-[2rem] transition-all duration-500 group relative overflow-hidden ${
                       activeView === item.id 
                         ? "bg-white shadow-xl shadow-gold/5 text-charcoal translate-x-2" 
                         : "text-muted-foreground/60 hover:text-gold hover:bg-white/50"
@@ -387,7 +439,7 @@ const Profile = () => {
                 
                 <button 
                   onClick={() => setIsLogoutDialogOpen(true)}
-                  className="flex-shrink-0 lg:flex-shrink-1 flex items-center gap-4 py-3 px-4 md:py-4 md:px-6 rounded-2xl md:rounded-[2rem] text-rose-brand/60 hover:text-rose-brand hover:bg-rose-brand/5 transition-all mt-0 lg:mt-4 group"
+                  className="flex-shrink-0 lg:flex-shrink-1 flex items-center gap-4 py-3 px-4 md:py-3 md:px-5 rounded-2xl md:rounded-[2rem] text-rose-brand/60 hover:text-rose-brand hover:bg-rose-brand/5 transition-all mt-0 lg:mt-4 group"
                 >
                   <div className="p-2 rounded-xl bg-rose-brand/5">
                     <LogOut size={18} className="group-hover:rotate-12 transition-transform duration-500" />
@@ -431,7 +483,7 @@ const Profile = () => {
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
+                            className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-4 md:py-5 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
                             required
                           />
                         </div>
@@ -449,7 +501,7 @@ const Profile = () => {
                               type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
+                                className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-4 md:py-5 pl-16 md:pl-20 pr-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
                                 required
                               />
                           </div>
@@ -464,7 +516,7 @@ const Profile = () => {
                             <PhoneInput 
                               value={mobileNumber}
                               onChange={(val) => setMobileNumber(val)}
-                              className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-2 md:py-3 pl-12 md:pl-16 pr-8 font-body text-sm md:text-base focus-within:bg-white focus-within:border-gold/30 focus-within:shadow-xl focus-within:shadow-gold/5 outline-none transition-all duration-500"
+                              className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-2 md:py-2.5 pl-12 md:pl-16 pr-8 font-body text-sm md:text-base focus-within:bg-white focus-within:border-gold/30 focus-within:shadow-xl focus-within:shadow-gold/5 outline-none transition-all duration-500"
                               placeholder="00000 00000"
                             />
                           </div>
@@ -472,11 +524,11 @@ const Profile = () => {
                       </div>
 
                       <div className="pt-10">
-                        <button
-                          disabled={loading}
-                          type="submit"
-                          className="w-full py-6 md:py-8 bg-charcoal text-white font-body font-bold uppercase tracking-[0.3em] rounded-2xl md:rounded-[2rem] hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl relative overflow-hidden group"
-                        >
+                          <button
+                            disabled={loading}
+                            type="submit"
+                            className="w-full py-3 md:py-4 bg-charcoal text-white font-body font-bold uppercase tracking-[0.3em] rounded-xl md:rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl relative overflow-hidden group"
+                          >
                           <span className="relative z-10 flex items-center justify-center gap-3">
                             {loading ? (
                               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -514,62 +566,165 @@ const Profile = () => {
                         <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Security <span className="text-gold italic font-light">Settings</span></h3>
                       </div>
                       
-                      <form onSubmit={handleChangePassword} className="space-y-6">
-                        <div className="space-y-1.5 group">
+                      <form onSubmit={handleChangePassword} className="space-y-8">
+                        <div className="space-y-4 group">
                           <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
                             <span className="w-1 h-1 bg-gold rounded-full" />
                             Current Password
                           </label>
-                          <input
-                            type="password"
-                            value={oldPassword}
-                            onChange={(e) => setOldPassword(e.target.value)}
-                            className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 px-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                            placeholder="••••••••"
-                            required
-                          />
+                          <div className="flex flex-col gap-3">
+                            <div className="relative">
+                              <input
+                                type={showOldPassword ? "text" : "password"}
+                                value={oldPassword}
+                                disabled={isOldPasswordVerified}
+                                onChange={(e) => {
+                                  setOldPassword(e.target.value);
+                                  setOldPasswordError("");
+                                }}
+                                className={`w-full bg-white/40 border rounded-2xl md:rounded-[1.2rem] py-3 md:py-4 pl-8 pr-16 font-body text-sm md:text-base outline-none transition-all duration-500 ${
+                                  isOldPasswordVerified 
+                                    ? "border-emerald-500/30 bg-emerald-500/[0.02] text-emerald-600" 
+                                    : oldPasswordError 
+                                      ? "border-rose-500/30 bg-rose-500/[0.02]" 
+                                      : "border-gold/5 focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5"
+                                }`}
+                                placeholder="••••••••"
+                                required
+                              />
+                              
+                              <div className="absolute right-6 top-1/2 -translate-y-1/2 flex items-center gap-4">
+                                {verifyingOldPassword && (
+                                  <div className="w-4 h-4 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
+                                )}
+                                
+                                {isOldPasswordVerified && (
+                                  <div className="text-emerald-500 flex items-center gap-2 pr-2">
+                                    <ShieldCheck size={18} />
+                                    <span className="hidden md:inline text-[9px] font-black uppercase tracking-widest">Verified</span>
+                                  </div>
+                                )}
+
+                                {!isOldPasswordVerified && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowOldPassword(!showOldPassword)}
+                                    className="text-muted-foreground hover:text-gold transition-colors"
+                                  >
+                                    {showOldPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                  </button>
+                                )}
+
+                                {isOldPasswordVerified && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setIsOldPasswordVerified(false);
+                                      setOldPassword("");
+                                      setOldPasswordError("");
+                                    }}
+                                    className="text-[9px] font-black uppercase tracking-widest text-gold hover:underline"
+                                  >
+                                    Change
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {oldPasswordError && (
+                              <motion.div 
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="flex items-center gap-2 px-4 py-2 bg-rose-500/10 border border-rose-500/20 rounded-xl"
+                              >
+                                <AlertCircle size={14} className="text-rose-500" />
+                                <span className="text-[10px] font-bold text-rose-500/80 uppercase tracking-widest">{oldPasswordError}</span>
+                              </motion.div>
+                            )}
+                          </div>
                         </div>
                         
-                        <div className="grid md:grid-cols-2 gap-10">
-                          <div className="space-y-1.5 group">
-                            <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
-                              <span className="w-1 h-1 bg-gold rounded-full" />
-                              New Password
-                            </label>
-                            <input
-                              type="password"
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 px-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                              placeholder="••••••••"
-                              required
-                            />
-                          </div>
-                          <div className="space-y-1.5 group">
-                            <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
-                              <span className="w-1 h-1 bg-gold rounded-full" />
-                              Confirm Password
-                            </label>
-                            <input
-                              type="password"
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                              className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.5rem] py-5 md:py-7 px-8 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
-                              placeholder="••••••••"
-                              required
-                            />
-                          </div>
-                        </div>
+                        <AnimatePresence>
+                          {isOldPasswordVerified && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0, y: -20 }}
+                              animate={{ opacity: 1, height: "auto", y: 0 }}
+                              exit={{ opacity: 0, height: 0, y: -20 }}
+                              className="overflow-hidden space-y-8"
+                            >
+                              <div className="h-[1px] bg-gradient-to-r from-transparent via-gold/10 to-transparent" />
+                              
+                              <div className="grid md:grid-cols-2 gap-10">
+                                <div className="space-y-1.5 group">
+                                  <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-gold rounded-full" />
+                                    New Password
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={showNewPassword ? "text" : "password"}
+                                      value={newPassword}
+                                      onChange={(e) => setNewPassword(e.target.value)}
+                                      className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.2rem] py-3 md:py-4 pl-8 pr-16 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
+                                      placeholder="••••••••"
+                                      required
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowNewPassword(!showNewPassword)}
+                                      className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gold transition-colors"
+                                    >
+                                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="space-y-1.5 group">
+                                  <label className="text-[10px] font-body font-bold text-muted-foreground uppercase tracking-widest pl-3 flex items-center gap-2">
+                                    <span className="w-1 h-1 bg-gold rounded-full" />
+                                    Confirm Password
+                                  </label>
+                                  <div className="relative">
+                                    <input
+                                      type={showConfirmPassword ? "text" : "password"}
+                                      value={confirmPassword}
+                                      onChange={(e) => setConfirmPassword(e.target.value)}
+                                      className="w-full bg-white/40 border border-gold/5 rounded-2xl md:rounded-[1.2rem] py-3 md:py-4 pl-8 pr-16 font-body text-sm md:text-base focus:bg-white focus:border-gold/30 focus:shadow-xl focus:shadow-gold/5 outline-none transition-all duration-500"
+                                      placeholder="••••••••"
+                                      required
+                                    />
+                                    <button
+                                      type="button"
+                                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                      className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-gold transition-colors"
+                                    >
+                                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
 
-                        <div className="pt-10">
-                          <button
-                            disabled={passwordLoading}
-                            type="submit"
-                            className="w-full py-6 md:py-8 bg-charcoal text-white font-body font-bold uppercase tracking-[0.3em] rounded-2xl md:rounded-[2rem] hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl overflow-hidden"
-                          >
-                            {passwordLoading ? "Updating..." : "Update Password"}
-                          </button>
-                        </div>
+                              <div className="pt-2">
+                                <button
+                                  disabled={passwordLoading}
+                                  type="submit"
+                                  className="w-full py-3 md:py-4 bg-charcoal text-white font-body font-bold uppercase tracking-[0.3em] rounded-xl md:rounded-2xl hover:bg-gold hover:text-charcoal transition-all duration-700 shadow-2xl overflow-hidden group relative"
+                                >
+                                  <span className="relative z-10 flex items-center justify-center gap-3">
+                                    {passwordLoading ? (
+                                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                      <>
+                                        <ShieldCheck size={18} />
+                                        <span>Update Password</span>
+                                      </>
+                                    )}
+                                  </span>
+                                  <div className="absolute inset-0 bg-gradient-to-r from-gold/0 via-gold/10 to-gold/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                </button>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </form>
                     </div>
                   </motion.div>
@@ -612,7 +767,7 @@ const Profile = () => {
                                         });
                                         setIsAddressModalOpen(true);
                                     }}
-                                    className="flex items-center gap-3 px-8 py-4 bg-charcoal text-white rounded-full font-body text-xs font-bold uppercase tracking-widest hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-xl shadow-charcoal/10"
+                                    className="flex items-center gap-3 px-5 py-2.5 bg-charcoal text-white rounded-full font-body text-[10px] font-bold uppercase tracking-widest hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-xl shadow-charcoal/10"
                                 >
                                     <Plus size={16} /> Add New Address
                                 </button>
@@ -673,10 +828,10 @@ const Profile = () => {
                                                                         const data = await res.json();
                                                                         setAddresses(data.addresses);
                                                                         syncUser(data.user);
-                                                                        toast.success("Default sanctuary updated.");
+                                                                        toast.success("Default address updated.");
                                                                     }
                                                                 } catch (err) {
-                                                                    toast.error("Ritual failed.");
+                                                                    toast.error("Failed to update address.");
                                                                 }
                                                             }}
                                                             className="text-[10px] font-bold uppercase tracking-widest text-charcoal/40 hover:text-gold transition-colors"
@@ -717,8 +872,8 @@ const Profile = () => {
                                             <MapPin size={40} />
                                         </div>
                                         <div className="space-y-2">
-                                            <h4 className="font-display text-2xl font-bold text-charcoal">No Saved Sanctuary.</h4>
-                                            <p className="text-xs font-body text-muted-foreground uppercase tracking-widest italic font-light">Add your first address to accelerate your rituals.</p>
+                                            <h4 className="font-display text-2xl font-bold text-charcoal">No Saved Addresses.</h4>
+                                            <p className="text-xs font-body text-muted-foreground uppercase tracking-widest italic font-light">Add an address to speed up your checkout.</p>
                                         </div>
                                     </div>
                                 )}
@@ -969,7 +1124,7 @@ const Profile = () => {
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="w-full h-20 bg-charcoal text-white rounded-[2rem] font-black uppercase tracking-[0.4em] hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-2xl shadow-charcoal/20 flex items-center justify-center gap-4 group"
+                    className="w-full h-14 md:h-16 bg-charcoal text-white rounded-2xl font-black uppercase tracking-[0.4em] text-[10px] hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-2xl shadow-charcoal/20 flex items-center justify-center gap-4 group"
                   >
                     {loading ? "Saving..." : (
                       <>

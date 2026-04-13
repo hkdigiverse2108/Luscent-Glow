@@ -263,6 +263,24 @@ async def update_profile(data: dict = Body(...)):
         "user": serialize_user(updated_user)
     }
 
+@router.post("/verify-password")
+async def verify_user_password(data: dict = Body(...)):
+    db = await get_database()
+    mobileNumber = data.get("mobileNumber")
+    password = data.get("password")
+    
+    if not mobileNumber or not password:
+        raise HTTPException(status_code=400, detail="Mobile number and password are required")
+        
+    user = await db["users"].find_one({"mobileNumber": mobileNumber})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if not verify_password(password, user["password"]):
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
+        
+    return {"status": "success", "message": "Password verified", "isValid": True}
+
 @router.put("/change-password")
 async def change_password(data: dict = Body(...)):
     db = await get_database()
