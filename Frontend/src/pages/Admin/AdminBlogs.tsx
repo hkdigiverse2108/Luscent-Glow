@@ -178,7 +178,9 @@ const AdminBlogs = () => {
           <button 
             onClick={() => setActiveTab("posts")}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "posts" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+              activeTab === "posts" 
+                ? "bg-gold text-charcoal" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
             Blog Posts
@@ -186,7 +188,9 @@ const AdminBlogs = () => {
           <button 
             onClick={() => setActiveTab("voices")}
             className={`px-6 py-2 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "voices" ? "bg-gold text-charcoal" : "text-muted-foreground hover:text-foreground"
+              activeTab === "voices" 
+                ? "bg-gold text-charcoal" 
+                : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
             Author Voices
@@ -207,7 +211,9 @@ const AdminBlogs = () => {
                    <input 
                      value={safeSettings.heroBadge}
                      onChange={(e) => setSettings({ ...safeSettings, heroBadge: e.target.value })}
-                     className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
+                     className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold ${
+                       isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                     }`}
                    />
                 </div>
                 <div className="space-y-2">
@@ -215,7 +221,9 @@ const AdminBlogs = () => {
                    <input 
                      value={safeSettings.heroTitle}
                      onChange={(e) => setSettings({ ...safeSettings, heroTitle: e.target.value })}
-                     className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
+                     className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold ${
+                       isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                     }`}
                    />
                 </div>
                 <div className="space-y-2">
@@ -223,7 +231,9 @@ const AdminBlogs = () => {
                    <input 
                      value={safeSettings.finaleTitle}
                      onChange={(e) => setSettings({ ...safeSettings, finaleTitle: e.target.value })}
-                     className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
+                     className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold ${
+                       isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                     }`}
                    />
                 </div>
                 <div className="space-y-2">
@@ -231,7 +241,9 @@ const AdminBlogs = () => {
                    <input 
                      value={safeSettings.finaleSubtitle}
                      onChange={(e) => setSettings({ ...safeSettings, finaleSubtitle: e.target.value })}
-                     className="w-full p-4 rounded-xl border bg-transparent text-sm font-bold"
+                     className={`w-full p-4 rounded-xl border bg-transparent text-sm font-bold ${
+                       isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                     }`}
                    />
                 </div>
                 

@@ -187,7 +187,11 @@ const AdminHome = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className="flex items-center gap-2 pb-4 text-[10px] font-bold uppercase tracking-widest transition-all relative text-muted-foreground hover:text-charcoal dark:hover:text-white"
+              className={`flex items-center gap-2 pb-4 text-[10px] font-bold uppercase tracking-widest transition-all relative ${
+                activeTab === tab.id 
+                  ? "text-gold" 
+                  : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
+              }`}
             >
               <tab.icon size={12} />
               {tab.label}

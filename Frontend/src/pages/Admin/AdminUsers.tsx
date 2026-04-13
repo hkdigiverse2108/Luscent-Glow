@@ -843,7 +843,7 @@ const AdminUsers = () => {
                         className={`flex items-center gap-2 px-4 py-6 text-[10px] font-black uppercase tracking-[0.25em] relative transition-all duration-500 whitespace-nowrap ${
                           activeTab === tab.id 
                           ? "text-gold translate-y-[-1px]" 
-                          : isDark ? "text-white/30 hover:text-white" : "text-charcoal/30 hover:text-charcoal"
+                          : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
                         }`}
                       >
                         <tab.icon size={11} className={activeTab === tab.id ? "text-gold" : "opacity-40"} />
