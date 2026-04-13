@@ -49,6 +49,7 @@ import AdminBlogs from "./pages/Admin/AdminBlogs.tsx";
 import AdminReviews from "./pages/Admin/AdminReviews.tsx";
 import AdminFooter from "./pages/Admin/AdminFooter.tsx";
 import AdminPayments from "./pages/Admin/AdminPayments.tsx";
+import AdminCategories from "./pages/Admin/AdminCategories.tsx";
 import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute.tsx";
 import { AdminThemeProvider } from "./context/AdminThemeContext.tsx";
 import WhatsAppButton from "./components/WhatsAppButton";
@@ -121,6 +122,7 @@ const App = () => (
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="home" element={<AdminHome />} />
                     <Route path="products" element={<AdminProducts />} />
+                    <Route path="categories" element={<AdminCategories />} />
                     <Route path="orders" element={<AdminOrders />} />
                     <Route path="payments" element={<AdminPayments />} />
                     <Route path="users" element={<AdminUsers />} />

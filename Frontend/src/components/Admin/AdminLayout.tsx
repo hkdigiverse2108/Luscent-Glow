@@ -44,6 +44,7 @@ const menuGroups = [
     items: [
       { icon: Layout,          label: "Home Page",     path: "/admin/home" },
       { icon: ShoppingBag,     label: "Products",      path: "/admin/products" },
+      { icon: Tag,             label: "Categories",    path: "/admin/categories" },
       { icon: Edit2,           label: "Journal Management", path: "/admin/blogs" },
     ]
   },
