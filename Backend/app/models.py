@@ -795,6 +795,7 @@ class HomeDiscountBannerModel(BaseModel):
     buttonText: str = Field(default="Claim Offer")
     buttonLink: str = Field(default="/offers")
     endDate: Optional[str] = Field(default=None)
+    isActive: bool = Field(default=True)
 
 class HomeInstagramModel(BaseModel):
     """

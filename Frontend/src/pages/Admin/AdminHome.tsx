@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Sparkles,
@@ -166,7 +167,8 @@ const AdminHome = () => {
     { id: "identity", label: "Branding", icon: Sparkles },
     { id: "editorial", label: "Brand Story", icon: MessageSquare },
     { id: "taxonomy", label: "Categories", icon: Layout },
-    { id: "social", label: "Social Media", icon: Instagram }
+    { id: "social", label: "Social Media", icon: Instagram },
+    { id: "promotions", label: "Promotions", icon: Zap }
   ];
 
   return (
@@ -592,6 +594,128 @@ const AdminHome = () => {
 
         {activeTab === "social" && (
           <InstagramManagement />
+        )}
+
+        {activeTab === "promotions" && (
+          <motion.div
+            key="promotions"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="max-w-4xl mx-auto space-y-6"
+          >
+            <div className={`p-8 rounded-[3rem] border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-gold/10 shadow-xl"}`}>
+              <div className="flex items-center justify-between mb-8 pb-6 border-b border-white/5">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold">
+                    <Zap size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold uppercase tracking-tight font-display">Featured Promotion</h3>
+                    <p className="text-xs text-muted-foreground font-body">Manage the high-visibility promotional banner shown on your home page.</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 py-2 px-4 rounded-2xl bg-white/5 border border-white/5">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Visibility</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-gold">{config.discountBanner?.isActive ? "Live" : "Paused"}</span>
+                  </div>
+                  <button 
+                    onClick={() => setConfig({ 
+                      ...config, 
+                      discountBanner: { ...config.discountBanner, isActive: !config.discountBanner.isActive } 
+                    })}
+                    className={`relative w-14 h-7 rounded-full transition-all duration-500 shadow-inner ${config.discountBanner?.isActive ? "bg-gold" : "bg-white/20"}`}
+                  >
+                    <div className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-xl transition-transform duration-500 ring-4 ring-transparent ${config.discountBanner?.isActive ? "translate-x-7" : "translate-x-0"}`} />
+                  </button>
+                  <div className="h-8 w-px bg-white/10 mx-2" />
+                  <Link 
+                    to="/admin/promotions"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${isDark ? "bg-gold/10 text-gold hover:bg-gold hover:text-charcoal" : "bg-gold/10 text-gold hover:bg-gold hover:text-white"}`}
+                  >
+                    Manage Library <ArrowRight size={12} />
+                  </Link>
+                </div>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-10">
+                <div className="w-full md:w-2/5">
+                  <label className="text-[8px] font-black uppercase tracking-widest opacity-30 mb-3 block">Banner Visual</label>
+                  <div className="relative aspect-[16/9] rounded-[2rem] overflow-hidden group border border-white/10 shadow-2xl">
+                    <img src={getAssetUrl(config.discountBanner?.image)} className="w-full h-full object-cover" />
+                    <label className="absolute inset-0 bg-charcoal/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-all">
+                      <Upload size={24} className="text-gold mb-2" />
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-white text-center px-4">Replace Visual</span>
+                      <input type="file" className="hidden" onChange={(e) => e.target.files?.[0] && handleImageUpload('discountBanner.image', e.target.files[0])} />
+                    </label>
+                  </div>
+                  <p className="mt-4 text-[9px] text-muted-foreground leading-relaxed italic opacity-60">
+                    Recommended: 1600x600px luxury lifestyle or product shot with dark overlays for text readability.
+                  </p>
+                </div>
+
+                <div className="flex-1 space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-[8px] font-black uppercase tracking-widest opacity-30">Exclusive Badge (Subtitle)</label>
+                    <input 
+                      value={config.discountBanner?.subtitle}
+                      onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, subtitle: e.target.value } })}
+                      className="w-full bg-white/5 rounded-xl p-3 text-[10px] font-bold uppercase tracking-widest border-none focus:ring-1 focus:ring-gold/30"
+                      placeholder="e.g. EXCLUSIVE INVITATION"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[8px] font-black uppercase tracking-widest opacity-30">Main Headline</label>
+                    <input 
+                      value={config.discountBanner?.title}
+                      onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, title: e.target.value } })}
+                      className="w-full bg-transparent border-none p-0 text-2xl font-display font-bold focus:ring-0"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[8px] font-black uppercase tracking-widest opacity-30">Discount Highlight</label>
+                      <input 
+                        value={config.discountBanner?.discountText}
+                        onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, discountText: e.target.value } })}
+                        className="w-full bg-white/5 rounded-xl p-3 text-[10px] font-bold border-none focus:ring-1 focus:ring-gold/30"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[8px] font-black uppercase tracking-widest opacity-30">Countdown End Date</label>
+                      <input 
+                        type="datetime-local"
+                        value={config.discountBanner?.endDate ? config.discountBanner.endDate.slice(0, 16) : ""}
+                        onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, endDate: e.target.value } })}
+                        className="w-full bg-white/5 rounded-xl p-3 text-[10px] font-bold border-none focus:ring-1 focus:ring-gold/30"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
+                    <div className="space-y-2">
+                      <label className="text-[8px] font-black uppercase tracking-widest opacity-30">Button Text</label>
+                      <input 
+                        value={config.discountBanner?.buttonText}
+                        onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, buttonText: e.target.value } })}
+                        className="w-full bg-white/5 rounded-xl p-3 text-[10px] font-bold uppercase tracking-widest border-none focus:ring-1 focus:ring-gold/30"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[8px] font-black uppercase tracking-widest opacity-30">Link URL</label>
+                      <input 
+                        value={config.discountBanner?.buttonLink}
+                        onChange={(e) => setConfig({ ...config, discountBanner: { ...config.discountBanner, buttonLink: e.target.value } })}
+                        className="w-full bg-white/5 rounded-xl p-3 text-[10px] font-bold border-none focus:ring-1 focus:ring-gold/30"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         )}
 
         {/* Category Modal Ceremony */}

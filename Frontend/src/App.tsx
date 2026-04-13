@@ -34,6 +34,8 @@ import AdminDashboard from "./pages/Admin/AdminDashboard.tsx";
 import AdminHome from "./pages/Admin/AdminHome.tsx";
 import AdminProducts from "./pages/Admin/AdminProducts.tsx";
 import AdminOrders from "./pages/Admin/AdminOrders.tsx";
+import InstagramFeedSettings from "./pages/Admin/AdminInstagram";
+import AdminPromotions from "./pages/Admin/AdminPromotions";
 import AdminUsers from "./pages/Admin/AdminUsers.tsx";
 import AdminNewsletter from "./pages/Admin/AdminNewsletter.tsx";
 import AdminSettings from "./pages/Admin/AdminSettings.tsx";
@@ -126,6 +128,7 @@ const App = () => (
                     <Route path="users" element={<AdminUsers />} />
                     <Route path="newsletter" element={<AdminNewsletter />} />
                     <Route path="gift-cards" element={<AdminGiftCards />} />
+                    <Route path="promotions" element={<AdminPromotions />} />
                     <Route path="coupons" element={<AdminCoupons />} />
                     <Route path="bulk-orders" element={<AdminBulkOrders />} />
                     <Route path="about" element={<AdminAbout />} />

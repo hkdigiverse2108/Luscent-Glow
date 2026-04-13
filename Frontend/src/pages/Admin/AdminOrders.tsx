@@ -14,7 +14,8 @@ import {
   ExternalLink,
   MapPin,
   CreditCard,
-  User
+  User,
+  Copy
 } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
 import { toast } from "sonner";
@@ -158,6 +159,7 @@ const AdminOrders = () => {
                     <th className="px-4 py-2">Customer</th>
                     <th className="px-4 py-2">Total Amount</th>
                     <th className="px-4 py-2">Status</th>
+                    <th className="px-4 py-2">Tracking</th>
                     <th className="px-4 py-2">Payment</th>
                    <th className="px-4 py-2 text-right pr-12">Actions</th>
                 </tr>
@@ -218,6 +220,43 @@ const AdminOrders = () => {
                        </td>
                        <td className="px-4 py-1.5">
                            <StatusPill currentStatus={o.status} />
+                       </td>
+                       <td className="px-4 py-1.5">
+                          {o.trackingNumber ? (
+                            <div className="flex flex-col gap-1">
+                               <div className="flex items-center gap-2 group/copy">
+                                  <span className={`text-[11px] font-bold uppercase tracking-wider ${isDark ? "text-white/80" : "text-charcoal/80"}`}>
+                                     {o.trackingNumber}
+                                  </span>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      navigator.clipboard.writeText(o.trackingNumber);
+                                      toast.success("AWB Copied!");
+                                    }}
+                                    className="p-1 opacity-0 group-hover/copy:opacity-100 hover:text-gold transition-all"
+                                  >
+                                    <Copy size={12} />
+                                  </button>
+                                  {o.trackingUrl && (
+                                    <a 
+                                      href={o.trackingUrl} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="p-1 opacity-0 group-hover/copy:opacity-100 hover:text-sky-400 transition-all"
+                                    >
+                                      <ExternalLink size={12} />
+                                    </a>
+                                  )}
+                               </div>
+                               <span className="text-[9px] font-bold text-gold uppercase tracking-tighter opacity-60">
+                                 {o.courierPartner || "Shiprocket"}
+                               </span>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] font-bold uppercase tracking-widest opacity-20 italic">Not Shipped</span>
+                          )}
                        </td>
                        <td className="px-4 py-1.5">
                           <div className="flex items-center gap-2">

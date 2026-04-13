@@ -16,8 +16,10 @@ import {
   IndianRupee,
   ShieldCheck,
   ShoppingBag,
-  Save,
-  Sparkles
+  Sparkles,
+  Copy,
+  ExternalLink,
+  Save
 } from "lucide-react";
 import { getAssetUrl, getApiUrl } from "@/lib/api";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -390,13 +392,21 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderDeta
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400">
                       <Truck size={20} />
                     </div>
                     <div>
-                      <h4 className="text-sm font-extrabold uppercase tracking-widest text-indigo-400">Tracking Details</h4>
-                      <p className="text-[10px] font-medium opacity-40 uppercase tracking-tighter">Sync with shipping partner API</p>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-extrabold uppercase tracking-widest text-indigo-400">Tracking Details</h4>
+                        {order.trackingNumber && (
+                          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-400/10 border border-emerald-400/20">
+                            <ShieldCheck size={10} className="text-emerald-400" />
+                            <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-widest">Shiprocket Auto-Synced</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[10px] font-medium opacity-40 uppercase tracking-tighter">Live registry synchronization active</p>
                     </div>
                   </div>
                   
@@ -425,21 +435,48 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderDeta
                   </div>
                   <div className="space-y-2">
                     <label className="text-[9px] font-bold uppercase tracking-widest opacity-40 ml-1 text-indigo-400">Courier Partner</label>
-                    <select 
-                      value={courierPartner}
-                      onChange={(e) => setCourierPartner(e.target.value)}
-                      className={`w-full px-5 py-3 rounded-xl border text-sm font-bold outline-none appearance-none transition-all ${
-                        isDark ? "bg-white/5 border-white/10 text-white focus:border-indigo-400" : "bg-white border-charcoal/10 text-charcoal focus:border-indigo-400 shadow-sm"
-                      }`}
-                    >
-                      <option value="Shiprocket">Shiprocket</option>
-                      <option value="BlueDart">BlueDart</option>
-                      <option value="Delhivery">Delhivery</option>
-                      <option value="Ecom Express">Ecom Express</option>
-                      <option value="Other">Other Partner</option>
-                    </select>
+                    <div className="relative">
+                      <select 
+                        value={courierPartner}
+                        onChange={(e) => setCourierPartner(e.target.value)}
+                        className={`w-full px-5 py-3 rounded-xl border text-sm font-bold outline-none appearance-none transition-all ${
+                          isDark ? "bg-white/5 border-white/10 text-white focus:border-indigo-400" : "bg-white border-charcoal/10 text-charcoal focus:border-indigo-400 shadow-sm"
+                        }`}
+                      >
+                        <option value="Shiprocket">Shiprocket</option>
+                        <option value="BlueDart">BlueDart</option>
+                        <option value="Delhivery">Delhivery</option>
+                        <option value="Ecom Express">Ecom Express</option>
+                        <option value="Other">Other Partner</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                         <Truck size={14} />
+                      </div>
+                    </div>
                   </div>
                 </div>
+
+                {order.trackingUrl && (
+                  <div className={`p-4 rounded-2xl flex items-center justify-between transition-colors ${
+                    isDark ? "bg-white/5" : "bg-charcoal/5"
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <ExternalLink size={16} className="text-indigo-400" />
+                      <div>
+                        <p className="text-[9px] font-bold uppercase tracking-widest opacity-40">Direct Tracking URL</p>
+                        <p className={`text-[10px] font-medium truncate max-w-[200px] md:max-w-md ${isDark ? "text-white/60" : "text-charcoal/80"}`}>{order.trackingUrl}</p>
+                      </div>
+                    </div>
+                    <a 
+                      href={order.trackingUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest hover:underline"
+                    >
+                      Open Link
+                    </a>
+                  </div>
+                )}
 
                 <button 
                   onClick={handleUpdateTracking}

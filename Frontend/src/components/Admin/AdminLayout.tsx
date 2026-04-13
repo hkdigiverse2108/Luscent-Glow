@@ -26,7 +26,8 @@ import {
   UserCheck,
   Star,
   CreditCard,
-  Tag
+  Tag,
+  Zap
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -53,6 +54,7 @@ const menuGroups = [
       { icon: ClipboardList,   label: "Orders",        path: "/admin/orders" },
       { icon: CreditCard,      label: "Payments",      path: "/admin/payments" },
       { icon: Ticket,          label: "Gift Cards",    path: "/admin/gift-cards" },
+      { icon: Zap,             label: "Home Promotions", path: "/admin/promotions" },
       { icon: Tag,             label: "Coupons",       path: "/admin/coupons" },
       { icon: Package,         label: "Bulk Orders",   path: "/admin/bulk-orders" },
     ]

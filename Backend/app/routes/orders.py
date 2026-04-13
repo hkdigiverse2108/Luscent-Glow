@@ -9,6 +9,9 @@ import random
 import string
 from ..shiprocket import shiprocket_client
 from .settings import get_shiprocket_credentials
+import logging
+
+logger = logging.getLogger(__name__)
 
 def serialize_order(o: dict) -> dict:
     """Convert a MongoDB order document to a JSON-serializable dict."""
@@ -160,55 +163,141 @@ async def fulfill_order_via_shiprocket(db, order, creds):
     shiprocket_items = []
     for item in order.get("items", []):
         shiprocket_items.append({
-            "name": item.get("name"),
-            "sku": item.get("productId") or item.get("name"),
-            "units": item.get("quantity", 1),
-            "selling_price": item.get("price", 0)
+            "name": item.get("name") or "Product",
+            "sku": item.get("productId") or item.get("name") or "SKU",
+            "units": int(item.get("quantity", 1)),
+            "selling_price": float(item.get("price", 0))
         })
 
     # Map Address
-    address = order.get("shippingAddress", {})
+    raw_address = order.get("shippingAddress")
+    address = {}
     
+    if isinstance(raw_address, dict):
+        address = raw_address
+    elif isinstance(raw_address, str):
+        # Handle legacy string addresses by putting them in the street field
+        address = {"street": raw_address, "city": "Update Required", "state": "Update Required", "zipCode": "000000"}
+    else:
+        address = {}
+
+    # Mandatory Field Validation for Shiprocket (Pre-flight check)
+    street = address.get("street", "").strip()
+    city = address.get("city", "").strip()
+    pincode = address.get("zipCode", "").strip()
+    state = address.get("state") or "State"
+    mobile = order.get("userMobile", "").strip()
+    
+    # Shiprocket requires at least 10 chars for address.
+    # AUTO-REPAIR: If address is too short, append city and state to meet validation.
+    if len(street) < 10 and len(street) > 0:
+        street = f"{street}, {city}, {state}"
+    
+    # Final check: if still too short or empty
+    if len(street) < 10:
+        return False, {"error": "Valid street address required (min 10 characters). Please update the address first."}
+    
+    if not city or city.lower() == "city":
+        return False, {"error": "Valid city required. Please update the address first."}
+        
+    if not pincode or pincode == "000000":
+        return False, {"error": "Valid 6-digit pincode required. Please update the address first."}
+
+    # Clean mobile number
+    clean_mobile = "".join(filter(str.isdigit, mobile))
+    if len(clean_mobile) < 10:
+        return False, {"error": "Valid 10-digit mobile number required for fulfillment."}
+
     # Determine Payment Method
     payment_method = "Prepaid" if order.get("paymentStatus") == "Paid" else "Postpaid"
     
     # Format Date (YYYY-MM-DD HH:MM)
     try:
         from datetime import datetime
-        order_date = datetime.fromisoformat(order.get("createdAt").replace("Z", "+00:00")).strftime("%Y-%m-%d %H:%M")
+        order_date_str = order.get("createdAt")
+        if order_date_str:
+            order_date = datetime.fromisoformat(order_date_str.replace("Z", "+00:00")).strftime("%Y-%m-%d %H:%M")
+        else:
+            order_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M")
     except:
         order_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M")
+
+    # Split Name for Last Name requirement
+    full_name = (order.get("userName") or address.get("fullName") or "Valued Customer").strip()
+    name_parts = full_name.split(" ", 1)
+    first_name = name_parts[0]
+    last_name = name_parts[1] if len(name_parts) > 1 else "." # Shiprocket often rejects empty last names
 
     payload = {
         "order_id": order.get("orderNumber"),
         "order_date": order_date,
         "pickup_location": creds.get("shiprocketPickupLocation", "Primary"),
-        "billing_customer_name": order.get("userName") or "Valued Customer",
-        "billing_last_name": "",
-        "billing_address": address.get("street") or "Address Not Provided",
-        "billing_city": address.get("city") or "City",
-        "billing_pincode": address.get("zipCode") or "000000",
-        "billing_state": address.get("state") or "State",
+        "billing_customer_name": first_name,
+        "billing_last_name": last_name,
+        "billing_address": street,
+        "billing_address_2": "",
+        "billing_city": city,
+        "billing_pincode": pincode,
+        "billing_state": state,
         "billing_country": "India",
-        "billing_email": "customer@example.com", # Fallback
-        "billing_phone": order.get("userMobile") or "9999999999",
-        "shipping_is_billing": True,
+        "billing_email": order.get("email") or "customer@example.com",
+        "billing_phone": clean_mobile[:10],
+        "shipping_is_billing": 1, # Use 1 for true
+        "shipping_customer_name": first_name,
+        "shipping_last_name": last_name,
+        "shipping_address": street,
+        "shipping_address_2": "",
+        "shipping_city": city,
+        "shipping_pincode": pincode,
+        "shipping_country": "India",
+        "shipping_state": state,
+        "shipping_email": order.get("email") or "customer@example.com",
+        "shipping_phone": clean_mobile[:10],
         "order_items": shiprocket_items,
         "payment_method": payment_method,
-        "sub_total": order.get("totalAmount", 0),
+        "shipping_charges": 0,
+        "giftwrap_charges": 0,
+        "transaction_charges": 0,
+        "total_discount": 0,
+        "sub_total": str(round(float(order.get("totalAmount", 0)), 2)),
         "length": 10,
         "breadth": 10,
         "height": 5,
         "weight": 0.5
     }
 
-    # 1. Create Order
+    logger.info(f"Initiating Shiprocket fulfillment for order {order.get('orderNumber')}")
+    logger.debug(f"Shiprocket Payload: {payload}")
+
+    # 1. Proactive Pickup Location Check
+    pickup_data = await shiprocket_client.get_pickup_locations(creds)
+    shipping_addresses = pickup_data.get("data", {}).get("shipping_address", [])
+    
+    if not shipping_addresses:
+        return False, {
+            "error": "No Pickup Address found in your Shiprocket account. Please add a business address in your Shiprocket Dashboard (Settings > Pickup Address) first."
+        }
+    
+    # Optional: Verify if the requested nickname exists, otherwise use the first one available
+    requested_pickup = creds.get("shiprocketPickupLocation", "Primary")
+    available_nicknames = [addr.get("pickup_location") for addr in shipping_addresses]
+    
+    if requested_pickup not in available_nicknames:
+        # Auto-fallback to the first available location if 'Primary' doesn't exist
+        payload["pickup_location"] = available_nicknames[0]
+        logger.warning(f"Pickup location '{requested_pickup}' not found. Falling back to '{available_nicknames[0]}'")
+
+    # 2. Create Order
     sr_order = await shiprocket_client.create_custom_order(payload, creds)
     
     if "order_id" not in sr_order:
         error_msg = sr_order.get("error") or sr_order.get("message") or "Shiprocket order creation failed."
         if "details" in sr_order:
-            error_msg += f" Details: {sr_order['details']}"
+            # Clean up the generic 'Please add address' error with a more helpful one
+            if "billing/shipping address first" in str(sr_order['details']):
+                error_msg = "Shiprocket rejected the address. Please ensure a valid Pickup Address (Sender) and Billing Address (Company) are set in your Shiprocket Dashboard settings."
+            else:
+                error_msg += f" Details: {sr_order['details']}"
         return False, {"error": error_msg}
 
     shiprocket_order_id = sr_order.get("order_id")

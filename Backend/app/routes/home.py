@@ -23,7 +23,8 @@ async def get_home_settings():
             },
             discountBanner={
                 "title": "Season of Radiance",
-                "discountText": "UP TO 50% OFF"
+                "discountText": "UP TO 50% OFF",
+                "isActive": True
             },
             instagram={
                 "profileHandle": "@hk_digiverse",
