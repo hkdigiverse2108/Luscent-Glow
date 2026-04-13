@@ -14,23 +14,26 @@ import SEO from "@/components/SEO";
 
 const Index = () => {
   const [settings, setSettings] = useState<any>(null);
+  const [promotion, setPromotion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(getApiUrl("/home/settings"));
-        if (response.ok) {
-          const data = await response.json();
-          setSettings(data);
-        }
+        const [settingsRes, promoRes] = await Promise.all([
+          fetch(getApiUrl("/home/settings")),
+          fetch(getApiUrl("/api/promotions/active"))
+        ]);
+        
+        if (settingsRes.ok) setSettings(await settingsRes.json());
+        if (promoRes.ok) setPromotion(await promoRes.json());
       } catch (error) {
         console.error("Failed to fetch home settings:", error);
       } finally {
         setLoading(false);
       }
     };
-    fetchSettings();
+    fetchData();
   }, []);
 
   if (loading) {
@@ -58,7 +61,9 @@ const Index = () => {
           title={settings?.newArrivalsTitle} 
           subtitle={settings?.newArrivalsSubtitle} 
         />
-        <DiscountBanner banner={settings?.discountBanner} />
+        {(promotion?.isActive || settings?.discountBanner?.isActive) && (
+          <DiscountBanner banner={promotion?.isActive ? promotion : settings?.discountBanner} />
+        )}
         <InstagramFeed settings={settings?.instagram} />
       </main>
       <Footer />

@@ -9,6 +9,8 @@ SHIPROCKET_AUTH_URL = "https://apiv2.shiprocket.in/v1/external/auth/login"
 SHIPROCKET_TRACK_AWB_URL = "https://apiv2.shiprocket.in/v1/external/courier/track/awb/"
 SHIPROCKET_CREATE_ORDER_URL = "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc"
 SHIPROCKET_GENERATE_AWB_URL = "https://apiv2.shiprocket.in/v1/external/courier/assign/awb"
+SHIPROCKET_TRACK_ORDER_URL = "https://apiv2.shiprocket.in/v1/external/courier/track/order/"
+SHIPROCKET_GET_PICKUP_URL = "https://apiv2.shiprocket.in/v1/external/settings/get/pickup"
 
 class ShiprocketClient:
     _token: Optional[str] = None
@@ -141,6 +143,29 @@ class ShiprocketClient:
                     return {"error": f"API Error: {response.status_code}"}
         except Exception as e:
             logger.error(f"Shiprocket track exception: {str(e)}")
+            return {"error": str(e)}
+
+    @classmethod
+    async def get_pickup_locations(cls, db_creds: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """
+        Fetch registered pickup locations.
+        """
+        token = await cls.get_token(db_creds)
+        if not token:
+            return {"error": "Authentication failed"}
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    SHIPROCKET_GET_PICKUP_URL,
+                    headers={"Authorization": f"Bearer {token}"},
+                    timeout=15.0
+                )
+                if response.status_code == 200:
+                    return response.json()
+                else:
+                    return {"error": f"API Error: {response.status_code}", "details": response.text}
+        except Exception as e:
             return {"error": str(e)}
 
 shiprocket_client = ShiprocketClient()

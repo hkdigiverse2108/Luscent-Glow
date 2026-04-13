@@ -35,6 +35,7 @@ from .routes.chat import router as chat_router
 from .routes.analytics import router as analytics_router
 from .routes.seo_data import router as seo_data_router
 from .routes.instagram import router as instagram_router
+from .routes.promotions import router as promotions_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -85,6 +86,7 @@ app.include_router(chat_router, prefix="/api", tags=["AI Assistant"])
 app.include_router(analytics_router, prefix="/api", tags=["Analytics"])
 app.include_router(seo_data_router, prefix="/api", tags=["SEO"])
 app.include_router(instagram_router, prefix="/api", tags=["Instagram Gallery"])
+app.include_router(promotions_router, prefix="/api", tags=["Home Promotions"])
 
 
 # Serving Static Assets (JS, CSS, Images from src if no dist)

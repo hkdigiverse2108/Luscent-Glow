@@ -24,10 +24,6 @@ interface TrackStep {
 }
 
 const TrackOrder = () => {
-  useEffect(() => {
-    // Immediate redirect to Shiprocket tracking as requested
-    window.location.href = "https://shiprocket.co/tracking";
-  }, []);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -128,13 +124,6 @@ const TrackOrder = () => {
       }
 
       // Arrived via direct link (auto=true) - Bypass internal view and go to Shiprocket
-      const hasRealTracking = order.trackingNumber && order.trackingNumber.toLowerCase() !== 'processing';
-      
-      if (hasRealTracking) {
-        // Use href instead of open to bypass popup blockers on auto-redirect
-        window.location.href = `https://shiprocket.co/tracking/${order.trackingNumber}`;
-        return;
-      }
 
       setOrderData({
         orderNumber: order.orderNumber,
@@ -143,7 +132,8 @@ const TrackOrder = () => {
         courier: order.courierPartner || shiprocketData?.courier_name || "Logistics Partner",
         trackingId: order.trackingNumber || shiprocketData?.awb_code || "Processing",
         items: order.items || [],
-        steps: steps
+        steps: steps,
+        activities: activities
       });
 
       setIsTracking(true);
@@ -378,6 +368,42 @@ const TrackOrder = () => {
                             </div>
                          </div>
                       </div>
+
+                       {/* Detailed History Log (Shiprocket Live) */}
+                       {orderData.activities && orderData.activities.length > 0 && (
+                         <div className="bg-white p-6 rounded-[2rem] border border-border shadow-sm space-y-5">
+                            <div className="flex items-center gap-3">
+                               <Clock size={14} className="text-gold" />
+                               <h3 className="text-[10px] font-bold text-charcoal uppercase tracking-widest">Tracking History</h3>
+                            </div>
+                            <div className="space-y-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                               {orderData.activities.map((activity: any, i: number) => (
+                                 <div key={i} className="flex gap-4 relative group">
+                                    {i !== orderData.activities.length - 1 && (
+                                      <div className="absolute left-[7px] top-4 bottom-[-24px] w-[1px] bg-border group-hover:bg-gold/20 transition-colors" />
+                                    )}
+                                    <div className="w-3.5 h-3.5 rounded-full border-2 border-gold/30 bg-white ring-4 ring-gold/5 flex-shrink-0 z-10 mt-1" />
+                                    <div className="space-y-1 pb-4">
+                                       <p className="text-[11px] font-bold text-charcoal">{activity.status}</p>
+                                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                                          <p className="text-[9px] text-muted-foreground flex items-center gap-1">
+                                             <Calendar size={10} /> {activity.date}
+                                          </p>
+                                          {activity.location && (
+                                            <p className="text-[9px] text-gold font-bold flex items-center gap-1 uppercase tracking-tighter">
+                                               <MapPin size={10} /> {activity.location}
+                                            </p>
+                                          )}
+                                       </div>
+                                       {activity.activity && (
+                                         <p className="text-[10px] text-muted-foreground/60 leading-tight italic">{activity.activity}</p>
+                                       )}
+                                    </div>
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+                       )}
 
                       {/* Item Preview */}
                       <div className="bg-white p-6 rounded-[2rem] border border-border shadow-sm space-y-5">

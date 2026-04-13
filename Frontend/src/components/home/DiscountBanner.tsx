@@ -23,7 +23,7 @@ const DiscountBanner = ({ banner }: DiscountBannerProps) => {
     subtitle: "Exclusive Invitation",
     discountText: "40% OFF",
     buttonText: "Retrieve Offer",
-    buttonLink: "/products",
+    buttonLink: "/offers",
     endDate: ""
   };
 

@@ -34,6 +34,8 @@ import AdminDashboard from "./pages/Admin/AdminDashboard.tsx";
 import AdminHome from "./pages/Admin/AdminHome.tsx";
 import AdminProducts from "./pages/Admin/AdminProducts.tsx";
 import AdminOrders from "./pages/Admin/AdminOrders.tsx";
+import InstagramFeedSettings from "./pages/Admin/AdminInstagram";
+import AdminPromotions from "./pages/Admin/AdminPromotions";
 import AdminUsers from "./pages/Admin/AdminUsers.tsx";
 import AdminNewsletter from "./pages/Admin/AdminNewsletter.tsx";
 import AdminSettings from "./pages/Admin/AdminSettings.tsx";
@@ -108,40 +110,41 @@ const App = () => (
                   {/* Dynamic Legal Sanctuary (Root-Level) */}
                   <Route path="/:type" element={<DynamicPolicy />} />
 
-                  {/* Admin Sanctuary Routes */}
-                  <Route path="/admin/login" element={<AdminLogin />} />
-
-                  <Route path="/admin" element={
-                    <AdminProtectedRoute />
+                {/* Admin Sanctuary Routes */}
+                <Route path="/admin/login" element={<AdminLogin />} />
+                
+                <Route path="/admin" element={
+                  <AdminProtectedRoute />
+                }>
+                  <Route element={
+                    <AdminThemeProvider>
+                      <AdminLayout />
+                    </AdminThemeProvider>
                   }>
-                    <Route element={
-                      <AdminThemeProvider>
-                        <AdminLayout />
-                      </AdminThemeProvider>
-                    }>
-                      <Route index element={<AdminDashboard />} />
-                      <Route path="dashboard" element={<AdminDashboard />} />
-                      <Route path="home" element={<AdminHome />} />
-                      <Route path="products" element={<AdminProducts />} />
-                      <Route path="categories" element={<AdminCategories />} />
-                      <Route path="orders" element={<AdminOrders />} />
-                      <Route path="payments" element={<AdminPayments />} />
-                      <Route path="users" element={<AdminUsers />} />
-                      <Route path="newsletter" element={<AdminNewsletter />} />
-                      <Route path="gift-cards" element={<AdminGiftCards />} />
-                      <Route path="coupons" element={<AdminCoupons />} />
-                      <Route path="bulk-orders" element={<AdminBulkOrders />} />
-                      <Route path="about" element={<AdminAbout />} />
-                      <Route path="contact" element={<AdminContact />} />
-                      <Route path="faq" element={<AdminFAQ />} />
-                      <Route path="policies" element={<AdminPolicies />} />
-                      <Route path="blogs" element={<AdminBlogs />} />
-                      <Route path="reviews" element={<AdminReviews />} />
-                      <Route path="footer" element={<AdminFooter />} />
-                      <Route path="social-media" element={<AdminSocialMedia />} />
-                      <Route path="settings" element={<AdminSettings />} />
-                    </Route>
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="home" element={<AdminHome />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="categories" element={<AdminCategories />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="payments" element={<AdminPayments />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="newsletter" element={<AdminNewsletter />} />
+                    <Route path="gift-cards" element={<AdminGiftCards />} />
+                    <Route path="promotions" element={<AdminPromotions />} />
+                    <Route path="coupons" element={<AdminCoupons />} />
+                    <Route path="bulk-orders" element={<AdminBulkOrders />} />
+                    <Route path="about" element={<AdminAbout />} />
+                    <Route path="contact" element={<AdminContact />} />
+                    <Route path="faq" element={<AdminFAQ />} />
+                    <Route path="policies" element={<AdminPolicies />} />
+                    <Route path="blogs" element={<AdminBlogs />} />
+                    <Route path="reviews" element={<AdminReviews />} />
+                    <Route path="footer" element={<AdminFooter />} />
+                    <Route path="social-media" element={<AdminSocialMedia />} />
+                    <Route path="settings" element={<AdminSettings />} />
                   </Route>
+                </Route>
 
                   <Route path="*" element={<NotFound />} />
                 </Routes>
