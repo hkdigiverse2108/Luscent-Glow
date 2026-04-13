@@ -17,7 +17,9 @@ import {
   ExternalLink,
   ShieldCheck,
   Zap,
-  LayoutDashboard
+  LayoutDashboard,
+  Filter,
+  Check
 } from "lucide-react";
 import {
   AreaChart,
@@ -52,12 +54,13 @@ const AdminDashboard = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [period, setPeriod] = useState("allTime");
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
-        const res = await fetch(getApiUrl("/api/analytics/dashboard"));
+        const res = await fetch(getApiUrl(`/api/analytics/dashboard?period=${period}`));
         if (!res.ok) throw new Error("Data retrieval failed.");
         const json = await res.json();
         setData(json);
@@ -69,7 +72,7 @@ const AdminDashboard = () => {
       }
     };
     fetchAnalytics();
-  }, []);
+  }, [period]);
 
   // Professional Dynamic Colors
   const chartColors = {
@@ -123,7 +126,43 @@ const AdminDashboard = () => {
           highlightedWord="Dashboard"
           subtitle="Real-time store performance and analytics overview."
           isDark={isDark}
-        />
+        >
+           <div className={`p-1 hidden lg:flex items-center gap-1 rounded-2xl border ${isDark ? "bg-white/5 border-white/5" : "bg-charcoal/5 border-charcoal/5"}`}>
+              {[
+                { id: "today", label: "Today" },
+                { id: "yesterday", label: "Yesterday" },
+                { id: "last7d", label: "7 Days" },
+                { id: "last30d", label: "30 Days" },
+                { id: "allTime", label: "All Time" }
+              ].map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => setPeriod(p.id)}
+                  className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-500 ${
+                    period === p.id 
+                      ? "bg-gold text-charcoal shadow-lg" 
+                      : isDark ? "text-white/30 hover:text-white" : "text-charcoal/40 hover:text-gold"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+           </div>
+           {/* Mobile Filter Trigger */}
+           <div className="lg:hidden">
+              <select 
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                className={`px-4 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest border focus:outline-none ${isDark ? "bg-charcoal border-white/10 text-white" : "bg-white border-charcoal/10 text-charcoal"}`}
+              >
+                <option value="today">Today</option>
+                <option value="yesterday">Yesterday</option>
+                <option value="last7d">7 Days</option>
+                <option value="last30d">30 Days</option>
+                <option value="allTime">All Time</option>
+              </select>
+           </div>
+        </AdminHeader>
       </div>
 
 
