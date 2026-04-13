@@ -27,7 +27,8 @@ import {
   Star,
   CreditCard,
   Tag,
-  Zap
+  Zap,
+  Instagram
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
