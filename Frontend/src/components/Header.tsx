@@ -20,7 +20,7 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
   const [searchResults, setSearchResults] = useState<Product[]>([]);
-  const { totalItems } = useCart();
+  const { totalItems, productCount } = useCart();
   const { wishlist } = useWishlist();
   const { user, logout } = useAuth();
   const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
@@ -360,9 +360,9 @@ const Header = () => {
               <div className="relative group flex flex-col items-center">
                 <Link to="/cart" className="p-1.5 xs:p-2 text-foreground/70 hover:text-gold transition-colors relative">
                   <ShoppingBag size={20} className="w-5 h-5" />
-                  {totalItems > 0 && (
+                  {productCount > 0 && (
                     <span className="absolute top-0 right-0 md:-top-0.5 md:-right-0.5 w-3.5 h-3.5 md:w-4 md:h-4 bg-gold text-primary-foreground text-[8px] md:text-[10px] font-bold rounded-full flex items-center justify-center">
-                      {totalItems}
+                      {productCount}
                     </span>
                   )}
                 </Link>

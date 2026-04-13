@@ -41,6 +41,7 @@ interface CartContextType {
   updateQuantity: (id: string, quantity: number, selectedShade?: string, selectedSize?: string, metadata?: any) => void;
   clearCart: () => void;
   totalItems: number;
+  productCount: number;
   subtotal: number;
   appliedCoupon: Coupon | null;
   applyCoupon: (code: string) => boolean;
@@ -357,6 +358,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const productCount = items.length;
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   
   let discountAmount = 0;
@@ -377,6 +379,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateQuantity,
         clearCart,
         totalItems,
+        productCount,
         subtotal,
         appliedCoupon,
         applyCoupon,

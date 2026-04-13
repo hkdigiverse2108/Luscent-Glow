@@ -10,21 +10,38 @@ import { useCart } from "@/context/CartContext";
 
 const Wishlist = () => {
   const { wishlist, clearWishlist, toggleWishlist } = useWishlist();
-  const { addItem } = useCart();
+  const { items, addItem, updateQuantity } = useCart();
 
-  const moveAllToBag = () => {
-    wishlist.forEach(product => {
+  const handleMoveToBag = (product: any) => {
+    const productId = product._id || product.id;
+    const existingItem = items.find(item => item.id === productId);
+
+    if (existingItem) {
+      updateQuantity(
+        existingItem.id, 
+        existingItem.quantity + 1, 
+        existingItem.selectedShade, 
+        existingItem.selectedSize, 
+        existingItem.metadata
+      );
+    } else {
       addItem({
-        id: product._id || product.id,
+        id: productId,
         name: product.name,
         price: product.price,
         image: product.image,
         category: product.category,
         quantity: 1
       });
+    }
+    toggleWishlist(product, true); // Silent remove from wishlist
+  };
+
+  const moveAllToBag = () => {
+    wishlist.forEach(product => {
+      handleMoveToBag(product);
     });
-    // Clear wishlist after moving
-    clearWishlist(); 
+    // The wishlist is cleared by handleMoveToBag calling toggleWishlist
   };
 
   return (
@@ -105,17 +122,7 @@ const Wishlist = () => {
                       </div>
                     </div>
                     <button 
-                      onClick={() => {
-                        addItem({
-                          id: product._id || product.id,
-                          name: product.name,
-                          price: product.price,
-                          image: product.image,
-                          category: product.category,
-                          quantity: 1
-                        });
-                        toggleWishlist(product); // Move typically implies removing from wishlist
-                      }}
+                      onClick={() => handleMoveToBag(product)}
                       className="w-full mt-4 py-3 bg-secondary text-foreground text-[10px] font-body font-bold uppercase tracking-widest rounded-xl hover:bg-gold hover:text-white transition-all border border-gold/10"
                     >
                       <ShoppingBag size={14} className="inline mr-2" /> Move to Bag
@@ -124,8 +131,8 @@ const Wishlist = () => {
                 ))}
               </AnimatePresence>
             </div>
-          )}
-          
+          )
+        }  
           {wishlist.length > 0 && (
             <div className="mt-16 md:mt-24 p-8 md:p-12 bg-gold/5 rounded-[2.5rem] md:rounded-[3rem] border border-gold/10 text-center">
               <h3 className="font-display text-xl md:text-2xl font-light mb-4">Ready to checkout?</h3>
