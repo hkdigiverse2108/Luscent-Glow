@@ -165,8 +165,7 @@ const AdminHome = () => {
     { id: "carousel", label: "Hero Banner", icon: ImageIcon },
     { id: "identity", label: "Branding", icon: Sparkles },
     { id: "editorial", label: "Brand Story", icon: MessageSquare },
-    { id: "taxonomy", label: "Categories", icon: Layout },
-    { id: "social", label: "Social Media", icon: Instagram }
+    { id: "taxonomy", label: "Categories", icon: Layout }
   ];
 
   return (
@@ -590,9 +589,7 @@ const AdminHome = () => {
           </motion.div>
         )}
 
-        {activeTab === "social" && (
-          <InstagramManagement />
-        )}
+
 
         {/* Category Modal Ceremony */}
         {isCategoryModalOpen && (
