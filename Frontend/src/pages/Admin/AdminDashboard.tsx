@@ -30,7 +30,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
 } from "recharts";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
@@ -42,7 +45,17 @@ type AnalyticsData = {
     activeUsers: { value: number; change: number; trend: string };
     totalOrders: { value: number; change: number; trend: string };
     conversionRate: { value: number; change: number; trend: string };
+    aov: { value: number; change: number; trend: string };
   };
+  financials: {
+    prepaidOrders: number;
+    codOrders: number;
+    received: number;
+    pending: number;
+    codRevenue: number;
+  };
+  statusDistribution: Array<{ name: string; value: number }>;
+  categoryRevenue: Array<{ name: string; revenue: number }>;
   revenueTrend: Array<{ name: string; revenue: number }>;
   profitExpenses: Array<{ name: string; profit: number; expenses: number }>;
   topProducts: Array<{ name: string; sales: number; growth: number }>;
@@ -131,8 +144,9 @@ const AdminDashboard = () => {
 
   const kpis = [
     { label: "Total Revenue", value: `₹${data.summary.totalRevenue.value.toLocaleString('en-IN')}`, trendValue: data.summary.totalRevenue.change, trend: data.summary.totalRevenue.trend, icon: IndianRupee, color: "text-gold", bg: "bg-gold/10" },
-    { label: "Accounts", value: data.summary.activeUsers.value.toLocaleString(), trendValue: data.summary.activeUsers.change, trend: data.summary.activeUsers.trend, icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Orders", value: data.summary.totalOrders.value.toLocaleString(), trendValue: data.summary.totalOrders.change, trend: data.summary.totalOrders.trend, icon: ShoppingBag, color: "text-violet-500", bg: "bg-violet-500/10" }
+    { label: "Accounts", value: data.summary.activeUsers.value.toLocaleString(), trendValue: data.summary.activeUsers.change, trend: data.summary.activeUsers.trend, icon: Users, color: "text-blue-400", bg: "bg-blue-400/10" },
+    { label: "Orders", value: data.summary.totalOrders.value.toLocaleString(), trendValue: data.summary.totalOrders.change, trend: data.summary.totalOrders.trend, icon: ShoppingBag, color: "text-violet-400", bg: "bg-violet-400/10" },
+    { label: "Avg. Order Value", value: `₹${data.summary.aov.value.toLocaleString('en-IN')}`, trendValue: data.summary.aov.change, trend: data.summary.aov.trend, icon: Zap, color: "text-amber-400", bg: "bg-amber-400/10" }
   ];
 
   return (
@@ -215,7 +229,7 @@ const AdminDashboard = () => {
 
 
       {/* ── KPI Summary Cards ──────────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
         {kpis.map((kpi, idx) => (
           <motion.div
             key={kpi.label}
@@ -368,6 +382,144 @@ const AdminDashboard = () => {
                </div>
                <ShieldCheck size={16} className="text-gold opacity-30" />
             </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* ── Operations & Financial Intelligence ─────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Order Status Distribution */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className={cardBase}
+        >
+          <div className="p-10">
+             <div className="mb-10">
+                <h3 className="text-2xl font-display font-bold mb-1">Ritual Pipeline</h3>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Orders status distribution</p>
+             </div>
+             
+             <div className="h-[250px] w-full flex items-center justify-center">
+               <ResponsiveContainer width="100%" height="100%">
+                 <PieChart>
+                    <Pie
+                      data={data.statusDistribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {data.statusDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={[chartColors.gold, "#60a5fa", "#a78bfa", "#f472b6"][index % 4]} stroke="none" />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '1rem', border: 'none', backgroundColor: isDark ? '#1a1a1a' : '#fff' }}
+                    />
+                 </PieChart>
+               </ResponsiveContainer>
+             </div>
+
+             <div className="mt-6 space-y-3">
+               {data.statusDistribution.map((status, i) => (
+                 <div key={i} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: [chartColors.gold, "#60a5fa", "#a78bfa", "#f472b6"][i % 4] }}></div>
+                       <span className="text-[9px] font-black uppercase tracking-widest opacity-60">{status.name}</span>
+                    </div>
+                    <span className="text-xs font-bold">{status.value}</span>
+                 </div>
+               ))}
+             </div>
+          </div>
+        </motion.div>
+
+        {/* Category Revenue Performance */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className={cardBase}
+        >
+          <div className="p-10">
+             <div className="mb-10">
+                <h3 className="text-2xl font-display font-bold mb-1">Category Leaderboard</h3>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Revenue distribution by category</p>
+             </div>
+             
+             <div className="space-y-8">
+               {data.categoryRevenue.map((cat, i) => (
+                 <div key={i} className="space-y-2">
+                    <div className="flex justify-between items-end">
+                       <span className="text-[10px] font-black uppercase tracking-widest opacity-50">{cat.name}</span>
+                       <span className="text-xs font-bold text-gold">₹{cat.revenue.toLocaleString()}</span>
+                    </div>
+                    <div className={`h-1.5 w-full rounded-full ${isDark ? "bg-white/5" : "bg-charcoal/5"}`}>
+                       <motion.div 
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${(cat.revenue / (data.categoryRevenue[0]?.revenue || 1)) * 100}%` }}
+                          transition={{ duration: 1.2, ease: "easeOut" }}
+                          className="h-full bg-gold rounded-full"
+                       />
+                    </div>
+                 </div>
+               ))}
+             </div>
+          </div>
+        </motion.div>
+
+        {/* Financial Flow Section */}
+        <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           whileInView={{ opacity: 1, y: 0 }}
+           viewport={{ once: true }}
+           className={cardBase}
+        >
+          <div className="p-10">
+             <div className="mb-10">
+               <h3 className="text-2xl font-display font-bold mb-1">Financial Health</h3>
+               <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40">Payment split & Collection status</p>
+             </div>
+
+             <div className="grid grid-cols-2 gap-4 mb-10">
+                <div className={`p-6 rounded-3xl ${isDark ? "bg-white/5" : "bg-white"} border ${isDark ? "border-white/5" : "border-gold/10"}`}>
+                   <p className="text-[8px] font-black uppercase tracking-widest text-emerald-500 mb-2">Collected</p>
+                   <p className="text-xl font-display font-bold text-emerald-500">₹{data.financials.received.toLocaleString()}</p>
+                </div>
+                <div className={`p-6 rounded-3xl ${isDark ? "bg-white/5" : "bg-white"} border ${isDark ? "border-white/5" : "border-gold/10"}`}>
+                   <p className="text-[8px] font-black uppercase tracking-widest text-amber-500 mb-2">Outstanding</p>
+                   <p className="text-xl font-display font-bold text-amber-500">₹{data.financials.pending.toLocaleString()}</p>
+                </div>
+             </div>
+
+             <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                     <span className="text-[9px] font-black uppercase tracking-widest opacity-40">Payment Split</span>
+                     <span className="text-[9px] font-black uppercase tracking-widest text-gold">{data.financials.prepaidOrders} Prepaid / {data.financials.codOrders} COD</span>
+                  </div>
+                  <div className={`h-3 w-full rounded-full overflow-hidden flex ${isDark ? "bg-white/5" : "bg-charcoal/5"}`}>
+                     <div className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)] transition-all" style={{ width: `${(data.financials.prepaidOrders / (Math.max(1, data.financials.prepaidOrders + data.financials.codOrders))) * 100}%` }}></div>
+                     <div className="h-full bg-amber-500 opacity-60 transition-all" style={{ width: `${(data.financials.codOrders / (Math.max(1, data.financials.prepaidOrders + data.financials.codOrders))) * 100}%` }}></div>
+                  </div>
+                </div>
+
+                <div className={`mt-8 pt-6 border-t ${isDark ? "border-white/5" : "border-charcoal/5"}`}>
+                   <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-gold/5 text-gold flex items-center justify-center">
+                         <IndianRupee size={18} />
+                      </div>
+                      <div>
+                        <p className="text-[8px] font-black uppercase tracking-[0.2em] opacity-40">Projected COD Inflow</p>
+                        <p className="text-sm font-bold">₹{data.financials.codRevenue.toLocaleString()}</p>
+                      </div>
+                   </div>
+                </div>
+             </div>
           </div>
         </motion.div>
       </div>

@@ -53,21 +53,62 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
         filtered_orders_count = 0
         total_revenue = 0
         
+        # New Financial Metrics
+        prepaid_count = 0
+        cod_count = 0
+        payment_received = 0
+        payment_pending = 0
+        
+        # Status Distribution
+        status_dist = collections.defaultdict(int)
+        
+        # Category Revenue Breakdown (for all categories)
+        cat_revenue_breakdown = collections.defaultdict(float)
+        all_products = await db["products"].find({}).to_list(length=1000)
+        prod_to_cat = {p["name"]: p["category"] for p in all_products}
+        
         for o in orders:
             is_paid = o.get("paymentStatus") == "Paid"
+            is_pending = o.get("paymentStatus") == "Pending"
+            is_cancelled = o.get("status") == "Cancelled"
+            
+            # Payment Method Inference (Simple version: Presence of transaction ID = Prepaid)
+            is_cod = not o.get("merchantTransactionId")
+            
             has_category_item = False
             order_category_revenue = 0
             
             for item in o.get("items", []):
-                if category == "all" or item.get("name") in target_product_names:
+                item_name = item.get("name")
+                item_cat = prod_to_cat.get(item_name, "Uncategorized")
+                item_revenue = item.get("price", 0) * item.get("quantity", 1)
+                
+                # Global Category Breakdown
+                if is_paid and not is_cancelled:
+                    cat_revenue_breakdown[item_cat] += item_revenue
+
+                # Filtered Category Logic
+                if category == "all" or item_name in target_product_names:
                     has_category_item = True
                     if is_paid:
-                        order_category_revenue += item.get("price", 0) * item.get("quantity", 1)
+                        order_category_revenue += item_revenue
             
             if has_category_item:
                 filtered_orders_count += 1
                 total_revenue += order_category_revenue
-        
+                
+                if not is_cancelled:
+                    status_dist[o.get("status", "Processing")] += 1
+                    if is_paid:
+                        payment_received += order_category_revenue
+                        prepaid_count += 1
+                    elif is_pending:
+                        payment_pending += order_category_revenue
+                        if is_cod: cod_count += 1
+                        else: prepaid_count += 1 # Failed or pending online payment
+
+        # AOV (Average Order Value)
+        aov = (total_revenue / filtered_orders_count) if filtered_orders_count > 0 else 0
         conversion_rate = (filtered_orders_count / total_users_count * 100) if total_users_count > 0 else 0
         
         growth_multiplier = 1.0
@@ -94,14 +135,34 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
                 "value": round(conversion_rate, 2),
                 "change": 2.1,
                 "trend": "up"
+            },
+            "aov": {
+                "value": round(aov, 0),
+                "change": 5.4,
+                "trend": "up"
             }
         }
         
+        # Format Category Breakdown for Recharts
+        category_revenue = [
+            {"name": cat.title(), "revenue": rev} 
+            for cat, rev in sorted(cat_revenue_breakdown.items(), key=lambda x: x[1], reverse=True)[:5]
+        ]
+        
+        # Financials Object
+        financials = {
+            "prepaidOrders": prepaid_count,
+            "codOrders": cod_count,
+            "received": payment_received,
+            "pending": payment_pending,
+            "codRevenue": sum(o.get("totalAmount", 0) for o in orders if not o.get("merchantTransactionId") and o.get("paymentStatus") == "Pending" and o.get("status") != "Cancelled")
+        }
+
         # 3. Revenue Overview
         revenue_map = collections.defaultdict(float)
         months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
         
-        for o in [o for o in orders if o.get("paymentStatus") == "Paid"]:
+        for o in [o for o in orders if o.get("paymentStatus") == "Paid" and o.get("status") != "Cancelled"]:
             try:
                 dt = datetime.fromisoformat(o["createdAt"].replace("Z", "+00:00"))
                 
@@ -181,12 +242,15 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
             recent_orders.append({
                 "customer": o.get("userMobile", "Guest"),
                 "product": display_item.get("name", "Unknown"),
-                "amount": o.get("totalAmount", 0), # Total order amount or category subtotal? Usually total amount is displayed in transaction lists
+                "amount": o.get("totalAmount", 0),
                 "status": o.get("status", "Processing")
             })
 
         return {
             "summary": summary,
+            "financials": financials,
+            "statusDistribution": [{"name": k, "value": v} for k, v in status_dist.items()],
+            "categoryRevenue": category_revenue,
             "revenueTrend": revenue_trend,
             "profitExpenses": profit_expenses,
             "topProducts": top_products,
