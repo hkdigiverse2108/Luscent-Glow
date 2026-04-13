@@ -140,7 +140,7 @@ const Orders = () => {
   };
 
   const handleCancelOrder = async (orderId: string, orderNumber: string) => {
-    if (!window.confirm(`Are you sure you want to cancel ritual #${orderNumber}? This action cannot be undone.`)) {
+    if (!window.confirm(`Are you sure you want to cancel order #${orderNumber}? This action cannot be undone.`)) {
       return;
     }
 
@@ -203,16 +203,16 @@ const Orders = () => {
             <div className="w-8 h-8 rounded-full border border-border flex items-center justify-center group-hover:border-gold group-hover:bg-gold/5 transition-all">
               <ChevronLeft size={16} />
             </div>
-            Back to Sanctuary
+            Back to Account
           </button>
 
           {/* Professional Header Section */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div className="space-y-1">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-medium text-charcoal tracking-tight">
-                Your <span className="text-gold italic font-light">Orders</span>
+                My <span className="text-gold italic font-light">Orders</span>
               </h1>
-              <p className="text-[10px] md:text-xs text-muted-foreground uppercase font-bold tracking-[0.4em] opacity-60">Track and manage your rituals</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground uppercase font-bold tracking-[0.4em] opacity-60">Manage your recent purchases</p>
             </div>
 
             <div className="relative w-full md:w-80">
@@ -286,17 +286,6 @@ const Orders = () => {
                                   <span className="flex items-center gap-1"><Package size={14} /> Qty: {item.quantity}</span>
                                   <span className="text-charcoal font-bold">₹{item.price.toLocaleString()}</span>
                                 </div>
-                                {order.status === "Delivered" && (
-                                  <button 
-                                    onClick={() => handleOpenReview(item, order.orderNumber)}
-                                    className={`text-[10px] font-bold uppercase tracking-widest transition-colors flex items-center gap-1 mt-1 ${
-                                      hasReview ? "text-gold hover:text-charcoal" : "text-muted-foreground hover:text-gold"
-                                    }`}
-                                  >
-                                    <Star size={12} className={hasReview ? "fill-gold" : ""} /> 
-                                    {hasReview ? "Edit Review" : "Review Item"}
-                                  </button>
-                                )}
                               </div>
                             </div>
                           );
@@ -340,6 +329,21 @@ const Orders = () => {
                           Order Details
                         </button>
                         
+                        {order.status === "Delivered" && (
+                          <button 
+                            onClick={() => {
+                              // Automatically open review for the first item
+                              if (order.items.length > 0) {
+                                handleOpenReview(order.items[0], order.orderNumber);
+                              }
+                            }}
+                            className="w-full py-3 bg-gold/5 border border-gold/30 text-gold text-[10px] font-bold rounded-xl hover:bg-gold hover:text-white transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-[0.2em]"
+                          >
+                            <Star size={14} />
+                            Review Items
+                          </button>
+                        )}
+                        
                         {(order.status === "Processing" || order.status === "Quality Check") && (
                           <button 
                             onClick={() => handleCancelOrder(order.id, order.orderNumber)}
@@ -369,7 +373,7 @@ const Orders = () => {
                 <Archive size={40} />
               </div>
               <h2 className="text-2xl font-display font-bold text-charcoal mb-2">No Orders Found</h2>
-              <p className="text-sm text-muted-foreground mb-8">You haven't placed any orders with this ritual yet.</p>
+              <p className="text-sm text-muted-foreground mb-8">You haven't placed any orders yet.</p>
               <button 
                 onClick={() => navigate("/products")}
                 className="px-10 py-3.5 bg-charcoal text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gold transition-all"
