@@ -18,13 +18,19 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
+    const basePrice = (product.variants && product.variants.length > 0) 
+      ? product.variants[0].price 
+      : product.price;
+
     addItem({
       id: productId,
       name: product.name,
-      price: product.price,
+      price: basePrice,
       image: product.image,
       category: product.category,
-      quantity: 1
+      quantity: 1,
+      selectedShade: product.variants?.[0]?.color,
+      selectedSize: product.variants?.[0]?.size,
     });
     
     // Remove from wishlist if it is wishlisted
@@ -128,9 +134,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Price */}
         <div className="flex items-baseline gap-2">
-          <span className="font-body text-lg font-bold text-charcoal tracking-tight">
-            ₹{(product.price ?? 0).toLocaleString()}
-          </span>
+           <div className="flex flex-col">
+              {product.variants && product.variants.length > 1 && (
+                <span className="text-[9px] font-body font-bold text-gold/60 uppercase tracking-widest leading-none mb-1">Starting from</span>
+              )}
+              <span className="font-body text-lg font-bold text-charcoal tracking-tight">
+                ₹{(product.price ?? 0).toLocaleString()}
+              </span>
+           </div>
           {product.originalPrice && (
             <span className="text-sm text-muted-foreground line-through font-body">
               ₹{(product.originalPrice).toLocaleString()}
