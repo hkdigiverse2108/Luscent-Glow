@@ -203,7 +203,6 @@ const AdminProducts = () => {
                    <th className="px-4 py-2 min-w-[300px] font-extrabold uppercase tracking-[0.3em]">Product</th>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Brand</th>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Category</th>
-                   <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Pricing</th>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Performance</th>
                    <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Status</th>
                    <th className="px-6 py-6 text-right pr-12 font-extrabold uppercase tracking-[0.3em]">Actions</th>
@@ -218,7 +217,6 @@ const AdminProducts = () => {
                       <td className="px-4 py-1.5"><div className="h-14 w-48 bg-white/5 rounded-xl" /></td>
                       <td className="px-4 py-1.5"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
                       <td className="px-4 py-1.5"><div className="h-6 w-24 bg-white/5 rounded-lg" /></td>
-                      <td className="px-4 py-1.5"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
                       <td className="px-4 py-1.5"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
                       <td className="px-4 py-1.5"><div className="h-6 w-16 bg-white/5 rounded-lg" /></td>
                       <td className="px-4 py-1.5"><div className="h-10 w-10 ml-auto bg-white/5 rounded-full" /></td>
@@ -261,28 +259,7 @@ const AdminProducts = () => {
                              {p.category}
                           </span>
                        </td>
-                       <td className="px-4 py-1.5">
-                          <div className="space-y-2">
-                             <div className={`font-display text-2xl font-bold italic ${isDark ? "text-white" : "text-charcoal"}`}>
-                                ₹{p.price}
-                             </div>
-                             {p.originalPrice && (
-                               <div className="flex items-center gap-3">
-                                 <span className="text-[14px] font-bold line-through opacity-60">₹{p.originalPrice}</span>
-                                 <span className="text-[14px] font-extrabold text-rose-500">-{p.discount}%</span>
-                               </div>
-                             )}
-                             {p.appliedPromotionId && (
-                               <div className="flex items-center gap-2 mt-1 px-2 py-0.5 bg-gold/10 border border-gold/20 rounded-lg w-fit">
-                                 <Zap size={10} className="text-gold fill-gold" />
-                                 <span className="text-[10px] font-black uppercase tracking-widest text-gold whitespace-nowrap">
-                                   {promotions.find(promo => promo._id === p.appliedPromotionId)?.discountText || "OFFER"}
-                                 </span>
-                               </div>
-                             )}
-                          </div>
-                       </td>
-                       <td className="px-4 py-1.5">
+                        <td className="px-4 py-1.5">
                           <div className="space-y-2">
                              <div className="flex items-center gap-2 text-gold">
                                 <span className="text-lg font-bold">{p.rating}</span>
@@ -330,7 +307,7 @@ const AdminProducts = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className={`px-8 py-24 text-center font-body text-base uppercase tracking-widest italic transition-colors ${
+                    <td colSpan={6} className={`px-8 py-24 text-center font-body text-base uppercase tracking-widest italic transition-colors ${
                       isDark ? "text-white/40" : "text-charcoal/70"
                     }`}>
                       No products found in the database.
