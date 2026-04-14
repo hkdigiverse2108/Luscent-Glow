@@ -165,14 +165,27 @@ const Header = () => {
           scrolled ? "bg-background/95 backdrop-blur-md shadow-sm" : "bg-background"
         }`}
       >
-        {/* Top bar */}
-        <div className="bg-primary text-primary-foreground text-[8px] md:text-[10px] lg:text-xs py-2 px-2 md:px-4 text-center tracking-widest uppercase font-body relative group/banner overflow-hidden">
-          <div className="flex items-center justify-center gap-x-2 gap-y-1 flex-wrap md:gap-4 animate-in fade-in slide-in-from-top-1 duration-500">
-            <span>Free Shipping Above ₹{globalSettings.freeShippingThreshold}</span>
-            <span className="hidden xs:inline opacity-40">|</span>
-            <span>{globalSettings.promoText} <span className="text-gold font-semibold">{globalSettings.promoCode}</span></span>
-            <span className="hidden sm:inline opacity-40">|</span>
-            <Link to="/quiz" className="hidden sm:inline text-gold font-bold hover:text-white transition-colors">Find Your Glow</Link>
+        {/* Top bar - Scrolling Marquee */}
+        <div className="bg-primary text-primary-foreground text-[8px] md:text-[10px] lg:text-xs py-2 px-2 md:px-4 tracking-[0.3em] uppercase font-body relative group/banner overflow-hidden whitespace-nowrap">
+          <div className="animate-marquee flex items-center">
+            {/* Main Content Set */}
+            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12">
+              <span>Free Shipping Above ₹{globalSettings.freeShippingThreshold}</span>
+              <span className="opacity-40">|</span>
+              <span>{globalSettings.promoText} <span className="text-gold font-semibold">{globalSettings.promoCode}</span></span>
+            </div>
+            {/* Duplicate for Seamless Loop */}
+            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12">
+              <span>Free Shipping Above ₹{globalSettings.freeShippingThreshold}</span>
+              <span className="opacity-40">|</span>
+              <span>{globalSettings.promoText} <span className="text-gold font-semibold">{globalSettings.promoCode}</span></span>
+            </div>
+            {/* Triplicate to ensure full screen coverage on ultra-wide */}
+            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12">
+              <span>Free Shipping Above ₹{globalSettings.freeShippingThreshold}</span>
+              <span className="opacity-40">|</span>
+              <span>{globalSettings.promoText} <span className="text-gold font-semibold">{globalSettings.promoCode}</span></span>
+            </div>
           </div>
         </div>
         {/* Main header */}
@@ -485,10 +498,11 @@ const Header = () => {
                      </button>
                   )}
                   <Link
-                    to="/products"
-                    className="text-sm font-body font-bold text-gold hover:text-gold/80 transition-all tracking-wide uppercase px-4 py-2 bg-gold/5 rounded-full border border-gold/20"
+                    to="/quiz"
+                    className="flex items-center gap-2 text-xs font-body font-black text-white px-5 py-2 bg-charcoal rounded-full border border-charcoal hover:bg-gold hover:border-gold transition-all tracking-widest uppercase shadow-lg shadow-charcoal/10"
                   >
-                    All Products
+                    <Sparkles size={12} className="text-gold" />
+                    Find Your Glow
                   </Link>
                 </div>
               </div>
