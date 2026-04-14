@@ -614,17 +614,14 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            <button 
-              onClick={handleBuyNow}
-              disabled={isOutOfStock}
-              className={`w-full py-4 font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl active:scale-95 ${
-                isOutOfStock
-                  ? "bg-secondary/50 text-muted-foreground cursor-not-allowed border border-border/50"
-                  : "bg-gold text-primary hover:bg-gold/90 shadow-gold/20"
-              }`}
-            >
-              {isOutOfStock ? "NOTIFY ME WHEN AVAILABLE" : "Buy Now"}
-            </button>
+            {!isOutOfStock && (
+              <button 
+                onClick={handleBuyNow}
+                className="w-full py-4 bg-gold text-primary font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-gold/90 transition-all shadow-xl shadow-gold/20 active:scale-95"
+              >
+                Buy Now
+              </button>
+            )}
 
             {/* Policies */}
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
