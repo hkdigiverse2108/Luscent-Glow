@@ -281,6 +281,11 @@ const ProductDetail = () => {
     ? Math.round((activeVariant?.price || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
     : null;
 
+  // Stock status logic
+  const stockCount = activeVariant ? (activeVariant.stock ?? 0) : 10; // Default to 10 if no variant (unmanaged)
+  const isOutOfStock = activeVariant ? stockCount === 0 : false;
+  const isLowStock = !isOutOfStock && stockCount > 0 && stockCount <= 5;
+
   const handleAddToCart = () => {
     if (!product) return;
     addItem({
@@ -447,28 +452,38 @@ const ProductDetail = () => {
               </span>
             </div>
 
-            {/* Price */}
-            <div className="flex items-baseline gap-3 flex-wrap">
-              {promoPrice ? (
-                <>
-                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(promoPrice ?? 0).toLocaleString()}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(displayOriginalPrice || displayPrice || 0).toLocaleString()}</span>
-                    <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{parseDiscount(appliedPromotion?.discountText ?? "0")}% OFF</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(displayPrice ?? 0).toLocaleString()}</span>
-                  {displayOriginalPrice && displayOriginalPrice > (displayPrice ?? 0) && (
+            {/* Price section with Stock Badge */}
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-baseline gap-3 flex-wrap">
+                {promoPrice ? (
+                  <>
+                    <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(promoPrice ?? 0).toLocaleString()}</span>
                     <div className="flex items-center gap-2">
-                      <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{displayOriginalPrice.toLocaleString()}</span>
-                      {displayDiscount && displayDiscount > 0 && (
-                        <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{displayDiscount}% OFF</span>
-                      )}
+                      <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(displayOriginalPrice || displayPrice || 0).toLocaleString()}</span>
+                      <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{parseDiscount(appliedPromotion?.discountText ?? "0")}% OFF</span>
                     </div>
-                  )}
-                </>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(displayPrice ?? 0).toLocaleString()}</span>
+                    {displayOriginalPrice && displayOriginalPrice > (displayPrice ?? 0) && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{displayOriginalPrice.toLocaleString()}</span>
+                        {displayDiscount && displayDiscount > 0 && (
+                          <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{displayDiscount}% OFF</span>
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Status Badge */}
+              {isOutOfStock && (
+                <div className="px-4 py-1.5 rounded-full bg-rose/10 border border-rose/20 backdrop-blur-md flex items-center gap-2 animate-pulse-slow">
+                  <div className="w-1.5 h-1.5 rounded-full bg-rose" />
+                  <span className="text-[10px] font-bold text-rose uppercase tracking-[0.1em]">OUT OF STOCK</span>
+                </div>
               )}
             </div>
 
@@ -544,23 +559,47 @@ const ProductDetail = () => {
               </div>
             )}
 
-            {/* Quantity + Add to cart */}
+            {/* Low Stock Indicator */}
+            {isLowStock && (
+              <div className="bg-gold/5 border border-gold/10 p-4 rounded-2xl flex items-center gap-4 transition-all hover:bg-gold/10">
+                <div className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center shrink-0">
+                  <Clock size={18} className="text-gold" />
+                </div>
+                <div>
+                  <p className="text-xs font-body font-bold text-gold uppercase tracking-[0.1em]">Limited Supply</p>
+                  <p className="text-sm font-body text-muted-foreground">Only {stockCount} items left in the sanctuary. Complete your ritual before they vanish.</p>
+                </div>
+              </div>
+            )}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-              <div className="flex items-center justify-between border border-border rounded-xl bg-secondary/30">
-                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-4 text-muted-foreground hover:text-foreground transition-colors">
+              <div className={`flex items-center justify-between border border-border rounded-xl bg-secondary/30 ${isOutOfStock ? 'opacity-30 pointer-events-none' : ''}`}>
+                <button 
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))} 
+                  disabled={isOutOfStock}
+                  className="p-4 text-muted-foreground hover:text-foreground transition-colors disabled:cursor-not-allowed"
+                >
                   <Minus size={16} />
                 </button>
-                <span className="px-6 text-base font-body font-bold">{quantity}</span>
-                <button onClick={() => setQuantity(quantity + 1)} className="p-4 text-muted-foreground hover:text-foreground transition-colors">
+                <span className="px-6 text-base font-body font-bold">{isOutOfStock ? 0 : quantity}</span>
+                <button 
+                  onClick={() => setQuantity(quantity + 1)} 
+                  disabled={isOutOfStock}
+                  className="p-4 text-muted-foreground hover:text-foreground transition-colors disabled:cursor-not-allowed"
+                >
                   <Plus size={16} />
                 </button>
               </div>
               <div className="flex items-center gap-3 flex-1">
                 <button 
                   onClick={handleAddToCart}
-                  className="flex-1 flex items-center justify-center gap-2 py-4 bg-primary text-primary-foreground font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-gold transition-all shadow-xl shadow-primary/10 active:scale-95"
+                  disabled={isOutOfStock}
+                  className={`flex-1 flex items-center justify-center gap-2 py-4 font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl active:scale-95 ${
+                    isOutOfStock 
+                      ? "bg-secondary text-muted-foreground cursor-not-allowed shadow-none" 
+                      : "bg-primary text-primary-foreground hover:bg-gold shadow-primary/10"
+                  }`}
                 >
-                  <ShoppingBag size={18} /> Add to Cart
+                  <ShoppingBag size={18} /> {isOutOfStock ? "Out of Stock" : "Add to Cart"}
                 </button>
                 <button 
                   onClick={() => product && toggleWishlist(product)}
@@ -575,9 +614,14 @@ const ProductDetail = () => {
 
             <button 
               onClick={handleBuyNow}
-              className="w-full py-4 bg-gold text-primary font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-gold/90 transition-all shadow-xl shadow-gold/20 active:scale-95"
+              disabled={isOutOfStock}
+              className={`w-full py-4 font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl active:scale-95 ${
+                isOutOfStock
+                  ? "bg-secondary/50 text-muted-foreground cursor-not-allowed border border-border/50"
+                  : "bg-gold text-primary hover:bg-gold/90 shadow-gold/20"
+              }`}
             >
-              Buy Now
+              {isOutOfStock ? "NOTIFY ME WHEN AVAILABLE" : "Buy Now"}
             </button>
 
             {/* Policies */}

@@ -19,6 +19,10 @@ const parseDiscount = (text: string): number => {
 const ProductCard = ({ product, promotion }: ProductCardProps) => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addItem } = useCart();
+  
+  const isAllOutOfStock = (product.variants && product.variants.length > 0)
+    ? product.variants.every(v => (v.stock ?? 0) === 0)
+    : false;
   const { productId, currentPrice, originalPrice, discountPercent } = (() => {
     const id = product._id || product.id;
     
@@ -82,7 +86,12 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
     >
       {/* Badges */}
       <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
-        {product.isNew && (
+        {isAllOutOfStock && (
+          <span className="px-2.5 py-0.5 bg-rose text-white text-[10px] font-body font-black uppercase tracking-widest rounded-full shadow-lg shadow-rose/20 animate-pulse-slow border border-white/20">
+            Sold Out
+          </span>
+        )}
+        {product.isNew && !isAllOutOfStock && (
           <span className="px-2.5 py-0.5 bg-gold text-primary-foreground text-[10px] font-body font-bold uppercase tracking-wider rounded-full">
             New
           </span>
@@ -129,14 +138,23 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
           {/* Quick Add Overlay */}
-          <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-            <button 
-              onClick={handleQuickAdd}
-              className="w-full py-2 bg-primary/90 backdrop-blur-md text-primary-foreground text-[10px] font-body font-bold uppercase tracking-widest rounded-xl hover:bg-gold transition-colors shadow-2xl"
-            >
-              Quick Add to Cart
-            </button>
-          </div>
+          {!isAllOutOfStock && (
+            <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+              <button 
+                onClick={handleQuickAdd}
+                className="w-full py-2 bg-primary/90 backdrop-blur-md text-primary-foreground text-[10px] font-body font-bold uppercase tracking-widest rounded-xl hover:bg-gold transition-colors shadow-2xl"
+              >
+                Quick Add to Cart
+              </button>
+            </div>
+          )}
+          {isAllOutOfStock && (
+            <div className="absolute inset-0 bg-secondary/40 backdrop-blur-[2px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+               <span className="px-4 py-2 bg-rose text-white text-[10px] font-black uppercase tracking-widest rounded-full shadow-2xl">
+                 Currently Unavailable
+               </span>
+            </div>
+          )}
         </div>
       </Link>
 
