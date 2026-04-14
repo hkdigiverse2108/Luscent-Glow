@@ -25,23 +25,21 @@ async def list_products(category: Optional[str] = Query(None)):
 
 @router.get("/recommend", response_description="Get ritual recommendations", response_model=List[ProductModel])
 async def recommend_ritual(
-    skinType: Optional[str] = Query(None),
-    concern: Optional[str] = Query(None)
+    tags: Optional[str] = Query(None)
 ):
+    """
+    Dynamically recommends products based on a list of tags.
+    """
     db = await get_database()
     query = {}
     
-    # Map quiz options to DB tags
-    tags = []
-    if skinType == "dry": tags.append("hydration")
-    if skinType == "oily": tags.append("matte")
-    if concern == "glow": tags.append("vitamin-c")
-    if concern == "aging": tags.append("anti-aging")
-    if concern == "acne": tags.append("repair")
-    
     if tags:
-        query["tags"] = {"$in": tags}
-        
+        # Split comma-separated tags and filter out empty strings
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+        if tag_list:
+            # Match products that have ANY of the selected ritual tags
+            query["tags"] = {"$in": tag_list}
+            
     products_list = await db["products"].find(query).to_list(3)
     
     # Fallback if no specific tags found

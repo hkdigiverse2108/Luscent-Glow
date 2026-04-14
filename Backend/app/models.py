@@ -1007,3 +1007,42 @@ class UpdateCouponModel(BaseModel):
     expiryDate: Optional[str] = None
     description: Optional[str] = None
     isActive: Optional[bool] = None
+
+class QuizSubmissionModel(BaseModel):
+    """
+    Model for Radiance Ritual Consultation (Skin Quiz) results.
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    skinType: str
+    concern: str
+    routine: str
+    recommendedProductIds: List[str] = Field(default_factory=list)
+    userName: Optional[str] = Field(default="Anonymous")
+    userEmail: Optional[str] = Field(default=None)
+    createdAt: str # ISO String
+
+    class Config:
+        populate_by_name = True
+
+class QuizOptionModel(BaseModel):
+    """
+    Sub-schema for individual quiz options with recommendation mapping.
+    """
+    id: str
+    label: str
+    sub: Optional[str] = None
+    icon: Optional[str] = None
+    recommendedTag: Optional[str] = None
+
+class QuizStepModel(BaseModel):
+    """
+    Model for dynamic Consultation steps (questions).
+    """
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    stepId: str # e.g. "skinType"
+    question: str
+    options: List[QuizOptionModel]
+    order: int
+
+    class Config:
+        populate_by_name = True

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Sparkles, Check, ChevronLeft, RefreshCw, ShoppingBag, Heart } from "lucide-react";
+import { ArrowRight, Sparkles, Check, ChevronLeft, RefreshCw, ShoppingBag, Heart, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -9,49 +9,35 @@ import { products, Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 
-const steps = [
-  {
-    id: "skinType",
-    question: "How would you describe your current skin state?",
-    options: [
-      { id: "dry", label: "Dry & Dehydrated", sub: "Feels tight, looks dull", icon: "💧" },
-      { id: "oily", label: "Oily & Shiny", sub: "Excess sebum, enlarged pores", icon: "✨" },
-      { id: "combination", label: "Combination", sub: "Oily T-zone, dry cheeks", icon: "🌓" },
-      { id: "sensitive", label: "Sensitive", sub: "Prone to redness, reactive", icon: "🌸" }
-    ]
-  },
-  {
-    id: "concern",
-    question: "What is your primary focus at the moment?",
-    options: [
-      { id: "glow", label: "Radiance & Glow", sub: "Revive tired, dull complexion", icon: "✨" },
-      { id: "aging", label: "Aging Gracefully", sub: "Fine lines, loss of firmness", icon: "⏳" },
-      { id: "acne", label: "Clarifying", sub: "Blemishes, texture, congestion", icon: "🧼" },
-      { id: "recovery", label: "Barrier Recovery", sub: "Soothing, deep nourishment", icon: "🛡️" }
-    ]
-  },
-  {
-    id: "routine",
-    question: "What is your preferred ritual style?",
-    options: [
-      { id: "minimal", label: "The Minimalist", sub: "3 essential steps max", icon: "⚪" },
-      { id: "balanced", label: "Golden Balance", sub: "The perfect 5-step flow", icon: "🌅" },
-      { id: "luxury", label: "The Maximalist", sub: "Full 10-step immersion", icon: "💎" }
-    ]
-  }
-];
-
 const RadianceQuiz = () => {
+  const [steps, setSteps] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isFinished, setIsFinished] = useState(false);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
+  useEffect(() => {
+    const loadSteps = async () => {
+      try {
+        const res = await fetch("/api/quiz/steps");
+        if (res.ok) {
+          const data = await res.json();
+          setSteps(data);
+        }
+      } catch (err) {
+        console.error("Failed to load quiz steps:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadSteps();
+  }, []);
+
   const handleOptionSelect = (optionId: string) => {
-    setAnswers({ ...answers, [steps[currentStep].id]: optionId });
+    setAnswers({ ...answers, [steps[currentStep].stepId]: optionId });
     if (currentStep < steps.length - 1) {
       setTimeout(() => setCurrentStep(currentStep + 1), 300);
     } else {
@@ -61,11 +47,16 @@ const RadianceQuiz = () => {
 
   useEffect(() => {
     const fetchRecommendations = async () => {
-      if (!isFinished) return;
+      if (!isFinished || steps.length === 0) return;
       try {
         setLoading(true);
-        const params = new URLSearchParams(answers);
-        const response = await fetch(`/api/products/recommend?${params.toString()}`);
+        // Extract tags from selected answers
+        const selectedTags = steps.map(step => {
+          const selId = answers[step.stepId];
+          return step.options.find((o: any) => o.id === selId)?.recommendedTag;
+        }).filter(t => !!t);
+
+        const response = await fetch(`/api/products/recommend?tags=${selectedTags.join(",")}`);
         if (response.ok) {
           const data = await response.json();
           setRecommendations(data);
@@ -77,7 +68,41 @@ const RadianceQuiz = () => {
       }
     };
     fetchRecommendations();
-  }, [isFinished, answers]);
+  }, [isFinished, answers, steps]);
+
+  useEffect(() => {
+    const submitConsultation = async () => {
+      if (!isFinished || recommendations.length === 0) return;
+      
+      const userStr = localStorage.getItem("user");
+      let userData = null;
+      if (userStr && userStr !== "undefined") {
+        try { userData = JSON.parse(userStr); } catch (e) {}
+      }
+
+      const submissionData = {
+        skinType: answers.skinType,
+        concern: answers.concern,
+        routine: answers.routine,
+        recommendedProductIds: recommendations.map(p => p._id || p.id),
+        userName: userData?.name || "Anonymous Visitor",
+        userEmail: userData?.email || null,
+        createdAt: new Date().toISOString()
+      };
+
+      try {
+        await fetch("/api/quiz/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(submissionData)
+        });
+      } catch (err) {
+        console.error("Error submitting consultation:", err);
+      }
+    };
+
+    submitConsultation();
+  }, [isFinished, recommendations]);
 
   return (
     <div className="min-h-screen bg-[#faf9f6]">
@@ -85,64 +110,76 @@ const RadianceQuiz = () => {
       <main className="container mx-auto px-4 py-12 lg:py-20">
         <div className="max-w-4xl mx-auto">
           {!isFinished ? (
-            <div className="space-y-12">
-              <div className="text-center space-y-4 md:space-y-6">
-                <p className="text-[10px] md:text-xs font-body font-bold text-gold uppercase tracking-[0.3em]">Radiance Ritual Consultation</p>
-                <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-light text-foreground italic px-4">Find Your Personalized Glow</h1>
-                <div className="w-full h-1 bg-secondary rounded-full overflow-hidden max-w-[200px] md:max-w-xs mx-auto mt-6 md:mt-8">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                    className="h-full bg-gold shadow-[0_0_10px_rgba(182,143,76,0.3)]"
-                  />
-                </div>
+            loading ? (
+              <div className="py-40 text-center space-y-4">
+                <RefreshCw size={40} className="animate-spin text-gold/30 mx-auto mb-4" />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold/60">Preparing Your Consultation...</p>
               </div>
-
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="space-y-8"
-                >
-                  <h2 className="font-display text-xl sm:text-2xl lg:text-3xl text-center text-foreground font-light mb-8 md:mb-10 px-4">
-                    {steps[currentStep].question}
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {steps[currentStep].options.map((option) => (
-                      <button
-                        key={option.id}
-                        onClick={() => handleOptionSelect(option.id)}
-                        className={`group p-5 md:p-6 rounded-2xl md:rounded-3xl border text-left transition-all duration-500 hover:shadow-ethereal flex items-center gap-4 md:gap-5 ${
-                          answers[steps[currentStep].id] === option.id 
-                            ? "bg-primary text-primary-foreground border-primary" 
-                            : "bg-white border-gold/10 text-foreground hover:border-gold/30 hover:bg-gold/5"
-                        }`}
-                      >
-                        <span className="text-2xl md:text-3xl filter grayscale group-hover:grayscale-0 transition-all">{option.icon}</span>
-                        <div>
-                          <p className="font-body font-bold text-[10px] md:text-sm tracking-widest mb-0.5 md:mb-1 uppercase">{option.label}</p>
-                          <p className="text-[10px] md:text-xs opacity-60 italic">{option.sub}</p>
-                        </div>
-                        {answers[steps[currentStep].id] === option.id && <Check className="ml-auto text-gold" size={20} />}
-                      </button>
-                    ))}
+            ) : steps.length > 0 ? (
+              <div className="space-y-12">
+                <div className="text-center space-y-4 md:space-y-6">
+                  <p className="text-[10px] md:text-xs font-body font-bold text-gold uppercase tracking-[0.3em]">Radiance Ritual Consultation</p>
+                  <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-light text-foreground italic px-4">Find Your Personalized Glow</h1>
+                  <div className="w-full h-1 bg-secondary rounded-full overflow-hidden max-w-[200px] md:max-w-xs mx-auto mt-6 md:mt-8">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      animate={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                      className="h-full bg-gold shadow-[0_0_10px_rgba(182,143,76,0.3)]"
+                    />
                   </div>
-                </motion.div>
-              </AnimatePresence>
-
-              {currentStep > 0 && (
-                <div className="text-center">
-                  <button 
-                    onClick={() => setCurrentStep(currentStep - 1)}
-                    className="text-xs font-body font-bold uppercase tracking-widest text-muted-foreground hover:text-gold flex items-center gap-2 mx-auto"
-                  >
-                    <ChevronLeft size={14} /> Back to Previous
-                  </button>
                 </div>
-              )}
-            </div>
+
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={currentStep}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-8"
+                  >
+                    <h2 className="font-display text-xl sm:text-2xl lg:text-3xl text-center text-foreground font-light mb-8 md:mb-10 px-4">
+                      {steps[currentStep]?.question}
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {steps[currentStep]?.options.map((option: any) => (
+                        <button
+                          key={option.id}
+                          onClick={() => handleOptionSelect(option.id)}
+                          className={`group p-5 md:p-6 rounded-2xl md:rounded-3xl border text-left transition-all duration-500 hover:shadow-ethereal flex items-center gap-4 md:gap-5 ${
+                            answers[steps[currentStep].stepId] === option.id 
+                              ? "bg-primary text-primary-foreground border-primary" 
+                              : "bg-white border-gold/10 text-foreground hover:border-gold/30 hover:bg-gold/5"
+                          }`}
+                        >
+                          <span className="text-2xl md:text-3xl filter grayscale group-hover:grayscale-0 transition-all">{option.icon}</span>
+                          <div>
+                            <p className="font-body font-bold text-[10px] md:text-sm tracking-widest mb-0.5 md:mb-1 uppercase">{option.label}</p>
+                            <p className="text-[10px] md:text-xs opacity-60 italic">{option.sub}</p>
+                          </div>
+                          {answers[steps[currentStep].stepId] === option.id && <Check className="ml-auto text-gold" size={20} />}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+
+                {currentStep > 0 && (
+                  <div className="text-center">
+                    <button 
+                      onClick={() => setCurrentStep(currentStep - 1)}
+                      className="text-xs font-body font-bold uppercase tracking-widest text-muted-foreground hover:text-gold flex items-center gap-2 mx-auto"
+                    >
+                      <ChevronLeft size={14} /> Back to Previous
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="py-20 text-center space-y-6">
+                <AlertCircle size={48} className="text-gold/20 mx-auto" />
+                <p className="font-display italic text-muted-foreground">The consultation is momentarily unavailable. Please try again later.</p>
+              </div>
+            )
           ) : (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }}
