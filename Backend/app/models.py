@@ -17,6 +17,7 @@ class ProductVariant(BaseModel):
     stock: Optional[int] = Field(default=0)
     sku: Optional[str] = Field(default=None)
     appliedPromotionId: Optional[str] = Field(default=None)
+    image: Optional[str] = Field(default=None)
 
 class SEOModel(BaseModel):
     """

@@ -23,7 +23,8 @@ import {
   AlertCircle,
   Image as ImageIcon,
   ArrowLeft,
-  Gift
+  Gift,
+  ShieldCheck
 } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
@@ -71,6 +72,8 @@ const AdminUsers = () => {
     }
   });
 
+  // ─── Utility Functions ──────────────────────────────────────────────────
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -108,17 +111,6 @@ const AdminUsers = () => {
     }
   };
 
-  useEffect(() => {
-    if (adminAuthPassword.length > 0 && !isAdminVerified && !verifyingAdmin) {
-      const timer = setTimeout(() => {
-        handleAutoVerifyAdminAction();
-      }, 800);
-      return () => clearTimeout(timer);
-    } else if (adminAuthPassword.length === 0) {
-      setAdminAuthError("");
-    }
-  }, [adminAuthPassword]);
-
   const handleAutoVerifyAdminAction = async () => {
     if (!adminUser || !adminAuthPassword) return;
     
@@ -147,6 +139,19 @@ const AdminUsers = () => {
       setVerifyingAdmin(false);
     }
   };
+
+  // ─── Effects ─────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (adminAuthPassword.length > 0 && !isAdminVerified && !verifyingAdmin) {
+      const timer = setTimeout(() => {
+        handleAutoVerifyAdminAction();
+      }, 800);
+      return () => clearTimeout(timer);
+    } else if (adminAuthPassword.length === 0) {
+      setAdminAuthError("");
+    }
+  }, [adminAuthPassword]);
 
   useEffect(() => {
     fetchUsers();

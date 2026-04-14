@@ -1,5 +1,6 @@
 import React from "react";
-import { Plus, LucideIcon, Sun, Moon, LogOut } from "lucide-react";
+import { Plus, Sun, Moon, LogOut } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { useAuth } from "../../context/AuthContext.tsx";
 

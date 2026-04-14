@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Sparkles, Image as ImageIcon, Info, Plus, Trash2, Zap } from "lucide-react";
+import { X, Save, Sparkles, Image as ImageIcon, Info, Plus, Trash2, Zap, Camera } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -63,31 +63,55 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     reader.readAsDataURL(file);
   };
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch(getApiUrl("/api/categories/"));
-        if (response.ok) {
-          const data = await response.json();
-          if (data.length > 0) setDynamicCategories(data);
-        }
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    };
-    fetchCategories();
+  const handleVariantFileUpload = (variantId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    const fetchPromotions = async () => {
-      try {
-        const response = await fetch(getApiUrl("/api/promotions/"));
-        if (response.ok) {
-          const data = await response.json();
-          setAvailablePromotions(data);
-        }
-      } catch (err) {
-        console.error("Error fetching promotions:", err);
-      }
+    const reader = new FileReader();
+    reader.onloadstart = () => setIsUploading(true);
+    reader.onload = (event) => {
+      const base64String = event.target?.result as string;
+      updateVariant(variantId, "image", base64String);
+      setIsUploading(false);
+      toast.success("Variant image added.");
     };
+    reader.onerror = () => {
+      setIsUploading(false);
+      toast.error("Failed to process variant image.");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ─── Utility Functions ──────────────────────────────────────────────────
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/categories/"));
+      if (response.ok) {
+        const data = await response.json();
+        if (data.length > 0) setDynamicCategories(data);
+      }
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
+
+  const fetchPromotions = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/promotions/"));
+      if (response.ok) {
+        const data = await response.json();
+        setAvailablePromotions(data);
+      }
+    } catch (err) {
+      console.error("Error fetching promotions:", err);
+    }
+  };
+
+  // ─── Effects ─────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    fetchCategories();
     fetchPromotions();
   }, []);
 
@@ -98,7 +122,6 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
         tags: Array.isArray(product.tags) ? product.tags : [],
       });
     } else {
-// ... existing code ...
       setFormData({
         name: "",
         brand: "Lucsent Glow",
@@ -596,10 +619,35 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                          key={variant.id}
                          initial={{ opacity: 0, x: -10 }}
                          animate={{ opacity: 1, x: 0 }}
-                         className={`p-6 rounded-[2rem] border grid grid-cols-1 md:grid-cols-5 gap-6 items-end group transition-all ${
-                           isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/40 border-charcoal/10"
+                         className={`p-6 rounded-[2rem] border grid grid-cols-1 md:grid-cols-6 gap-4 items-end group transition-all ${
+                           isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-charcoal/5 shadow-sm"
                          }`}
                        >
+                          {/* Variant Image */}
+                          <div className="space-y-3 flex flex-col items-center">
+                             <label className="text-[10px] font-bold text-gold uppercase tracking-widest leading-none mb-1">Visual</label>
+                             <div 
+                               onClick={() => document.getElementById(`variant-image-${variant.id}`)?.click()}
+                               className={`relative w-14 h-14 rounded-xl border overflow-hidden cursor-pointer group/vimg ${
+                                 isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
+                               }`}
+                             >
+                                <img 
+                                  src={variant.image ? getAssetUrl(variant.image) : (formData.image ? getAssetUrl(formData.image) : "https://via.placeholder.com/100")} 
+                                  className="w-full h-full object-cover group-hover/vimg:scale-110 transition-transform"
+                                />
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/vimg:opacity-100 transition-opacity">
+                                   <Camera size={12} className="text-white" />
+                                </div>
+                                <input 
+                                  id={`variant-image-${variant.id}`}
+                                  type="file" 
+                                  accept="image/*" 
+                                  className="hidden" 
+                                  onChange={(e) => handleVariantFileUpload(variant.id, e)} 
+                                />
+                             </div>
+                          </div>
                           <div className="space-y-3">
                              <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Color / Shade</label>
                              <input 
