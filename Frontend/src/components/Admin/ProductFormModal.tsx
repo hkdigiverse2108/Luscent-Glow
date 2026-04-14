@@ -41,6 +41,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
+  const [availablePromotions, setAvailablePromotions] = useState<any[]>([]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,6 +76,19 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
       }
     };
     fetchCategories();
+
+    const fetchPromotions = async () => {
+      try {
+        const response = await fetch(getApiUrl("/api/promotions/"));
+        if (response.ok) {
+          const data = await response.json();
+          setAvailablePromotions(data);
+        }
+      } catch (err) {
+        console.error("Error fetching promotions:", err);
+      }
+    };
+    fetchPromotions();
   }, []);
 
   useEffect(() => {
@@ -196,8 +210,8 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
-    } else if (name === "tags") {
-      setFormData(prev => ({ ...prev, tags: value.split(",").map(t => t.trim()) }));
+    } else if (name === "tags" || name === "shades" || name === "sizes" || name === "images") {
+      setFormData(prev => ({ ...prev, [name]: value.split(",").map(t => t.trim()).filter(t => t !== "") }));
     } else if (type === "number") {
       const numValue = parseFloat(value);
       setFormData(prev => {
@@ -378,24 +392,59 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                       </div>
                    </div>
 
-                  <div className="grid grid-cols-3 gap-4">
-                     <div className="space-y-4">
+                  <div className="grid grid-cols-4 gap-4">
+                     <div className="space-y-4 col-span-1">
                         <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Price (₹)</label>
-                        <input name="price" type="number" value={formData.price} onChange={handleInputChange} step="0.01" className={`w-full border rounded-2xl py-4 px-6 text-sm ${
-                          isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                        }`} />
+                        <input 
+                          name="price" 
+                          type="number" 
+                          value={formData.price} 
+                          onChange={handleInputChange} 
+                          step="0.01" 
+                          readOnly={!!formData.appliedPromotionId}
+                          className={`w-full border rounded-2xl py-4 px-6 text-sm transition-all ${
+                            isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
+                          } ${formData.appliedPromotionId ? "opacity-60 cursor-not-allowed border-gold/30" : ""}`} 
+                        />
                      </div>
-                     <div className="space-y-4">
+                     <div className="space-y-4 col-span-1">
                         <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Original (₹)</label>
                         <input name="originalPrice" type="number" value={formData.originalPrice} onChange={handleInputChange} step="0.01" className={`w-full border rounded-2xl py-4 px-6 text-sm ${
                           isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
                         }`} />
                      </div>
-                     <div className="space-y-4">
+                     <div className="space-y-4 col-span-1">
                         <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Discount (%)</label>
-                        <input name="discount" type="number" readOnly value={formData.discount} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm opacity-60 cursor-not-allowed ${
-                          isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                        }`} />
+                        <input 
+                          name="discount" 
+                          type="number" 
+                          readOnly 
+                          value={formData.discount} 
+                          className={`w-full border rounded-2xl py-4 px-6 text-sm opacity-60 cursor-not-allowed ${
+                            isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
+                          } ${formData.appliedPromotionId ? "border-gold/30" : ""}`} 
+                        />
+                     </div>
+                     <div className="space-y-4 col-span-1">
+                        <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 text-gold`}>Apply Offer</label>
+                        <div className="relative">
+                          <select 
+                            name="appliedPromotionId" 
+                            value={formData.appliedPromotionId || ""} 
+                            onChange={handleInputChange} 
+                            className={`w-full border rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest appearance-none outline-none focus:ring-1 focus:ring-gold/30 ${
+                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
+                            }`}
+                          >
+                              <option value="">No Active Offer</option>
+                              {availablePromotions.map(promo => (
+                                <option key={promo._id} value={promo._id}>
+                                  {promo.discountText || "PROMO"} - {promo.title}
+                                </option>
+                              ))}
+                          </select>
+                          <Zap size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gold pointer-events-none" />
+                        </div>
                      </div>
                   </div>
                </div>
@@ -404,18 +453,58 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
             {/* Tags & Badges Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 pt-8 border-t border-white/5">
                 <div className="space-y-8">
-                   <div className="space-y-4">
-                      <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Product Tags (comma separated)</label>
+                    <div className="space-y-4">
+                      <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Gallery Images (URLs, comma separated)</label>
                       <input 
-                        name="tags"
-                        value={formData.tags.join(", ")}
+                        name="images"
+                        value={Array.isArray(formData.images) ? formData.images.join(", ") : ""}
                         onChange={handleInputChange}
-                        placeholder="serum, glow, anti-aging"
+                        placeholder="image-url-1, image-url-2, ..."
                         className={`w-full border rounded-2xl py-4 px-6 font-body text-sm ${
                           isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
                         }`}
                       />
-                   </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Available Shades (#Hex/Name)</label>
+                        <input 
+                          name="shades"
+                          value={Array.isArray(formData.shades) ? formData.shades.join(", ") : ""}
+                          onChange={handleInputChange}
+                          placeholder="#FF0000, #00FF00, ..."
+                          className={`w-full border rounded-2xl py-4 px-6 font-body text-sm ${
+                            isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
+                          }`}
+                        />
+                      </div>
+                      <div className="space-y-4">
+                         <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Available Sizes</label>
+                         <input 
+                           name="sizes"
+                           value={Array.isArray(formData.sizes) ? formData.sizes.join(", ") : ""}
+                           onChange={handleInputChange}
+                           placeholder="50ml, 100ml, ..."
+                           className={`w-full border rounded-2xl py-4 px-6 font-body text-sm ${
+                             isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
+                           }`}
+                         />
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                       <label className="text-xs font-bold text-gold uppercase tracking-[0.3em] ml-2">Product Tags (comma separated)</label>
+                       <input 
+                         name="tags"
+                         value={Array.isArray(formData.tags) ? formData.tags.join(", ") : ""}
+                         onChange={handleInputChange}
+                         placeholder="serum, glow, anti-aging"
+                         className={`w-full border rounded-2xl py-4 px-6 font-body text-sm ${
+                           isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
+                         }`}
+                       />
+                    </div>
                    
                    <div className="flex flex-wrap gap-8 pt-4">
                       {[

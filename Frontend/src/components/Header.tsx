@@ -633,8 +633,8 @@ const Header = () => {
               
               <div className="p-6 border-t border-border bg-secondary/20">
                  <div className="flex gap-4 mb-4">
-                    <Link to="/privacy-policy" onClick={() => setMobileMenuOpen(false)} className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Privacy</Link>
-                    <Link to="/terms-and-conditions" onClick={() => setMobileMenuOpen(false)} className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Terms</Link>
+                    <Link to="/policy/privacy-policy" onClick={() => setMobileMenuOpen(false)} className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Privacy</Link>
+                    <Link to="/policy/terms-and-conditions" onClick={() => setMobileMenuOpen(false)} className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Terms</Link>
                  </div>
                  <p className="text-[10px] text-muted-foreground italic">{globalSettings.copyrightText}</p>
               </div>

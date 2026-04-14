@@ -94,6 +94,7 @@ class UpdateProductModel(BaseModel):
     variants: Optional[List[ProductVariant]] = None
     ingredients: Optional[str] = None
     howToUse: Optional[str] = None
+    appliedPromotionId: Optional[str] = None
     seo: Optional[SEOModel] = None
 
     class Config:

@@ -327,7 +327,7 @@ const AdminHome = () => {
               ))}
 
               <button 
-                onClick={() => setConfig({ ...config, heroSlides: [...config.heroSlides, { image: "", title: "New Promotion", subtitle: "Enter promotion description...", cta: "Shop Now", link: "/products" }] })}
+                onClick={() => setConfig({ ...config, heroSlides: [...config.heroSlides, { image: "", title: "New Promotion", subtitle: "Enter promotion description...", cta: "Shop Now", link: "/offers" }] })}
                 className={`group min-h-[300px] rounded-[2.5rem] border-2 border-dashed flex flex-col items-center justify-center gap-4 transition-all ${
                   isDark ? "border-white/10 bg-white/5 hover:border-gold/30 hover:bg-gold/5" : "border-gold/20 bg-white hover:border-gold/40 shadow-xl"
                 }`}

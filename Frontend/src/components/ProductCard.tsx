@@ -8,12 +8,37 @@ import { getAssetUrl } from "@/lib/api";
 
 interface ProductCardProps {
   product: Product;
+  promotion?: any;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const parseDiscount = (text: string): number => {
+  const match = text.match(/(\d+)%/);
+  return match ? parseInt(match[1]) : 0;
+};
+
+const ProductCard = ({ product, promotion }: ProductCardProps) => {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const { addItem } = useCart();
-  const productId = product._id || product.id;
+  const { productId, currentPrice, originalPrice, discountPercent } = (() => {
+    const id = product._id || product.id;
+    if (promotion) {
+      const discount = parseDiscount(promotion.discountText || "");
+      const price = Math.round((product.originalPrice || product.price) * (1 - discount / 100));
+      return { 
+        productId: id, 
+        currentPrice: price, 
+        originalPrice: product.originalPrice || product.price, 
+        discountPercent: discount 
+      };
+    }
+    return { 
+      productId: id, 
+      currentPrice: product.price, 
+      originalPrice: product.originalPrice, 
+      discountPercent: product.discount 
+    };
+  })();
+
   const isWishlisted = isInWishlist(productId);
 
   const handleQuickAdd = (e: React.MouseEvent) => {
@@ -62,9 +87,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
             Trending
           </span>
         )}
-        {product.discount && (
+        {!!discountPercent && (
           <span className="px-2.5 py-0.5 bg-destructive text-destructive-foreground text-[10px] font-body font-bold uppercase tracking-wider rounded-full">
-            {product.discount}% Off
+            {discountPercent}% OFF
           </span>
         )}
       </div>
@@ -144,7 +169,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
            </div>
           {product.originalPrice && (
             <span className="text-sm text-muted-foreground line-through font-body">
-              ₹{(product.originalPrice).toLocaleString()}
+              ₹{originalPrice.toLocaleString()}
             </span>
           )}
         </div>

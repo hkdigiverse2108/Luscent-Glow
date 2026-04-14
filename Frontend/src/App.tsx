@@ -28,6 +28,7 @@ import Profile from "./pages/Profile.tsx";
 import Orders from "./pages/Orders.tsx";
 import Checkout from "./pages/Checkout.tsx";
 import OrderSuccess from "./pages/OrderSuccess.tsx";
+import Offers from "./pages/Offers.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import AdminLayout from "./components/Admin/AdminLayout.tsx";
 import AdminDashboard from "./pages/Admin/AdminDashboard.tsx";
@@ -106,9 +107,10 @@ const App = () => (
                   <Route path="/orders" element={<Orders />} />
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/order-success" element={<OrderSuccess />} />
+                  <Route path="/offers" element={<Offers />} />
 
                   {/* Dynamic Legal Sanctuary (Root-Level) */}
-                  <Route path="/:type" element={<DynamicPolicy />} />
+                  <Route path="/policy/:type" element={<DynamicPolicy />} />
 
                 {/* Admin Sanctuary Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />

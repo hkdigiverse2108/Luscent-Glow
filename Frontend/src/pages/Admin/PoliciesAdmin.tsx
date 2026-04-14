@@ -453,7 +453,7 @@ const PoliciesAdmin = () => {
                 <Label isDark={isDark}>URL Slug (Read-only)</Label>
                 <div className="flex items-center gap-2 px-4 py-3 rounded-xl border font-mono text-xs bg-transparent border-dashed border-gold/20 text-gold">
                   <Hash size={12} className="text-gold/50 flex-shrink-0" />
-                  /policies/{policy.type}
+                  /policy/{policy.type}
                 </div>
               </div>
 
@@ -797,7 +797,7 @@ const PoliciesAdmin = () => {
                     <AlertTriangle size={13} className="text-gold mt-0.5 flex-shrink-0" />
                     <p className="text-[10px] text-gold font-semibold leading-relaxed">
                       Creates a live page at{" "}
-                      <span className="font-mono font-bold">/policies/{newSlug}</span>
+                      <span className="font-mono font-bold">/policy/{newSlug}</span>
                     </p>
                   </div>
                 )}

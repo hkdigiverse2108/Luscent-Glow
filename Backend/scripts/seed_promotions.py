@@ -19,7 +19,7 @@ async def seed_promotions():
             "subtitle": "EXCLUSIVE INVITATION",
             "discountText": "40% OFF",
             "buttonText": "Retrieve Offer",
-            "buttonLink": "/products",
+            "buttonLink": "/offers",
             "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1600&h=600&fit=crop",
             "endDate": (datetime.now(timezone.utc) + timedelta(days=3)).isoformat(),
             "isActive": True,

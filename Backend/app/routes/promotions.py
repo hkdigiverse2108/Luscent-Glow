@@ -52,10 +52,12 @@ async def create_promotion(promo: dict = Body(...)):
     promo["_id"] = str(result.inserted_id)
     return promo
 
+import re
+
 @router.put("/{id}", response_description="Update a banner")
 async def update_promotion(id: str, promo: dict = Body(...)):
     """
-    Modify an existing banner design.
+    Modify an existing banner design and propagate price changes to linked products.
     """
     db = await get_database()
     if promo.get("isActive"):
@@ -65,7 +67,31 @@ async def update_promotion(id: str, promo: dict = Body(...)):
     promo.pop("_id", None)
     promo["updatedAt"] = datetime.now(timezone.utc).isoformat()
     
+    # Save the updated promotion
     await db["promotions"].update_one({"_id": ObjectId(id)}, {"$set": promo})
+    
+    # Automated Price Propagation Logic
+    discount_text = promo.get("discountText", "")
+    match = re.search(r'(\d+)', discount_text)
+    discount_percent = int(match.group(1)) if match else 0
+    
+    # Find all products linked to this promotion
+    cursor = db["products"].find({"appliedPromotionId": id})
+    linked_products = await cursor.to_list(length=1000)
+    
+    for product in linked_products:
+        # Use existing originalPrice or fallback to current price as baseline
+        original_price = product.get("originalPrice") or product.get("price")
+        if original_price:
+            new_price = round(original_price * (1 - discount_percent / 100))
+            await db["products"].update_one(
+                {"_id": product["_id"]},
+                {"$set": {
+                    "price": new_price,
+                    "discount": discount_percent
+                }}
+            )
+            
     promo["_id"] = id
     return promo
 
