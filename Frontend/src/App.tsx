@@ -6,8 +6,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/CartContext.tsx";
 import { WishlistProvider } from "./context/WishlistContext.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
-import { AnimationProvider } from "./context/AnimationContext.tsx";
-import AddToCartFlight from "./components/AddToCartFlight.tsx";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index.tsx";
 import Products from "./pages/Products.tsx";
@@ -86,11 +84,9 @@ const App = () => (
       <WishlistProvider>
         <CartProvider>
           <AuthProvider>
-            <AnimationProvider>
-              <TooltipProvider>
-                <AddToCartFlight />
-                <Toaster />
-                <Sonner />
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
                 <BrowserRouter>
                   <ScrollToTop />
                   <Routes>
@@ -161,8 +157,7 @@ const App = () => (
                   <GlobalFloatingButtons />
                 </BrowserRouter>
               </TooltipProvider>
-            </AnimationProvider>
-          </AuthProvider>
+            </AuthProvider>
         </CartProvider>
       </WishlistProvider>
     </QueryClientProvider>

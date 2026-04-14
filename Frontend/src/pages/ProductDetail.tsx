@@ -9,7 +9,6 @@ import { Product, products } from "@/data/products";
 import SEO from "@/components/SEO";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
-import { useAnimation } from "@/context/AnimationContext";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import ReviewModal from "@/components/ReviewModal";
 import CustomerGalleryModal from "@/components/CustomerGalleryModal";
@@ -279,7 +278,6 @@ const ProductDetail = () => {
   }
 
   // After this point, 'product' is guaranteed to be non-null
-  const { triggerFlight } = useAnimation();
   const isWishlisted = isInWishlist(product._id || product.id);
 
   const displayImages = variantImages || (product.images && product.images.length > 0 ? product.images : [product.image]);
@@ -302,7 +300,6 @@ const ProductDetail = () => {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     if (!product) return;
-    triggerFlight(e.clientX, e.clientY);
     addItem({
       id: product._id || product.id,
       name: product.name,
