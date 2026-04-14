@@ -158,13 +158,15 @@ const ProductDetail = () => {
     fetchRelatedAndAlsoViewed();
 
     const fetchAppliedPromotion = async () => {
-      if (product?.appliedPromotionId) {
+      const promoId = activeVariant?.appliedPromotionId || product?.appliedPromotionId;
+      if (promoId) {
         try {
           const response = await fetch(getApiUrl(`/api/promotions/`));
           if (response.ok) {
             const allPromos = await response.json();
-            const found = allPromos.find((p: any) => p._id === product.appliedPromotionId);
+            const found = allPromos.find((p: any) => p._id === promoId);
             if (found) setAppliedPromotion(found);
+            else setAppliedPromotion(null);
           }
         } catch (err) {
           console.error("Error fetching applied promotion:", err);
@@ -174,7 +176,7 @@ const ProductDetail = () => {
       }
     };
     fetchAppliedPromotion();
-  }, [product]);
+  }, [product, activeVariant]);
 
   const isWishlisted = product ? isInWishlist(product._id || product.id) : false;
 
@@ -212,7 +214,7 @@ const ProductDetail = () => {
 
   const activeVariant = getActiveVariant();
   const displayPrice = activeVariant ? activeVariant.price : product?.price;
-  const displayOriginalPrice = activeVariant ? activeVariant.originalPrice : product?.originalPrice;
+  const displayOriginalPrice = product?.originalPrice;
   const displayDiscount = activeVariant && activeVariant.originalPrice 
     ? Math.round(((activeVariant.originalPrice - activeVariant.price) / activeVariant.originalPrice) * 100)
     : product?.discount;
