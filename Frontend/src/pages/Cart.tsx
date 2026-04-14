@@ -19,8 +19,10 @@ import {
   Check,
   Sparkles,
   MapPin,
-  Settings
+  Settings,
+  Sparkle
 } from "lucide-react";
+import SparkleBurst from "@/components/SparkleBurst";
 import { 
   Dialog, 
   DialogContent, 
@@ -75,6 +77,12 @@ const Cart = () => {
   const [isGiftCardsModalOpen, setIsGiftCardsModalOpen] = useState(false);
   const [isPlacingOrder, setIsPlacingOrder] = React.useState(false);
   const [orderComplete, setOrderComplete] = React.useState(false);
+  const [showSparkles, setShowSparkles] = React.useState(false);
+
+  const triggerSparkles = () => {
+    setShowSparkles(true);
+    setTimeout(() => setShowSparkles(false), 2000);
+  };
 
   const handleMoveToWishlist = (item: any) => {
     // Product object expected by toggleWishlist
@@ -129,10 +137,13 @@ const Cart = () => {
 
   const total = Math.max(0, subtotal + shipping + tax - finalDiscountAmount - giftCardDiscount);
 
-  const handleApplyGiftCard = () => {
+  const handleApplyGiftCard = async () => {
     if (!giftCardInput.trim()) return;
-    applyGiftCard(giftCardInput);
-    setGiftCardInput("");
+    const success = await applyGiftCard(giftCardInput);
+    if (success) {
+      triggerSparkles();
+      setGiftCardInput("");
+    }
   };
 
   const handleCompletePurchase = () => {
@@ -422,7 +433,7 @@ const Cart = () => {
                                <div className="p-6 bg-white shadow-sm mb-6">
                                   <div className="relative flex items-center bg-secondary rounded-2xl border border-gold/5 overflow-hidden group focus-within:ring-2 focus-within:ring-gold/20 transition-all">
                                     <input type="text" value={couponInput} onChange={(e) => setCouponInput(e.target.value.toUpperCase())} placeholder="Enter Promo Code" className="flex-1 bg-transparent border-none px-6 py-5 text-sm font-body font-bold text-charcoal outline-none placeholder:text-muted-foreground/30 uppercase tracking-widest" />
-                                    <button onClick={() => { if(applyCoupon(couponInput)) setIsCouponsModalOpen(false); }} className="px-8 py-5 text-[10px] font-body font-bold text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em]">Apply</button>
+                                    <button onClick={async () => { if(await applyCoupon(couponInput)) { triggerSparkles(); setIsCouponsModalOpen(false); } }} className="px-8 py-5 text-[10px] font-body font-bold text-gold hover:text-charcoal transition-colors uppercase tracking-[0.2em]">Apply</button>
                                   </div>
                                </div>
                                <div className="px-6 space-y-6 pb-20">
@@ -442,7 +453,7 @@ const Cart = () => {
                                                 )}
                                               </h4>
                                            </div>
-                                           <button disabled={appliedCoupon?.code === coupon.code} onClick={() => { applyCoupon(coupon.code); setIsCouponsModalOpen(false); }} className={`px-8 py-3 rounded-full border text-[10px] font-body font-bold uppercase tracking-widest transition-all ${appliedCoupon?.code === coupon.code ? 'bg-gold/10 border-gold/20 text-gold cursor-default' : 'bg-charcoal text-white hover:bg-gold hover:text-charcoal border-transparent active:scale-95'}`}>{appliedCoupon?.code === coupon.code ? "Active" : "Apply"}</button>
+                                           <button disabled={appliedCoupon?.code === coupon.code} onClick={async () => { if(await applyCoupon(coupon.code)) { triggerSparkles(); setIsCouponsModalOpen(false); } }} className={`px-8 py-3 rounded-full border text-[10px] font-body font-bold uppercase tracking-widest transition-all ${appliedCoupon?.code === coupon.code ? 'bg-gold/10 border-gold/20 text-gold cursor-default' : 'bg-charcoal text-white hover:bg-gold hover:text-charcoal border-transparent active:scale-95'}`}>{appliedCoupon?.code === coupon.code ? "Active" : "Apply"}</button>
                                          </div>
                                           <div className="flex items-center justify-between bg-secondary rounded-xl px-4 py-3 border border-gold/5">
                                             <span className="text-[11px] font-mono font-bold text-charcoal tracking-widest">{coupon.code}</span>
@@ -478,11 +489,11 @@ const Cart = () => {
                                 </DialogHeader>
                                 <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar">
                                   {receivedGiftCards.map((card, idx) => (
-                                    <button 
-                                      key={idx}
-                                      onClick={() => { applyGiftCard(card.code); setIsGiftCardsModalOpen(false); }}
-                                      className="w-full text-left p-5 rounded-2xl bg-white border border-gold/10 hover:border-gold/30 hover:shadow-lg transition-all group flex justify-between items-center"
-                                    >
+                                      <button 
+                                        key={idx}
+                                        onClick={async () => { if(await applyGiftCard(card.code)) { triggerSparkles(); setIsGiftCardsModalOpen(false); } }}
+                                        className="w-full text-left p-5 rounded-2xl bg-white border border-gold/10 hover:border-gold/30 hover:shadow-lg transition-all group flex justify-between items-center"
+                                      >
                                       <div className="space-y-1">
                                         <p className="text-[10px] font-body font-bold text-gold uppercase tracking-widest">{card.code}</p>
                                         <p className="text-xs font-display font-medium text-charcoal">Available Balance: ₹{card.balance.toLocaleString()}</p>
@@ -547,7 +558,18 @@ const Cart = () => {
                              <p className="text-[10px] font-body font-bold text-muted-foreground/40 uppercase tracking-[0.5em] leading-none mb-1">Total Amount</p>
                              <span className="font-display text-xl md:text-2xl font-light text-charcoal italic tracking-tight uppercase">Grand <span className="text-gold">Total</span></span>
                           </div>
-                          <span className="font-body text-3xl md:text-4xl font-bold text-gold tracking-tight leading-none drop-shadow-[0_2px_10px_rgba(182,143,76,0.15)]">₹{total.toLocaleString()}</span>
+                          <div className="relative">
+                            <SparkleBurst active={showSparkles} />
+                            <motion.span 
+                              key={total}
+                              initial={{ scale: 1 }}
+                              animate={showSparkles ? { scale: [1, 1.2, 1] } : {}}
+                              transition={{ duration: 0.5 }}
+                              className="block font-body text-3xl md:text-4xl font-bold text-gold tracking-tight leading-none drop-shadow-[0_2px_10px_rgba(182,143,76,0.15)]"
+                            >
+                              ₹{total.toLocaleString()}
+                            </motion.span>
+                          </div>
                         </div>
                       </div>
                     </div>
