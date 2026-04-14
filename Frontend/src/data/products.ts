@@ -20,6 +20,15 @@ export interface Product {
   description?: string;
   ingredients?: string;
   howToUse?: string;
+  variants?: {
+    id: string;
+    color?: string;
+    size?: string;
+    price: number;
+    originalPrice?: number;
+    stock?: number;
+    sku?: string;
+  }[];
 }
 
 export const categories = [
@@ -45,6 +54,12 @@ export const products: Product[] = [
     ],
     shades: ["Rose Petal", "Berry Crush", "Nude Bliss", "Crimson Red"],
     isTrending: true, isBestSeller: true,
+    variants: [
+      { id: "v1-1", color: "Rose Petal", price: 899, originalPrice: 1299, stock: 10, sku: "LIPS-MAT-RP" },
+      { id: "v1-2", color: "Berry Crush", price: 799, originalPrice: 1199, stock: 15, sku: "LIPS-MAT-BC" },
+      { id: "v1-3", color: "Nude Bliss", price: 899, originalPrice: 1299, stock: 8, sku: "LIPS-MAT-NB" },
+      { id: "v1-4", color: "Crimson Red", price: 999, originalPrice: 1499, stock: 5, sku: "LIPS-MAT-CR" }
+    ],
     description: "A luxuriously smooth matte lipstick that glides on effortlessly, delivering rich, full-coverage color that lasts all day.",
     ingredients: "Isododecane, Dimethicone, Trimethylsiloxysilicate, Nylon-611/Dimethicone Copolymer",
     howToUse: "Apply directly from the bullet or use a lip brush for precision. Start from the center and work outward."
@@ -54,6 +69,10 @@ export const products: Product[] = [
     rating: 4.8, reviewCount: 1856, category: "skincare", tags: ["serum", "hydration"],
     image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&h=500&fit=crop",
     sizes: ["30ml", "50ml"], isNew: true, isTrending: true,
+    variants: [
+      { id: "v2-1", size: "30ml", price: 1499, originalPrice: 1999, stock: 20, sku: "SKIN-GLOW-30" },
+      { id: "v2-2", size: "50ml", price: 2299, originalPrice: 2999, stock: 12, sku: "SKIN-GLOW-50" }
+    ],
     description: "An ultra-lightweight serum infused with hyaluronic acid and vitamin C for a dewy, luminous glow.",
     ingredients: "Isododecane, Dimethicone, Trimethylsiloxysilicate, Nylon-611/Dimethicone Copolymer",
     howToUse: "Apply directly from the bullet or use a lip brush for precision. Start from the center and work outward."

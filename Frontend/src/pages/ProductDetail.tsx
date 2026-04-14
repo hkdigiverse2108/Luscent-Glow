@@ -178,17 +178,52 @@ const ProductDetail = () => {
 
   const isWishlisted = product ? isInWishlist(product._id || product.id) : false;
 
+  // Dynamic Option Extraction
+  const displayShades = product?.shades && product.shades.length > 0 
+    ? product.shades 
+    : [...new Set((product?.variants || []).map(v => v.color).filter(Boolean).filter(s => s !== null))];
+    
+  const displaySizes = product?.sizes && product.sizes.length > 0
+    ? product.sizes
+    : [...new Set((product?.variants || []).map(v => v.size).filter(Boolean).filter(s => s !== null))];
+
+  // Variant Resolution Logic
+  const getActiveVariant = () => {
+    if (!product || !product.variants || product.variants.length === 0) return null;
+    
+    // Safety check for indices
+    const safeShadeIndex = selectedShade >= displayShades.length ? 0 : selectedShade;
+    const safeSizeIndex = selectedSize >= displaySizes.length ? 0 : selectedSize;
+
+    const selectedShadeLabel = displayShades.length > 0 ? displayShades[safeShadeIndex] : null;
+    const selectedSizeLabel = displaySizes.length > 0 ? displaySizes[safeSizeIndex] : null;
+
+    return product.variants.find((v: any) => {
+      // If a label exists in our display list, it MUST match the variation field
+      const matchShade = !selectedShadeLabel || v.color === selectedShadeLabel;
+      const matchSize = !selectedSizeLabel || v.size === selectedSizeLabel;
+      return matchShade && matchSize;
+    }) || null;
+  };
+
+  const activeVariant = getActiveVariant();
+  const displayPrice = activeVariant ? activeVariant.price : product?.price;
+  const displayOriginalPrice = activeVariant ? activeVariant.originalPrice : product?.originalPrice;
+  const displayDiscount = activeVariant && activeVariant.originalPrice 
+    ? Math.round(((activeVariant.originalPrice - activeVariant.price) / activeVariant.originalPrice) * 100)
+    : product?.discount;
+
   const handleAddToCart = () => {
     if (!product) return;
     addItem({
       id: product._id || product.id,
       name: product.name,
-      price: product.price,
+      price: promoPrice || displayPrice || 0,
       image: product.image,
       category: product.category,
       quantity: quantity,
-      selectedShade: product.shades ? product.shades[selectedShade] : undefined,
-      selectedSize: product.sizes ? product.sizes[selectedSize] : undefined,
+      selectedShade: activeVariant?.color || (product.shades ? product.shades[selectedShade] : undefined),
+      selectedSize: activeVariant?.size || (product.sizes ? product.sizes[selectedSize] : undefined),
     });
     
     if (isWishlisted) {
@@ -201,12 +236,12 @@ const ProductDetail = () => {
     const directBuyItem = {
       id: product._id || product.id,
       name: product.name,
-      price: promoPrice || product.price,
+      price: promoPrice || displayPrice || product.price,
       image: product.image,
       category: product.category,
       quantity: quantity,
-      selectedShade: product.shades ? product.shades[selectedShade] : undefined,
-      selectedSize: product.sizes ? product.sizes[selectedSize] : undefined,
+      selectedShade: activeVariant?.color || (product.shades ? product.shades[selectedShade] : undefined),
+      selectedSize: activeVariant?.size || (product.sizes ? product.sizes[selectedSize] : undefined),
     };
     navigate("/checkout", { state: { directBuyItem } });
   };
@@ -267,7 +302,7 @@ const ProductDetail = () => {
   };
 
   const promoPrice = appliedPromotion && product 
-    ? Math.round((product.originalPrice || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
+    ? Math.round((activeVariant?.price || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
     : null;
 
   return (
@@ -386,20 +421,20 @@ const ProductDetail = () => {
             <div className="flex items-baseline gap-3 flex-wrap">
               {promoPrice ? (
                 <>
-                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{promoPrice.toLocaleString()}</span>
+                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(promoPrice ?? 0).toLocaleString()}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(product?.originalPrice || product?.price)?.toLocaleString()}</span>
-                    <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{parseDiscount(appliedPromotion.discountText)}% OFF</span>
+                    <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(displayOriginalPrice || displayPrice || 0).toLocaleString()}</span>
+                    <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{parseDiscount(appliedPromotion?.discountText ?? "0")}% OFF</span>
                   </div>
                 </>
               ) : (
                 <>
-                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{product?.price?.toLocaleString() || "TBD"}</span>
-                  {product?.originalPrice && product.originalPrice > product.price && (
+                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(displayPrice ?? 0).toLocaleString()}</span>
+                  {displayOriginalPrice && displayOriginalPrice > (displayPrice ?? 0) && (
                     <div className="flex items-center gap-2">
-                      <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{product.originalPrice.toLocaleString()}</span>
-                      {product.discount > 0 && (
-                        <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{product.discount}% OFF</span>
+                      <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{displayOriginalPrice.toLocaleString()}</span>
+                      {displayDiscount && displayDiscount > 0 && (
+                        <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{displayDiscount}% OFF</span>
                       )}
                     </div>
                   )}
@@ -438,20 +473,20 @@ const ProductDetail = () => {
             ) : null}
 
             {/* Shades */}
-            {product.shades && (
+            {displayShades.length > 0 && (
               <div>
                 <p className="text-sm font-body font-medium text-foreground mb-3">
-                  Shade: <span className="text-muted-foreground">{product.shades[selectedShade]}</span>
+                  Shade: <span className="text-muted-foreground">{displayShades[selectedShade]}</span>
                 </p>
                 <div className="flex items-center gap-2">
-                  {product.shades.map((shade: string, i: number) => (
+                  {displayShades.map((shade: any, i: number) => (
                     <button
                       key={shade}
                       onClick={() => setSelectedShade(i)}
                       className={`w-8 h-8 rounded-full border-2 transition-all ${
                         i === selectedShade ? "border-gold scale-110" : "border-border"
                       }`}
-                      style={{ backgroundColor: shadeColors[shade] || "#ccc" }}
+                      style={{ backgroundColor: (shadeColors as any)[shade] || "#ccc" }}
                       title={shade}
                     />
                   ))}
@@ -460,11 +495,11 @@ const ProductDetail = () => {
             )}
 
             {/* Sizes */}
-            {product.sizes && (
+            {displaySizes.length > 0 && (
               <div>
                 <p className="text-sm font-body font-medium text-foreground mb-3">Size</p>
-                <div className="flex items-center gap-2">
-                  {product.sizes.map((size: string, i: number) => (
+                <div className="flex items-center gap-2 flex-wrap">
+                  {displaySizes.map((size: any, i: number) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(i)}

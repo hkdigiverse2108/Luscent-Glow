@@ -21,21 +21,35 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
   const { addItem } = useCart();
   const { productId, currentPrice, originalPrice, discountPercent } = (() => {
     const id = product._id || product.id;
+    
+    // 1. Identify "Base Price" from first variation or root product
+    const initialBasePrice = (product.variants && product.variants.length > 0)
+      ? product.variants[0].price
+      : product.price;
+      
+    const initialOriginalPrice = (product.variants && product.variants.length > 0)
+      ? (product.variants[0].originalPrice || initialBasePrice)
+      : (product.originalPrice || initialBasePrice);
+
+    // 2. Apply Promotion overrides if present
     if (promotion) {
       const discount = parseDiscount(promotion.discountText || "");
-      const price = Math.round((product.originalPrice || product.price) * (1 - discount / 100));
+      const price = Math.round(initialBasePrice * (1 - discount / 100));
       return { 
         productId: id, 
         currentPrice: price, 
-        originalPrice: product.originalPrice || product.price, 
-        discountPercent: discount 
+        originalPrice: initialOriginalPrice, 
+        discountPercent: discount || Math.round(((initialOriginalPrice - initialBasePrice) / initialOriginalPrice) * 100)
       };
     }
+
+    // 3. Fallback to Variant/Product defaults
+    const discount = Math.round(((initialOriginalPrice - initialBasePrice) / initialOriginalPrice) * 100);
     return { 
       productId: id, 
-      currentPrice: product.price, 
-      originalPrice: product.originalPrice, 
-      discountPercent: product.discount 
+      currentPrice: initialBasePrice, 
+      originalPrice: initialOriginalPrice, 
+      discountPercent: discount || product.discount 
     };
   })();
 
@@ -49,7 +63,9 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
       price: currentPrice,
       image: product.image,
       category: product.category,
-      quantity: 1
+      quantity: 1,
+      selectedShade: product.variants?.[0]?.color,
+      selectedSize: product.variants?.[0]?.size,
     });
     
     // Remove from wishlist if it is wishlisted
@@ -153,12 +169,17 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
 
         {/* Price */}
         <div className="flex items-baseline gap-2">
-          <span className="font-body text-lg font-bold text-charcoal tracking-tight">
-            ₹{currentPrice.toLocaleString()}
-          </span>
-          {originalPrice && originalPrice > currentPrice && (
+           <div className="flex flex-col">
+              {product.variants && product.variants.length > 1 && (
+                <span className="text-[9px] font-body font-bold text-gold/60 uppercase tracking-widest leading-none mb-1">Starting from</span>
+              )}
+              <span className="font-body text-lg font-bold text-charcoal tracking-tight">
+                ₹{(currentPrice ?? 0).toLocaleString()}
+              </span>
+           </div>
+          {originalPrice && (
             <span className="text-sm text-muted-foreground line-through font-body">
-              ₹{originalPrice.toLocaleString()}
+              ₹{(originalPrice ?? 0).toLocaleString()}
             </span>
           )}
         </div>

@@ -38,15 +38,30 @@ async def get_cart(userMobile: str):
             product = await db["products"].find_one({"_id": productId})
             
         if product:
+            # Resolve variation-specific price if variations exist
+            resolved_price = product.get("price", 0)
+            selected_shade = item.get("selectedShade")
+            selected_size = item.get("selectedSize")
+            
+            variants = product.get("variants", [])
+            if variants:
+                for v in variants:
+                    # Match variation by color and size
+                    color_match = not selected_shade or v.get("color") == selected_shade
+                    size_match = not selected_size or v.get("size") == selected_size
+                    if color_match and size_match:
+                        resolved_price = v.get("price", resolved_price)
+                        break
+            
             cart_entry = {
                 "id": str(product["_id"]),
                 "name": product["name"],
-                "price": product["price"],
+                "price": resolved_price,
                 "image": product["image"],
                 "category": product["category"],
                 "quantity": item["quantity"],
-                "selectedShade": item.get("selectedShade"),
-                "selectedSize": item.get("selectedSize"),
+                "selectedShade": selected_shade,
+                "selectedSize": selected_size,
                 "metadata": item.get("metadata")
             }
             full_cart.append(cart_entry)

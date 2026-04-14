@@ -5,6 +5,18 @@ from bson import ObjectId
 # Represents an ObjectId field in the database.
 PyObjectId = Annotated[str, BeforeValidator(str)]
 
+class ProductVariant(BaseModel):
+    """
+    Schema for individual product variations (Color/Size/Price combinations).
+    """
+    id: Optional[str] = Field(default=None)
+    color: Optional[str] = Field(default=None)
+    size: Optional[str] = Field(default=None)
+    price: float = Field(..., ge=0)
+    originalPrice: Optional[float] = Field(default=None)
+    stock: Optional[int] = Field(default=0)
+    sku: Optional[str] = Field(default=None)
+
 class SEOModel(BaseModel):
     """
     Schema for SEO metadata used across the platform.
@@ -21,7 +33,7 @@ class ProductModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: str = Field(...)
     brand: str = Field(...)
-    price: float = Field(..., gt=0)
+    price: float = Field(..., ge=0)
     originalPrice: Optional[float] = Field(default=None)
     discount: Optional[int] = Field(default=None)
     rating: float = Field(..., ge=0, le=5)
@@ -38,7 +50,7 @@ class ProductModel(BaseModel):
     description: Optional[str] = Field(default=None)
     ingredients: Optional[str] = Field(default=None)
     howToUse: Optional[str] = Field(default=None)
-    appliedPromotionId: Optional[str] = Field(default=None)
+    variants: Optional[List[ProductVariant]] = Field(default_factory=list)
     seo: Optional[SEOModel] = Field(default=None)
 
     class Config:
@@ -79,6 +91,7 @@ class UpdateProductModel(BaseModel):
     isTrending: Optional[bool] = None
     isBestSeller: Optional[bool] = None
     description: Optional[str] = None
+    variants: Optional[List[ProductVariant]] = None
     ingredients: Optional[str] = None
     howToUse: Optional[str] = None
     appliedPromotionId: Optional[str] = None

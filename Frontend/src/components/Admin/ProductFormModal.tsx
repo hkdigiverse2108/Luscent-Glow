@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Sparkles, Image as ImageIcon, Info, Plus, Zap } from "lucide-react";
+import { X, Save, Sparkles, Image as ImageIcon, Info, Plus, Trash2, Zap } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -34,10 +34,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     description: "",
     ingredients: "",
     howToUse: "",
-    appliedPromotionId: "",
-    images: [],
-    shades: [],
-    sizes: [],
+    variants: [],
     seo: { title: "", description: "", keywords: "" }
   });
 
@@ -119,52 +116,66 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
         description: "",
         ingredients: "",
         howToUse: "",
-        appliedPromotionId: "",
-        images: [],
-        shades: [],
-        sizes: [],
+        variants: [],
         seo: { title: "", description: "", keywords: "" }
       });
     }
   }, [product, isOpen]);
-  
-  // Automated Offer Applied Logic
-  useEffect(() => {
-    if (formData.appliedPromotionId && formData.originalPrice > 0) {
-      const selectedPromo = availablePromotions.find(p => p._id === formData.appliedPromotionId);
-      if (selectedPromo) {
-        const discountText = selectedPromo.discountText || "";
-        const match = discountText.match(/(\d+)/);
-        if (match) {
-          const discountPercent = parseInt(match[0]);
-          const newPrice = Math.round(formData.originalPrice * (1 - discountPercent / 100));
-          
-          setFormData(prev => {
-            if (prev.price === newPrice && prev.discount === discountPercent) return prev;
-            return {
-              ...prev,
-              price: newPrice,
-              discount: discountPercent
-            };
-          });
+
+  const addVariant = () => {
+    setFormData((prev: any) => ({
+      ...prev,
+      variants: [
+        ...prev.variants,
+        { 
+          id: Math.random().toString(36).substr(2, 9), 
+          color: "", 
+          size: "", 
+          price: prev.price > 0 ? prev.price : 0, 
+          originalPrice: prev.originalPrice > 0 ? prev.originalPrice : 0, 
+          stock: 10 
         }
-      }
-    } else if (!formData.appliedPromotionId) {
-      // Revert to original price when no offer is selected
-      setFormData(prev => {
-        if (prev.price === prev.originalPrice && prev.discount === 0) return prev;
-        return {
-          ...prev,
-          price: prev.originalPrice,
-          discount: 0
-        };
-      });
-    }
-  }, [formData.appliedPromotionId, formData.originalPrice, availablePromotions]);
+      ]
+    }));
+  };
+
+  const removeVariant = (id: string) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      variants: prev.variants.filter((v: any) => v.id !== id)
+    }));
+  };
+
+  const updateVariant = (id: string, field: string, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      variants: prev.variants.map((v: any) => {
+        if (v.id === id) {
+          return { ...v, [field]: value };
+        }
+        return v;
+      })
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    // Auto-sync main price if variations exist
+    let syncData = { ...formData };
+    if (syncData.variants && syncData.variants.length > 0) {
+      // Use the first variant as the "Starting From" price
+      syncData.price = syncData.variants[0].price;
+      syncData.originalPrice = syncData.variants[0].originalPrice;
+      
+      // Calculate display discount for the catalog
+      if (syncData.originalPrice && syncData.originalPrice > syncData.price) {
+        syncData.discount = Math.round(((syncData.originalPrice - syncData.price) / syncData.originalPrice) * 100);
+      } else {
+        syncData.discount = 0;
+      }
+    }
 
     const method = product ? "PUT" : "POST";
     const url = product 
@@ -175,7 +186,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(syncData),
       });
 
       if (response.ok) {
@@ -539,6 +550,104 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                        }`} />
                     </div>
                  </div>
+            </div>
+
+            {/* Product Variants Section */}
+            <div className="space-y-8 pt-8 border-t border-white/5">
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                         <Plus size={20} />
+                      </div>
+                      <div>
+                         <h4 className={`text-sm font-bold uppercase tracking-widest ${isDark ? "text-white" : "text-charcoal"}`}>Product Variations</h4>
+                         <p className={`text-[9px] font-bold uppercase tracking-widest opacity-40`}>Manage Color, Size and specific Pricing</p>
+                      </div>
+                   </div>
+                   <button 
+                     type="button"
+                     onClick={addVariant}
+                     className="px-6 py-3 bg-indigo-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/20"
+                   >
+                     Add Variation
+                   </button>
+                </div>
+
+                {formData.variants && formData.variants.length > 0 ? (
+                  <div className="space-y-4">
+                     {formData.variants.map((variant: any, idx: number) => (
+                       <motion.div 
+                         key={variant.id}
+                         initial={{ opacity: 0, x: -10 }}
+                         animate={{ opacity: 1, x: 0 }}
+                         className={`p-6 rounded-[2rem] border grid grid-cols-1 md:grid-cols-5 gap-6 items-end group transition-all ${
+                           isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/40 border-charcoal/10"
+                         }`}
+                       >
+                          <div className="space-y-3">
+                             <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Color / Shade</label>
+                             <input 
+                               value={variant.color}
+                               onChange={(e) => updateVariant(variant.id, "color", e.target.value)}
+                               placeholder="e.g. Crimson Red"
+                               className={`w-full border rounded-xl py-3 px-4 text-xs ${
+                                 isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal"
+                               }`}
+                             />
+                          </div>
+                          <div className="space-y-3">
+                             <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Size / Volume</label>
+                             <input 
+                               value={variant.size}
+                               onChange={(e) => updateVariant(variant.id, "size", e.target.value)}
+                               placeholder="e.g. 50ml"
+                               className={`w-full border rounded-xl py-3 px-4 text-xs ${
+                                 isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal"
+                               }`}
+                             />
+                          </div>
+                          <div className="space-y-3">
+                             <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Price (₹)</label>
+                             <input 
+                               type="number"
+                               value={variant.price}
+                               onChange={(e) => updateVariant(variant.id, "price", parseFloat(e.target.value))}
+                               className={`w-full border rounded-xl py-3 px-4 text-xs ${
+                                 isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal"
+                               }`}
+                             />
+                          </div>
+                          <div className="space-y-3">
+                             <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Stock</label>
+                             <input 
+                               type="number"
+                               value={variant.stock}
+                               onChange={(e) => updateVariant(variant.id, "stock", parseInt(e.target.value))}
+                               className={`w-full border rounded-xl py-3 px-4 text-xs ${
+                                 isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal"
+                               }`}
+                             />
+                          </div>
+                          <div className="flex items-center justify-end h-full pb-1">
+                             <button 
+                               type="button"
+                               onClick={() => removeVariant(variant.id)}
+                               className="w-10 h-10 rounded-full flex items-center justify-center text-rose-500 hover:bg-rose-500/10 transition-all font-bold"
+                             >
+                                <Trash2 size={18} />
+                             </button>
+                          </div>
+                       </motion.div>
+                     ))}
+                  </div>
+                ) : (
+                  <div className={`py-12 border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center gap-4 transition-colors ${
+                    isDark ? "border-white/5 text-white/20" : "border-charcoal/5 text-charcoal/20"
+                  }`}>
+                     <p className="text-[10px] font-black uppercase tracking-[0.3em]">No Variations Defined</p>
+                     <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Add variations for multiple SKUs (Size/Color)</p>
+                  </div>
+                )}
             </div>
 
             {/* Narrative Sections */}
