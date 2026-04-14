@@ -162,13 +162,17 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Auto-sync main price if variations exist
+    // Auto-sync main price and legacy attributes if variations exist
     let syncData = { ...formData };
     if (syncData.variants && syncData.variants.length > 0) {
       // Use the first variant as the "Starting From" price
       syncData.price = syncData.variants[0].price;
       syncData.originalPrice = syncData.variants[0].originalPrice;
       
+      // Sync legacy attributes to match variants exactly
+      syncData.shades = [...new Set(syncData.variants.map((v: any) => v.color).filter(Boolean).filter((s: string) => s !== ""))];
+      syncData.sizes = [...new Set(syncData.variants.map((v: any) => v.size).filter(Boolean).filter((s: string) => s !== ""))];
+
       // Calculate display discount for the catalog
       if (syncData.originalPrice && syncData.originalPrice > syncData.price) {
         syncData.discount = Math.round(((syncData.originalPrice - syncData.price) / syncData.originalPrice) * 100);

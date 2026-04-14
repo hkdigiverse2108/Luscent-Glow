@@ -179,13 +179,17 @@ const ProductDetail = () => {
   const isWishlisted = product ? isInWishlist(product._id || product.id) : false;
 
   // Dynamic Option Extraction
-  const displayShades = product?.shades && product.shades.length > 0 
-    ? product.shades 
-    : [...new Set((product?.variants || []).map(v => v.color).filter(Boolean).filter(s => s !== null))];
+  // Dynamic Option Extraction - Priority to Variations
+  const variantShades = [...new Set((product?.variants || []).map(v => v.color).filter(Boolean).filter(s => s !== null && s !== ""))];
+  const variantSizes = [...new Set((product?.variants || []).map(v => v.size).filter(Boolean).filter(s => s !== null && s !== ""))];
+
+  const displayShades = variantShades.length > 0 
+    ? variantShades 
+    : (product?.shades && product.shades.length > 0 ? product.shades : []);
     
-  const displaySizes = product?.sizes && product.sizes.length > 0
-    ? product.sizes
-    : [...new Set((product?.variants || []).map(v => v.size).filter(Boolean).filter(s => s !== null))];
+  const displaySizes = variantSizes.length > 0
+    ? variantSizes
+    : (product?.sizes && product.sizes.length > 0 ? product.sizes : []);
 
   // Variant Resolution Logic
   const getActiveVariant = () => {
