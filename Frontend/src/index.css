@@ -205,4 +205,43 @@
   .animate-marquee:hover {
     animation-play-state: paused;
   }
+
+  /* --- Premium Form Rituals --- */
+  .premium-input-vessel {
+    @apply relative border-b border-charcoal/10 transition-all duration-500 py-3;
+  }
+
+  .premium-input-vessel:focus-within {
+    @apply border-gold shadow-[0_4px_20px_-10px_rgba(182,143,76,0.3)];
+  }
+
+  .floating-label {
+    @apply absolute left-0 top-1/2 -translate-y-1/2 text-muted-foreground/50 transition-all duration-300 pointer-events-none font-body text-xs uppercase tracking-widest;
+  }
+
+  .premium-input-vessel:focus-within .floating-label,
+  .premium-input-vessel:not(:placeholder-shown) .floating-label {
+    @apply -top-2 translate-y-0 text-[10px] text-gold font-bold opacity-100;
+  }
+
+  .premium-phone-input {
+    @apply flex items-center w-full bg-transparent font-body text-sm text-charcoal outline-none;
+  }
+
+  .premium-phone-input .PhoneInputCountry {
+    @apply mr-3 pr-3 border-r border-charcoal/5 flex items-center h-8;
+  }
+
+  .premium-phone-input .PhoneInputCountrySelectArrow {
+    @apply text-gold opacity-50 ml-1;
+  }
+
+  .premium-phone-input input {
+    @apply bg-transparent border-none outline-none w-full !p-0 placeholder:text-muted-foreground/20;
+  }
+
+  /* Specific fix for the user's reported overlap */
+  .PhoneInput {
+    @apply flex items-center;
+  }
 }

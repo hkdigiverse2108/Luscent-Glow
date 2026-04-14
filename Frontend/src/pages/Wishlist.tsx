@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
+import { getApiUrl } from "@/lib/api";
 
 const Wishlist = () => {
   const { wishlist, clearWishlist, toggleWishlist } = useWishlist();

@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider } from "./context/CartContext.tsx";
 import { WishlistProvider } from "./context/WishlistContext.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import { AnimationProvider } from "./context/AnimationContext.tsx";
+import AddToCartFlight from "./components/AddToCartFlight.tsx";
 import { HelmetProvider } from "react-helmet-async";
 import Index from "./pages/Index.tsx";
 import Products from "./pages/Products.tsx";
@@ -84,79 +86,82 @@ const App = () => (
       <WishlistProvider>
         <CartProvider>
           <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <ScrollToTop />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/products" element={<Products />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/wishlist" element={<Wishlist />} />
-                  <Route path="/quiz" element={<RadianceQuiz />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/faq" element={<FAQ />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/bulk-orders" element={<BulkOrders />} />
-                  <Route path="/gift-cards" element={<GiftCards />} />
-                  <Route path="/blogs" element={<Blogs />} />
-                  <Route path="/blogs/:id" element={<BlogDetail />} />
-                  <Route path="/track-order" element={<TrackOrder />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/order-success" element={<OrderSuccess />} />
-                  <Route path="/offers" element={<Offers />} />
+            <AnimationProvider>
+              <TooltipProvider>
+                <AddToCartFlight />
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <ScrollToTop />
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/quiz" element={<RadianceQuiz />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/bulk-orders" element={<BulkOrders />} />
+                    <Route path="/gift-cards" element={<GiftCards />} />
+                    <Route path="/blogs" element={<Blogs />} />
+                    <Route path="/blogs/:id" element={<BlogDetail />} />
+                    <Route path="/track-order" element={<TrackOrder />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/order-success" element={<OrderSuccess />} />
+                    <Route path="/offers" element={<Offers />} />
 
-                  {/* Dynamic Legal Sanctuary (Root-Level) */}
-                  <Route path="/policy/:type" element={<DynamicPolicy />} />
+                    {/* Dynamic Legal Sanctuary (Root-Level) */}
+                    <Route path="/policy/:type" element={<DynamicPolicy />} />
 
-                {/* Admin Sanctuary Routes */}
-                <Route path="/admin/login" element={<AdminLogin />} />
-                
-                <Route path="/admin" element={
-                  <AdminProtectedRoute />
-                }>
-                  <Route element={
-                    <AdminThemeProvider>
-                      <AdminLayout />
-                    </AdminThemeProvider>
-                  }>
-                    <Route index element={<AdminDashboard />} />
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="home" element={<AdminHome />} />
-                    <Route path="products" element={<AdminProducts />} />
-                    <Route path="categories" element={<AdminCategories />} />
-                    <Route path="orders" element={<AdminOrders />} />
-                    <Route path="payments" element={<AdminPayments />} />
-                    <Route path="users" element={<AdminUsers />} />
-                    <Route path="newsletter" element={<AdminNewsletter />} />
-                    <Route path="gift-cards" element={<AdminGiftCards />} />
-                    <Route path="promotions" element={<AdminPromotions />} />
-                    <Route path="coupons" element={<AdminCoupons />} />
-                    <Route path="bulk-orders" element={<AdminBulkOrders />} />
-                    <Route path="about" element={<AdminAbout />} />
-                    <Route path="contact" element={<AdminContact />} />
-                    <Route path="faq" element={<AdminFAQ />} />
-                    <Route path="policies" element={<AdminPolicies />} />
-                    <Route path="blogs" element={<AdminBlogs />} />
-                    <Route path="reviews" element={<AdminReviews />} />
-                    <Route path="consultations" element={<AdminConsultations />} />
-                    <Route path="quiz-settings" element={<QuizSettings />} />
-                    <Route path="footer" element={<AdminFooter />} />
-                    <Route path="social-media" element={<AdminSocialMedia />} />
-                    <Route path="settings" element={<AdminSettings />} />
-                  </Route>
-                </Route>
+                    {/* Admin Sanctuary Routes */}
+                    <Route path="/admin/login" element={<AdminLogin />} />
+                    
+                    <Route path="/admin" element={
+                      <AdminProtectedRoute />
+                    }>
+                      <Route element={
+                        <AdminThemeProvider>
+                          <AdminLayout />
+                        </AdminThemeProvider>
+                      }>
+                        <Route index element={<AdminDashboard />} />
+                        <Route path="dashboard" element={<AdminDashboard />} />
+                        <Route path="home" element={<AdminHome />} />
+                        <Route path="products" element={<AdminProducts />} />
+                        <Route path="categories" element={<AdminCategories />} />
+                        <Route path="orders" element={<AdminOrders />} />
+                        <Route path="payments" element={<AdminPayments />} />
+                        <Route path="users" element={<AdminUsers />} />
+                        <Route path="newsletter" element={<AdminNewsletter />} />
+                        <Route path="gift-cards" element={<AdminGiftCards />} />
+                        <Route path="promotions" element={<AdminPromotions />} />
+                        <Route path="coupons" element={<AdminCoupons />} />
+                        <Route path="bulk-orders" element={<AdminBulkOrders />} />
+                        <Route path="about" element={<AdminAbout />} />
+                        <Route path="contact" element={<AdminContact />} />
+                        <Route path="faq" element={<AdminFAQ />} />
+                        <Route path="policies" element={<AdminPolicies />} />
+                        <Route path="blogs" element={<AdminBlogs />} />
+                        <Route path="reviews" element={<AdminReviews />} />
+                        <Route path="consultations" element={<AdminConsultations />} />
+                        <Route path="quiz-settings" element={<QuizSettings />} />
+                        <Route path="footer" element={<AdminFooter />} />
+                        <Route path="social-media" element={<AdminSocialMedia />} />
+                        <Route path="settings" element={<AdminSettings />} />
+                      </Route>
+                    </Route>
 
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <GlobalFloatingButtons />
-              </BrowserRouter>
-            </TooltipProvider>
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                  <GlobalFloatingButtons />
+                </BrowserRouter>
+              </TooltipProvider>
+            </AnimationProvider>
           </AuthProvider>
         </CartProvider>
       </WishlistProvider>

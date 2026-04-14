@@ -9,6 +9,7 @@ import { Product, products } from "@/data/products";
 import SEO from "@/components/SEO";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useAnimation } from "@/context/AnimationContext";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import ReviewModal from "@/components/ReviewModal";
 import CustomerGalleryModal from "@/components/CustomerGalleryModal";
@@ -270,6 +271,7 @@ const ProductDetail = () => {
   }
 
   // After this point, 'product' is guaranteed to be non-null
+  const { triggerFlight } = useAnimation();
   const isWishlisted = isInWishlist(product._id || product.id);
 
   // Prices are calculated here once product is guaranteed, but the logic is now moved higher to avoid scoping issues.
@@ -288,8 +290,9 @@ const ProductDetail = () => {
   const isOutOfStock = activeVariant ? stockCount === 0 : false;
   const isLowStock = !isOutOfStock && stockCount > 0 && stockCount <= 5;
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (e: React.MouseEvent) => {
     if (!product) return;
+    triggerFlight(e.clientX, e.clientY);
     addItem({
       id: product._id || product.id,
       name: product.name,
@@ -593,7 +596,7 @@ const ProductDetail = () => {
               </div>
               <div className="flex items-center gap-3 flex-1">
                 <button 
-                  onClick={handleAddToCart}
+                  onClick={(e) => handleAddToCart(e)}
                   disabled={isOutOfStock}
                   className={`flex-1 flex items-center justify-center gap-2 py-4 font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl active:scale-95 ${
                     isOutOfStock 

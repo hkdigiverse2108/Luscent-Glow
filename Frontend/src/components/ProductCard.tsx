@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import type { Product } from "@/data/products";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
+import { useAnimation } from "@/context/AnimationContext";
 import { getAssetUrl } from "@/lib/api";
 
 interface ProductCardProps {
@@ -58,9 +59,11 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
   })();
 
   const isWishlisted = isInWishlist(productId);
+  const { triggerFlight } = useAnimation();
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
+    triggerFlight(e.clientX, e.clientY);
     addItem({
       id: productId,
       name: product.name,

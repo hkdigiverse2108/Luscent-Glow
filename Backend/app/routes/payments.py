@@ -27,7 +27,7 @@ async def initiate_payment(order_data: dict = Body(...)):
     """
     db = await get_database()
     creds = await get_payment_credentials()
-    active_gateway = creds.get("activeGateway", "razorpay")
+    active_gateway = creds.get("activeGateway") or "razorpay"
 
     # Explicit Guest Lead Capture
     # If this is a guest checkout (userMobile provided but no auth token usually), 
@@ -172,11 +172,27 @@ async def initiate_payment(order_data: dict = Body(...)):
             "message": "Order placed successfully with Cash on Delivery"
         }
 
-    amount_float = float(order_data.get("totalAmount"))
+    # Amount Sanitization Ritual
+    try:
+        raw_amount = order_data.get("totalAmount")
+        if raw_amount is None:
+            raise ValueError("Amount is missing from the ritual.")
+        amount_float = float(raw_amount)
+        if amount_float < 1 and active_gateway != "cod":
+            # Razorpay requires at least 1 INR
+            amount_float = 1.0
+    except (ValueError, TypeError) as e:
+        print(f"[*] Payment Amount Validation Failure: {e}")
+        raise HTTPException(status_code=400, detail="The ritual amount is invalid.")
 
     if active_gateway == "razorpay":
-        key_id = creds.get("keyId", settings.RAZORPAY_KEY_ID)
-        key_secret = creds.get("keySecret", settings.RAZORPAY_KEY_SECRET)
+        key_id = creds.get("keyId") or settings.RAZORPAY_KEY_ID
+        key_secret = creds.get("keySecret") or settings.RAZORPAY_KEY_SECRET
+        
+        if not key_id or not key_secret:
+            print("[!] Critical: Razorpay credentials missing in both DB and ENV.")
+            raise HTTPException(status_code=500, detail="Payment Gateway credentials uninitialized.")
+
         client = razorpay.Client(auth=(key_id, key_secret))
         amount_paisa = int(amount_float * 100)
         
@@ -264,6 +280,7 @@ async def initiate_payment(order_data: dict = Body(...)):
         except Exception as e:
             print("Cashfree Order Creation Error:", str(e))
             raise HTTPException(status_code=500, detail="Cashfree Gateway unavailable.")
+
 
     raise HTTPException(status_code=400, detail="Invalid Gateway configuration")
 

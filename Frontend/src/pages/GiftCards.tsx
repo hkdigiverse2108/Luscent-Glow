@@ -187,39 +187,57 @@ const GiftCards = () => {
                       </button>
                     ))}
                   </div>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      placeholder="Enter Custom Amount"
-                      value={customAmount}
-                      onChange={(e) => setCustomAmount(e.target.value)}
-                      className="w-full py-4 px-6 bg-white border-2 border-border rounded-2xl font-body text-sm focus:outline-none focus:border-gold transition-colors"
-                    />
-                    <div className="absolute right-6 top-1/2 -translate-y-1/2 text-muted-foreground font-body font-bold text-sm uppercase tracking-widest">INR</div>
+                  
+                  <div className="premium-input-vessel group !border-b-2">
+                    <label className="floating-label">Enter Custom Amount</label>
+                    <div className="flex items-center justify-between">
+                      <input
+                        type="number"
+                        placeholder=" "
+                        value={customAmount}
+                        onChange={(e) => setCustomAmount(e.target.value)}
+                        className="w-full bg-transparent font-body text-sm text-charcoal outline-none placeholder:opacity-0"
+                      />
+                      <div className="text-gold font-body font-bold text-[10px] uppercase tracking-widest opacity-40 group-focus-within:opacity-100 transition-opacity">INR</div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-10">
                   <h2 className="font-display text-4xl font-bold text-foreground flex items-center gap-4">
                     03. <span className="text-gold/60 italic font-light">Add Details</span>
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-8">
+                    {/* Recipient Name */}
+                    <div className="premium-input-vessel group">
+                      <label className="floating-label">Recipient Full Name</label>
+                      <input
+                        type="text"
+                        placeholder=" "
+                        value={recipientName}
+                        onChange={(e) => setRecipientName(e.target.value)}
+                        className="w-full bg-transparent font-body text-sm text-charcoal outline-none placeholder:opacity-0"
+                      />
+                    </div>
+
+                    {/* Recipient Mobile */}
+                    <div className="premium-input-vessel group">
+                      <label className="floating-label">Recipient Mobile</label>
+                      <PhoneInput 
+                        value={recipientMobile}
+                        onChange={(val) => setRecipientMobile(val)}
+                        className="premium-phone-input"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Sender Name */}
+                  <div className="premium-input-vessel group">
+                    <label className="floating-label">Your Name (Sender)</label>
                     <input
                       type="text"
-                      placeholder="Recipient Full Name"
-                      value={recipientName}
-                      onChange={(e) => setRecipientName(e.target.value)}
-                      className="w-full py-4 px-6 bg-white border-2 border-border rounded-2xl font-body text-sm focus:outline-none focus:border-gold transition-colors"
-                    />
-                    <PhoneInput 
-                      value={recipientMobile}
-                      onChange={(val) => setRecipientMobile(val)}
-                      className="w-full bg-white border-2 border-border rounded-2xl font-body text-sm focus-within:border-gold transition-colors"
-                      placeholder="00000 00000"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Your Name"
+                      placeholder=" "
                       value={senderName}
                       onFocus={() => {
                         if (user && !senderName) {
@@ -227,16 +245,21 @@ const GiftCards = () => {
                         }
                       }}
                       onChange={(e) => setSenderName(e.target.value)}
-                      className="w-full py-4 px-6 bg-white border-2 border-border rounded-2xl font-body text-sm focus:outline-none focus:border-gold transition-colors"
+                      className="w-full bg-transparent font-body text-sm text-charcoal outline-none placeholder:opacity-0"
                     />
                   </div>
-                  <textarea
-                    placeholder="Enter a heartfelt message..."
-                    rows={4}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="w-full py-4 px-6 bg-white border-2 border-border rounded-2xl font-body text-sm focus:outline-none focus:border-gold transition-colors resize-none"
-                  />
+
+                  {/* Heartfelt Message */}
+                  <div className="premium-input-vessel group !border-b-2">
+                    <label className="floating-label">Enter a heartfelt message...</label>
+                    <textarea
+                      rows={1}
+                      placeholder=" "
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      className="w-full bg-transparent font-body text-sm text-charcoal outline-none placeholder:opacity-0 resize-none min-h-[40px] pt-2"
+                    />
+                  </div>
                 </div>
 
                 <motion.button

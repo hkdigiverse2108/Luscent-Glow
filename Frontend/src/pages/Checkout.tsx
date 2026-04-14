@@ -258,6 +258,9 @@ const Checkout = () => {
     const finalMethod = method || (activePaymentTab === "COD" ? "COD" : "ONLINE");
     
     try {
+      // Sanitize total to prevent NaN/null ritual errors
+      const sanitizedTotal = isNaN(total) || total < 0 ? 0 : total;
+
       const orderData = {
         userMobile: address.mobile || user?.mobileNumber || "Guest",
         userName: address.fullName || user?.fullName || "Guest",
@@ -271,7 +274,7 @@ const Checkout = () => {
           selectedSize: item.selectedSize,
           metadata: item.metadata || (isDirectBuy ? { directBuy: true } : {})
         })),
-        totalAmount: total,
+        totalAmount: sanitizedTotal,
         appliedGiftCardCode: isDirectBuy ? null : (appliedGiftCard?.code || null),
         giftCardDiscount: isDirectBuy ? 0 : (giftCardDiscount || 0),
         paymentStatus: "Pending",
@@ -454,49 +457,65 @@ const Checkout = () => {
                         <ShoppingBag className="text-gold" size={28} /> Order Summary
                     </h2>
                     
-                    <form onSubmit={handleNextStep} className="space-y-8">
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <label className={labelClass}>Full Name</label>
-                                <div className="relative">
-                                    <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <form onSubmit={handleNextStep} className="space-y-10">
+                        <div className="grid md:grid-cols-2 gap-x-10 gap-y-8">
+                            {/* Full Name */}
+                            <div className="premium-input-vessel group">
+                                <label className="floating-label">Full Name</label>
+                                <div className="flex items-center gap-3">
+                                    <User size={16} className="text-gold opacity-40 group-focus-within:opacity-100 transition-opacity" />
                                     <input 
-                                        type="text" required placeholder="Enter your name"
-                                        className={`${inputClass} pl-12`}
+                                        type="text" 
+                                        required 
+                                        placeholder=" "
+                                        className="w-full bg-transparent font-body text-sm text-charcoal outline-none placeholder:opacity-0"
                                         value={address.fullName}
                                         onChange={(e) => setAddress({...address, fullName: e.target.value})}
                                     />
                                 </div>
                             </div>
-                             <div className="space-y-2">
-                                <label className={labelClass}>Mobile Number</label>
-                                <div className="relative">
-                                    <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+
+                            {/* Mobile Number */}
+                            <div className="premium-input-vessel group">
+                                <label className="floating-label">Mobile Number</label>
+                                <div className="flex items-center gap-3">
+                                    <Phone size={16} className="text-gold opacity-40 group-focus-within:opacity-100 transition-opacity" />
                                     <PhoneInput 
                                         value={address.mobile}
                                         onChange={(val) => setAddress({...address, mobile: val})}
-                                        className="w-full bg-white border border-gray-100 rounded-2xl py-1 pl-12 focus-within:ring-2 focus-within:ring-gold/20 focus-within:border-gold transition-all"
-                                        placeholder="00000 00000"
+                                        className="premium-phone-input"
+                                        placeholder="Enter phone number"
                                     />
                                 </div>
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <label className={labelClass}>Email (Optional)</label>
-                            <div className="relative">
-                                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+
+                        {/* Email */}
+                        <div className="premium-input-vessel group">
+                            <label className="floating-label">Email Address (Optional)</label>
+                            <div className="flex items-center gap-3">
+                                <Mail size={16} className="text-gold opacity-40 group-focus-within:opacity-100 transition-opacity" />
                                 <input 
-                                    type="email" placeholder="support@luscent.com"
-                                    className={`${inputClass} pl-12`}
+                                    type="email" 
+                                    placeholder=" "
+                                    className="w-full bg-transparent font-body text-sm text-charcoal outline-none placeholder:opacity-0"
                                     value={address.email}
                                     onChange={(e) => setAddress({...address, email: e.target.value})}
                                 />
                             </div>
                         </div>
 
-                        <button type="submit" className="w-full py-5 bg-charcoal text-white rounded-2xl font-black uppercase tracking-[0.3em] hover:bg-gold transition-all shadow-xl shadow-charcoal/10 text-xs text-center block">
-                            Proceed to Address
-                        </button>
+                        <div className="pt-4">
+                            <button 
+                                type="submit" 
+                                className="w-full py-5 bg-gold text-primary rounded-[2rem] font-bold uppercase tracking-[0.25em] hover:bg-gold/90 transition-all shadow-xl shadow-gold/10 text-[10px] text-center block active:scale-[0.98]"
+                            >
+                                Secure My Ritual Details
+                            </button>
+                            <p className="text-[10px] font-body text-muted-foreground/60 text-center mt-4 uppercase tracking-widest">
+                                Your data is protected by the sanctuary of our encryption.
+                            </p>
+                        </div>
                     </form>
                   </div>
                 </motion.div>
