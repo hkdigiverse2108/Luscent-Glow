@@ -164,12 +164,12 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
                 <span className="text-[9px] font-body font-bold text-gold/60 uppercase tracking-widest leading-none mb-1">Starting from</span>
               )}
               <span className="font-body text-lg font-bold text-charcoal tracking-tight">
-                ₹{(product.price ?? 0).toLocaleString()}
+                ₹{(currentPrice ?? 0).toLocaleString()}
               </span>
            </div>
-          {product.originalPrice && (
+          {originalPrice && (
             <span className="text-sm text-muted-foreground line-through font-body">
-              ₹{originalPrice.toLocaleString()}
+              ₹{(originalPrice ?? 0).toLocaleString()}
             </span>
           )}
         </div>

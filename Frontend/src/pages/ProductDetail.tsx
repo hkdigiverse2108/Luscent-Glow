@@ -421,16 +421,16 @@ const ProductDetail = () => {
             <div className="flex items-baseline gap-3 flex-wrap">
               {promoPrice ? (
                 <>
-                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{promoPrice.toLocaleString()}</span>
+                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(promoPrice ?? 0).toLocaleString()}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(product?.originalPrice || product?.price)?.toLocaleString()}</span>
-                    <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{parseDiscount(appliedPromotion.discountText)}% OFF</span>
+                    <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(product?.originalPrice || product?.price || 0).toLocaleString()}</span>
+                    <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{parseDiscount(appliedPromotion?.discountText ?? "0")}% OFF</span>
                   </div>
                 </>
               ) : (
                 <>
                   <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{product?.price?.toLocaleString() || "TBD"}</span>
-                  {product?.originalPrice && product.originalPrice > product.price && (
+                  {product && product.originalPrice && product.originalPrice > product.price && (
                     <div className="flex items-center gap-2">
                       <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{product.originalPrice.toLocaleString()}</span>
                       {product.discount > 0 && (

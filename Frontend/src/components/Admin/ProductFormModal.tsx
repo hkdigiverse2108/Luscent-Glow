@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Sparkles, Image as ImageIcon, Info, Plus, Trash2 } from "lucide-react";
+import { X, Save, Sparkles, Image as ImageIcon, Info, Plus, Trash2, Zap } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";

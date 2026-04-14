@@ -25,6 +25,8 @@ const AdminProducts = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [promotions, setPromotions] = useState<any[]>([]);
@@ -88,10 +90,14 @@ const AdminProducts = () => {
     setIsModalOpen(true);
   };
 
-  const filteredProducts = products.filter(p => 
-    (p.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.category || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = (p.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (p.category || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || p.category.toLowerCase() === selectedCategory.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
+
+  const availableCategories = ["all", ...new Set(products.map(p => p.category).filter(Boolean))];
 
   return (
     <div className="space-y-2 pb-4">
@@ -124,14 +130,64 @@ const AdminProducts = () => {
             }`}
           />
         </div>
-        <button className={`flex items-center gap-3 px-6 py-3 backdrop-blur-2xl border rounded-2xl transition-all duration-500 font-bold uppercase tracking-widest text-xs ${
-          isDark 
-          ? "bg-charcoal/40 border-white/5 text-white/40 hover:text-white hover:border-white/10" 
-          : "bg-white border-charcoal/5 text-charcoal/40 hover:text-charcoal hover:border-charcoal/10 shadow-sm"
-        }`}>
-          <Filter size={18} />
-          <span>Filter</span>
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className={`flex items-center gap-3 px-6 py-3 backdrop-blur-2xl border rounded-2xl transition-all duration-500 font-bold uppercase tracking-widest text-xs ${
+              isFilterOpen || selectedCategory !== "all"
+              ? "bg-gold text-charcoal border-gold" 
+              : isDark 
+                ? "bg-charcoal/40 border-white/5 text-white/40 hover:text-white hover:border-white/10" 
+                : "bg-white border-charcoal/5 text-charcoal/40 hover:text-charcoal hover:border-charcoal/10 shadow-sm"
+            }`}
+          >
+            <Filter size={18} />
+            <span>{selectedCategory === "all" ? "Filter" : selectedCategory}</span>
+          </button>
+
+          <AnimatePresence>
+            {isFilterOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className={`absolute right-0 mt-4 w-60 rounded-3xl border shadow-2xl z-50 p-2 overflow-hidden backdrop-blur-3xl ${
+                  isDark ? "bg-[#1a1a1a]/95 border-white/10" : "bg-white/95 border-charcoal/10"
+                }`}
+              >
+                {availableCategories.map((category: any) => (
+                  <button
+                    key={category}
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setIsFilterOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                      selectedCategory === category
+                      ? "bg-gold text-charcoal"
+                      : isDark ? "hover:bg-white/5 text-white/60" : "hover:bg-charcoal/5 text-charcoal/60"
+                    }`}
+                  >
+                    {category}
+                    {selectedCategory === category && <div className="w-1.5 h-1.5 rounded-full bg-charcoal" />}
+                  </button>
+                ))}
+                
+                {selectedCategory !== "all" && (
+                   <button
+                     onClick={() => {
+                       setSelectedCategory("all");
+                       setIsFilterOpen(false);
+                     }}
+                     className="w-full mt-2 py-3 text-[9px] font-black uppercase tracking-[0.2em] text-rose-500 hover:bg-rose-500/5 transition-all"
+                   >
+                     Clear Filter
+                   </button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Products Table */}
