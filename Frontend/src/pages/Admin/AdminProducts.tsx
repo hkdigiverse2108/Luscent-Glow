@@ -11,7 +11,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Package,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Zap
 } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ const AdminProducts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [promotions, setPromotions] = useState<any[]>([]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -42,8 +44,20 @@ const AdminProducts = () => {
     }
   };
 
+  const fetchPromotions = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/promotions/"));
+      if (response.ok) {
+        setPromotions(await response.json());
+      }
+    } catch (error) {
+      console.error("Error fetching promotions:", error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchPromotions();
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -200,6 +214,14 @@ const AdminProducts = () => {
                                <div className="flex items-center gap-3">
                                  <span className="text-[14px] font-bold line-through opacity-60">₹{p.originalPrice}</span>
                                  <span className="text-[14px] font-extrabold text-rose-500">-{p.discount}%</span>
+                               </div>
+                             )}
+                             {p.appliedPromotionId && (
+                               <div className="flex items-center gap-2 mt-1 px-2 py-0.5 bg-gold/10 border border-gold/20 rounded-lg w-fit">
+                                 <Zap size={10} className="text-gold fill-gold" />
+                                 <span className="text-[10px] font-black uppercase tracking-widest text-gold whitespace-nowrap">
+                                   {promotions.find(promo => promo._id === p.appliedPromotionId)?.discountText || "OFFER"}
+                                 </span>
                                </div>
                              )}
                           </div>

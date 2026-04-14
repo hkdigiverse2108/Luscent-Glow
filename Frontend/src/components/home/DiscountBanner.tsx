@@ -110,6 +110,19 @@ const DiscountBanner = ({ banner }: DiscountBannerProps) => {
                 </div>
                 
                 <div className="h-10 w-[1px] bg-white/20 mx-2 hidden lg:block invisible" />
+
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link
+                    to="/offers"
+                    className="group/btn flex items-center gap-3 px-10 py-5 bg-gold text-charcoal rounded-full font-body font-black uppercase tracking-[0.2em] text-[10px] hover:bg-white transition-all duration-500 shadow-2xl shadow-gold/20"
+                  >
+                    {activeBanner.buttonText || "Retrieve Offer"}
+                    <ArrowRight size={16} className="group-hover/btn:translate-x-1.5 transition-transform duration-500" />
+                  </Link>
+                </motion.div>
               </div>
             </div>
           </div>

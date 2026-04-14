@@ -51,8 +51,8 @@ const Footer = () => {
             {
               title: "Policies",
               links: [
-                { label: "Privacy Policy", path: "/privacy-policy" },
-                { label: "Terms & Conditions", path: "/terms-and-conditions" }
+                { label: "Privacy Policy", path: "/policy/privacy-policy" },
+                { label: "Terms & Conditions", path: "/policy/terms-and-conditions" }
               ]
             }
           ],

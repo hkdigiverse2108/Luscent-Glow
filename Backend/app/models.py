@@ -38,6 +38,7 @@ class ProductModel(BaseModel):
     description: Optional[str] = Field(default=None)
     ingredients: Optional[str] = Field(default=None)
     howToUse: Optional[str] = Field(default=None)
+    appliedPromotionId: Optional[str] = Field(default=None)
     seo: Optional[SEOModel] = Field(default=None)
 
     class Config:
@@ -80,6 +81,7 @@ class UpdateProductModel(BaseModel):
     description: Optional[str] = None
     ingredients: Optional[str] = None
     howToUse: Optional[str] = None
+    appliedPromotionId: Optional[str] = None
     seo: Optional[SEOModel] = None
 
     class Config:

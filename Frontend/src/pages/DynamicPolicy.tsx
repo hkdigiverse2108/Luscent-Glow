@@ -36,7 +36,9 @@ const DynamicPolicy = () => {
         const response = await fetch(getApiUrl(`/api/policies/${type}`));
         if (!response.ok) {
           if (response.status === 404) {
+            console.error(`Status 404: Policy type "${type}" not found.`);
             navigate("/404");
+            return;
           }
           throw new Error("Sanctuary Archive unreachable.");
         }
@@ -44,6 +46,7 @@ const DynamicPolicy = () => {
         setPolicy(data);
       } catch (error) {
         console.error("Error fetching policy:", error);
+        // If it's not a 404 (already handled), we just stay on the page but show nothing
       } finally {
         setLoading(false);
       }

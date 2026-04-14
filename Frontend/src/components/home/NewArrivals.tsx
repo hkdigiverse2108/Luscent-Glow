@@ -13,14 +13,24 @@ interface NewArrivalsProps {
 
 const NewArrivals = ({ title, subtitle }: NewArrivalsProps) => {
   const [newProducts, setNewProducts] = useState<Product[]>([]);
+  const [promotions, setPromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const parseDiscount = (text: string): number => {
+    const match = text.match(/(\d+)%/);
+    return match ? parseInt(match[1]) : 0;
+  };
 
   useEffect(() => {
     const fetchNew = async () => {
       try {
-        const response = await fetch(getApiUrl("/api/products/"));
-        if (response.ok) {
-          const data = await response.json();
+        const [prodRes, promoRes] = await Promise.all([
+          fetch(getApiUrl("/api/products/")),
+          fetch(getApiUrl("/api/promotions/"))
+        ]);
+
+        if (prodRes.ok) {
+          const data = await prodRes.json();
           const filtered = data.filter((p: Product) => p.isNew);
           
           if (filtered.length > 0) {
@@ -29,9 +39,11 @@ const NewArrivals = ({ title, subtitle }: NewArrivalsProps) => {
             const { products } = await import("@/data/products");
             setNewProducts(products.filter(p => p.isNew));
           }
-        } else {
-          const { products } = await import("@/data/products");
-          setNewProducts(products.filter(p => p.isNew));
+        }
+
+        if (promoRes.ok) {
+          const promoData = await promoRes.json();
+          setPromotions(promoData);
         }
       } catch (err) {
         console.error("Error fetching new arrivals:", err);
@@ -118,9 +130,33 @@ const NewArrivals = ({ title, subtitle }: NewArrivalsProps) => {
                 
                 <div className="flex flex-col gap-6">
                   <div className="flex items-center gap-6">
-                    <span className="font-body text-2xl font-bold text-foreground">
-                      ₹{product.price.toLocaleString()}
-                    </span>
+                    <div className="flex flex-col">
+                      {(() => {
+                        const promotion = promotions.find(p => p._id === product.appliedPromotionId);
+                        if (promotion) {
+                          const discount = parseDiscount(promotion.discountText || "");
+                          const promoPrice = Math.round((product.originalPrice || product.price) * (1 - discount / 100));
+                          return (
+                            <div className="flex items-center gap-4">
+                              <span className="font-body text-2xl font-bold text-foreground">
+                                ₹{promoPrice.toLocaleString()}
+                              </span>
+                              <span className="text-sm text-muted-foreground line-through opacity-50">
+                                ₹{(product.originalPrice || product.price).toLocaleString()}
+                              </span>
+                              <span className="px-2 py-0.5 bg-destructive text-white text-[9px] font-black rounded-full">
+                                {discount}% OFF
+                              </span>
+                            </div>
+                          );
+                        }
+                        return (
+                          <span className="font-body text-2xl font-bold text-foreground">
+                            ₹{product.price.toLocaleString()}
+                          </span>
+                        );
+                      })()}
+                    </div>
                     <div className="flex items-center gap-2">
                        <span className="w-8 h-[1px] bg-gold" />
                        <span className="text-gold font-body font-bold uppercase tracking-widest text-[10px]">Essential Collection</span>

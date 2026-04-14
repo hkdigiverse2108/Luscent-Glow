@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { Truck, RotateCcw, Shield, Minus, Plus, ShoppingBag, Heart, Star, Sparkles, Check, ChevronRight, Share2, Camera, MessageSquare, ChevronDown, ChevronUp, ThumbsUp } from "lucide-react";
+import { Truck, RotateCcw, Shield, Minus, Plus, ShoppingBag, Heart, Star, Sparkles, Check, ChevronRight, Share2, Camera, MessageSquare, ChevronDown, ChevronUp, ThumbsUp, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -24,6 +24,7 @@ const ProductDetail = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [appliedPromotion, setAppliedPromotion] = useState<any | null>(null);
   
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedShade, setSelectedShade] = useState(0);
@@ -155,6 +156,24 @@ const ProductDetail = () => {
     };
 
     fetchRelatedAndAlsoViewed();
+
+    const fetchAppliedPromotion = async () => {
+      if (product?.appliedPromotionId) {
+        try {
+          const response = await fetch(getApiUrl(`/api/promotions/`));
+          if (response.ok) {
+            const allPromos = await response.json();
+            const found = allPromos.find((p: any) => p._id === product.appliedPromotionId);
+            if (found) setAppliedPromotion(found);
+          }
+        } catch (err) {
+          console.error("Error fetching applied promotion:", err);
+        }
+      } else {
+        setAppliedPromotion(null);
+      }
+    };
+    fetchAppliedPromotion();
   }, [product]);
 
   const isWishlisted = product ? isInWishlist(product._id || product.id) : false;
@@ -230,6 +249,16 @@ const ProductDetail = () => {
     ogImage: product?.image,
     keywords: product?.tags?.join(", ") || "skincare, beauty, botanical"
   };
+
+  const parseDiscount = (text: string): number => {
+    if (!text) return 0;
+    const match = text.match(/(\d+)/);
+    return match ? parseInt(match[0]) : 0;
+  };
+
+  const promoPrice = appliedPromotion && product 
+    ? Math.round((product.originalPrice || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
+    : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -345,25 +374,58 @@ const ProductDetail = () => {
 
             {/* Price */}
             <div className="flex items-baseline gap-3 flex-wrap">
-              <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{product?.price?.toLocaleString() || "TBD"}</span>
-              {product?.originalPrice && (
-                <div className="flex items-center gap-2">
-                  <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{product.originalPrice.toLocaleString()}</span>
-                  <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{product.discount || "10"}% OFF</span>
-                </div>
+              {promoPrice ? (
+                <>
+                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{promoPrice.toLocaleString()}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(product?.originalPrice || product?.price)?.toLocaleString()}</span>
+                    <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{parseDiscount(appliedPromotion.discountText)}% OFF</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{product?.price?.toLocaleString() || "TBD"}</span>
+                  {product?.originalPrice && product.originalPrice > product.price && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{product.originalPrice.toLocaleString()}</span>
+                      {product.discount > 0 && (
+                        <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{product.discount}% OFF</span>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
             <p className="text-xs font-body text-muted-foreground">Inclusive of all taxes</p>
 
             {/* Offer */}
-            {product.discount && product.discount >= 25 && (
+            {appliedPromotion ? (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-gold/10 border border-gold/20 rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-gold/5 blur-2xl -mr-8 -mt-8" />
+                <div className="w-10 h-10 rounded-xl bg-gold/20 flex items-center justify-center text-gold shadow-lg flex-shrink-0">
+                  <Zap size={20} className="fill-gold" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gold">{appliedPromotion.subtitle || "EXCLUSIVE OFFER"}</span>
+                    <span className="w-1 h-1 rounded-full bg-gold/30" />
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gold">{appliedPromotion.discountText}</span>
+                  </div>
+                  <h4 className="text-sm font-display font-bold text-charcoal leading-tight mt-1">{appliedPromotion.title}</h4>
+                </div>
+              </motion.div>
+            ) : (product.discount && product.discount >= 25) ? (
               <div className="bg-gold/10 border border-gold/20 rounded-lg p-3">
                 <p className="text-sm font-body text-gold font-medium">
                   🎉 Use code <span className="font-bold">EXTRA10</span> for additional 10% off
                 </p>
               </div>
-            )}
+            ) : null}
 
             {/* Shades */}
             {product.shades && (
@@ -482,18 +544,18 @@ const ProductDetail = () => {
           </div>
           <div className="py-8 max-w-3xl">
             {activeTab === "description" && (
-              <p className="text-sm font-body text-muted-foreground leading-relaxed">
-                {product.description || "A premium product from Luscent Glow, crafted with the finest ingredients for a luxurious experience. Our commitment to quality ensures that every product meets the highest standards of excellence."}
+              <p className="text-sm font-body text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {product.description || "No description available for this ritual."}
               </p>
             )}
             {activeTab === "ingredients" && (
-              <p className="text-sm font-body text-muted-foreground leading-relaxed">
-                {product.ingredients || "Please refer to the product packaging for the complete list of ingredients. All Luscent Glow products are cruelty-free and dermatologically tested."}
+              <p className="text-sm font-body text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {product.ingredients || "Ingredients are listed on the physical packaging. For sensitive skin, we recommend a patch test."}
               </p>
             )}
             {activeTab === "how to use" && (
-              <p className="text-sm font-body text-muted-foreground leading-relaxed">
-                {product.howToUse || "Follow the instructions on the product packaging for best results. For detailed application tips, visit our blog."}
+              <p className="text-sm font-body text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                {product.howToUse || "Follow the application ritual specified on the product vessel for optimal radiance."}
               </p>
             )}
             {activeTab === "reviews" && (

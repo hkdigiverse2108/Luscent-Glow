@@ -13,6 +13,7 @@ interface TrendingSectionProps {
 const TrendingSection = ({ title, subtitle }: TrendingSectionProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [trending, setTrending] = useState<Product[]>([]);
+  const [promotions, setPromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -21,9 +22,13 @@ const TrendingSection = ({ title, subtitle }: TrendingSectionProps) => {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const response = await fetch(getApiUrl("/api/products/"));
-        if (response.ok) {
-          const data = await response.json();
+        const [prodRes, promoRes] = await Promise.all([
+          fetch(getApiUrl("/api/products/")),
+          fetch(getApiUrl("/api/promotions/"))
+        ]);
+
+        if (prodRes.ok) {
+          const data = await prodRes.json();
           const filtered = data.filter((p: Product) => p.isTrending);
           
           if (filtered.length > 0) {
@@ -32,9 +37,11 @@ const TrendingSection = ({ title, subtitle }: TrendingSectionProps) => {
             const { products } = await import("@/data/products");
             setTrending(products.filter(p => p.isTrending));
           }
-        } else {
-          const { products } = await import("@/data/products");
-          setTrending(products.filter(p => p.isTrending));
+        }
+
+        if (promoRes.ok) {
+          const promoData = await promoRes.json();
+          setPromotions(promoData);
         }
       } catch (err) {
         console.error("Error fetching trending:", err);
@@ -156,7 +163,10 @@ const TrendingSection = ({ title, subtitle }: TrendingSectionProps) => {
                   className="min-w-[240px] xs:min-w-[280px] max-w-[280px] snap-start"
                 >
                   <div className="hover-lift transition-all duration-500">
-                    <ProductCard product={product} />
+                    <ProductCard 
+                      product={product} 
+                      promotion={promotions.find(p => p._id === product.appliedPromotionId)}
+                    />
                   </div>
                 </motion.div>
               ))

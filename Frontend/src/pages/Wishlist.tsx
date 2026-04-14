@@ -11,6 +11,19 @@ import { useCart } from "@/context/CartContext";
 const Wishlist = () => {
   const { wishlist, clearWishlist, toggleWishlist } = useWishlist();
   const { items, addItem, updateQuantity } = useCart();
+  const [promotions, setPromotions] = React.useState<any[]>([]);
+
+  const parseDiscount = (text: string): number => {
+    const match = text.match(/(\d+)%/);
+    return match ? parseInt(match[1]) : 0;
+  };
+
+  React.useEffect(() => {
+    fetch(getApiUrl("/api/promotions/"))
+      .then(res => res.json())
+      .then(data => setPromotions(data))
+      .catch(err => console.error("Error fetching promotions in wishlist:", err));
+  }, []);
 
   const handleMoveToBag = (product: any) => {
     const productId = product._id || product.id;
@@ -28,7 +41,14 @@ const Wishlist = () => {
       addItem({
         id: productId,
         name: product.name,
-        price: product.price,
+        price: (() => {
+          const promotion = promotions.find(p => p._id === product.appliedPromotionId);
+          if (promotion) {
+            const discount = parseDiscount(promotion.discountText || "");
+            return Math.round((product.originalPrice || product.price) * (1 - discount / 100));
+          }
+          return product.price;
+        })(),
         image: product.image,
         category: product.category,
         quantity: 1
@@ -110,7 +130,10 @@ const Wishlist = () => {
                     className="group"
                   >
                     <div className="relative">
-                      <ProductCard product={product} />
+                      <ProductCard 
+                        product={product} 
+                        promotion={promotions.find(p => p._id === product.appliedPromotionId)}
+                      />
                       <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
                         <button 
                           onClick={() => toggleWishlist(product)}

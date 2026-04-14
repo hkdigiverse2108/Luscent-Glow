@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { SlidersHorizontal, X, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
@@ -41,6 +41,7 @@ const Products = () => {
   const [sortBy, setSortBy] = useState("relevance");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
+  const [promotions, setPromotions] = useState<any[]>([]);
   const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
   const [dynamicPriceRanges, setDynamicPriceRanges] = useState<any[]>(DEFAULT_PRICE_RANGES);
   const [loading, setLoading] = useState(true);
@@ -55,10 +56,11 @@ const Products = () => {
     const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const [prodRes, catRes, settingsRes] = await Promise.all([
+        const [prodRes, catRes, settingsRes, promoRes] = await Promise.all([
           fetch(getApiUrl("/api/products/")),
           fetch(getApiUrl("/api/categories/?hide_empty=true")),
-          fetch(getApiUrl("/api/settings/global/"))
+          fetch(getApiUrl("/api/settings/global/")),
+          fetch(getApiUrl("/api/promotions/"))
         ]);
 
         if (prodRes.ok) {
@@ -71,6 +73,11 @@ const Products = () => {
         if (catRes.ok) {
           const cats = await catRes.json();
           if (cats.length > 0) setDynamicCategories(cats);
+        }
+
+        if (promoRes.ok) {
+          const promoData = await promoRes.json();
+          setPromotions(promoData);
         }
 
         if (settingsRes.ok) {
@@ -202,10 +209,32 @@ const Products = () => {
       <Header />
       <main className="container mx-auto px-4 py-6 md:py-8 lg:py-12">
         {/* Breadcrumb */}
-        <p className="text-[10px] md:text-xs font-body font-bold text-muted-foreground mb-4 md:md-6 tracking-widest opacity-70">
-          Home / {selectedCategory ? dynamicCategories.find((c) => c.slug === selectedCategory)?.name : "All Products"}
-          {searchParam && <span className="text-gold font-medium"> / Searching for "{searchParam}"</span>}
-        </p>
+        <nav className="text-[10px] md:text-xs font-body font-bold text-muted-foreground mb-4 md:md-6 tracking-widest flex items-center gap-2 flex-wrap">
+          <Link to="/" className="hover:text-gold transition-colors opacity-70 hover:opacity-100 uppercase">Home</Link>
+          <span className="opacity-30">/</span>
+          {selectedCategory ? (
+            <>
+              <button 
+                onClick={clearFilters}
+                className="hover:text-gold transition-colors opacity-70 hover:opacity-100 uppercase"
+              >
+                All Products
+              </button>
+              <span className="opacity-30">/</span>
+              <span className="text-foreground opacity-90 uppercase">
+                {dynamicCategories.find((c) => c.slug === selectedCategory)?.name}
+              </span>
+            </>
+          ) : (
+            <span className="text-foreground opacity-90 uppercase">All Products</span>
+          )}
+          {searchParam && (
+             <>
+               <span className="opacity-30">/</span>
+               <span className="text-gold font-medium uppercase italic">Searching for "{searchParam}"</span>
+             </>
+          )}
+        </nav>
 
         <div className="flex gap-8">
           {/* Desktop Sidebar */}
@@ -271,7 +300,10 @@ const Products = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
                   >
-                    <ProductCard product={product} />
+                    <ProductCard 
+                  product={product} 
+                  promotion={promotions.find(p => p._id === product.appliedPromotionId)}
+                />
                   </motion.div>
                 ))}
               </div>
