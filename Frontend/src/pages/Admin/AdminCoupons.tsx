@@ -117,7 +117,7 @@ const AdminCoupons = () => {
                 <div className="space-y-1">
                   <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Discount</p>
                   <p className="text-lg font-display font-bold text-gold">
-                    {coupon.discountType === "percentage" ? `${coupon.value}%` : coupon.discountType === "fixed" ? `₹${coupon.value}` : "Free Ship"}
+                    {coupon.discountType === "percentage" ? `${coupon.value}%` : coupon.discountType === "fixed" ? `₹${coupon.value}` : (coupon.value > 0 ? `₹${coupon.value} Fee` : "Free Ship")}
                   </p>
                 </div>
                 <div className="space-y-1">

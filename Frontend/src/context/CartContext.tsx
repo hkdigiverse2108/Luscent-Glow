@@ -55,6 +55,8 @@ interface CartContextType {
   availableCoupons: Coupon[];
   fetchReceivedGiftCards: () => Promise<void>;
   syncCart: () => Promise<void>;
+  shippingSettings: { threshold: number; fee: number };
+  refreshSettings: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -95,6 +97,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [receivedGiftCards, setReceivedGiftCards] = useState<AppliedGiftCard[]>([]);
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
+  const [shippingSettings, setShippingSettings] = useState({ threshold: 0, fee: 0 });
+
+  const refreshSettings = useCallback(async () => {
+    try {
+      // Global shipping settings are now driven exclusively from the 'FREESHIP' coupon
+      const response = await fetch(getApiUrl("/api/coupons/"));
+      if (response.ok) {
+        const coupons = await response.json();
+        const masterCoupon = coupons.find((c: any) => c.code.toUpperCase() === 'FREESHIP');
+        if (masterCoupon && masterCoupon.isActive) {
+          setShippingSettings({
+            threshold: Number(masterCoupon.minPurchase) || 0,
+            fee: Number(masterCoupon.value) || 0
+          });
+        }
+        setAvailableCoupons(coupons);
+      }
+    } catch (error) {
+      console.error("Error syncing shipping rules from coupons:", error);
+    }
+  }, []);
 
   const fetchCoupons = useCallback(async () => {
     try {
@@ -142,14 +165,36 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    refreshSettings();
     fetchCoupons();
     fetchServerCart();
     fetchReceivedGiftCards();
-  }, [fetchCoupons, fetchServerCart, fetchReceivedGiftCards]);
+  }, [refreshSettings, fetchCoupons, fetchServerCart, fetchReceivedGiftCards]);
 
   useEffect(() => {
     localStorage.setItem("luscent-glow-cart", JSON.stringify(items));
   }, [items]);
+
+  useEffect(() => {
+    if (appliedCoupon && availableCoupons.length > 0) {
+      const freshCoupon = availableCoupons.find(c => c.code.toUpperCase() === appliedCoupon.code.toUpperCase());
+      if (freshCoupon) {
+        if (
+          freshCoupon.value !== appliedCoupon.value || 
+          freshCoupon.discountType !== appliedCoupon.discountType || 
+          freshCoupon.isActive !== appliedCoupon.isActive
+        ) {
+          if (!freshCoupon.isActive) {
+            setAppliedCoupon(null);
+            toast.error("The applied coupon has been deactivated");
+          } else {
+            setAppliedCoupon(freshCoupon);
+          }
+        }
+      }
+    }
+  }, [availableCoupons]);
+
 
   useEffect(() => {
     if (appliedCoupon) {
@@ -318,6 +363,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.error("This coupon is no longer active");
         return false;
       }
+      if (subtotal < (coupon.minPurchase || 0)) {
+        toast.error(`Order total must be at least ₹${coupon.minPurchase} for this coupon`);
+        return false;
+      }
       if (appliedGiftCard) {
         setAppliedGiftCard(null);
         toast.info("Gift card removed. Only one offer can be applied at a time.");
@@ -373,10 +422,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   if (appliedCoupon) {
     if (appliedCoupon.discountType === "percentage") discountAmount = (subtotal * appliedCoupon.value) / 100;
     else if (appliedCoupon.discountType === "fixed") discountAmount = appliedCoupon.value;
-    else if (appliedCoupon.discountType === "shipping") discountAmount = 50;
+    else if (appliedCoupon.discountType === "shipping") discountAmount = appliedCoupon.value;
   }
 
   const giftCardDiscount = appliedGiftCard ? Math.min(subtotal - discountAmount, appliedGiftCard.balance) : 0;
+
+  // Re-validate coupon minimum purchase continuously
+  useEffect(() => {
+    if (appliedCoupon && subtotal < (appliedCoupon.minPurchase || 0)) {
+       setAppliedCoupon(null);
+       toast.info(`Coupon ${appliedCoupon.code} removed: Order total must be at least ₹${appliedCoupon.minPurchase}`);
+    }
+  }, [subtotal, appliedCoupon]);
 
   return (
     <CartContext.Provider
@@ -400,7 +457,9 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         receivedGiftCards,
         availableCoupons,
         fetchReceivedGiftCards,
-        syncCart: fetchServerCart
+        syncCart: fetchServerCart,
+        shippingSettings,
+        refreshSettings
       }}
     >
       {children}

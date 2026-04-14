@@ -57,8 +57,14 @@ const Cart = () => {
     giftCardDiscount,
     receivedGiftCards,
     availableCoupons,
-    fetchReceivedGiftCards
+    fetchReceivedGiftCards,
+    shippingSettings,
+    refreshSettings
   } = useCart();
+
+  useEffect(() => {
+    refreshSettings();
+  }, [refreshSettings]);
   const { user } = useAuth();
   const { toggleWishlist, isInWishlist } = useWishlist();
   
@@ -112,9 +118,16 @@ const Cart = () => {
     toast.success("All items moved to wishlist");
   };
 
-  const shipping = subtotal >= 999 ? 0 : 50; 
+  const baseShipping = subtotal >= shippingSettings.threshold ? 0 : shippingSettings.fee;
+  const shipping = appliedCoupon?.discountType === "shipping" ? appliedCoupon.value : baseShipping;
   const tax = 0; 
-  const total = Math.max(0, subtotal + shipping + tax - discountAmount - giftCardDiscount);
+  
+  // Calculate final discount - if it's a shipping coupon, cap it at the actual shipping cost
+  const finalDiscountAmount = (appliedCoupon?.discountType === "shipping")
+    ? Math.min(shipping, discountAmount)
+    : discountAmount;
+
+  const total = Math.max(0, subtotal + shipping + tax - finalDiscountAmount - giftCardDiscount);
 
   const handleApplyGiftCard = () => {
     if (!giftCardInput.trim()) return;
@@ -126,7 +139,7 @@ const Cart = () => {
     navigate("/checkout");
   };
 
-  const freeShippingThreshold = 999;
+  const freeShippingThreshold = shippingSettings.threshold;
   const progressToFreeShipping = Math.min((subtotal / freeShippingThreshold) * 100, 100);
 
   if (orderComplete) {

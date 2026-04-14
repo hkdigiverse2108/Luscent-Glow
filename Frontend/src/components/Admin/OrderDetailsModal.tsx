@@ -325,7 +325,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderDeta
                         </div>
                         <div className="flex justify-between text-[11px] font-bold uppercase tracking-widest opacity-40">
                            <span>Shipping</span>
-                           <span className="italic">FREE</span>
+                           <span>{order.shippingCharges && order.shippingCharges > 0 ? `₹${order.shippingCharges}` : "FREE"}</span>
                         </div>
                      </div>
                      
