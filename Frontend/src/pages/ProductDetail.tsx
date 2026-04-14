@@ -40,14 +40,56 @@ const ProductDetail = () => {
   // Gallery Sanctuary States
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
+  const [variantImageOverride, setVariantImageOverride] = useState<string | null>(null);
 
   // Aggregate all customer images for the sanctuary
   const allCustomerImages = reviews.flatMap(r => r.images || []);
+
+  const parseDiscount = (text: string): number => {
+    if (!text) return 0;
+    const match = text.match(/(\d+)/);
+    return match ? parseInt(match[0]) : 0;
+  };
+
+  // Dynamic Option Extraction - Priority to Variations
+  const variantShades = [...new Set((product?.variants || []).map(v => v.color).filter(Boolean).filter(s => s !== null && s !== ""))];
+  const variantSizes = [...new Set((product?.variants || []).map(v => v.size).filter(Boolean).filter(s => s !== null && s !== ""))];
+
+  const displayShades = variantShades.length > 0 
+    ? variantShades 
+    : (product?.shades && product.shades.length > 0 ? product.shades : []);
+    
+  const displaySizes = variantSizes.length > 0
+    ? variantSizes
+    : (product?.sizes && product.sizes.length > 0 ? product.sizes : []);
+
+  // Variant Resolution Logic
+  const getActiveVariant = () => {
+    if (!product || !product.variants || product.variants.length === 0) return null;
+    
+    // Safety check for indices
+    const safeShadeIndex = selectedShade >= displayShades.length ? 0 : selectedShade;
+    const safeSizeIndex = selectedSize >= displaySizes.length ? 0 : selectedSize;
+
+    const selectedShadeLabel = displayShades.length > 0 ? displayShades[safeShadeIndex] : null;
+    const selectedSizeLabel = displaySizes.length > 0 ? displaySizes[safeSizeIndex] : null;
+
+    return product.variants.find((v: any) => {
+      // If a label exists in our display list, it MUST match the variation field
+      const matchShade = !selectedShadeLabel || v.color === selectedShadeLabel;
+      const matchSize = !selectedSizeLabel || v.size === selectedSizeLabel;
+      return matchShade && matchSize;
+    }) || null;
+  };
+
+  const activeVariant = getActiveVariant();
 
   const openGallery = (index: number = 0) => {
     setCurrentGalleryIndex(index);
     setIsGalleryModalOpen(true);
   };
+
+  // ─── Effects ─────────────────────────────────────────────────────────────
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -129,6 +171,7 @@ const ProductDetail = () => {
       fetchReviews();
     }
   }, [product?.id, product?._id, activeTab]);
+
   useEffect(() => {
     const fetchRelatedAndAlsoViewed = async () => {
       if (!product) return;
@@ -156,8 +199,11 @@ const ProductDetail = () => {
     };
 
     fetchRelatedAndAlsoViewed();
+  }, [product]);
 
+  useEffect(() => {
     const fetchAppliedPromotion = async () => {
+      if (!product) return;
       const promoId = activeVariant?.appliedPromotionId || product?.appliedPromotionId;
       if (promoId) {
         try {
@@ -178,80 +224,14 @@ const ProductDetail = () => {
     fetchAppliedPromotion();
   }, [product, activeVariant]);
 
-  const isWishlisted = product ? isInWishlist(product._id || product.id) : false;
-
-  // Dynamic Option Extraction
-  // Dynamic Option Extraction - Priority to Variations
-  const variantShades = [...new Set((product?.variants || []).map(v => v.color).filter(Boolean).filter(s => s !== null && s !== ""))];
-  const variantSizes = [...new Set((product?.variants || []).map(v => v.size).filter(Boolean).filter(s => s !== null && s !== ""))];
-
-  const displayShades = variantShades.length > 0 
-    ? variantShades 
-    : (product?.shades && product.shades.length > 0 ? product.shades : []);
-    
-  const displaySizes = variantSizes.length > 0
-    ? variantSizes
-    : (product?.sizes && product.sizes.length > 0 ? product.sizes : []);
-
-  // Variant Resolution Logic
-  const getActiveVariant = () => {
-    if (!product || !product.variants || product.variants.length === 0) return null;
-    
-    // Safety check for indices
-    const safeShadeIndex = selectedShade >= displayShades.length ? 0 : selectedShade;
-    const safeSizeIndex = selectedSize >= displaySizes.length ? 0 : selectedSize;
-
-    const selectedShadeLabel = displayShades.length > 0 ? displayShades[safeShadeIndex] : null;
-    const selectedSizeLabel = displaySizes.length > 0 ? displaySizes[safeSizeIndex] : null;
-
-    return product.variants.find((v: any) => {
-      // If a label exists in our display list, it MUST match the variation field
-      const matchShade = !selectedShadeLabel || v.color === selectedShadeLabel;
-      const matchSize = !selectedSizeLabel || v.size === selectedSizeLabel;
-      return matchShade && matchSize;
-    }) || null;
-  };
-
-  const activeVariant = getActiveVariant();
-  const displayPrice = activeVariant ? activeVariant.price : product?.price;
-  const displayOriginalPrice = product?.originalPrice;
-  const displayDiscount = activeVariant && activeVariant.originalPrice 
-    ? Math.round(((activeVariant.originalPrice - activeVariant.price) / activeVariant.originalPrice) * 100)
-    : product?.discount;
-
-  const handleAddToCart = () => {
-    if (!product) return;
-    addItem({
-      id: product._id || product.id,
-      name: product.name,
-      price: promoPrice || displayPrice || 0,
-      image: product.image,
-      category: product.category,
-      quantity: quantity,
-      selectedShade: activeVariant?.color || (product.shades ? product.shades[selectedShade] : undefined),
-      selectedSize: activeVariant?.size || (product.sizes ? product.sizes[selectedSize] : undefined),
-    });
-    
-    if (isWishlisted) {
-      toggleWishlist(product);
+  // Variant Image Logic: Swap main image when variant changes
+  useEffect(() => {
+    if (activeVariant?.image) {
+      setVariantImageOverride(activeVariant.image);
     }
-  };
+  }, [activeVariant?.id]);
 
-  const handleBuyNow = () => {
-    if (!product) return;
-    const directBuyItem = {
-      id: product._id || product.id,
-      name: product.name,
-      price: promoPrice || displayPrice || product.price,
-      image: product.image,
-      category: product.category,
-      quantity: quantity,
-      selectedShade: activeVariant?.color || (product.shades ? product.shades[selectedShade] : undefined),
-      selectedSize: activeVariant?.size || (product.sizes ? product.sizes[selectedSize] : undefined),
-    };
-    navigate("/checkout", { state: { directBuyItem } });
-  };
-
+  // Guards for initial loading and error states
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -287,12 +267,53 @@ const ProductDetail = () => {
     );
   }
 
-  const shadeColors: Record<string, string> = {
-    "Rose Petal": "#d4818a", "Berry Crush": "#8b2252", "Nude Bliss": "#c9a68e", "Crimson Red": "#b22222",
-    "Ivory": "#faf0e6", "Sand": "#deb887", "Honey": "#d4a017", "Caramel": "#a0522d", "Mocha": "#6b4226", "Espresso": "#3c1414",
-    "Cherry": "#de3163", "Blush": "#f5c6cb", "Nude": "#d2b48c", "Plum": "#8e4585", "Coral": "#ff7f50",
-    "Blonde": "#f0d5a0", "Brunette": "#7b5b3a", "Dark Brown": "#4a3728", "Black": "#1a1a1a",
+  // After this point, 'product' is guaranteed to be non-null
+  const isWishlisted = isInWishlist(product._id || product.id);
+
+  // Prices are calculated here once product is guaranteed, but the logic is now moved higher to avoid scoping issues.
+  const displayPrice = activeVariant ? activeVariant.price : product.price;
+  const displayOriginalPrice = product.originalPrice;
+  const displayDiscount = (activeVariant && activeVariant.originalPrice && activeVariant.originalPrice > 0)
+    ? Math.round(((activeVariant.originalPrice - activeVariant.price) / activeVariant.originalPrice) * 100)
+    : product.discount;
+
+  const promoPrice = appliedPromotion 
+    ? Math.round((activeVariant?.price || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
+    : null;
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addItem({
+      id: product._id || product.id,
+      name: product.name,
+      price: promoPrice || displayPrice || 0,
+      image: product.image,
+      category: product.category,
+      quantity: quantity,
+      selectedShade: activeVariant?.color || (product.shades ? product.shades[selectedShade] : undefined),
+      selectedSize: activeVariant?.size || (product.sizes ? product.sizes[selectedSize] : undefined),
+    });
+    
+    if (isWishlisted) {
+      toggleWishlist(product);
+    }
   };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+    const directBuyItem = {
+      id: product._id || product.id,
+      name: product.name,
+      price: promoPrice || displayPrice || product.price,
+      image: product.image,
+      category: product.category,
+      quantity: quantity,
+      selectedShade: activeVariant?.color || (product.shades ? product.shades[selectedShade] : undefined),
+      selectedSize: activeVariant?.size || (product.sizes ? product.sizes[selectedSize] : undefined),
+    };
+    navigate("/checkout", { state: { directBuyItem } });
+  };
+
 
   const productSEO = (product as any)?.seo?.title?.trim() ? (product as any).seo : {
     title: product ? `${product.name} | ${product.brand} | Luscent Glow` : "Product Details | Luscent Glow",
@@ -301,15 +322,12 @@ const ProductDetail = () => {
     keywords: product?.tags?.join(", ") || "skincare, beauty, botanical"
   };
 
-  const parseDiscount = (text: string): number => {
-    if (!text) return 0;
-    const match = text.match(/(\d+)/);
-    return match ? parseInt(match[0]) : 0;
+  const shadeColors: Record<string, string> = {
+    "Rose Petal": "#d4818a", "Berry Crush": "#8b2252", "Nude Bliss": "#c9a68e", "Crimson Red": "#b22222",
+    "Ivory": "#faf0e6", "Sand": "#deb887", "Honey": "#d4a017", "Caramel": "#a0522d", "Mocha": "#6b4226", "Espresso": "#3c1414",
+    "Cherry": "#de3163", "Blush": "#f5c6cb", "Nude": "#d2b48c", "Plum": "#8e4585", "Coral": "#ff7f50",
+    "Blonde": "#f0d5a0", "Brunette": "#7b5b3a", "Dark Brown": "#4a3728", "Black": "#1a1a1a",
   };
-
-  const promoPrice = appliedPromotion && product 
-    ? Math.round((activeVariant?.price || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
-    : null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -320,7 +338,7 @@ const ProductDetail = () => {
           <Link to="/" className="hover:text-gold transition-colors opacity-70 hover:opacity-100">Home</Link>
           <span className="opacity-30">/</span>
           <Link 
-            to={`/products?category=${product.category?.toLowerCase()}`} 
+            to={`/products?category=${(product.category || "Collection").toLowerCase()}`} 
             className="hover:text-gold transition-colors opacity-70 hover:opacity-100"
           >
             {product.category || "Collection"}
@@ -346,9 +364,12 @@ const ProductDetail = () => {
                   {product.images.map((img: string, idx: number) => (
                     <button
                       key={idx}
-                      onClick={() => setSelectedImage(idx)}
+                      onClick={() => {
+                        setSelectedImage(idx);
+                        setVariantImageOverride(null);
+                      }}
                       className={`relative w-full aspect-square rounded-xl overflow-hidden border transition-all duration-300 ${
-                        selectedImage === idx ? "border-charcoal shadow-md scale-105" : "border-transparent opacity-50 hover:opacity-100"
+                        selectedImage === idx && !variantImageOverride ? "border-charcoal shadow-md scale-105" : "border-transparent opacity-50 hover:opacity-100"
                       }`}
                     >
                       <img src={getAssetUrl(img)} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
@@ -376,7 +397,7 @@ const ProductDetail = () => {
             {/* Main Image */}
             <div className="w-full flex-1 aspect-square rounded-[2rem] overflow-hidden bg-[#faf9f6] cursor-zoom-in group relative shadow-lg border border-gold/5">
               <img
-                src={getAssetUrl(product.images?.[selectedImage] || product.image)}
+                src={getAssetUrl(variantImageOverride || product.images?.[selectedImage] || product.image)}
                 alt={product.name}
                 className="w-full h-full object-cover object-center group-hover:scale-[1.35] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center bg-white"
               />
@@ -386,13 +407,16 @@ const ProductDetail = () => {
             {product.images && product.images.length > 1 && (
               <div className="flex sm:hidden gap-3 overflow-x-auto w-full pb-2 pt-4 scrollbar-hide">
                 {product.images.map((img: string, idx: number) => (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedImage(idx)}
-                    className={`relative w-16 h-16 rounded-xl overflow-hidden border transition-all duration-300 flex-shrink-0 ${
-                      selectedImage === idx ? "border-charcoal shadow-sm" : "border-transparent opacity-50 hover:opacity-100"
-                    }`}
-                  >
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setSelectedImage(idx);
+                    setVariantImageOverride(null);
+                  }}
+                  className={`relative w-16 h-16 rounded-xl overflow-hidden border transition-all duration-300 flex-shrink-0 ${
+                    selectedImage === idx && !variantImageOverride ? "border-charcoal shadow-sm" : "border-transparent opacity-50 hover:opacity-100"
+                  }`}
+                >
                     <img src={getAssetUrl(img)} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
