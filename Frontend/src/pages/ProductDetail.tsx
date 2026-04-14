@@ -228,8 +228,10 @@ const ProductDetail = () => {
   useEffect(() => {
     if (activeVariant?.image) {
       setVariantImageOverride(activeVariant.image);
+    } else {
+      setVariantImageOverride(null);
     }
-  }, [activeVariant?.id]);
+  }, [activeVariant?.id, activeVariant?.image]);
 
   // Guards for initial loading and error states
   if (loading) {
