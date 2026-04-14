@@ -546,7 +546,7 @@ const ProductDetail = () => {
                       className={`w-8 h-8 rounded-full border-2 transition-all ${
                         i === selectedShade ? "border-gold scale-110" : "border-border"
                       }`}
-                      style={{ backgroundColor: (shadeColors as any)[shade] || "#ccc" }}
+                      style={{ backgroundColor: (shadeColors as any)[shade] || (shadeColors as any)[shade.charAt(0).toUpperCase() + shade.slice(1).toLowerCase()] || "#ccc" }}
                       title={shade}
                     />
                   ))}

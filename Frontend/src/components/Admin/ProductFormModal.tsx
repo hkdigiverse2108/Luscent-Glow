@@ -8,6 +8,14 @@ import { categories } from "@/data/products";
 import SEOForm from "./SEOForm";
 
 
+const shadeColors: Record<string, string> = {
+  "Rose Petal": "#d4818a", "Berry Crush": "#8b2252", "Nude Bliss": "#c9a68e", "Crimson Red": "#b22222",
+  "Ivory": "#faf0e6", "Sand": "#deb887", "Honey": "#d4a017", "Caramel": "#a0522d", "Mocha": "#6b4226", "Espresso": "#3c1414",
+  "Cherry": "#de3163", "Blush": "#f5c6cb", "Nude": "#d2b48c", "Plum": "#8e4585", "Coral": "#ff7f50",
+  "Blonde": "#f0d5a0", "Brunette": "#7b5b3a", "Dark Brown": "#4a3728", "Black": "#1a1a1a",
+};
+
+
 interface ProductFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -17,6 +25,14 @@ interface ProductFormModalProps {
 
 const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormModalProps) => {
   const { isDark } = useAdminTheme();
+
+  const getColor = (colorName: string) => {
+    if (!colorName) return null;
+    return shadeColors[colorName] || 
+           shadeColors[colorName.charAt(0).toUpperCase() + colorName.slice(1).toLowerCase()] || 
+           null;
+  };
+
   const [formData, setFormData] = useState<any>({
     name: "",
     brand: "Lucsent Glow",
@@ -679,14 +695,21 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                                    </div>
                                  ))}
                                  
-                                 {/* Add More Variant Image */}
+                                  {/* Add More Variant Image */}
                                  <div 
                                    onClick={() => document.getElementById(`variant-image-${variant.id}`)?.click()}
-                                   className={`w-14 h-14 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-gold/50 transition-colors ${
+                                   className={`w-14 h-14 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-gold/50 transition-all duration-500 relative overflow-hidden ${
                                      isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
                                    }`}
+                                   style={{ 
+                                     backgroundColor: (variant.images?.length === 0 && getColor(variant.color)) ? getColor(variant.color) : undefined,
+                                     borderColor: (variant.images?.length === 0 && getColor(variant.color)) ? 'transparent' : undefined
+                                   }}
                                  >
-                                    <Plus size={16} className="text-gold" />
+                                    <Plus size={16} className={`${(variant.images?.length === 0 && getColor(variant.color)) ? "text-white shadow-sm" : "text-gold"}`} />
+                                    {variant.images?.length === 0 && getColor(variant.color) && (
+                                       <div className="absolute inset-0 bg-black/10 hover:bg-black/0 transition-colors" />
+                                    )}
                                     <input 
                                       id={`variant-image-${variant.id}`}
                                       type="file" 
@@ -698,7 +721,12 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                               </div>
                            </div>
                           <div className="space-y-3">
-                             <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Color / Shade</label>
+                              <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1 flex items-center gap-2">
+                                 Color / Shade
+                                 {getColor(variant.color) && (
+                                   <div className="w-2 h-2 rounded-full shadow-sm" style={{ backgroundColor: getColor(variant.color) }} />
+                                 )}
+                              </label>
                              <input 
                                value={variant.color}
                                onChange={(e) => updateVariant(variant.id, "color", e.target.value)}
