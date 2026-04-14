@@ -197,8 +197,18 @@ const ProductDetail = () => {
   };
 
   const handleBuyNow = () => {
-    handleAddToCart();
-    navigate("/cart");
+    if (!product) return;
+    const directBuyItem = {
+      id: product._id || product.id,
+      name: product.name,
+      price: promoPrice || product.price,
+      image: product.image,
+      category: product.category,
+      quantity: quantity,
+      selectedShade: product.shades ? product.shades[selectedShade] : undefined,
+      selectedSize: product.sizes ? product.sizes[selectedSize] : undefined,
+    };
+    navigate("/checkout", { state: { directBuyItem } });
   };
 
   if (loading) {

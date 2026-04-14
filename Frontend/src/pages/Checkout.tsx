@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ChevronLeft, 
@@ -56,8 +56,16 @@ const INDIAN_STATES = [
 
 const Checkout = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { items, subtotal, discountAmount, giftCardDiscount, appliedGiftCard, clearCart } = useCart();
   const { user, syncUser } = useAuth();
+
+  // "Buy Now" (Direct Checkout) logic
+  const directBuyItem = location.state?.directBuyItem;
+  const isDirectBuy = !!directBuyItem;
+
+  const checkoutItems = isDirectBuy ? [directBuyItem] : items;
+  const checkoutSubtotal = isDirectBuy ? (directBuyItem.price * directBuyItem.quantity) : subtotal;
   
   const [step, setStep] = useState(1); // 1: Identify, 2: Address
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -133,14 +141,14 @@ const Checkout = () => {
     return () => clearTimeout(timer);
   }, [address.mobile, user]);
 
-  const shipping = subtotal >= 999 ? 0 : 50;
-  const total = Math.max(0, subtotal + shipping - discountAmount - giftCardDiscount);
+  const shipping = checkoutSubtotal >= 999 ? 0 : 50;
+  const total = Math.max(0, checkoutSubtotal + shipping - (isDirectBuy ? 0 : discountAmount) - (isDirectBuy ? 0 : giftCardDiscount));
 
   useEffect(() => {
-    if (items.length === 0) {
+    if (checkoutItems.length === 0 && !isDirectBuy) {
       navigate("/cart");
     }
-  }, [items, navigate]);
+  }, [checkoutItems, isDirectBuy, navigate]);
 
   const handleNextStep = (e: React.FormEvent) => {
     e.preventDefault();
@@ -242,7 +250,7 @@ const Checkout = () => {
       const orderData = {
         userMobile: address.mobile || user?.mobileNumber || "Guest",
         userName: address.fullName || user?.fullName || "Guest",
-        items: items.map(item => ({
+        items: checkoutItems.map(item => ({
           productId: item.id,
           name: item.name,
           price: item.price,
@@ -250,11 +258,11 @@ const Checkout = () => {
           image: item.image,
           selectedShade: item.selectedShade,
           selectedSize: item.selectedSize,
-          metadata: item.metadata
+          metadata: item.metadata || (isDirectBuy ? { directBuy: true } : {})
         })),
         totalAmount: total,
-        appliedGiftCardCode: appliedGiftCard?.code || null,
-        giftCardDiscount: giftCardDiscount || 0,
+        appliedGiftCardCode: isDirectBuy ? null : (appliedGiftCard?.code || null),
+        giftCardDiscount: isDirectBuy ? 0 : (giftCardDiscount || 0),
         paymentStatus: "Pending",
         shippingAddress: {
           fullName: address.fullName || user?.fullName || "Guest",
@@ -279,7 +287,7 @@ const Checkout = () => {
       if (response.ok) {
         if (data.gateway === "cod") {
             toast.success("Order Confirmed! Your order has been placed.");
-            clearCart();
+            if (!isDirectBuy) clearCart();
             navigate(`/order-success?orderNumber=${data.orderNumber}`);
             return;
         }
@@ -310,7 +318,7 @@ const Checkout = () => {
                     const verifyData = await verifyResponse.json();
                     if (verifyResponse.ok && verifyData.success) {
                         toast.success("Purchase Complete! Preparing your order...");
-                        clearCart();
+                        if (!isDirectBuy) clearCart();
                         navigate(`/order-success?orderNumber=${data.orderNumber}`);
                     } else {
                         toast.error("Verification failed. Please contact support.");
@@ -349,7 +357,7 @@ const Checkout = () => {
                 const verifyData = await verifyResponse.json();
                 if (verifyResponse.ok && verifyData.success) {
                   toast.success("Purchase Complete!");
-                  clearCart();
+                  if (!isDirectBuy) clearCart();
                   navigate(`/order-success?orderNumber=${data.orderNumber}`);
                 } else {
                   toast.error("Verification failed.");
@@ -721,7 +729,7 @@ const Checkout = () => {
                                 className="border-t border-gray-50 overflow-hidden bg-gray-50/20"
                             >
                                 <div className="p-7 space-y-5 max-h-[350px] overflow-y-auto custom-scrollbar">
-                                    {items.map((item, idx) => (
+                                    {checkoutItems.map((item, idx) => (
                                         <div key={idx} className="flex gap-5 group">
                                             <div className="w-20 h-24 rounded-2xl bg-white border border-gray-100 overflow-hidden flex-shrink-0 shadow-sm transition-transform duration-500 group-hover:scale-105">
                                                 <img src={getAssetUrl(item.image)} className="w-full h-full object-cover" alt={item.name} />
