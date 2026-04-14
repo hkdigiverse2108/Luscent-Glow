@@ -48,6 +48,7 @@ const menuGroups = [
       { icon: ShoppingBag, label: "Products", path: "/admin/products" },
       { icon: Tag, label: "Categories", path: "/admin/categories" },
       { icon: Edit2, label: "Journal Management", path: "/admin/blogs" },
+      { icon: HelpCircle, label: "Quiz Management", path: "/admin/quiz-settings" },
       { icon: Instagram, label: "Social Media", path: "/admin/social-media" },
     ]
   },
@@ -65,9 +66,10 @@ const menuGroups = [
   {
     label: "Audience",
     items: [
-      { icon: Users, label: "Users", path: "/admin/users" },
-      { icon: Star, label: "Reviews", path: "/admin/reviews" },
-      { icon: Rss, label: "Subscribers", path: "/admin/newsletter" },
+      { icon: Sparkles,      label: "Consultations", path: "/admin/consultations" },
+      { icon: Users,         label: "Users",         path: "/admin/users" },
+      { icon: Star,          label: "Reviews",       path: "/admin/reviews" },
+      { icon: Rss,           label: "Subscribers",   path: "/admin/newsletter" },
     ]
   },
   {

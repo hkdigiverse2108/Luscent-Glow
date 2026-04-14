@@ -50,6 +50,8 @@ import AdminFAQ from "./pages/Admin/AdminFAQ.tsx";
 import AdminPolicies from "./pages/Admin/PoliciesAdmin.tsx";
 import AdminBlogs from "./pages/Admin/AdminBlogs.tsx";
 import AdminReviews from "./pages/Admin/AdminReviews.tsx";
+import AdminConsultations from "./pages/Admin/Consultations.tsx";
+import QuizSettings from "./pages/Admin/QuizSettings.tsx";
 import AdminFooter from "./pages/Admin/AdminFooter.tsx";
 import AdminPayments from "./pages/Admin/AdminPayments.tsx";
 import AdminCategories from "./pages/Admin/AdminCategories.tsx";
@@ -142,6 +144,8 @@ const App = () => (
                     <Route path="policies" element={<AdminPolicies />} />
                     <Route path="blogs" element={<AdminBlogs />} />
                     <Route path="reviews" element={<AdminReviews />} />
+                    <Route path="consultations" element={<AdminConsultations />} />
+                    <Route path="quiz-settings" element={<QuizSettings />} />
                     <Route path="footer" element={<AdminFooter />} />
                     <Route path="social-media" element={<AdminSocialMedia />} />
                     <Route path="settings" element={<AdminSettings />} />
