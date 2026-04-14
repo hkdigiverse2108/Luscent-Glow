@@ -225,14 +225,22 @@ const ProductDetail = () => {
     fetchAppliedPromotion();
   }, [product, activeVariant]);
 
-  // Variant Image Logic: Swap main image when variant changes
+  // Variant Image Logic: Update gallery source when variant changes
+  const [variantImages, setVariantImages] = useState<string[] | null>(null);
+
   useEffect(() => {
-    if (activeVariant?.image) {
+    if (activeVariant?.images && activeVariant.images.length > 0) {
+      setVariantImages(activeVariant.images);
+      setSelectedImage(0); // Reset focal point to first variant image
+      setVariantImageOverride(null); // Clear single override logic
+    } else if (activeVariant?.image) {
       setVariantImageOverride(activeVariant.image);
+      setVariantImages(null);
     } else {
       setVariantImageOverride(null);
+      setVariantImages(null);
     }
-  }, [activeVariant?.id, activeVariant?.image]);
+  }, [activeVariant?.id, activeVariant?.images, activeVariant?.image]);
 
   // Guards for initial loading and error states
   if (loading) {
@@ -273,6 +281,8 @@ const ProductDetail = () => {
   // After this point, 'product' is guaranteed to be non-null
   const { triggerFlight } = useAnimation();
   const isWishlisted = isInWishlist(product._id || product.id);
+
+  const displayImages = variantImages || (product.images && product.images.length > 0 ? product.images : [product.image]);
 
   // Prices are calculated here once product is guaranteed, but the logic is now moved higher to avoid scoping issues.
   const displayPrice = activeVariant ? activeVariant.price : product.price;
@@ -365,13 +375,13 @@ const ProductDetail = () => {
             className="flex flex-col sm:flex-row gap-5 xl:gap-8 items-start w-full"
           >
             {/* Desktop Vertical Thumbnails */}
-            {product.images && product.images.length > 1 && (
+            {displayImages && displayImages.length > 1 && (
               <div className="hidden sm:flex flex-col items-center flex-shrink-0 w-16 xl:w-20">
                 <div 
                   id="thumbnail-list" 
                   className="flex flex-col gap-3 overflow-y-auto max-h-[500px] scrollbar-hide scroll-smooth py-1 px-1 w-full"
                 >
-                  {product.images.map((img: string, idx: number) => (
+                  {displayImages.map((img: string, idx: number) => (
                     <button
                       key={idx}
                       onClick={() => {
@@ -407,16 +417,16 @@ const ProductDetail = () => {
             {/* Main Image */}
             <div className="w-full flex-1 aspect-square rounded-[2rem] overflow-hidden bg-[#faf9f6] cursor-zoom-in group relative shadow-lg border border-gold/5">
               <img
-                src={getAssetUrl(variantImageOverride || product.images?.[selectedImage] || product.image)}
+                src={getAssetUrl(variantImageOverride || displayImages?.[selectedImage] || product.image)}
                 alt={product.name}
                 className="w-full h-full object-cover object-center group-hover:scale-[1.35] transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center bg-white"
               />
             </div>
             
             {/* Mobile Horizontal Thumbnails */}
-            {product.images && product.images.length > 1 && (
+            {displayImages && displayImages.length > 1 && (
               <div className="flex sm:hidden gap-3 overflow-x-auto w-full pb-2 pt-4 scrollbar-hide">
-                {product.images.map((img: string, idx: number) => (
+                {displayImages.map((img: string, idx: number) => (
                 <button
                   key={idx}
                   onClick={() => {
@@ -617,17 +627,14 @@ const ProductDetail = () => {
               </div>
             </div>
 
-            <button 
-              onClick={handleBuyNow}
-              disabled={isOutOfStock}
-              className={`w-full py-4 font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl transition-all shadow-xl active:scale-95 ${
-                isOutOfStock
-                  ? "bg-secondary/50 text-muted-foreground cursor-not-allowed border border-border/50"
-                  : "bg-gold text-primary hover:bg-gold/90 shadow-gold/20"
-              }`}
-            >
-              {isOutOfStock ? "NOTIFY ME WHEN AVAILABLE" : "Buy Now"}
-            </button>
+            {!isOutOfStock && (
+              <button 
+                onClick={handleBuyNow}
+                className="w-full py-4 bg-gold text-primary font-body font-bold text-xs uppercase tracking-[0.2em] rounded-xl hover:bg-gold/90 transition-all shadow-xl shadow-gold/20 active:scale-95"
+              >
+                Buy Now
+              </button>
+            )}
 
             {/* Policies */}
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
