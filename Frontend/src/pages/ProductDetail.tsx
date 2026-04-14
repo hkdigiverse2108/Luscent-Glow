@@ -387,7 +387,7 @@ const ProductDetail = () => {
                       }}
                       className={`relative w-full aspect-square rounded-xl overflow-hidden border transition-all duration-300 ${
                         selectedImage === idx && !variantImageOverride ? "border-charcoal shadow-md scale-105" : "border-transparent opacity-50 hover:opacity-100"
-                       }`}
+                      }`}
                     >
                       <img src={getAssetUrl(img)} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
                     </button>
