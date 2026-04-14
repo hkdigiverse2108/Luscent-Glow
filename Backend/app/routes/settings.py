@@ -16,6 +16,7 @@ async def get_global_settings():
             "whatsappNumber": "919537150942",
             "copyrightText": "© 2026 Luscent Glow. All rights reserved.",
             "freeShippingThreshold": 999,
+            "defaultShippingCharge": 0,
             "promoText": "Use Code",
             "promoCode": "GLOW15",
             "priceFilters": [

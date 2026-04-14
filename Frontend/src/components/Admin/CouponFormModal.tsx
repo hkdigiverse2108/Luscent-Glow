@@ -135,7 +135,7 @@ const CouponFormModal = ({ isOpen, onClose, coupon, onSuccess }: CouponFormModal
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Value</label>
-                <input name="value" type="number" value={formData.value} onChange={handleInputChange} disabled={formData.discountType === "shipping"} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"} disabled:opacity-40`} />
+                <input name="value" type="number" value={formData.value} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
               </div>
               <div className="space-y-4">
                 <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Min Purchase (₹)</label>

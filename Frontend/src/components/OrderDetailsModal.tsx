@@ -132,7 +132,9 @@ const OrderDetailsModal = ({ isOpen, onClose, order }: OrderDetailsProps) => {
                         </div>
                         <div className="flex justify-between text-[11px]">
                             <span className="text-muted-foreground">Shipping</span>
-                            <span className="font-bold text-gold uppercase tracking-[0.1em]">Free Delivery</span>
+                            <span className="font-bold text-gold uppercase tracking-[0.1em]">
+                                {order.shippingCharges && order.shippingCharges > 0 ? `₹${order.shippingCharges.toLocaleString()}` : "Free Delivery"}
+                            </span>
                         </div>
                         {order.discount && (
                           <div className="flex justify-between text-[11px]">

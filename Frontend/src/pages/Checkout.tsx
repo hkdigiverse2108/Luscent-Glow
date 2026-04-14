@@ -57,8 +57,12 @@ const INDIAN_STATES = [
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { items, subtotal, discountAmount, giftCardDiscount, appliedGiftCard, clearCart } = useCart();
+  const { items, subtotal, discountAmount, giftCardDiscount, appliedGiftCard, clearCart, shippingSettings, appliedCoupon, availableCoupons, refreshSettings } = useCart();
   const { user, syncUser } = useAuth();
+
+  useEffect(() => {
+    refreshSettings();
+  }, [refreshSettings]);
 
   // "Buy Now" (Direct Checkout) logic
   const directBuyItem = location.state?.directBuyItem;
@@ -141,8 +145,15 @@ const Checkout = () => {
     return () => clearTimeout(timer);
   }, [address.mobile, user]);
 
-  const shipping = checkoutSubtotal >= 999 ? 0 : 50;
-  const total = Math.max(0, checkoutSubtotal + shipping - (isDirectBuy ? 0 : discountAmount) - (isDirectBuy ? 0 : giftCardDiscount));
+  const baseShipping = checkoutSubtotal >= shippingSettings.threshold ? 0 : shippingSettings.fee;
+  const shipping = appliedCoupon?.discountType === "shipping" ? appliedCoupon.value : baseShipping;
+  
+  // Calculate final discount - if it's a shipping coupon, cap it at the actual shipping cost
+  const finalDiscountAmount = (appliedCoupon?.discountType === "shipping")
+    ? Math.min(shipping, discountAmount)
+    : discountAmount;
+
+  const total = Math.max(0, checkoutSubtotal + shipping - (isDirectBuy ? 0 : finalDiscountAmount) - (isDirectBuy ? 0 : giftCardDiscount));
 
   useEffect(() => {
     if (checkoutItems.length === 0 && !isDirectBuy) {
@@ -829,7 +840,9 @@ const Checkout = () => {
                                     </div>
                                     <div className="flex justify-between text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">
                                         <span>Shipping</span>
-                                        <span className="text-[#008945] font-black italic">FREE</span>
+                                        <span className={shipping === 0 ? "text-[#008945] font-black italic" : "text-charcoal font-black"}>
+                                            {shipping === 0 ? "FREE" : `₹${shipping.toLocaleString()}`}
+                                        </span>
                                     </div>
                                     {(discountAmount > 0 || giftCardDiscount > 0) && (
                                         <div className="flex justify-between text-[10px] text-gold font-black uppercase tracking-[0.2em]">

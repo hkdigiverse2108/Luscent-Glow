@@ -109,14 +109,12 @@ const OrderSuccess = () => {
               Continue Your Journey <ArrowRight size={18} className="transition-transform group-hover:translate-x-2" />
             </Link>
 
-            <a 
-              href={`https://shiprocket.co/tracking/${orderNumber.replace('#', '')}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link 
+              to={`/track-order?orderId=${orderNumber.replace('#', '')}&auto=true`}
               className="group w-full flex items-center justify-center gap-4 px-12 py-5 border border-gold/30 text-gold rounded-xl font-body font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-gold hover:text-charcoal transition-all duration-500 shadow-lg shadow-gold/5"
             >
               Track Order <ExternalLink size={18} className="transition-transform group-hover:translate-x-1" />
-            </a>
+            </Link>
             
             <Link 
               to="/orders"

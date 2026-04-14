@@ -29,6 +29,7 @@ import { getApiUrl } from "../../lib/api";
 import { toast } from "sonner";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 import SEOForm from "../../components/Admin/SEOForm.tsx";
+import { useCart } from "../../context/CartContext.tsx";
 
 type PaymentCreds = {
   activeGateway: "razorpay" | "cashfree";
@@ -78,12 +79,14 @@ const DEFAULT_SMTP: SmtpCreds = {
 
 const AdminSettings = () => {
   const { isDark } = useAdminTheme();
+  const { refreshSettings } = useCart();
   
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [copyrightText, setCopyrightText] = useState("");
-  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(999);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(0);
   const [promoText, setPromoText] = useState("");
   const [promoCode, setPromoCode] = useState("");
+  const [defaultShippingCharge, setDefaultShippingCharge] = useState<number>(0);
   const [seo, setSeo] = useState({ title: "", description: "", keywords: "" });
   const [priceFilters, setPriceFilters] = useState<any[]>([]);
   
@@ -127,6 +130,7 @@ const AdminSettings = () => {
         setFreeShippingThreshold(data.freeShippingThreshold || 999);
         setPromoText(data.promoText || "");
         setPromoCode(data.promoCode || "");
+        setDefaultShippingCharge(data.defaultShippingCharge || 0);
         setSeo(data.seo || { title: "", description: "", keywords: "" });
         setPriceFilters(data.priceFilters || []);
       }
@@ -146,7 +150,6 @@ const AdminSettings = () => {
         body: JSON.stringify({ 
           whatsappNumber,
           copyrightText,
-          freeShippingThreshold,
           promoText,
           promoCode,
           seo,
@@ -155,6 +158,7 @@ const AdminSettings = () => {
       });
       if (response.ok) {
         toast.success("Settings updated successfully.");
+        await refreshSettings();
       } else {
         toast.error("Failed to update settings.");
       }
@@ -324,24 +328,8 @@ const AdminSettings = () => {
               <h4 className={`text-sm font-bold uppercase tracking-widest mb-6 flex items-center gap-2 ${isDark ? "text-white" : "text-charcoal"}`}>
                 <Tag size={16} className="text-gold" /> Announcement Bar
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-3">
-                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
-                    Free Shipping Threshold (₹)
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
-                      <Truck size={14} />
-                    </div>
-                    <input
-                      type="number"
-                      value={freeShippingThreshold}
-                      onChange={(e) => setFreeShippingThreshold(Number(e.target.value))}
-                      className={`${inputClass} pl-12`}
-                      placeholder="999"
-                    />
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
 
                 <div className="space-y-3">
                   <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
@@ -355,7 +343,7 @@ const AdminSettings = () => {
                       type="text"
                       value={promoText}
                       onChange={(e) => setPromoText(e.target.value)}
-                      className={`${inputClass} pl-12`}
+                      className={`${inputClass} pl-10`}
                       placeholder="Use Code"
                     />
                   </div>
@@ -367,17 +355,19 @@ const AdminSettings = () => {
                   </label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
-                      <Hash size={14} />
+                       <Hash size={14} />
                     </div>
                     <input
                       type="text"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
-                      className={`${inputClass} pl-12`}
+                      className={`${inputClass} pl-10`}
                       placeholder="GLOW15"
                     />
                   </div>
                 </div>
+
+
               </div>
             </div>
           </div>
