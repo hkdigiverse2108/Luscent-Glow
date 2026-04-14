@@ -151,7 +151,30 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
       ...prev,
       variants: prev.variants.map((v: any) => {
         if (v.id === id) {
-          return { ...v, [field]: value };
+          const updatedVariant = { ...v, [field]: value };
+          
+          // Automatic Price Calculation for Variants
+          if (field === "appliedPromotionId" || field === "price") {
+            const promoId = field === "appliedPromotionId" ? value : v.appliedPromotionId;
+            const originalPrice = prev.originalPrice || v.price;
+            
+            if (promoId) {
+              const promo = availablePromotions.find(p => p._id === promoId);
+              if (promo) {
+                const match = promo.discountText?.match(/(\d+)%/);
+                const discountPercent = match ? parseInt(match[1]) : 0;
+                if (discountPercent > 0) {
+                  updatedVariant.price = Math.round(originalPrice * (1 - discountPercent / 100));
+                  updatedVariant.originalPrice = originalPrice;
+                }
+              }
+            } else if (field === "appliedPromotionId" && !value) {
+              // Restoring price when promotion is cleared
+              updatedVariant.price = updatedVariant.originalPrice || updatedVariant.price;
+            }
+          }
+          
+          return updatedVariant;
         }
         return v;
       })
@@ -165,9 +188,10 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     // Auto-sync main price and legacy attributes if variations exist
     let syncData = { ...formData };
     if (syncData.variants && syncData.variants.length > 0) {
-      // Use the first variant as the "Starting From" price
+      // Use the first variant as the "Starting From" price and baseline promotion
       syncData.price = syncData.variants[0].price;
       syncData.originalPrice = syncData.variants[0].originalPrice;
+      syncData.appliedPromotionId = syncData.variants[0].appliedPromotionId;
       
       // Sync legacy attributes to match variants exactly
       syncData.shades = [...new Set(syncData.variants.map((v: any) => v.color).filter(Boolean).filter((s: string) => s !== ""))];
@@ -230,6 +254,27 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
             newData.discount = Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
           } else {
             newData.discount = 0;
+          }
+
+          // SYNC: If global originalPrice changes, update all variants that have an active offer
+          if (name === "originalPrice" && newData.variants) {
+            newData.variants = newData.variants.map((v: any) => {
+              if (v.appliedPromotionId) {
+                const promo = availablePromotions.find(p => p._id === v.appliedPromotionId);
+                if (promo) {
+                  const match = promo.discountText?.match(/(\d+)%/);
+                  const discountPercent = match ? parseInt(match[1]) : 0;
+                  if (discountPercent > 0) {
+                    return { 
+                      ...v, 
+                      price: Math.round(originalPrice * (1 - discountPercent / 100)),
+                      originalPrice: originalPrice 
+                    };
+                  }
+                }
+              }
+              return v;
+            });
           }
         }
         
@@ -396,61 +441,28 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                       </div>
                    </div>
 
-                  <div className="grid grid-cols-4 gap-4">
-                     <div className="space-y-4 col-span-1">
-                        <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Price (₹)</label>
-                        <input 
-                          name="price" 
-                          type="number" 
-                          value={formData.price} 
-                          onChange={handleInputChange} 
-                          step="0.01" 
-                          readOnly={!!formData.appliedPromotionId}
-                          className={`w-full border rounded-2xl py-4 px-6 text-sm transition-all ${
-                            isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                          } ${formData.appliedPromotionId ? "opacity-60 cursor-not-allowed border-gold/30" : ""}`} 
-                        />
+                     <div className="space-y-4 col-span-3">
+                        <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Legacy Attributes (Managed via Variants)</label>
+                        <div className={`p-6 rounded-2xl border flex items-center justify-between transition-colors ${
+                          isDark ? "bg-white/2] border-white/5 text-white/40" : "bg-charcoal/5 border-charcoal/5 text-charcoal/40"
+                        }`}>
+                           <p className="text-[10px] font-bold uppercase tracking-widest italic">Base price and offers are now resolved dynamically from your variants below.</p>
+                           <Zap size={14} className="text-gold opacity-30" />
+                        </div>
                      </div>
                      <div className="space-y-4 col-span-1">
                         <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Original (₹)</label>
-                        <input name="originalPrice" type="number" value={formData.originalPrice} onChange={handleInputChange} step="0.01" className={`w-full border rounded-2xl py-4 px-6 text-sm ${
-                          isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                        }`} />
-                     </div>
-                     <div className="space-y-4 col-span-1">
-                        <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Discount (%)</label>
                         <input 
-                          name="discount" 
+                          name="originalPrice" 
                           type="number" 
-                          readOnly 
-                          value={formData.discount} 
-                          className={`w-full border rounded-2xl py-4 px-6 text-sm opacity-60 cursor-not-allowed ${
+                          value={formData.originalPrice} 
+                          onChange={handleInputChange} 
+                          step="0.01" 
+                          className={`w-full border rounded-2xl py-4 px-6 text-sm ${
                             isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                          } ${formData.appliedPromotionId ? "border-gold/30" : ""}`} 
+                          }`} 
                         />
                      </div>
-                     <div className="space-y-4 col-span-1">
-                        <label className={`text-xs font-bold uppercase tracking-[0.3em] ml-2 text-gold`}>Apply Offer</label>
-                        <div className="relative">
-                          <select 
-                            name="appliedPromotionId" 
-                            value={formData.appliedPromotionId || ""} 
-                            onChange={handleInputChange} 
-                            className={`w-full border rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest appearance-none outline-none focus:ring-1 focus:ring-gold/30 ${
-                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                            }`}
-                          >
-                              <option value="">No Active Offer</option>
-                              {availablePromotions.map(promo => (
-                                <option key={promo._id} value={promo._id}>
-                                  {promo.discountText || "PROMO"} - {promo.title}
-                                </option>
-                              ))}
-                          </select>
-                          <Zap size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-gold pointer-events-none" />
-                        </div>
-                     </div>
-                  </div>
                </div>
             </div>
 
@@ -615,11 +627,32 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                              <input 
                                type="number"
                                value={variant.price}
+                               readOnly={!!variant.appliedPromotionId}
                                onChange={(e) => updateVariant(variant.id, "price", parseFloat(e.target.value))}
                                className={`w-full border rounded-xl py-3 px-4 text-xs ${
                                  isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal"
-                               }`}
+                               } ${variant.appliedPromotionId ? "opacity-60 cursor-not-allowed border-gold/30" : ""}`}
                              />
+                          </div>
+                          <div className="space-y-3">
+                             <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Offer</label>
+                             <div className="relative">
+                               <select 
+                                 value={variant.appliedPromotionId || ""} 
+                                 onChange={(e) => updateVariant(variant.id, "appliedPromotionId", e.target.value)} 
+                                 className={`w-full border rounded-xl py-3 px-4 text-[9px] font-black uppercase tracking-widest appearance-none outline-none focus:ring-gold/30 ${
+                                   isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal"
+                                 }`}
+                               >
+                                   <option value="">None</option>
+                                   {availablePromotions.map(promo => (
+                                     <option key={promo._id} value={promo._id}>
+                                       {promo.discountText}
+                                     </option>
+                                   ))}
+                               </select>
+                               <Zap size={10} className="absolute right-3 top-1/2 -translate-y-1/2 text-gold pointer-events-none" />
+                             </div>
                           </div>
                           <div className="space-y-3">
                              <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Stock</label>
