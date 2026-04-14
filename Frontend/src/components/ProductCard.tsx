@@ -21,21 +21,35 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
   const { addItem } = useCart();
   const { productId, currentPrice, originalPrice, discountPercent } = (() => {
     const id = product._id || product.id;
+    
+    // 1. Identify "Base Price" from first variation or root product
+    const initialBasePrice = (product.variants && product.variants.length > 0)
+      ? product.variants[0].price
+      : product.price;
+      
+    const initialOriginalPrice = (product.variants && product.variants.length > 0)
+      ? (product.variants[0].originalPrice || initialBasePrice)
+      : (product.originalPrice || initialBasePrice);
+
+    // 2. Apply Promotion overrides if present
     if (promotion) {
       const discount = parseDiscount(promotion.discountText || "");
-      const price = Math.round((product.originalPrice || product.price) * (1 - discount / 100));
+      const price = Math.round(initialBasePrice * (1 - discount / 100));
       return { 
         productId: id, 
         currentPrice: price, 
-        originalPrice: product.originalPrice || product.price, 
-        discountPercent: discount 
+        originalPrice: initialOriginalPrice, 
+        discountPercent: discount || Math.round(((initialOriginalPrice - initialBasePrice) / initialOriginalPrice) * 100)
       };
     }
+
+    // 3. Fallback to Variant/Product defaults
+    const discount = Math.round(((initialOriginalPrice - initialBasePrice) / initialOriginalPrice) * 100);
     return { 
       productId: id, 
-      currentPrice: product.price, 
-      originalPrice: product.originalPrice, 
-      discountPercent: product.discount 
+      currentPrice: initialBasePrice, 
+      originalPrice: initialOriginalPrice, 
+      discountPercent: discount || product.discount 
     };
   })();
 
@@ -43,14 +57,10 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
 
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
-    const basePrice = (product.variants && product.variants.length > 0) 
-      ? product.variants[0].price 
-      : product.price;
-
     addItem({
       id: productId,
       name: product.name,
-      price: basePrice,
+      price: currentPrice,
       image: product.image,
       category: product.category,
       quantity: 1,

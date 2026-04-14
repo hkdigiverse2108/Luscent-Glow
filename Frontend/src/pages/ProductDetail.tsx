@@ -218,12 +218,12 @@ const ProductDetail = () => {
     addItem({
       id: product._id || product.id,
       name: product.name,
-      price: displayPrice || 0,
+      price: promoPrice || displayPrice || 0,
       image: product.image,
       category: product.category,
       quantity: quantity,
-      selectedShade: product.shades ? product.shades[selectedShade] : undefined,
-      selectedSize: product.sizes ? product.sizes[selectedSize] : undefined,
+      selectedShade: activeVariant?.color || (product.shades ? product.shades[selectedShade] : undefined),
+      selectedSize: activeVariant?.size || (product.sizes ? product.sizes[selectedSize] : undefined),
     });
     
     if (isWishlisted) {
@@ -236,12 +236,12 @@ const ProductDetail = () => {
     const directBuyItem = {
       id: product._id || product.id,
       name: product.name,
-      price: promoPrice || product.price,
+      price: promoPrice || displayPrice || product.price,
       image: product.image,
       category: product.category,
       quantity: quantity,
-      selectedShade: product.shades ? product.shades[selectedShade] : undefined,
-      selectedSize: product.sizes ? product.sizes[selectedSize] : undefined,
+      selectedShade: activeVariant?.color || (product.shades ? product.shades[selectedShade] : undefined),
+      selectedSize: activeVariant?.size || (product.sizes ? product.sizes[selectedSize] : undefined),
     };
     navigate("/checkout", { state: { directBuyItem } });
   };
@@ -302,7 +302,7 @@ const ProductDetail = () => {
   };
 
   const promoPrice = appliedPromotion && product 
-    ? Math.round((product.originalPrice || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
+    ? Math.round((activeVariant?.price || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
     : null;
 
   return (
@@ -423,18 +423,18 @@ const ProductDetail = () => {
                 <>
                   <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(promoPrice ?? 0).toLocaleString()}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(product?.originalPrice || product?.price || 0).toLocaleString()}</span>
+                    <span className="text-base md:text-lg text-muted-foreground line-through font-body opacity-50">₹{(displayOriginalPrice || displayPrice || 0).toLocaleString()}</span>
                     <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{parseDiscount(appliedPromotion?.discountText ?? "0")}% OFF</span>
                   </div>
                 </>
               ) : (
                 <>
-                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{product?.price?.toLocaleString() || "TBD"}</span>
-                  {product && product.originalPrice && product.originalPrice > product.price && (
+                  <span className="font-body text-2xl md:text-3xl font-bold text-foreground">₹{(displayPrice ?? 0).toLocaleString()}</span>
+                  {displayOriginalPrice && displayOriginalPrice > (displayPrice ?? 0) && (
                     <div className="flex items-center gap-2">
-                      <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{product.originalPrice.toLocaleString()}</span>
-                      {product.discount > 0 && (
-                        <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{product.discount}% OFF</span>
+                      <span className="text-base md:text-lg text-muted-foreground line-through font-body">₹{displayOriginalPrice.toLocaleString()}</span>
+                      {displayDiscount && displayDiscount > 0 && (
+                        <span className="text-xs font-body font-bold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">{displayDiscount}% OFF</span>
                       )}
                     </div>
                   )}
