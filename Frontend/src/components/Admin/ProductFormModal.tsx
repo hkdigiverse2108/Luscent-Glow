@@ -71,7 +71,23 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     reader.onloadstart = () => setIsUploading(true);
     reader.onload = (event) => {
       const base64String = event.target?.result as string;
-      updateVariant(variantId, "image", base64String);
+      
+      setFormData((prev: any) => ({
+        ...prev,
+        variants: prev.variants.map((v: any) => {
+          if (v.id === variantId) {
+            const currentImages = v.images || [];
+            // Keep 'image' as the first image for backward compatibility if needed
+            return { 
+              ...v, 
+              images: [...currentImages, base64String],
+              image: currentImages.length === 0 ? base64String : v.image 
+            };
+          }
+          return v;
+        })
+      }));
+
       setIsUploading(false);
       toast.success("Variant image added.");
     };
@@ -80,6 +96,24 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
       toast.error("Failed to process variant image.");
     };
     reader.readAsDataURL(file);
+  };
+
+  const removeVariantImage = (variantId: string, imageIndex: number) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      variants: prev.variants.map((v: any) => {
+        if (v.id === variantId) {
+          const newImages = (v.images || []).filter((_: any, iValue: number) => iValue !== imageIndex);
+          return { 
+            ...v, 
+            images: newImages,
+            image: newImages.length > 0 ? newImages[0] : "" 
+          };
+        }
+        return v;
+      })
+    }));
+    toast.info("Variant image removed.");
   };
 
   // ─── Utility Functions ──────────────────────────────────────────────────
@@ -156,7 +190,8 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
           size: "", 
           price: prev.price > 0 ? prev.price : 0, 
           originalPrice: prev.originalPrice > 0 ? prev.originalPrice : 0, 
-          stock: 10 
+          stock: 10,
+          images: [] 
         }
       ]
     }));
@@ -623,31 +658,45 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                            isDark ? "bg-white/[0.02] border-white/5" : "bg-white border-charcoal/5 shadow-sm"
                          }`}
                        >
-                          {/* Variant Image */}
-                          <div className="space-y-3 flex flex-col items-center">
-                             <label className="text-[10px] font-bold text-gold uppercase tracking-widest leading-none mb-1">Visual</label>
-                             <div 
-                               onClick={() => document.getElementById(`variant-image-${variant.id}`)?.click()}
-                               className={`relative w-14 h-14 rounded-xl border overflow-hidden cursor-pointer group/vimg ${
-                                 isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
-                               }`}
-                             >
-                                <img 
-                                  src={variant.image ? getAssetUrl(variant.image) : (formData.image ? getAssetUrl(formData.image) : "https://via.placeholder.com/100")} 
-                                  className="w-full h-full object-cover group-hover/vimg:scale-110 transition-transform"
-                                />
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/vimg:opacity-100 transition-opacity">
-                                   <Camera size={12} className="text-white" />
-                                </div>
-                                <input 
-                                  id={`variant-image-${variant.id}`}
-                                  type="file" 
-                                  accept="image/*" 
-                                  className="hidden" 
-                                  onChange={(e) => handleVariantFileUpload(variant.id, e)} 
-                                />
-                             </div>
-                          </div>
+                          {/* Variant Image Gallery */}
+                           <div className="space-y-3 flex flex-col items-start col-span-2">
+                              <label className="text-[10px] font-bold text-gold uppercase tracking-widest leading-none mb-1 ml-1">Gallery</label>
+                              <div className="flex flex-wrap gap-2 items-center">
+                                 {variant.images && variant.images.map((img: string, i: number) => (
+                                   <div key={i} className={`relative w-14 h-14 rounded-xl border overflow-hidden group/vimg ${
+                                     isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
+                                   }`}>
+                                      <img src={getAssetUrl(img)} className="w-full h-full object-cover" />
+                                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/vimg:opacity-100 transition-opacity">
+                                         <button 
+                                           type="button"
+                                           onClick={() => removeVariantImage(variant.id, i)}
+                                           className="p-1.5 bg-rose-500 rounded-full text-white hover:scale-110 transition-transform"
+                                         >
+                                            <Trash2 size={10} />
+                                         </button>
+                                      </div>
+                                   </div>
+                                 ))}
+                                 
+                                 {/* Add More Variant Image */}
+                                 <div 
+                                   onClick={() => document.getElementById(`variant-image-${variant.id}`)?.click()}
+                                   className={`w-14 h-14 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer hover:border-gold/50 transition-colors ${
+                                     isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
+                                   }`}
+                                 >
+                                    <Plus size={16} className="text-gold" />
+                                    <input 
+                                      id={`variant-image-${variant.id}`}
+                                      type="file" 
+                                      accept="image/*" 
+                                      className="hidden" 
+                                      onChange={(e) => handleVariantFileUpload(variant.id, e)} 
+                                    />
+                                 </div>
+                              </div>
+                           </div>
                           <div className="space-y-3">
                              <label className="text-[10px] font-bold text-gold uppercase tracking-widest ml-1">Color / Shade</label>
                              <input 
