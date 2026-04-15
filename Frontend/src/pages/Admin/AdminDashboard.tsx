@@ -144,13 +144,13 @@ const AdminDashboard = () => {
   // Professional Dynamic Colors
   const chartColors = {
     gold: isDark ? "#D4AF37" : "#B68F4C",
-    text: isDark ? "rgba(255,255,255,0.4)" : "rgba(18, 18, 18, 0.4)",
-    grid: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+    text: isDark ? "rgba(255,255,255,0.7)" : "rgba(18, 18, 18, 0.7)",
+    grid: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
     emerald: isDark ? "#34D399" : "#059669",
     rose: isDark ? "#FB7185" : "#E11D48",
     bg: isDark ? "bg-charcoal/40" : "bg-white",
     border: isDark ? "border-white/5" : "border-charcoal/5",
-    subtext: isDark ? "text-slate-400" : "text-charcoal/60"
+    subtext: isDark ? "text-slate-200" : "text-charcoal/80"
   };
 
   const cardBase = `relative overflow-hidden group rounded-[2rem] border backdrop-blur-3xl transition-all duration-500 hover:shadow-2xl ${
@@ -481,7 +481,7 @@ const AdminDashboard = () => {
             
             <div className="h-[400px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data.revenueTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <AreaChart data={data.revenueTrend} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
                   <defs>
                     <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor={chartColors.gold} stopOpacity={0.25}/>
@@ -546,7 +546,7 @@ const AdminDashboard = () => {
             
             <div className="flex-1 min-h-[380px]">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.profitExpenses} margin={{ top: 0, right: 0, left: 0, bottom: 0 }} barGap={10}>
+                <BarChart data={data.profitExpenses} margin={{ top: 0, right: 0, left: 0, bottom: 20 }} barGap={10}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={chartColors.grid} />
                   <XAxis 
                     dataKey="name" 
@@ -560,7 +560,7 @@ const AdminDashboard = () => {
                     contentStyle={{ borderRadius: '1.2rem', border: 'none', fontSize: '11px' }} 
                   />
                   <Bar dataKey="profit" fill={chartColors.gold} radius={[8, 8, 0, 0]} barSize={22} animationDuration={1500} />
-                  <Bar dataKey="expenses" fill={isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"} radius={[8, 8, 0, 0]} barSize={22} animationDuration={2000} />
+                  <Bar dataKey="expenses" fill={isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)"} radius={[8, 8, 0, 0]} barSize={22} animationDuration={2000} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -572,8 +572,8 @@ const AdminDashboard = () => {
                      <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Profit</span>
                   </div>
                   <div className="flex items-center gap-2">
-                     <div className={`w-2.5 h-2.5 rounded-full ${isDark ? "bg-white/10" : "bg-charcoal/10"}`}></div>
-                     <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Expenses</span>
+                     <div className={`w-2.5 h-2.5 rounded-full ${isDark ? "bg-white/30" : "bg-charcoal/30"}`}></div>
+                     <span className="text-[9px] font-black uppercase tracking-widest opacity-80">Expenses</span>
                   </div>
                </div>
                <ShieldCheck size={16} className="text-gold opacity-30" />

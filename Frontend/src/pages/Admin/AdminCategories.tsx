@@ -106,59 +106,65 @@ const AdminCategories = () => {
               key={category._id || category.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`relative overflow-hidden group rounded-[2.5rem] border transition-all duration-700 ${isDark ? "bg-charcoal/40 border-white/5 hover:border-gold/30 shadow-2xl shadow-black/40" : "bg-white border-charcoal/5 shadow-ethereal hover:shadow-2xl hover:border-gold/20"}`}
+              className={`relative h-56 overflow-hidden group rounded-[2rem] border transition-all duration-700 ${isDark ? "bg-charcoal/40 border-white/5 hover:border-gold/30 shadow-2xl shadow-black/40" : "bg-white border-charcoal/5 shadow-ethereal hover:shadow-2xl hover:border-gold/20"}`}
             >
-              {/* Category Background Visual */}
-              <div className="absolute inset-0 opacity-60 group-hover:opacity-80 transition-opacity duration-700">
+              {/* Category Background Visual - Full clarity */}
+              <div className="absolute inset-0 transition-transform duration-1000 group-hover:scale-110">
                 {category.image ? (
                   <img src={getAssetUrl(category.image)} alt="" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full bg-gold/5" />
+                  <div className="w-full h-full bg-gold/10" />
                 )}
               </div>
-              {/* Gradient overlay for text legibility - Softened for clarity */}
-              <div className={`absolute inset-0 ${
-                isDark
-                  ? "bg-gradient-to-br from-charcoal/60 via-charcoal/30 to-transparent"
-                  : "bg-gradient-to-br from-white/60 via-white/30 to-transparent"
+              
+              {/* Refined Glassmorphism Overlays */}
+              <div className={`absolute inset-0 transition-opacity duration-700 ${
+                isDark 
+                  ? "bg-black/20 group-hover:bg-black/40" 
+                  : "bg-white/10 group-hover:bg-black/20"
               }`} />
-
-              <div className="relative z-10 p-8">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-lg group-hover:scale-110 transition-transform duration-500">
-                    <Tag size={20} />
+              
+              <div className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end">
+                <div className="flex justify-between items-end">
+                  <div className="space-y-0.5">
+                    <p className="text-[9px] font-black uppercase tracking-[0.4em] text-gold mb-0.5">
+                      {category.slug}
+                    </p>
+                    <h3 className="text-xl font-display font-bold text-white tracking-tight leading-none drop-shadow-xl">
+                      {category.name}
+                    </h3>
                   </div>
-                  <div className="flex gap-2">
+                  
+                  {/* Elegant Action Group - Revealed on Hover */}
+                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-500">
                     <button 
                       onClick={() => { setEditingCategory(category); setIsModalOpen(true); }}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "bg-white/12 text-white/80 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/70 hover:text-gold shadow-sm"}`}
+                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white flex items-center justify-center hover:bg-gold hover:border-gold transition-all shadow-xl"
+                      title="Refine Category"
                     >
                       <Edit2 size={16} />
                     </button>
                     <button 
                       onClick={() => handleDelete(category)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "bg-white/12 text-white/80 hover:text-rose-500 hover:bg-rose-500/10" : "bg-charcoal/5 text-charcoal/70 hover:text-rose-500 shadow-sm"}`}
+                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 text-white flex items-center justify-center hover:bg-rose-500 hover:border-rose-500 transition-all shadow-xl"
+                      title="Dissolve Category"
                     >
                       <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
 
-                <div className="space-y-1 mb-4">
-                  <h3 className={`text-xl font-bold tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
-                    {category.name}
-                  </h3>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold/60 font-mono">
-                    /{category.slug}
-                  </p>
-                </div>
-
                 {category.seo && category.seo.title && (
-                   <div className={`mt-6 pt-6 border-t border-gold/10 flex items-center gap-2 ${isDark ? "text-white/20" : "text-charcoal/30"}`}>
-                      <RefreshCcw size={12} className="text-gold" />
-                      <span className="text-[9px] font-black uppercase tracking-widest leading-none">SEO Active</span>
+                   <div className="mt-4 pt-4 border-t border-white/10 flex items-center gap-2 text-white/40">
+                      <RefreshCcw size={10} className="text-gold" />
+                      <span className="text-[8px] font-black uppercase tracking-[0.2em] leading-none">Archived & SEO Optimized</span>
                    </div>
                 )}
+              </div>
+
+              {/* Identity Badge */}
+              <div className="absolute top-6 left-6 w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white shadow-2xl group-hover:bg-gold/20 transition-all duration-700">
+                <Tag size={18} strokeWidth={1.5} />
               </div>
             </motion.div>
           ))

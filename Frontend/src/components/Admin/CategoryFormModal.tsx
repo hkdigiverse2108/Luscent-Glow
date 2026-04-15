@@ -149,7 +149,14 @@ const CategoryFormModal = ({ isOpen, onClose, category, onSuccess }: CategoryFor
                   <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Structural Element</p>
                </div>
             </div>
-            <button onClick={onClose} className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5 transition-all text-white/40 hover:text-white">
+            <button 
+              onClick={onClose} 
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+                isDark 
+                  ? "text-white/40 hover:text-white hover:bg-white/5" 
+                  : "text-charcoal/40 hover:text-charcoal hover:bg-charcoal/5"
+              }`}
+            >
               <X size={20} />
             </button>
           </div>
@@ -214,7 +221,15 @@ const CategoryFormModal = ({ isOpen, onClose, category, onSuccess }: CategoryFor
 
           {/* Footer */}
           <div className="p-8 border-t flex items-center justify-end gap-6 bg-white/[0.02]">
-            <button onClick={onClose} type="button" className="text-[10px] font-black uppercase tracking-widest text-white/30 hover:text-white transition-colors">Cancel</button>
+            <button 
+              onClick={onClose} 
+              type="button" 
+              className={`text-[10px] font-black uppercase tracking-widest transition-colors ${
+                isDark ? "text-white/30 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
+              }`}
+            >
+              Cancel
+            </button>
             <button 
               onClick={handleSubmit}
               disabled={isSubmitting}
