@@ -93,51 +93,73 @@ const menuGroups = [
 const AdminLayout = () => {
   const { adminLogout } = useAuth();
   const location = useLocation();
-  const { isDark, toggleTheme } = useAdminTheme();
+  const { isDark, themeConfig } = useAdminTheme();
+
+  // Theme-specific backdrops — each palette gets its own cinematic signature
+  const backdropGlows = {
+    obsidian: (
+      <>
+        <div className="absolute top-[-10%] left-[-10%] w-[45%] h-[45%] rounded-full blur-[130px]" style={{ backgroundColor: 'rgba(212,175,55,0.05)' }} />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full blur-[160px]" style={{ backgroundColor: 'rgba(212,100,80,0.04)' }} />
+      </>
+    ),
+    radiant: (
+      <>
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full blur-[120px]" style={{ backgroundColor: 'rgba(182,143,76,0.06)' }} />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[45%] h-[45%] rounded-full blur-[140px]" style={{ backgroundColor: 'rgba(200,170,100,0.04)' }} />
+      </>
+    ),
+  };
 
   return (
-    <div className={`min-h-screen flex overflow-hidden font-body relative transition-colors duration-700 ${isDark ? "bg-[#0f0f0f] text-white" : "bg-[#faf9f6] text-charcoal"
-      }`}>
+    <div
+      className="min-h-screen flex overflow-hidden font-body relative transition-colors duration-700"
+      style={{ backgroundColor: themeConfig.vars['--adm-bg'], color: themeConfig.vars['--adm-text'] }}
+    >
       {/* Cinematic Backdrop Glow */}
-      <AnimatePresence>
-        {isDark && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
-          >
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gold/5 rounded-full blur-[120px]" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-rose-light/5 rounded-full blur-[150px]" />
-          </motion.div>
-        )}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={themeConfig.id}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 1 }}
+          className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+        >
+          {backdropGlows[themeConfig.id]}
+        </motion.div>
       </AnimatePresence>
 
       {/* ── Sidebar ────────────────────────────────────────────────────────── */}
-      <aside className={`w-[230px] flex-shrink-0 backdrop-blur-3xl border-r flex flex-col relative z-20 transition-all duration-700 ${isDark
-          ? "bg-charcoal/80 border-white/5 shadow-[0_0_60px_rgba(0,0,0,0.4)]"
-          : "bg-white/95 border-gold/10 shadow-[0_0_40px_rgba(0,0,0,0.06)]"
-        }`}>
+      <aside
+        className="w-[230px] flex-shrink-0 backdrop-blur-3xl border-r flex flex-col relative z-20 transition-all duration-700"
+        style={{
+          backgroundColor: isDark ? 'rgba(20,20,20,0.75)' : 'rgba(255,255,255,0.92)',
+          borderColor: themeConfig.vars['--adm-border'],
+          boxShadow: isDark ? '0 0 60px rgba(0,0,0,0.5)' : '0 0 40px rgba(0,0,0,0.06)'
+        }}
+      >
 
         {/* Brand Mark */}
         <div className="px-5 pt-6 pb-5">
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-gold to-rose-light flex items-center justify-center shadow-[0_6px_18px_rgba(212,175,55,0.3)] group-hover:scale-110 transition-all duration-500 flex-shrink-0">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center shadow-[0_6px_18px_rgba(212,175,55,0.25)] group-hover:scale-110 transition-all duration-500 flex-shrink-0"
+              style={{ background: `linear-gradient(135deg, ${themeConfig.vars['--adm-accent']}cc, ${themeConfig.vars['--adm-accent']}66)` }}
+            >
               <Sparkles className="text-white" size={18} />
             </div>
             <div className="leading-none">
-              <h1 className={`font-display text-[1.05rem] font-bold tracking-tight italic transition-colors duration-700 ${isDark ? "text-white" : "text-charcoal"
-                }`}>
-                Luscent <span className="text-gold">Glow</span>
+              <h1 className="font-display text-[1.05rem] font-bold tracking-tight italic transition-colors duration-700" style={{ color: themeConfig.vars['--adm-text'] }}>
+                Luscent <span style={{ color: themeConfig.vars['--adm-accent'] }}>Glow</span>
               </h1>
-              <p className={`text-[8px] font-black uppercase tracking-[0.5em] mt-0.5 transition-colors duration-700 ${isDark ? "text-white/30" : "text-charcoal/35"
-                }`}>Admin Panel</p>
+              <p className="text-[8px] font-black uppercase tracking-[0.5em] mt-0.5 transition-colors duration-700" style={{ color: themeConfig.vars['--adm-text-dim'] }}>Admin Panel</p>
             </div>
           </Link>
         </div>
 
         {/* Divider */}
-        <div className={`mx-5 h-px mb-3 ${isDark ? "bg-white/5" : "bg-charcoal/8"}`} />
+        <div className="mx-5 h-px mb-3 transition-colors duration-700" style={{ backgroundColor: themeConfig.vars['--adm-border'] }} />
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-3 pb-3 scrollbar-hide space-y-4">
@@ -145,8 +167,10 @@ const AdminLayout = () => {
             return (
               <div key={group.label}>
                 {/* Group Label */}
-                <p className={`px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.35em] ${isDark ? "text-white/20" : "text-charcoal/30"
-                  }`}>
+                <p
+                  className="px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.35em] transition-colors duration-700"
+                  style={{ color: themeConfig.vars['--adm-text-dim'] }}
+                >
                   {group.label}
                 </p>
 
@@ -164,34 +188,33 @@ const AdminLayout = () => {
                       >
                         <Link
                           to={item.path}
-                          className={`group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 relative overflow-hidden ${isActive
-                              ? isDark
-                                ? "bg-gold/12 border border-gold/25"
-                                : "bg-gold/10 border border-gold/25"
-                              : isDark
-                                ? "text-white/45 hover:text-white hover:bg-white/5 border border-transparent"
-                                : "text-charcoal/60 hover:text-charcoal hover:bg-charcoal/5 border border-transparent"
-                            }`}
+                          className="group flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 relative overflow-hidden border"
+                          style={isActive ? {
+                            backgroundColor: `${themeConfig.vars['--adm-accent']}12`,
+                            borderColor: `${themeConfig.vars['--adm-accent']}30`,
+                            color: themeConfig.vars['--adm-text'],
+                          } : {
+                            borderColor: 'transparent',
+                            color: themeConfig.vars['--adm-text-muted'],
+                          }}
                         >
                           {isActive && (
                             <motion.div
                               layoutId="activeGlow"
-                              className="absolute inset-0 bg-gold/5 blur-lg"
+                              className="absolute inset-0 blur-lg"
+                              style={{ backgroundColor: `${themeConfig.vars['--adm-accent']}08` }}
                             />
                           )}
 
                           <div className="flex items-center gap-2.5 relative z-10">
                             <item.icon
                               size={15}
-                              className={`flex-shrink-0 transition-colors ${isActive
-                                  ? "text-gold"
-                                  : "text-inherit group-hover:text-gold"
-                                }`}
+                              className="flex-shrink-0 transition-colors"
+                              style={{ color: isActive ? themeConfig.vars['--adm-accent'] : 'inherit' }}
                             />
-                            <span className={`text-[0.78rem] font-semibold tracking-wide transition-colors leading-none ${isActive
-                                ? isDark ? "text-white" : "text-charcoal"
-                                : "text-inherit"
-                              }`}>
+                            <span
+                              className="text-[0.78rem] font-semibold tracking-wide transition-colors leading-none"
+                            >
                               {item.label}
                             </span>
                           </div>
