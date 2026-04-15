@@ -209,6 +209,35 @@ const AdminNewsletter = () => {
               </div>
               
               <button 
+                onClick={() => {
+                  if (subs.length === 0) {
+                    toast.error("No subscribers to export.");
+                    return;
+                  }
+                  const escapeCSV = (val: string) => {
+                    if (val.includes(",") || val.includes('"') || val.includes("\n")) {
+                      return `"${val.replace(/"/g, '""')}"`;
+                    }
+                    return val;
+                  };
+                  const headers = ["Email", "Source", "Subscribed Date"];
+                  const rows = subs.map(s => [
+                    escapeCSV(s.email || ""),
+                    escapeCSV(s.source || "Direct Signup"),
+                    escapeCSV(new Date(s.subscribedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }))
+                  ]);
+                  const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+                  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = url;
+                  link.download = `luscent-glow-subscribers-${new Date().toISOString().slice(0, 10)}.csv`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                  toast.success(`Exported ${subs.length} subscribers to CSV.`);
+                }}
                 className={`flex items-center gap-2 px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all ${
                   isDark ? "bg-white/5 text-white/60 hover:bg-white/10 border border-white/5" : "bg-white text-charcoal shadow-sm border border-charcoal/5 hover:bg-charcoal/5"
                 }`}
