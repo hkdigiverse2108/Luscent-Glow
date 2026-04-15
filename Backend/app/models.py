@@ -54,6 +54,7 @@ class ProductModel(BaseModel):
     ingredients: Optional[str] = Field(default=None)
     howToUse: Optional[str] = Field(default=None)
     variants: Optional[List[ProductVariant]] = Field(default_factory=list)
+    matchedTags: Optional[List[str]] = Field(default=None)
     seo: Optional[SEOModel] = Field(default=None)
 
     class Config:

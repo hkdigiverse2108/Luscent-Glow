@@ -181,11 +181,12 @@ const QuizSettings = () => {
                       <span className="text-xl">{opt.icon}</span>
                       <p className="text-xs font-bold uppercase tracking-wider">{opt.label}</p>
                     </div>
-                    {opt.recommendedTag && (
-                      <div className="flex items-center gap-2 text-[9px] font-black text-gold uppercase tracking-widest">
-                        <Tag size={10} /> {opt.recommendedTag}
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-gold/5">
+                      <span className="text-[8px] font-black text-gold/40 uppercase tracking-widest">Target:</span>
+                      <div className="flex items-center gap-2 text-[9px] font-black text-gold uppercase tracking-widest bg-gold/10 px-3 py-1 rounded-lg border border-gold/20">
+                        {opt.recommendedTag || "Unassigned"}
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
               </div>

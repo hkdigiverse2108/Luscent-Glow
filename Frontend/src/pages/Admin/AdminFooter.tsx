@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Palette, 
   Save, 
-  RotateCcw, 
   Plus, 
   Trash2, 
   ExternalLink,
@@ -160,12 +159,6 @@ const AdminFooter = () => {
         subtitle="Manage the platform's footer navigation and links"
         isDark={isDark}
         actions={[
-          {
-            label: "Revert Changes",
-            onClick: fetchFooter,
-            icon: RotateCcw,
-            variant: "secondary"
-          },
           {
             label: saving ? "Saving..." : "Save Changes",
             onClick: handleSave,

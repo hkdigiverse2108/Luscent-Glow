@@ -586,12 +586,6 @@ const ProductDetail = () => {
                   <h4 className="text-sm font-display font-bold text-charcoal leading-tight mt-1">{appliedPromotion.title}</h4>
                 </div>
               </motion.div>
-            ) : (product.discount && product.discount >= 25) ? (
-              <div className="bg-gold/10 border border-gold/20 rounded-lg p-3">
-                <p className="text-sm font-body text-gold font-medium">
-                  🎉 Use code <span className="font-bold">EXTRA10</span> for additional 10% off
-                </p>
-              </div>
             ) : null}
 
             {/* Shades */}

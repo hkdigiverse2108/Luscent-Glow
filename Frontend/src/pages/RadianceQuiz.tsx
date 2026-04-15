@@ -196,6 +196,20 @@ const RadianceQuiz = () => {
                 <p className="text-xs md:text-sm text-muted-foreground font-body max-w-sm mx-auto italic">
                   "Authentic glow begins with understanding. Based on your profile, we have curated these treasures to harmonize with your skin's natural rhythm."
                 </p>
+
+                {/* Skin Profile Snapshot */}
+                <div className="flex flex-wrap justify-center gap-3">
+                  {steps.map(step => {
+                    const selId = answers[step.stepId];
+                    const option = step.options.find((o: any) => o.id === selId);
+                    if (!option) return null;
+                    return (
+                      <span key={step.stepId} className="px-5 py-2.5 bg-white border border-gold/10 rounded-full text-[10px] font-black uppercase tracking-widest text-gold shadow-sm">
+                        {option.label}
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
@@ -219,6 +233,17 @@ const RadianceQuiz = () => {
                     <div>
                       <p className="text-[10px] font-body font-bold text-gold uppercase tracking-widest mb-1">{product.category}</p>
                       <h3 className="font-display text-xl font-normal text-foreground group-hover:text-gold transition-colors">{product.name}</h3>
+                      
+                      {/* Match Indicators */}
+                      {(product as any).matchedTags && (product as any).matchedTags.length > 0 && (
+                        <div className="flex flex-wrap justify-center gap-1.5 mt-4">
+                          {(product as any).matchedTags.map((tag: string) => (
+                            <span key={tag} className="flex items-center gap-1.5 px-3 py-1 bg-gold/5 text-gold/60 text-[8px] font-black uppercase tracking-widest rounded-lg border border-gold/10">
+                              <Check size={8} /> {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <button 
                       onClick={() => {

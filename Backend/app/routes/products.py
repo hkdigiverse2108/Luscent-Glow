@@ -42,6 +42,12 @@ async def recommend_ritual(
             
     products_list = await db["products"].find(query).to_list(3)
     
+    # Calculate matched tags for UI feedback
+    if tags and tag_list:
+        for p in products_list:
+            p_tags = p.get("tags", [])
+            p["matchedTags"] = [t for t in tag_list if t in p_tags]
+            
     # Fallback if no specific tags found
     if not products_list:
         products_list = await db["products"].find({}).to_list(3)
