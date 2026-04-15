@@ -164,19 +164,29 @@ const Header = () => {
         }`}
       >
         {/* Top bar - Scrolling Marquee */}
-        <div className="bg-primary text-primary-foreground text-[8px] md:text-[10px] lg:text-xs py-2 px-2 md:px-4 tracking-[0.3em] uppercase font-body relative group/banner overflow-hidden whitespace-nowrap">
-          <div className="animate-marquee flex items-center">
-            {/* Main Content Set */}
-            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12 font-bold whitespace-nowrap">
+        <div className="bg-primary text-primary-foreground text-[8px] md:text-[10px] lg:text-xs py-2 overflow-hidden whitespace-nowrap">
+          <div className="animate-marquee flex flex-row items-center w-max">
+            {/* Set 1 */}
+            <div className="flex items-center gap-8 md:gap-16 px-4 md:px-8 font-bold whitespace-nowrap">
               <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
+              <span className="opacity-20">•</span>
+              <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
+              <span className="opacity-20">•</span>
+              <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
+              <span className="opacity-20">•</span>
+              <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
+              <span className="opacity-20">•</span>
             </div>
-            {/* Duplicate for Seamless Loop */}
-            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12 font-bold whitespace-nowrap">
+            {/* Set 2 (Duplicate for Seamless Loop) */}
+            <div className="flex items-center gap-8 md:gap-16 px-4 md:px-8 font-bold whitespace-nowrap">
               <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
-            </div>
-            {/* Triplicate to ensure full screen coverage on ultra-wide */}
-            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12 font-bold whitespace-nowrap">
+              <span className="opacity-20">•</span>
               <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
+              <span className="opacity-20">•</span>
+              <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
+              <span className="opacity-20">•</span>
+              <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
+              <span className="opacity-20">•</span>
             </div>
           </div>
         </div>
