@@ -113,36 +113,38 @@ const AdminProducts = () => {
         }}
       />
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row gap-6 mb-4">
         <div className="relative flex-1 group">
-          <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors ${
-            isDark ? "text-white/20 group-focus-within:text-gold" : "text-charcoal/60 group-focus-within:text-gold"
-          }`} size={18} />
+          <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none">
+            <Search className={`transition-colors duration-500 ${
+              isDark ? "text-white/20 group-focus-within:text-gold" : "text-charcoal/40 group-focus-within:text-gold"
+            }`} size={18} />
+          </div>
           <input 
             type="text" 
-            placeholder="Search products by name or category..."
+            placeholder="Search artisan catalog by name, category, or brand..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className={`w-full backdrop-blur-2xl border rounded-2xl py-3 pl-16 pr-6 font-body focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all ${
+            className={`w-full border rounded-[1.5rem] py-4 pl-16 pr-8 font-display text-[13px] font-bold focus:outline-none focus:ring-1 focus:ring-gold/30 transition-all duration-700 ${
               isDark 
-              ? "bg-charcoal/40 border-white/5 text-white placeholder:text-white/10" 
-              : "bg-white border-charcoal/5 text-charcoal placeholder:text-charcoal/60 shadow-sm"
+              ? "bg-white/[0.02] border-white/5 text-white placeholder:text-white/10" 
+              : "bg-white border-charcoal/5 text-charcoal placeholder:text-charcoal/40 shadow-sm"
             }`}
           />
         </div>
         <div className="relative">
           <button 
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`flex items-center gap-3 px-6 py-3 backdrop-blur-2xl border rounded-2xl transition-all duration-500 font-bold uppercase tracking-widest text-xs ${
+            className={`flex items-center gap-4 px-8 py-4 border rounded-[1.5rem] transition-all duration-700 font-black uppercase tracking-[0.2em] text-[10px] ${
               isFilterOpen || selectedCategory !== "all"
-              ? "bg-gold text-charcoal border-gold" 
+              ? "bg-gold text-charcoal border-gold shadow-lg shadow-gold/20" 
               : isDark 
-                ? "bg-charcoal/40 border-white/5 text-white/40 hover:text-white hover:border-white/10" 
-                : "bg-white border-charcoal/5 text-charcoal/40 hover:text-charcoal hover:border-charcoal/10 shadow-sm"
+                ? "bg-white/[0.02] border-white/5 text-white/40 hover:text-white hover:border-white/10" 
+                : "bg-white border-charcoal/5 text-charcoal/60 hover:text-charcoal shadow-sm"
             }`}
           >
-            <Filter size={18} />
-            <span>{selectedCategory === "all" ? "Filter" : selectedCategory}</span>
+            <Filter size={16} />
+            <span>{selectedCategory === "all" ? "Curation Filter" : selectedCategory}</span>
           </button>
 
           <AnimatePresence>
@@ -191,21 +193,21 @@ const AdminProducts = () => {
       </div>
 
       {/* Products Table */}
-      <div className={`backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 min-h-[600px] ${
-        isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
+      <div className={`border rounded-[3.5rem] overflow-hidden shadow-2xl transition-all duration-700 min-h-[600px] ${
+        isDark ? "bg-white/[0.01] border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
       }`}>
         <div className="overflow-x-auto overflow-y-visible">
           <table className="w-full text-left border-collapse">
-             <thead className={`border-b font-body text-[12px] font-bold uppercase tracking-[0.3em] transition-colors duration-700 ${
-               isDark ? "bg-white/[0.04] border-white/10 text-white/50" : "bg-charcoal/[0.04] border-charcoal/10 text-charcoal/80"
+             <thead className={`border-b transition-colors duration-700 ${
+               isDark ? "bg-white/[0.02] border-white/10 text-white/30" : "bg-charcoal/[0.02] border-charcoal/10 text-charcoal/50"
              }`}>
                 <tr>
-                   <th className="px-4 py-2 min-w-[300px] font-extrabold uppercase tracking-[0.3em]">Product</th>
-                   <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Brand</th>
-                   <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Category</th>
-                   <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Performance</th>
-                   <th className="px-4 py-2 font-extrabold uppercase tracking-[0.3em]">Status</th>
-                   <th className="px-6 py-6 text-right pr-12 font-extrabold uppercase tracking-[0.3em]">Actions</th>
+                   <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.4em] italic">Artisan Ritual</th>
+                   <th className="px-6 py-8 text-[10px] font-black uppercase tracking-[0.4em]">Brand</th>
+                   <th className="px-6 py-8 text-[10px] font-black uppercase tracking-[0.4em]">Category</th>
+                   <th className="px-6 py-8 text-[10px] font-black uppercase tracking-[0.4em]">Reception</th>
+                   <th className="px-6 py-8 text-[10px] font-black uppercase tracking-[0.4em]">Essence</th>
+                   <th className="px-10 py-8 text-right text-[10px] font-black uppercase tracking-[0.4em]">Interactions</th>
                 </tr>
              </thead>
              <tbody className={`divide-y transition-colors duration-700 ${
@@ -228,78 +230,99 @@ const AdminProducts = () => {
                       key={p._id || p.id}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="group/row hover:bg-white/[0.03] transition-colors"
+                      className={`group/row transition-all duration-500 ${
+                        isDark ? "hover:bg-white/[0.02]" : "hover:bg-charcoal/[0.01]"
+                      }`}
                     >
-                       <td className="px-4 py-1.5">
-                          <div className="flex items-center gap-5">
-                             <div className="w-16 h-16 rounded-2xl overflow-hidden bg-charcoal relative flex-shrink-0 border border-white/10 shadow-xl">
+                       <td className="px-10 py-6">
+                          <div className="flex items-center gap-7">
+                             <div className={`w-20 h-20 rounded-3xl overflow-hidden relative flex-shrink-0 border transition-all duration-700 group-hover/row:scale-105 group-hover/row:rotate-2 group-hover/row:shadow-2xl ${
+                               isDark ? "bg-charcoal border-white/10" : "bg-white border-charcoal/5 shadow-lg"
+                             }`}>
                                 {p.image ? (
-                                  <img src={getAssetUrl(p.image)} alt={p.name} className="w-full h-full object-cover transition-transform group-hover/row:scale-110 duration-700" />
+                                  <img src={getAssetUrl(p.image)} alt={p.name} className="w-full h-full object-cover transition-transform group-hover/row:scale-125 duration-1000" />
                                 ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-white/20"><ImageIcon size={24} /></div>
+                                  <div className="w-full h-full flex items-center justify-center text-white/20"><ImageIcon size={32} /></div>
                                 )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity" />
                              </div>
                              <div>
-                                <h4 className={`text-[15px] font-extrabold mb-1.5 transition-colors group-hover/row:text-gold ${
-                                  isDark ? "text-white" : "text-charcoal"
+                                <h4 className={`text-[15px] font-black uppercase tracking-tight mb-2 transition-colors group-hover/row:text-gold ${
+                                  isDark ? "text-white/90" : "text-charcoal"
                                 }`}>{p.name}</h4>
-                                <p className={`text-[13px] font-extrabold uppercase tracking-widest truncate max-w-[200px] transition-colors ${
-                                  isDark ? "text-white/60" : "text-charcoal/80"
-                                }`}>ID: {p._id || p.id}</p>
+                                <div className="flex items-center gap-3">
+                                   <div className={`text-[9px] font-black uppercase tracking-[0.3em] font-display px-2 py-0.5 rounded border transition-colors ${
+                                      isDark ? "border-white/10 text-white/20" : "border-charcoal/10 text-charcoal/40"
+                                   }`}>Archival SKU</div>
+                                   <p className={`text-[10px] font-bold uppercase tracking-widest truncate max-w-[120px] transition-colors ${
+                                     isDark ? "text-white/20" : "text-charcoal/30"
+                                   }`}>{p._id || p.id}</p>
+                                </div>
                              </div>
                           </div>
                        </td>
-                       <td className="px-4 py-1.5">
-                          <span className={`text-[14px] font-extrabold tracking-wider ${isDark ? "text-white/90" : "text-charcoal/90"}`}>
-                             {p.brand || "Luscent Glow"}
+                       <td className="px-6 py-6">
+                          <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${isDark ? "text-white/80 font-medium" : "text-charcoal/80"}`}>
+                             {p.brand || "Lucsent Glow"}
                           </span>
                        </td>
-                       <td className="px-4 py-1.5">
-                          <span className="px-5 py-2 bg-gold/10 rounded-xl text-[13px] font-extrabold text-gold uppercase tracking-widest border border-gold/20 shadow-sm">
+                       <td className="px-6 py-6">
+                          <span className={`px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-[0.3em] transition-all duration-500 border group-hover/row:shadow-lg ${
+                            isDark ? "bg-white/[0.03] border-white/5 text-gold/80" : "bg-gold/5 border-gold/10 text-gold shadow-sm"
+                          }`}>
                              {p.category}
                           </span>
                        </td>
-                        <td className="px-4 py-1.5">
+                        <td className="px-6 py-6">
                           <div className="space-y-2">
                              <div className="flex items-center gap-2 text-gold">
-                                <span className="text-lg font-bold">{p.rating}</span>
-                                <span className="text-[14px] opacity-100">★</span>
+                                <span className="text-sm font-black tracking-widest">{p.rating}</span>
+                                <div className="flex gap-0.5">
+                                   {[...Array(5)].map((_, i) => (
+                                     <div key={i} className={`w-1 h-1 rounded-full ${i < Math.floor(p.rating) ? "bg-gold" : "bg-gold/20"}`} />
+                                   ))}
+                                </div>
                              </div>
-                             <div className={`text-[13px] font-extrabold uppercase tracking-widest ${isDark ? "text-white/60" : "text-charcoal/80"}`}>
-                               {p.reviewCount?.toLocaleString()} Reviews
+                             <div className={`text-[9px] font-black uppercase tracking-[0.2em] italic ${isDark ? "text-white/20" : "text-charcoal/30"}`}>
+                               {p.reviewCount?.toLocaleString()} Testimonials
                              </div>
                           </div>
                        </td>
-                       <td className="px-4 py-1.5">
-                          <div className="flex flex-wrap gap-2.5">
+                       <td className="px-6 py-6">
+                          <div className="flex flex-col gap-2">
                              {p.isNew && (
-                               <span className="px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[12px] font-extrabold uppercase tracking-widest border border-emerald-500/30 shadow-sm">New</span>
+                               <div className="flex items-center gap-2 group/badge">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 group-hover/badge:scale-150 transition-transform" />
+                                  <span className="text-[9px] font-black text-emerald-500/80 uppercase tracking-[0.2em]">New Arrival</span>
+                               </div>
                              )}
-                             {p.isTrending && (
-                               <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[12px] font-extrabold uppercase tracking-widest border border-gold/30 shadow-sm">Trending</span>
-                             )}
-                             {p.isBestSeller && (
-                               <span className="px-3 py-1.5 rounded-full bg-gold/10 text-gold text-[12px] font-extrabold uppercase tracking-widest border border-gold/30 shadow-sm">Best Seller</span>
+                             {(p.isTrending || p.isBestSeller) && (
+                               <div className="flex items-center gap-2 group/badge">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+                                  <span className="text-[9px] font-black text-gold uppercase tracking-[0.2em]">Curated Favorite</span>
+                               </div>
                              )}
                           </div>
                        </td>
-                       <td className="px-6 py-5 text-right pr-8">
-                          <div className="flex items-center justify-end gap-3">
+                       <td className="px-10 py-6 text-right">
+                          <div className="flex items-center justify-end gap-5">
                              <button 
                                 onClick={() => openEditModal(p)}
-                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
-                                  isDark ? "bg-white/5 text-white/40 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/40 hover:text-gold hover:bg-gold/10"
+                                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group/edit relative ${
+                                  isDark ? "bg-white/[0.03] text-white/30 hover:text-gold" : "bg-charcoal/5 text-charcoal/40 hover:text-gold shadow-sm"
                                 }`}
                              >
-                                <Edit2 size={18} />
+                                <motion.div whileHover={{ rotate: 15 }}><Edit2 size={18} /></motion.div>
+                                <div className="absolute inset-0 bg-gold/10 rounded-2xl scale-0 group-hover/edit:scale-100 transition-transform duration-500" />
                              </button>
                              <button 
                                 onClick={() => handleDelete(p._id || p.id)}
-                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 shadow-xl ${
-                                  isDark ? "bg-white/5 text-white/40 hover:text-rose-light hover:bg-rose-light/10" : "bg-charcoal/5 text-charcoal/40 hover:text-rose-brand hover:bg-rose-brand/10"
+                                className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 group/trash relative ${
+                                  isDark ? "bg-white/[0.03] text-white/30 hover:text-rose-light" : "bg-charcoal/5 text-charcoal/40 hover:text-rose-brand shadow-sm"
                                 }`}
                              >
-                                <Trash2 size={18} />
+                                <motion.div whileHover={{ scale: 1.1 }}><Trash2 size={18} /></motion.div>
+                                <div className="absolute inset-0 bg-rose-500/10 rounded-2xl scale-0 group-hover/trash:scale-100 transition-transform duration-500" />
                              </button>
                           </div>
                        </td>
