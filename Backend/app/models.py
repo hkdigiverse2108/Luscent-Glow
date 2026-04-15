@@ -695,8 +695,7 @@ class GlobalSettingsModel(BaseModel):
     supportPhone: str = Field(default="+91 97126 63607")
     freeShippingThreshold: int = Field(default=0)
     defaultShippingCharge: float = Field(default=0)
-    promoText: str = Field(default="Use Code")
-    promoCode: str = Field(default="GLOW15")
+    announcementText: str = Field(default="FREE SHIPPING ABOVE ₹999 | USE CODE GLOW15")
     copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
     priceFilters: List[dict] = Field(default_factory=list)
     seo: Optional[SEOModel] = Field(default=None)
@@ -711,8 +710,7 @@ class GlobalSettingsModel(BaseModel):
                 "supportEmail": "hello@luscentglow.com",
                 "supportPhone": "+91 97126 63607",
                 "freeShippingThreshold": 999,
-                "promoText": "Use Code",
-                "promoCode": "GLOW15",
+                "announcementText": "FREE SHIPPING ABOVE ₹999 | USE CODE GLOW15",
                 "copyrightText": "© 2026 Luscent Glow. All rights reserved.",
                 "updatedAt": "2026-04-06T09:53:06Z"
             }

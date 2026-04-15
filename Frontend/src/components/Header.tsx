@@ -40,9 +40,7 @@ const Header = () => {
     storeName: "Luscent Glow",
     supportEmail: "hello@luscentglow.com",
     supportPhone: "+91 97126 63607",
-    freeShippingThreshold: 999,
-    promoText: "Use Code",
-    promoCode: "GLOW15",
+    announcementText: "FREE SHIPPING ABOVE ₹999 | USE CODE GLOW15",
     copyrightText: "© 2026 Luscent Glow. All rights reserved."
   });
 
@@ -169,22 +167,16 @@ const Header = () => {
         <div className="bg-primary text-primary-foreground text-[8px] md:text-[10px] lg:text-xs py-2 px-2 md:px-4 tracking-[0.3em] uppercase font-body relative group/banner overflow-hidden whitespace-nowrap">
           <div className="animate-marquee flex items-center">
             {/* Main Content Set */}
-            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12">
-              <span>Free Shipping Above ₹{globalSettings.freeShippingThreshold}</span>
-              <span className="opacity-40">|</span>
-              <span>{globalSettings.promoText} <span className="text-gold font-semibold">{globalSettings.promoCode}</span></span>
+            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12 font-bold whitespace-nowrap">
+              <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
             </div>
             {/* Duplicate for Seamless Loop */}
-            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12">
-              <span>Free Shipping Above ₹{globalSettings.freeShippingThreshold}</span>
-              <span className="opacity-40">|</span>
-              <span>{globalSettings.promoText} <span className="text-gold font-semibold">{globalSettings.promoCode}</span></span>
+            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12 font-bold whitespace-nowrap">
+              <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
             </div>
             {/* Triplicate to ensure full screen coverage on ultra-wide */}
-            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12">
-              <span>Free Shipping Above ₹{globalSettings.freeShippingThreshold}</span>
-              <span className="opacity-40">|</span>
-              <span>{globalSettings.promoText} <span className="text-gold font-semibold">{globalSettings.promoCode}</span></span>
+            <div className="flex items-center gap-6 md:gap-12 px-6 md:px-12 font-bold whitespace-nowrap">
+              <span>{globalSettings.announcementText || "Welcome to Luscent Glow Store"}</span>
             </div>
           </div>
         </div>
