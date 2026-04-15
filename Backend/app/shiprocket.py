@@ -10,7 +10,7 @@ SHIPROCKET_TRACK_AWB_URL = "https://apiv2.shiprocket.in/v1/external/courier/trac
 SHIPROCKET_CREATE_ORDER_URL = "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc"
 SHIPROCKET_GENERATE_AWB_URL = "https://apiv2.shiprocket.in/v1/external/courier/assign/awb"
 SHIPROCKET_TRACK_ORDER_URL = "https://apiv2.shiprocket.in/v1/external/courier/track/order/"
-SHIPROCKET_GET_PICKUP_URL = "https://apiv2.shiprocket.in/v1/external/settings/get/pickup"
+SHIPROCKET_GET_PICKUP_URL = "https://apiv2.shiprocket.in/v1/external/settings/company/pickup"
 
 class ShiprocketClient:
     _token: Optional[str] = None
@@ -164,6 +164,7 @@ class ShiprocketClient:
                 if response.status_code == 200:
                     return response.json()
                 else:
+                    logger.error(f"Shiprocket pickup locations fetch failed: {response.status_code} - {response.text}")
                     return {"error": f"API Error: {response.status_code}", "details": response.text}
         except Exception as e:
             return {"error": str(e)}

@@ -79,8 +79,13 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderDeta
         toast.success("Order Fulfillment Complete!", {
           description: `AWB Generated: ${data.tracking.trackingNumber}`
         });
-        setTrackingNumber(data.tracking.trackingNumber);
+        setTrackingNumber(data.tracking.trackingNumber || "");
         setCourierPartner(data.tracking.courierPartner || "Shiprocket");
+        
+        // Notify parent of status change to Shipped and trigger refresh
+        if (onStatusUpdate) {
+          onStatusUpdate(order._id || order.id, "Shipped");
+        }
       } else {
         toast.error("Shiprocket Rejection", {
           description: data.detail || "Fulfillment failed."
@@ -383,7 +388,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderDeta
             </div>
 
             {/* Tracking Integration */}
-            {(order.status === 'Shipped' || order.status === 'Delivered') && (
+            {(order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered') && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
