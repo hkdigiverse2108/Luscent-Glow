@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Search, Edit2, Trash2, Zap, Clock, Eye, EyeOff, Sparkles, Image as ImageIcon } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
@@ -8,6 +9,7 @@ import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 import PromotionFormModal from "../../components/Admin/PromotionFormModal.tsx";
 
 const AdminPromotions = () => {
+  const navigate = useNavigate();
   const { isDark } = useAdminTheme();
   const [promotions, setPromotions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +61,7 @@ const AdminPromotions = () => {
         highlightedWord="Promotions"
         subtitle="Manage the high-impact banners that welcome your participants"
         isDark={isDark}
+        onBack={() => navigate("/admin")}
         action={{
           label: "New Design",
           onClick: () => { setEditingPromotion(null); setIsModalOpen(true); },

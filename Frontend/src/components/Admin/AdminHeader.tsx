@@ -23,6 +23,7 @@ interface AdminHeaderProps {
     disabled?: boolean;
     variant?: "primary" | "danger" | "secondary";
   }[];
+  onBack?: () => void;
   children?: React.ReactNode;
 }
 
@@ -33,6 +34,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
   isDark, 
   action,
   actions,
+  onBack,
   children 
 }) => {
   const { toggleTheme } = useAdminTheme();
@@ -41,7 +43,17 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gold/10 pb-4">
-      <div className="space-y-1">
+      <div className="flex flex-col gap-2">
+        {onBack && (
+          <button 
+            onClick={onBack}
+            className="flex items-center gap-2 text-gold/60 hover:text-gold transition-colors text-[9px] font-black uppercase tracking-[0.3em] group w-fit"
+          >
+            <Plus size={12} className="rotate-45 group-hover:-translate-x-1 transition-transform" />
+            Back to Sanctuary
+          </button>
+        )}
+        <div className="space-y-1">
         <h2 className={`font-body text-2xl sm:text-4xl font-bold tracking-tight uppercase transition-colors duration-700 ${
           isDark ? "text-white" : "text-charcoal"
         }`}>
@@ -53,6 +65,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
           {subtitle}
         </p>
       </div>
+    </div>
       
       <div className="flex items-center gap-4 shrink-0">
         {children}

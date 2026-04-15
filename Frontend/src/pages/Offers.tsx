@@ -24,8 +24,11 @@ const Offers = () => {
 
         if (prodRes.ok) {
           const data = await prodRes.json();
-          // Filter products that have an applied promotion
-          const offers = data.filter((p: any) => p.appliedPromotionId);
+          // Filter products that have an applied promotion or variations with promotions
+          const offers = data.filter((p: any) => 
+            p.appliedPromotionId || 
+            (p.variants && p.variants.some((v: any) => v.appliedPromotionId))
+          );
           setFetchedProducts(offers);
         }
 
@@ -117,7 +120,7 @@ const Offers = () => {
                 </div>
                 <ProductCard 
                   product={product} 
-                  promotion={promotions.find(p => p._id === product.appliedPromotionId)} 
+                  promotion={promotions.find(p => p._id === (product.appliedPromotionId || product.variants?.find((v: any) => v.appliedPromotionId)?.appliedPromotionId))} 
                 />
               </motion.div>
             ))}

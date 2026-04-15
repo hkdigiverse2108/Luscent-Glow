@@ -23,27 +23,30 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
   const isAllOutOfStock = (product.variants && product.variants.length > 0)
     ? product.variants.every(v => (v.stock ?? 0) === 0)
     : false;
-  const { productId, currentPrice, originalPrice, discountPercent } = (() => {
+  const { productId, currentPrice, originalPrice, discountPercent, selectedShade, selectedSize } = (() => {
     const id = product._id || product.id;
     
-    // 1. Identify "Base Price" from first variation or root product
-    const initialBasePrice = (product.variants && product.variants.length > 0)
-      ? product.variants[0].price
-      : product.price;
-      
-    const initialOriginalPrice = (product.variants && product.variants.length > 0)
-      ? (product.variants[0].originalPrice || initialBasePrice)
-      : (product.originalPrice || initialBasePrice);
+    // 1. Identify "Base Price" - Prefer variant that matches the passed promotion
+    const baseVariant = promotion && product.variants
+      ? (product.variants.find((v: any) => v.appliedPromotionId === promotion._id) || product.variants[0])
+      : (product.variants && product.variants.length > 0 ? product.variants[0] : null);
+
+    const initialBasePrice = baseVariant ? baseVariant.price : product.price;
+    const initialOriginalPrice = baseVariant
+      ? (baseVariant.originalPrice || initialBasePrice)
+      : (product.originalPrice || product.price);
 
     // 2. Apply Promotion overrides if present
     if (promotion) {
       const discount = parseDiscount(promotion.discountText || "");
-      const price = Math.round(initialBasePrice * (1 - discount / 100));
+      const price = Math.round(initialOriginalPrice * (1 - discount / 100));
       return { 
         productId: id, 
         currentPrice: price, 
         originalPrice: initialOriginalPrice, 
-        discountPercent: discount || Math.round(((initialOriginalPrice - initialBasePrice) / initialOriginalPrice) * 100)
+        discountPercent: discount || Math.round(((initialOriginalPrice - initialBasePrice) / initialOriginalPrice) * 100),
+        selectedShade: baseVariant?.color,
+        selectedSize: baseVariant?.size
       };
     }
 
@@ -53,7 +56,9 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
       productId: id, 
       currentPrice: initialBasePrice, 
       originalPrice: initialOriginalPrice, 
-      discountPercent: discount || product.discount 
+      discountPercent: discount || product.discount,
+      selectedShade: baseVariant?.color,
+      selectedSize: baseVariant?.size
     };
   })();
 
@@ -67,8 +72,8 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
       image: product.image,
       category: product.category,
       quantity: 1,
-      selectedShade: product.variants?.[0]?.color,
-      selectedSize: product.variants?.[0]?.size,
+      selectedShade,
+      selectedSize,
     });
     
     // Remove from wishlist if it is wishlisted
@@ -124,7 +129,7 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
       </button>
 
       {/* Image */}
-      <Link to={`/product/${productId}`}>
+      <Link to={`/product/${productId}${promotion ? '?offer=true' : ''}`}>
         <div className="aspect-square overflow-hidden bg-secondary relative">
           <img
             src={getAssetUrl(product.image)}
@@ -162,7 +167,7 @@ const ProductCard = ({ product, promotion }: ProductCardProps) => {
         <p className="text-[11px] font-body font-bold text-gold tracking-widest leading-none mb-1">
           {product.brand}
         </p>
-        <Link to={`/product/${productId}`}>
+        <Link to={`/product/${productId}${promotion ? '?offer=true' : ''}`}>
           <h3 className="font-display text-base font-semibold text-foreground leading-tight hover:text-gold transition-colors">
             {product.name}
           </h3>

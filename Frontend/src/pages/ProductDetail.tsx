@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { Truck, RotateCcw, Shield, Minus, Plus, ShoppingBag, Heart, Star, Sparkles, Check, ChevronRight, Share2, Camera, MessageSquare, ChevronDown, ChevronUp, ThumbsUp, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
@@ -20,6 +20,8 @@ const ProductDetail = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { search } = useLocation();
+  const isOfferView = new URLSearchParams(search).get("offer") === "true";
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -52,8 +54,13 @@ const ProductDetail = () => {
   };
 
   // Dynamic Option Extraction - Priority to Variations
-  const variantShades = [...new Set((product?.variants || []).map(v => v.color).filter(Boolean).filter(s => s !== null && s !== ""))];
-  const variantSizes = [...new Set((product?.variants || []).map(v => v.size).filter(Boolean).filter(s => s !== null && s !== ""))];
+  // Filter variations to only include those on offer if isOfferView is true
+  const relevantVariants = (product?.variants || []).filter(v => 
+    !isOfferView || !!product?.appliedPromotionId || !!v.appliedPromotionId
+  );
+
+  const variantShades = [...new Set(relevantVariants.map(v => v.color).filter(Boolean).filter(s => s !== null && s !== ""))];
+  const variantSizes = [...new Set(relevantVariants.map(v => v.size).filter(Boolean).filter(s => s !== null && s !== ""))];
 
   const displayShades = variantShades.length > 0 
     ? variantShades 
@@ -289,8 +296,12 @@ const ProductDetail = () => {
     ? Math.round(((activeVariant.originalPrice - activeVariant.price) / activeVariant.originalPrice) * 100)
     : product.discount;
 
+  const currentOriginalPrice = activeVariant 
+    ? (activeVariant.originalPrice || activeVariant.price)
+    : (product.originalPrice || product.price);
+
   const promoPrice = appliedPromotion 
-    ? Math.round((activeVariant?.price || product.price) * (1 - parseDiscount(appliedPromotion.discountText) / 100))
+    ? Math.round(currentOriginalPrice * (1 - parseDiscount(appliedPromotion.discountText) / 100))
     : null;
 
   // Stock status logic
@@ -393,21 +404,23 @@ const ProductDetail = () => {
                     </button>
                   ))}
                 </div>
-                {/* Scroll Controls */}
-                <div className="flex flex-col gap-1 mt-3">
-                  <button 
-                    onClick={() => document.getElementById('thumbnail-list')?.scrollBy({ top: -100, behavior: 'smooth' })}
-                    className="p-1 rounded-full text-muted-foreground/60 hover:text-charcoal transition-colors hover:bg-gold/5"
-                  >
-                    <ChevronUp size={20} className="mx-auto" strokeWidth={1.5} />
-                  </button>
-                  <button 
-                    onClick={() => document.getElementById('thumbnail-list')?.scrollBy({ top: 100, behavior: 'smooth' })}
-                    className="p-1 rounded-full text-muted-foreground/60 hover:text-charcoal transition-colors hover:bg-gold/5"
-                  >
-                    <ChevronDown size={20} className="mx-auto" strokeWidth={1.5} />
-                  </button>
-                </div>
+                {/* Scroll Controls - Only show if many images */}
+                {displayImages.length > 6 && (
+                  <div className="flex flex-col gap-1 mt-3">
+                    <button 
+                      onClick={() => document.getElementById('thumbnail-list')?.scrollBy({ top: -100, behavior: 'smooth' })}
+                      className="p-1 rounded-full text-muted-foreground/60 hover:text-charcoal transition-colors hover:bg-gold/5"
+                    >
+                      <ChevronUp size={20} className="mx-auto" strokeWidth={1.5} />
+                    </button>
+                    <button 
+                      onClick={() => document.getElementById('thumbnail-list')?.scrollBy({ top: 100, behavior: 'smooth' })}
+                      className="p-1 rounded-full text-muted-foreground/60 hover:text-charcoal transition-colors hover:bg-gold/5"
+                    >
+                      <ChevronDown size={20} className="mx-auto" strokeWidth={1.5} />
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
