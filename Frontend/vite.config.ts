@@ -32,10 +32,11 @@ export default defineConfig(({ mode }) => ({
           const seo = await response.json();
           if (!seo) return html;
 
-          const title = seo.title || "Luscent Glow | Pure Botanical Radiance";
-          const description = seo.description || "Premium, cruelty-free botanical skincare and makeup.";
-          const keywords = seo.keywords || "skincare, beauty, botanical";
-          const image = seo.ogImage || "/og-image.png";
+          // Guard: skip empty-string values from DB — use fallback instead
+          const title = (seo.title || "").trim() || "Luscent Glow | Pure Botanical Radiance";
+          const description = (seo.description || "").trim() || "Premium, cruelty-free botanical skincare and makeup crafted for your authentic brilliance.";
+          const keywords = (seo.keywords || "").trim() || "skincare, beauty, botanical, cruelty-free, luscent glow";
+          const image = (seo.ogImage || "").trim() || "/og-image.png";
 
           // Inject Title
           html = html.replace(/<title>.*?<\/title>/, `<title>${title}</title>`);

@@ -91,23 +91,56 @@ async def get_seo_data(path: str):
 
     # Merge with default if needed
     if not seo:
-        return default_seo
+        seo = default_seo
     
     # Fill missing fields from default
-    if default_seo:
+    if default_seo and seo:
         for key in ["title", "description", "keywords", "ogImage"]:
             if not seo.get(key) and default_seo.get(key):
                 seo[key] = default_seo[key]
-                
-    return seo
+
+    # Hardcoded per-route fallbacks for when DB has no SEO data
+    ROUTE_FALLBACKS = {
+        "/blogs": {
+            "title": "Journal & Blogs | Luscent Glow",
+            "description": "Explore beauty rituals, skincare wisdom, and botanical radiance stories from the Luscent Glow editorial team.",
+            "keywords": "beauty blog, skincare tips, botanical beauty, luscent glow journal",
+        },
+        "/about": {
+            "title": "About Us | Luscent Glow",
+            "description": "Discover the story behind Luscent Glow — premium, cruelty-free botanical skincare crafted for your authentic brilliance.",
+            "keywords": "about luscent glow, botanical skincare brand, cruelty-free beauty",
+        },
+        "/contact": {
+            "title": "Contact Us | Luscent Glow",
+            "description": "Get in touch with the Luscent Glow team. We're here to help with your skincare journey.",
+            "keywords": "contact luscent glow, customer support, beauty help",
+        },
+        "/": {
+            "title": "Luscent Glow | Pure Botanical Radiance",
+            "description": "Elevate your beauty routine with Luscent Glow. Discover premium, cruelty-free botanical skincare and artisanal makeup.",
+            "keywords": "skincare, beauty, botanical, cruelty-free, luscent glow",
+        },
+    }
+
+    fallback = ROUTE_FALLBACKS.get(path, {})
+    if fallback:
+        for key, val in fallback.items():
+            if not seo or not seo.get(key):
+                if seo is None:
+                    seo = {}
+                seo[key] = val
+
+    return seo if seo else None
 
 def inject_seo(html: str, seo: dict):
     if not seo:
         return html
     
-    title = seo.get("title") or "Luscent Glow | Pure Botanical Radiance"
-    description = seo.get("description") or "Premium, cruelty-free botanical skincare and makeup."
-    keywords = seo.get("keywords") or "skincare, beauty, botanical"
+    # Only use non-empty values — skip empty strings
+    title = (seo.get("title") or "").strip() or "Luscent Glow | Pure Botanical Radiance"
+    description = (seo.get("description") or "").strip() or "Premium, cruelty-free botanical skincare and makeup."
+    keywords = (seo.get("keywords") or "").strip() or "skincare, beauty, botanical"
     image = seo.get("ogImage") or "/og-image.png"
 
     # Replace Title tags
