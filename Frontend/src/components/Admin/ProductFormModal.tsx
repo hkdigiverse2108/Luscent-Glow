@@ -618,9 +618,9 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                               { id: "isTrending", label: "Trending Masterpiece", icon: Zap },
                               { id: "isBestSeller", label: "Timeless Best Seller", icon: Info }
                             ].map(badge => (
-                              <label key={badge.id} className="flex items-center justify-between p-4 rounded-2xl border cursor-pointer group transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] ${
+                              <label key={badge.id} className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer group transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] ${
                                 isDark ? "bg-white/3 border-white/5" : "bg-white border-charcoal/5 shadow-sm"
-                              }">
+                              }`}>
                                  <div className="flex items-center gap-4">
                                     <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-700 ${
                                       formData[badge.id] ? "bg-gold text-charcoal shadow-lg" : isDark ? "bg-white/5 text-white/20" : "bg-charcoal/5 text-charcoal/20"
