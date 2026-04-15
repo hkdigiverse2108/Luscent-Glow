@@ -8,12 +8,18 @@ import collections
 router = APIRouter(prefix="/analytics", tags=["Analytics"])
 
 @router.get("/dashboard")
-async def get_dashboard_analytics(period: str = "allTime", category: str = "all"):
+async def get_dashboard_analytics(
+    period: str = "allTime",
+    category: str = "all",
+    startDate: str = "",
+    endDate: str = ""
+):
     db = await get_database()
     
     try:
         now = datetime.now()
         start_date = None
+        end_date = None
         
         if period == "today":
             start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -26,26 +32,34 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
             start_date = now - timedelta(days=30)
         elif period == "thisMonth":
             start_date = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        elif period == "custom" and startDate and endDate:
+            try:
+                start_date = datetime.fromisoformat(startDate)
+                end_date = datetime.fromisoformat(endDate).replace(hour=23, minute=59, second=59)
+            except ValueError:
+                pass  # fallback to allTime if dates are malformed
 
         # Base filter
         query = {}
         if start_date:
-            if period == "yesterday":
+            if end_date and period != "today":
                 query["createdAt"] = {"$gte": start_date.isoformat(), "$lt": end_date.isoformat()}
             else:
                 query["createdAt"] = {"$gte": start_date.isoformat()}
+
+        # Resolve multi-category: category param can be "all" or comma-separated slugs
+        selected_categories = [] if category == "all" else [c.strip() for c in category.split(",") if c.strip()]
 
         # 1. Fetch filtered data
         orders = await db["orders"].find(query).to_list(length=2000)
         users = await db["users"].find(query).to_list(length=1000)
         
-        # Category Filter Logic
+        # Category Filter Logic — supports multiple categories
         target_product_names = set()
-        if category != "all":
-            category_products = await db["products"].find({"category": category}).to_list(length=500)
-            target_product_names = {p["name"] for p in category_products}
-            # Also filter orders to only include those that have at least one target product
-            # Actually, we filter items within orders for revenue calculation
+        if selected_categories:
+            for cat_slug in selected_categories:
+                category_products = await db["products"].find({"category": cat_slug}).to_list(length=500)
+                target_product_names.update(p["name"] for p in category_products)
         
         total_users_count = await db["users"].count_documents({})
         
@@ -88,7 +102,7 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
                     cat_revenue_breakdown[item_cat] += item_revenue
 
                 # Filtered Category Logic
-                if category == "all" or item_name in target_product_names:
+                if not selected_categories or item_name in target_product_names:
                     has_category_item = True
                     if is_paid:
                         order_category_revenue += item_revenue
@@ -122,7 +136,7 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
                 "trend": "up"
             },
             "activeUsers": {
-                "value": len(users) if category == "all" else len([u for u in users if category in u.get("interests", [])]) or len(users) // 5,
+                "value": len(users) if not selected_categories else len([u for u in users if any(c in u.get("interests", []) for c in selected_categories)]) or len(users) // 5,
                 "change": round(8.2 * growth_multiplier, 1),
                 "trend": "up"
             },
@@ -169,7 +183,7 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
                 # Filter items in order for trend
                 cat_rev = sum(item.get("price", 0) * item.get("quantity", 1) 
                              for item in o.get("items", []) 
-                             if category == "all" or item.get("name") in target_product_names)
+                             if not selected_categories or item.get("name") in target_product_names)
                 
                 if cat_rev == 0: continue
 
@@ -217,7 +231,7 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
         item_counts = collections.Counter()
         for o in orders:
             for item in o.get("items", []):
-                if category == "all" or item.get("name") in target_product_names:
+                if not selected_categories or item.get("name") in target_product_names:
                     item_counts[item.get("name", "Unknown")] += item.get("quantity", 1)
         
         top_products = []
@@ -231,14 +245,14 @@ async def get_dashboard_analytics(period: str = "allTime", category: str = "all"
         # 6. Recent Orders (that contain category items)
         category_orders = []
         for o in sorted(orders, key=lambda x: x.get("createdAt", ""), reverse=True):
-            if any(item.get("name") in target_product_names for item in o.get("items", [])) or category == "all":
+            if not selected_categories or any(item.get("name") in target_product_names for item in o.get("items", [])):
                 category_orders.append(o)
                 if len(category_orders) == 5: break
 
         recent_orders = []
         for o in category_orders:
             # Show the first item from the category if filtered
-            display_item = next((i for i in o.get("items", []) if category == "all" or i.get("name") in target_product_names), {"name": "Unknown"})
+            display_item = next((i for i in o.get("items", []) if not selected_categories or i.get("name") in target_product_names), {"name": "Unknown"})
             recent_orders.append({
                 "customer": o.get("userMobile", "Guest"),
                 "product": display_item.get("name", "Unknown"),

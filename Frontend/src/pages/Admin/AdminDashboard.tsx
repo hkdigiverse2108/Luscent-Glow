@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -19,7 +19,10 @@ import {
   Zap,
   LayoutDashboard,
   Filter,
-  Check
+  Check,
+  ChevronDown,
+  X,
+  CalendarRange
 } from "lucide-react";
 import {
   AreaChart,
@@ -68,8 +71,23 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState("allTime");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categoryOpen, setCategoryOpen] = useState(false);
   const [categories, setCategories] = useState<{name: string, slug: string}[]>([]);
+  const categoryRef = useRef<HTMLDivElement>(null);
+
+  // Close category dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (categoryRef.current && !categoryRef.current.contains(e.target as Node)) {
+        setCategoryOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -86,11 +104,30 @@ const AdminDashboard = () => {
     fetchCategories();
   }, []);
 
+  const toggleCategory = (slug: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(slug) ? prev.filter(s => s !== slug) : [...prev, slug]
+    );
+  };
+
+  const categoryLabel = selectedCategories.length === 0
+    ? "All Categories"
+    : selectedCategories.length === 1
+      ? categories.find(c => c.slug === selectedCategories[0])?.name ?? "1 Selected"
+      : `${selectedCategories.length} Categories`;
+
   useEffect(() => {
     const fetchAnalytics = async () => {
+      // Don't fetch if custom range is chosen but dates are incomplete
+      if (period === "custom" && (!startDate || !endDate)) return;
       try {
         setLoading(true);
-        const res = await fetch(getApiUrl(`/api/analytics/dashboard?period=${period}&category=${selectedCategory}`));
+        const catParam = selectedCategories.length === 0 ? "all" : selectedCategories.join(",");
+        let url = `/api/analytics/dashboard?period=${period}&category=${catParam}`;
+        if (period === "custom" && startDate && endDate) {
+          url += `&startDate=${startDate}&endDate=${endDate}`;
+        }
+        const res = await fetch(getApiUrl(url));
         if (!res.ok) throw new Error("Data retrieval failed.");
         const json = await res.json();
         setData(json);
@@ -102,7 +139,7 @@ const AdminDashboard = () => {
       }
     };
     fetchAnalytics();
-  }, [period, selectedCategory]);
+  }, [period, selectedCategories, startDate, endDate]);
 
   // Professional Dynamic Colors
   const chartColors = {
@@ -159,70 +196,229 @@ const AdminDashboard = () => {
           isDark={isDark}
         >
            {/* Desktop Selectors */}
-           <div className="hidden lg:flex items-center gap-4">
+           <div className="hidden lg:flex items-center gap-3 flex-wrap">
+              {/* Period Pill Tabs */}
               <div className={`p-1 flex items-center gap-1 rounded-2xl border ${isDark ? "bg-white/5 border-white/5" : "bg-charcoal/5 border-charcoal/5"}`}>
                  {[
                    { id: "today", label: "Today" },
                    { id: "yesterday", label: "Yesterday" },
                    { id: "last7d", label: "7 Days" },
                    { id: "last30d", label: "30 Days" },
-                   { id: "allTime", label: "All Time" }
+                   { id: "allTime", label: "All Time" },
+                   { id: "custom", label: "Custom" }
                  ].map((p) => (
                    <button
                      key={p.id}
                      onClick={() => setPeriod(p.id)}
-                     className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-500 ${
+                     className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-1.5 ${
                        period === p.id 
                          ? "bg-gold text-charcoal shadow-lg" 
                          : isDark ? "text-white/30 hover:text-white" : "text-charcoal/40 hover:text-gold"
                      }`}
                    >
+                     {p.id === "custom" && <CalendarRange size={11} />}
                      {p.label}
                    </button>
                  ))}
               </div>
 
-              <div className="relative group">
-                 <Filter size={14} className={`absolute left-4 top-1/2 -translate-y-1/2 ${isDark ? "text-white/20" : "text-charcoal/30"}`} />
-                 <select 
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className={`pl-10 pr-10 py-3.5 rounded-2xl text-[10px] font-bold uppercase tracking-widest border transition-all appearance-none cursor-pointer focus:outline-none focus:ring-1 focus:ring-gold/30 ${
-                      isDark ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-white border-charcoal/10 text-charcoal hover:bg-charcoal/5 shadow-sm"
-                    }`}
-                 >
-                    <option value="all">All Categories</option>
-                    {categories.map(cat => (
-                      <option key={cat.slug} value={cat.slug}>{cat.name}</option>
-                    ))}
-                 </select>
+              {/* Custom Date Range Inputs — only shown when custom is active */}
+              <AnimatePresence>
+                {period === "custom" && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.25 }}
+                    className="flex items-center gap-2"
+                  >
+                    <div className="relative">
+                      <Calendar size={12} className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDark ? "text-gold/50" : "text-gold/60"}`} />
+                      <input
+                        type="date"
+                        value={startDate}
+                        max={endDate || undefined}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        className={`pl-9 pr-3 py-3 rounded-2xl text-[10px] font-bold border transition-all focus:outline-none focus:ring-1 focus:ring-gold/40 cursor-pointer ${
+                          isDark ? "bg-white/5 border-white/10 text-white [color-scheme:dark]" : "bg-white border-charcoal/10 text-charcoal shadow-sm"
+                        }`}
+                      />
+                    </div>
+                    <span className={`text-[9px] font-black opacity-30`}>→</span>
+                    <div className="relative">
+                      <Calendar size={12} className={`absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none ${isDark ? "text-gold/50" : "text-gold/60"}`} />
+                      <input
+                        type="date"
+                        value={endDate}
+                        min={startDate || undefined}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        className={`pl-9 pr-3 py-3 rounded-2xl text-[10px] font-bold border transition-all focus:outline-none focus:ring-1 focus:ring-gold/40 cursor-pointer ${
+                          isDark ? "bg-white/5 border-white/10 text-white [color-scheme:dark]" : "bg-white border-charcoal/10 text-charcoal shadow-sm"
+                        }`}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Multi-Category Dropdown */}
+              <div className="relative" ref={categoryRef}>
+                <button
+                  onClick={() => setCategoryOpen(v => !v)}
+                  className={`flex items-center gap-2.5 pl-4 pr-3 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${
+                    selectedCategories.length > 0
+                      ? "bg-gold/10 border-gold/30 text-gold"
+                      : isDark ? "bg-white/5 border-white/10 text-white/60 hover:bg-white/10" : "bg-white border-charcoal/10 text-charcoal/60 hover:bg-charcoal/5 shadow-sm"
+                  }`}
+                >
+                  <Filter size={13} />
+                  <span>{categoryLabel}</span>
+                  {selectedCategories.length > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-gold text-charcoal text-[8px] font-black flex items-center justify-center">
+                      {selectedCategories.length}
+                    </span>
+                  )}
+                  <ChevronDown size={12} className={`ml-0.5 transition-transform ${categoryOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                <AnimatePresence>
+                  {categoryOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                      transition={{ duration: 0.2 }}
+                      className={`absolute right-0 top-full mt-2 w-60 rounded-[1.5rem] border shadow-2xl z-50 overflow-hidden backdrop-blur-2xl ${
+                        isDark ? "bg-[#1a1a1a]/95 border-white/10" : "bg-white/95 border-charcoal/10"
+                      }`}
+                    >
+                      {/* Header */}
+                      <div className={`px-5 py-3.5 border-b flex items-center justify-between ${isDark ? "border-white/5" : "border-charcoal/5"}`}>
+                        <span className="text-[9px] font-black uppercase tracking-[0.3em] opacity-40">Filter Categories</span>
+                        {selectedCategories.length > 0 && (
+                          <button
+                            onClick={() => setSelectedCategories([])}
+                            className="text-[9px] font-black text-gold uppercase tracking-widest flex items-center gap-1 hover:opacity-70 transition-opacity"
+                          >
+                            <X size={10} /> Clear
+                          </button>
+                        )}
+                      </div>
+
+                      {/* All option */}
+                      <div className="p-3 space-y-1">
+                        <button
+                          onClick={() => setSelectedCategories([])}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                            selectedCategories.length === 0
+                              ? isDark ? "bg-gold/15 text-gold" : "bg-gold/10 text-gold"
+                              : isDark ? "text-white/40 hover:bg-white/5" : "text-charcoal/50 hover:bg-charcoal/5"
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${
+                            selectedCategories.length === 0 ? "bg-gold border-gold" : isDark ? "border-white/20" : "border-charcoal/20"
+                          }`}>
+                            {selectedCategories.length === 0 && <Check size={10} className="text-charcoal" strokeWidth={3} />}
+                          </div>
+                          All Categories
+                        </button>
+
+                        {/* Divider */}
+                        <div className={`my-2 border-t ${isDark ? "border-white/5" : "border-charcoal/5"}`} />
+
+                        {categories.map(cat => (
+                          <button
+                            key={cat.slug}
+                            onClick={() => toggleCategory(cat.slug)}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                              selectedCategories.includes(cat.slug)
+                                ? isDark ? "bg-gold/15 text-gold" : "bg-gold/10 text-gold"
+                                : isDark ? "text-white/40 hover:bg-white/5" : "text-charcoal/50 hover:bg-charcoal/5"
+                            }`}
+                          >
+                            <div className={`w-4 h-4 rounded-md border flex items-center justify-center flex-shrink-0 transition-all ${
+                              selectedCategories.includes(cat.slug) ? "bg-gold border-gold" : isDark ? "border-white/20" : "border-charcoal/20"
+                            }`}>
+                              {selectedCategories.includes(cat.slug) && <Check size={10} className="text-charcoal" strokeWidth={3} />}
+                            </div>
+                            {cat.name}
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
            </div>
 
-           {/* Mobile Filter Trigger */}
-           <div className="lg:hidden flex items-center gap-2">
-              <select 
-                value={period}
-                onChange={(e) => setPeriod(e.target.value)}
-                className={`px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border focus:outline-none ${isDark ? "bg-charcoal border-white/10 text-white" : "bg-white border-charcoal/10 text-charcoal"}`}
-              >
-                <option value="today">Today</option>
-                <option value="yesterday">Yesterday</option>
-                <option value="last7d">7 Days</option>
-                <option value="last30d">30 Days</option>
-                <option value="allTime">All Time</option>
-              </select>
+           {/* Mobile Filters */}
+           <div className="lg:hidden flex flex-col gap-3">
+              {/* Mobile period select */}
+              <div className="flex items-center gap-2">
+                <select 
+                  value={period}
+                  onChange={(e) => setPeriod(e.target.value)}
+                  className={`flex-1 px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border focus:outline-none ${
+                    isDark ? "bg-charcoal border-white/10 text-white [color-scheme:dark]" : "bg-white border-charcoal/10 text-charcoal"
+                  }`}
+                >
+                  <option value="today">Today</option>
+                  <option value="yesterday">Yesterday</option>
+                  <option value="last7d">7 Days</option>
+                  <option value="last30d">30 Days</option>
+                  <option value="allTime">All Time</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+              </div>
 
-              <select 
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className={`px-4 py-3 rounded-2xl text-[9px] font-bold uppercase tracking-widest border focus:outline-none ${isDark ? "bg-charcoal border-white/10 text-white" : "bg-white border-charcoal/10 text-charcoal"}`}
-              >
-                <option value="all">All Cats</option>
-                {categories.map(cat => (
-                  <option key={cat.slug} value={cat.slug}>{cat.name}</option>
-                ))}
-              </select>
+              {/* Mobile custom date range */}
+              {period === "custom" && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="date"
+                    value={startDate}
+                    max={endDate || undefined}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className={`flex-1 px-3 py-3 rounded-2xl text-[9px] font-bold border focus:outline-none ${
+                      isDark ? "bg-charcoal border-white/10 text-white [color-scheme:dark]" : "bg-white border-charcoal/10 text-charcoal"
+                    }`}
+                  />
+                  <span className="text-xs opacity-30">→</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    min={startDate || undefined}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className={`flex-1 px-3 py-3 rounded-2xl text-[9px] font-bold border focus:outline-none ${
+                      isDark ? "bg-charcoal border-white/10 text-white [color-scheme:dark]" : "bg-white border-charcoal/10 text-charcoal"
+                    }`}
+                  />
+                </div>
+              )}
+
+              {/* Mobile multi-category select (native, multi-select) */}
+              <div className={`relative rounded-2xl border overflow-hidden ${
+                isDark ? "bg-charcoal border-white/10" : "bg-white border-charcoal/10"
+              }`}>
+                <Filter size={12} className={`absolute left-3 top-3.5 pointer-events-none ${isDark ? "text-white/30" : "text-charcoal/30"}`} />
+                <select
+                  multiple
+                  value={selectedCategories}
+                  onChange={(e) => {
+                    const values = Array.from(e.target.selectedOptions, o => o.value);
+                    setSelectedCategories(values.filter(v => v !== "all"));
+                  }}
+                  className={`w-full pl-8 pr-4 py-3 text-[9px] font-bold uppercase tracking-widest focus:outline-none bg-transparent ${
+                    isDark ? "text-white" : "text-charcoal"
+                  }`}
+                  size={Math.min(4, categories.length + 1)}
+                >
+                  <option value="all" className={isDark ? "bg-charcoal" : "bg-white"}>All Categories</option>
+                  {categories.map(cat => (
+                    <option key={cat.slug} value={cat.slug} className={isDark ? "bg-charcoal" : "bg-white"}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
            </div>
         </AdminHeader>
       </div>
