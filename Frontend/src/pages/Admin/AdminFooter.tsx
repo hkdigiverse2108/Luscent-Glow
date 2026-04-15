@@ -59,8 +59,8 @@ const AdminFooter = () => {
             { label: "FAQ's", path: "/faq" }
           ] },
           { title: "Policies", links: [
-            { label: "Privacy Policy", path: "/privacy-policy" },
-            { label: "Terms & Conditions", path: "/terms-and-conditions" }
+            { label: "Privacy Policy", path: "/policy/privacy-policy" },
+            { label: "Terms & Conditions", path: "/policy/terms-and-conditions" }
           ] }
         ],
         newsletterTitle: "Newsletter Subscription",
@@ -310,13 +310,13 @@ const AdminFooter = () => {
                     
                     {colIdx === 1 ? (
                       <select 
-                        value={link.path.startsWith('/policies/') ? link.path.split('/policies/')[1] : (link.path.startsWith('/') ? link.path.substring(1) : "")}
+                        value={link.path.startsWith('/policy/') ? link.path.split('/policy/')[1] : (link.path.startsWith('/') ? link.path.substring(1) : "")}
                         onChange={(e) => {
                           const val = e.target.value;
                           const selected = policies.find(p => p.type === val);
                           if (selected) {
                             updateLink(colIdx, linkIdx, "label", selected.title);
-                            updateLink(colIdx, linkIdx, "path", `/${selected.type}`);
+                            updateLink(colIdx, linkIdx, "path", `/policy/${selected.type}`);
                           } else {
                             updateLink(colIdx, linkIdx, "path", `/${val}`);
                           }

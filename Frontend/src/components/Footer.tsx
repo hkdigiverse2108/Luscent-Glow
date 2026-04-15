@@ -178,7 +178,11 @@ const Footer = () => {
                   return (
                     <Link 
                       key={link.label}
-                      to={link.path} 
+                      to={
+                        ["privacy-policy", "terms-and-conditions", "return-policy", "shipping-policy", "cancellation-policy"].includes(link.path.replace(/^\//, ""))
+                          ? `/policy/${link.path.replace(/^\//, "")}`
+                          : link.path
+                      } 
                       className="block text-primary-foreground/60 hover:text-gold transition-colors"
                     >
                       {link.label}
