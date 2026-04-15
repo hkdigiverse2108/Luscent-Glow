@@ -75,7 +75,7 @@ const SEOForm: React.FC<SEOFormProps> = ({ seo, onChange, isDark }) => {
             value={seo?.keywords || ""}
             onChange={(e) => onChange({ ...seo, keywords: e.target.value })}
             className={inputClass}
-            placeholder="beauty, skincare, rituals..."
+            placeholder="beauty, skincare, serum, cream..."
           />
         </div>
       </div>

@@ -56,8 +56,24 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [activeTab, setActiveTab] = useState("master");
   const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
   const [availablePromotions, setAvailablePromotions] = useState<any[]>([]);
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  // Scroll to top on tab change
+  useEffect(() => {
+    if (formRef.current) {
+      formRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [activeTab]);
+
+  const tabs = [
+    { id: "master", label: "Product Info", icon: Sparkles },
+    { id: "variants", label: "Variants", icon: Plus },
+    { id: "narrative", label: "Description", icon: ImageIcon },
+    { id: "seo", label: "SEO & Tags", icon: Zap }
+  ];
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -312,7 +328,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
     if (type === "checkbox") {
       const checked = (e.target as HTMLInputElement).checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
-    } else if (name === "tags" || name === "shades" || name === "sizes" || name === "images") {
+    } else if (name === "tags") {
       setFormData(prev => ({ ...prev, [name]: value.split(",").map(t => t.trim()).filter(t => t !== "") }));
     } else if (type === "number") {
       const numValue = parseFloat(value);
@@ -383,116 +399,171 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
           }`}
         >
           {/* Header */}
-          <div className={`p-8 border-b flex items-center justify-between transition-colors duration-700 ${
+          <div className={`p-8 border-b transition-colors duration-700 ${
             isDark ? "bg-white/[0.02] border-white/5" : "bg-charcoal/[0.02] border-charcoal/5"
           }`}>
-            <div className="flex items-center gap-4">
-               <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-lg">
-                  <Sparkles size={24} />
-               </div>
-               <div>
-                  <h3 className={`font-body text-2xl font-bold uppercase tracking-tight transition-colors duration-700 ${
-                    isDark ? "text-white" : "text-charcoal"
-                  }`}>
-                    {product ? "Edit" : "Add New"} <span className="text-indigo-500 italic">Product</span>
-                  </h3>
-                  <p className={`text-xs font-bold uppercase tracking-widest font-body transition-colors duration-700 ${
-                    isDark ? "text-white/30" : "text-charcoal/70"
-                  }`}>Product Database</p>
-               </div>
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                 <div className="w-12 h-12 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shadow-lg">
+                    <Sparkles size={24} />
+                 </div>
+                 <div>
+                    <h3 className={`font-body text-2xl font-bold uppercase tracking-tight transition-colors duration-700 ${
+                      isDark ? "text-white" : "text-charcoal"
+                    }`}>
+                      {product ? "Edit" : "Add New"} <span className="text-indigo-500 italic">Product</span>
+                    </h3>
+                    <p className={`text-xs font-bold uppercase tracking-widest font-body transition-colors duration-700 ${
+                      isDark ? "text-white/30" : "text-charcoal/70"
+                    }`}>Product Database</p>
+                 </div>
+              </div>
+              <button 
+                onClick={onClose}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  isDark ? "hover:bg-white/5 text-white/40 hover:text-white" : "hover:bg-charcoal/5 text-charcoal/40 hover:text-charcoal"
+                }`}
+              >
+                <X size={24} />
+              </button>
             </div>
-            <button 
-              onClick={onClose}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
-                isDark ? "hover:bg-white/5 text-white/40 hover:text-white" : "hover:bg-charcoal/5 text-charcoal/40 hover:text-charcoal"
-              }`}
-            >
-              <X size={24} />
-            </button>
+
+            {/* Premium Tab Navigation */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar scroll-smooth">
+              {tabs.map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 whitespace-nowrap border ${
+                    activeTab === tab.id
+                      ? "bg-gold border-gold text-charcoal shadow-lg shadow-gold/20"
+                      : isDark 
+                        ? "bg-white/5 border-white/5 text-white/30 hover:text-white hover:bg-white/10" 
+                        : "bg-charcoal/5 border-charcoal/5 text-charcoal/40 hover:text-charcoal hover:bg-charcoal/10"
+                  }`}
+                >
+                  <tab.icon size={14} className={activeTab === tab.id ? "text-charcoal" : "text-gold/60"} />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Form Content */}
-          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 md:p-12 space-y-12 custom-scrollbar">
-            
-            {/* Essential Metadata Section */}
-            <div className={`p-10 rounded-[3.5rem] border backdrop-blur-3xl transition-all duration-700 ${
-              isDark ? "bg-white/[0.01] border-white/5 shadow-2xl" : "bg-charcoal/[0.01] border-charcoal/5 shadow-sm"
-            }`}>
-               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                  <div className="lg:col-span-7 space-y-8">
-                     <div className="space-y-4">
-                        <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic">Product Name</label>
-                        <input 
-                          name="name"
-                          value={formData.name}
-                          onChange={handleInputChange}
-                          required
-                          placeholder="e.g. 24K Gold Hydra-Glow Serum"
-                          className={`w-full border rounded-[2rem] py-5 px-8 font-display text-lg font-bold focus:ring-1 focus:ring-gold/30 outline-none transition-all ${
-                            isDark 
-                            ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" 
-                            : "bg-white border-charcoal/5 text-charcoal placeholder:text-charcoal/40 shadow-sm"
-                          }`}
-                        />
-                     </div>
-
-                     <div className="grid grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                           <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Artisan Brand</label>
-                           <input 
-                             name="brand" 
-                             value={formData.brand} 
-                             onChange={handleInputChange} 
-                             className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold ${
-                               isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
-                             }`}
-                           />
-                        </div>
-                        <div className="space-y-4">
-                           <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Curation Category</label>
-                           <div className="relative group/cat">
-                              <select 
-                                name="category" 
-                                value={formData.category} 
-                                onChange={handleInputChange} 
-                                className={`w-full border rounded-2xl py-4 px-6 text-xs font-black uppercase tracking-widest appearance-none outline-none focus:ring-1 focus:ring-gold/30 transition-all ${
-                                  isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/10 text-charcoal shadow-sm"
+          <form 
+            ref={formRef}
+            onSubmit={handleSubmit} 
+            className="flex-1 overflow-y-auto p-8 md:p-12 custom-scrollbar relative"
+          >
+            <AnimatePresence mode="wait">
+              {activeTab === "master" && (
+                <motion.div
+                  key="master"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-12"
+                >
+                  {/* Essential Metadata Section */}
+                  <div className={`p-10 rounded-[3.5rem] border backdrop-blur-3xl transition-all duration-700 ${
+                    isDark ? "bg-white/[0.01] border-white/5 shadow-2xl" : "bg-charcoal/[0.01] border-charcoal/5 shadow-sm"
+                  }`}>
+                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                        <div className="lg:col-span-12 space-y-8">
+                           <div className="space-y-4">
+                              <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic">Product Name</label>
+                              <input 
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                required
+                                placeholder="e.g. 24K Gold Hydra-Glow Serum"
+                                className={`w-full border rounded-[2rem] py-6 px-8 font-display text-xl font-bold focus:ring-1 focus:ring-gold/30 outline-none transition-all ${
+                                  isDark 
+                                  ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" 
+                                  : "bg-white border-charcoal/5 text-charcoal placeholder:text-charcoal/40 shadow-sm"
                                 }`}
-                              >
-                                  {dynamicCategories.map(cat => (
-                                    <option key={cat.slug} value={cat.slug} className={isDark ? "bg-charcoal text-white" : "bg-white text-charcoal"}>
-                                      {cat.name}
-                                    </option>
-                                  ))}
-                              </select>
-                              <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gold/60 group-hover/cat:text-gold transition-colors">
-                                 <Plus size={14} className="rotate-45" />
+                              />
+                           </div>
+
+                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                              <div className="space-y-4">
+                                 <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Brand Name</label>
+                                 <input 
+                                   name="brand" 
+                                   value={formData.brand} 
+                                   onChange={handleInputChange} 
+                                   className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold ${
+                                     isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
+                                   }`}
+                                 />
+                              </div>
+                              <div className="space-y-4">
+                                 <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Category</label>
+                                 <select 
+                                   name="category" 
+                                   value={formData.category} 
+                                   onChange={handleInputChange} 
+                                   className={`w-full border rounded-2xl py-4 px-6 text-xs font-black uppercase tracking-widest appearance-none outline-none focus:ring-1 focus:ring-gold/30 transition-all ${
+                                     isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/10 text-charcoal shadow-sm"
+                                   }`}
+                                 >
+                                     {dynamicCategories.map(cat => (
+                                       <option key={cat.slug} value={cat.slug} className={isDark ? "bg-charcoal text-white" : "bg-white text-charcoal"}>
+                                         {cat.name}
+                                       </option>
+                                     ))}
+                                 </select>
+                              </div>
+                              <div className="space-y-4">
+                                 <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Archival Price</label>
+                                 <div className="relative group/price">
+                                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-gold/40 group-focus-within/price:text-gold transition-colors">
+                                       <span className="text-[11px] font-black">₹</span>
+                                    </div>
+                                    <input 
+                                      name="originalPrice" 
+                                      type="number"
+                                      value={formData.originalPrice} 
+                                      onChange={handleInputChange} 
+                                      className={`w-full border rounded-2xl py-4 pl-12 pr-6 text-xs font-black transition-all focus:ring-1 focus:ring-gold/30 outline-none ${
+                                        isDark 
+                                        ? "bg-white/5 border-white/10 text-white" 
+                                        : "bg-white border-charcoal/5 text-charcoal shadow-sm"
+                                      }`}
+                                    />
+                                 </div>
                               </div>
                            </div>
                         </div>
                      </div>
                   </div>
 
-                  <div className="lg:col-span-5 space-y-8">
-                      <div className="space-y-4">
-                         <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic">Master Visual</label>
-                         <div className="flex items-center gap-8">
-                           <div className={`w-36 h-36 rounded-[2.5rem] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all duration-700 relative group/pimg ${
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                     {/* Master Visual Section */}
+                     <div className={`p-10 rounded-[3rem] border transition-all duration-700 ${
+                        isDark ? "bg-white/[0.01] border-white/10 shadow-xl" : "bg-charcoal/[0.01] border-charcoal/5 shadow-sm"
+                     }`}>
+                        <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic mb-6 block">Product Image</label>
+                        <div className="flex flex-col items-center gap-8">
+                           <div className={`w-48 h-48 rounded-[3rem] border-2 border-dashed flex items-center justify-center overflow-hidden transition-all duration-700 relative group/pimg ${
                              isDark ? "bg-white/[0.02] border-white/10 hover:border-gold/40" : "bg-charcoal/[0.02] border-charcoal/10 hover:border-gold/30 shadow-sm"
                            }`}>
                              {formData.image ? (
                                <>
                                  <img 
                                    src={getAssetUrl(formData.image)} 
-                                   alt="Product Preview" 
+                                   alt="" 
                                    className="w-full h-full object-cover transition-transform duration-700 group-hover/pimg:scale-110"
                                  />
                                  <div className="absolute inset-0 bg-charcoal/40 opacity-0 group-hover/pimg:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                                    <Camera className="text-white" size={24} />
+                                    <Camera className="text-white" size={32} />
                                  </div>
                                </>
                              ) : (
-                               <ImageIcon className={isDark ? "text-white/10" : "text-charcoal/10"} size={40} />
+                               <ImageIcon className={isDark ? "text-white/10" : "text-charcoal/10"} size={48} />
                              )}
                              
                              <input 
@@ -503,440 +574,284 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                                accept="image/*"
                              />
                            </div>
-                           
-                           <div className="flex-1 space-y-4">
-                              <h5 className={`text-[11px] font-black uppercase tracking-widest ${isDark ? "text-white/80" : "text-charcoal"}`}>Visual Essence</h5>
-                              <p className={`text-[9px] uppercase tracking-[0.2em] font-bold leading-relaxed transition-colors duration-700 ${isDark ? "text-white/20" : "text-charcoal/40"}`}>
-                                Upload the singular master asset that represents this ritual.
-                                <br />Recommended: 1:1 Aspect Ratio.
-                              </p>
-                           </div>
-                         </div>
-                      </div>
+                           <p className={`text-[9px] uppercase tracking-[0.2em] font-bold text-center leading-relaxed ${isDark ? "text-white/20" : "text-charcoal/40"}`}>
+                             Upload the main product photo.<br />Recommended 1:1 Aspect Ratio.
+                           </p>
+                        </div>
+                     </div>
+
+                     {/* Badges Section */}
+                     <div className={`p-10 rounded-[3rem] border transition-all duration-700 ${
+                        isDark ? "bg-white/[0.01] border-white/10 shadow-xl" : "bg-charcoal/[0.01] border-charcoal/5 shadow-sm"
+                     }`}>
+                        <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic mb-6 block">Product Status</label>
+                        <div className="flex flex-col gap-4">
+                           {[
+                             { id: "isNew", label: "New Arrival", icon: Sparkles },
+                             { id: "isTrending", label: "Trending", icon: Zap },
+                             { id: "isBestSeller", label: "Best Seller", icon: Info }
+                           ].map(badge => (
+                             <label key={badge.id} className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all duration-500 ${
+                               isDark ? "bg-white/3 border-white/5" : "bg-white border-charcoal/5 shadow-sm"
+                             }`}>
+                                <div className="flex items-center gap-3">
+                                   <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+                                     formData[badge.id] ? "bg-gold text-charcoal shadow-lg" : isDark ? "bg-white/5 text-white/20" : "bg-charcoal/5 text-charcoal/20"
+                                   }`}>
+                                      <badge.icon size={14} />
+                                   </div>
+                                   <span className={`text-[10px] font-black uppercase tracking-widest ${
+                                     formData[badge.id] ? "text-gold" : isDark ? "text-white/40" : "text-charcoal/70"
+                                   }`}>{badge.label}</span>
+                                </div>
+                                <input type="checkbox" name={badge.id} checked={formData[badge.id]} onChange={handleInputChange} className="hidden" />
+                                <div className={`w-10 h-5 rounded-full transition-all relative ${isDark ? "bg-white/5 border border-white/10" : "bg-charcoal/5 border border-charcoal/10 shadow-inner"} ${formData[badge.id] ? "bg-gold" : ""}`}>
+                                   <div className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-white rounded-full transition-transform ${formData[badge.id] ? "translate-x-5" : ""}`} />
+                                </div>
+                             </label>
+                           ))}
+                        </div>
+                     </div>
                   </div>
-               </div>
-            </div>
+                </motion.div>
+              )}
 
-            {/* Tags & Badges Section */}
-            <div className={`p-10 rounded-[3rem] border transition-all duration-700 ${
-              isDark ? "bg-white/[0.01] border-white/10 shadow-xl" : "bg-charcoal/[0.01] border-charcoal/5 shadow-sm"
-            }`}>
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                   <div className="lg:col-span-12 space-y-3 mb-4">
-                      <div className={`p-6 rounded-[2rem] border flex items-center justify-between transition-all duration-500 ${
-                         isDark ? "bg-gold/[0.02] border-gold/10 text-gold/60" : "bg-gold/5 border-gold/10 text-gold shadow-sm"
-                      }`}>
-                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-2xl bg-gold/10 flex items-center justify-center">
-                               <Zap size={18} className="text-gold" />
+              {activeTab === "variants" && (
+                <motion.div
+                  key="variants"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-12"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-center gap-5">
+                        <div className={`w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 shadow-lg`}>
+                          <Plus size={28} />
+                        </div>
+                        <div>
+                          <h4 className={`text-xl font-display font-bold uppercase tracking-tight ${isDark ? "text-white" : "text-charcoal"}`}>
+                            Product <span className="text-gold italic">Variations</span>
+                          </h4>
+                          <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? "text-white/30" : "text-charcoal/40"}`}>
+                            Manage colors, sizes, and specific pricing models
+                          </p>
+                        </div>
+                    </div>
+                    <button 
+                        type="button"
+                        onClick={addVariant}
+                        className="px-10 py-4 bg-indigo-500 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-indigo-500/20 flex items-center gap-3 font-display"
+                    >
+                        <Plus size={16} />
+                        <span>Add New Variation</span>
+                    </button>
+                  </div>
+
+                  {formData.variants && formData.variants.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-8">
+                      {formData.variants.map((variant: any, idx: number) => (
+                        <motion.div 
+                          key={variant.id}
+                          initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          className={`p-10 rounded-[3rem] border backdrop-blur-3xl transition-all duration-500 relative group/vcard ${
+                            isDark 
+                            ? "bg-white/[0.02] border-white/5 hover:border-gold/30 hover:bg-white/[0.04] shadow-[0_20px_50px_rgba(0,0,0,0.3)]" 
+                            : "bg-white border-charcoal/5 shadow-[0_15px_40px_rgba(182,143,76,0.06)] hover:border-gold/20"
+                          }`}
+                        >
+                            <div className={`absolute -top-3 -left-3 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg ${
+                              isDark ? "bg-charcoal border border-white/10 text-gold" : "bg-white border border-gold/20 text-gold"
+                            }`}>
+                                Variant #{idx + 1}
                             </div>
-                            <div>
-                               <p className="text-[10px] font-black uppercase tracking-[0.2em] italic leading-tight">Dynamic Attribute Management</p>
-                               <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Base rituals are automatically synchronized from your variations below.</p>
-                            </div>
-                         </div>
-                         <div className="flex items-center gap-4">
-                            <div className="flex flex-col items-end">
-                               <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Archival Price</span>
-                               <span className="text-xs font-black">₹{formData.originalPrice || 0}</span>
-                            </div>
-                            <input 
-                              name="originalPrice" 
-                              type="number" 
-                              value={formData.originalPrice} 
-                              onChange={handleInputChange} 
-                              step="0.01" 
-                              className={`w-24 border rounded-xl py-2 px-4 text-xs font-bold text-center outline-none focus:ring-1 focus:ring-gold/30 ${
-                                isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/10 text-charcoal shadow-inner"
-                              }`} 
-                            />
-                         </div>
-                      </div>
-                   </div>
 
-                   <div className="lg:col-span-7 space-y-8">
-                       <div className="space-y-4">
-                         <label className="text-[9px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic leading-none">Global Asset Gallery (URLs)</label>
-                         <input 
-                           name="images"
-                           value={Array.isArray(formData.images) ? formData.images.join(", ") : ""}
-                           onChange={handleInputChange}
-                           placeholder="image-url-1, image-url-2, ..."
-                           className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold ${
-                             isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
-                           }`}
-                         />
-                       </div>
-
-                       <div className="grid grid-cols-2 gap-6">
-                         <div className="space-y-4">
-                           <label className="text-[9px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic">Legacy Shades</label>
-                           <input 
-                             name="shades"
-                             value={Array.isArray(formData.shades) ? formData.shades.join(", ") : ""}
-                             onChange={handleInputChange}
-                             placeholder="#FF0000, #00FF00, ..."
-                             className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold ${
-                               isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
-                             }`}
-                           />
-                         </div>
-                         <div className="space-y-4">
-                            <label className="text-[9px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic">Legacy Sizes</label>
-                            <input 
-                              name="sizes"
-                              value={Array.isArray(formData.sizes) ? formData.sizes.join(", ") : ""}
-                              onChange={handleInputChange}
-                              placeholder="50ml, 100ml, ..."
-                              className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold ${
-                                isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
-                              }`}
-                            />
-                         </div>
-                       </div>
-
-                       <div className="space-y-4">
-                          <label className="text-[9px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic">Search Optimization Tags</label>
-                          <input 
-                            name="tags"
-                            value={Array.isArray(formData.tags) ? formData.tags.join(", ") : ""}
-                            onChange={handleInputChange}
-                            placeholder="serum, glow, anti-aging"
-                            className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold shadow-sm ${
-                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-white border-charcoal/5 text-charcoal"
-                            }`}
-                          />
-                       </div>
-                   </div>
-
-                   <div className="lg:col-span-5 space-y-10">
-                      <div className="space-y-6 pt-4">
-                         <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic">Collection Badges</label>
-                         <div className="flex flex-col gap-5">
-                            {[
-                              { id: "isNew", label: "New Arrival Ritual", icon: Sparkles },
-                              { id: "isTrending", label: "Trending Masterpiece", icon: Zap },
-                              { id: "isBestSeller", label: "Timeless Best Seller", icon: Info }
-                            ].map(badge => (
-                              <label key={badge.id} className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer group transition-all duration-500 hover:scale-[1.02] active:scale-[0.98] ${
-                                isDark ? "bg-white/3 border-white/5" : "bg-white border-charcoal/5 shadow-sm"
-                              }`}>
-                                 <div className="flex items-center gap-4">
-                                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-700 ${
-                                      formData[badge.id] ? "bg-gold text-charcoal shadow-lg" : isDark ? "bg-white/5 text-white/20" : "bg-charcoal/5 text-charcoal/20"
-                                    }`}>
-                                       <badge.icon size={14} />
-                                    </div>
-                                    <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${
-                                      formData[badge.id] ? "text-gold" : isDark ? "text-white/40" : "text-charcoal/70"
-                                    }`}>{badge.label}</span>
-                                 </div>
-                                 <div className="relative">
-                                    <input 
-                                      type="checkbox"
-                                      name={badge.id}
-                                      checked={formData[badge.id]}
-                                      onChange={handleInputChange}
-                                      className="peer sr-only"
-                                    />
-                                     <div className={`w-12 h-6 rounded-full transition-all duration-700 relative ${
-                                       isDark ? "bg-white/5 border border-white/10" : "bg-charcoal/5 border border-charcoal/10 shadow-inner"
-                                     } peer-checked:bg-gold`}>
-                                        <div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-700 peer-checked:translate-x-5 shadow-md shadow-black/20" />
-                                     </div>
-                                  </div>
-                               </label>
-                            ))}
-                         </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-6 pt-4">
-                         <div className="space-y-4 opacity-40 cursor-not-allowed">
-                            <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Community Rating</label>
-                            <input name="rating" type="number" step="0.1" max="5" readOnly value={formData.rating} className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold ${
-                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                            }`} />
-                         </div>
-                         <div className="space-y-4 opacity-40 cursor-not-allowed">
-                            <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Testimonials</label>
-                            <input name="reviewCount" type="number" readOnly value={formData.reviewCount} className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold ${
-                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                            }`} />
-                         </div>
-                      </div>
-                   </div>
-                </div>
-            </div>
-
-            <div className={`space-y-10 pt-12 border-t transition-colors duration-700 ${isDark ? "border-white/5" : "border-charcoal/5"}`}>
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                   <div className="flex items-center gap-5">
-                      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-700 shadow-lg ${
-                        isDark ? "bg-indigo-500/10 text-indigo-400" : "bg-indigo-500/5 text-indigo-600 border border-indigo-500/10"
-                      }`}>
-                         <Plus size={28} />
-                      </div>
-                      <div>
-                         <h4 className={`text-xl font-display font-bold uppercase tracking-tight transition-colors duration-700 ${isDark ? "text-white" : "text-charcoal"}`}>
-                           Product <span className="text-gold italic">Variations</span>
-                         </h4>
-                         <p className={`text-[10px] font-black uppercase tracking-[0.3em] transition-colors duration-700 ${isDark ? "text-white/30" : "text-charcoal/40"}`}>
-                           Manage colors, sizes, and specific pricing models
-                         </p>
-                      </div>
-                   </div>
-                   <button 
-                     type="button"
-                     onClick={addVariant}
-                     className="px-10 py-4 bg-indigo-500 text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 hover:scale-105 active:scale-95 transition-all shadow-xl shadow-indigo-500/20 flex items-center gap-3"
-                   >
-                     <Plus size={16} />
-                     <span>Add New Variation</span>
-                   </button>
-                </div>
-
-                {formData.variants && formData.variants.length > 0 ? (
-                  <div className="grid grid-cols-1 gap-8">
-                     {formData.variants.map((variant: any, idx: number) => (
-                       <motion.div 
-                         key={variant.id}
-                         initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                         animate={{ opacity: 1, scale: 1, y: 0 }}
-                         className={`p-10 rounded-[3rem] border backdrop-blur-3xl transition-all duration-500 relative group/vcard ${
-                           isDark 
-                           ? "bg-white/[0.02] border-white/5 hover:border-gold/30 hover:bg-white/[0.04] shadow-[0_20px_50px_rgba(0,0,0,0.3)]" 
-                           : "bg-white border-charcoal/5 shadow-[0_15px_40px_rgba(182,143,76,0.06)] hover:border-gold/20"
-                         }`}
-                       >
-                          {/* Variant Badge */}
-                          <div className={`absolute -top-3 -left-3 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest shadow-lg ${
-                            isDark ? "bg-charcoal border border-white/10 text-gold" : "bg-white border border-gold/20 text-gold"
-                          }`}>
-                             Variant #{idx + 1}
-                          </div>
-
-                          <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
-                              {/* Left Column: Asset Gallery */}
-                              <div className="xl:col-span-4 space-y-6">
-                                 <div className="flex items-center justify-between">
-                                    <label className="text-[10px] font-black text-gold uppercase tracking-[0.3em] leading-none ml-1">Variation Gallery</label>
-                                    <Zap size={14} className="text-gold opacity-30" />
-                                 </div>
-                                 
-                                 <div className="grid grid-cols-3 gap-3">
-                                    {variant.images && variant.images.map((img: string, i: number) => (
-                                      <div key={i} className={`relative aspect-square rounded-[1.5rem] border overflow-hidden group/vimg transition-all duration-500 hover:shadow-xl ${
-                                        isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
-                                      }`}>
-                                         <img src={getAssetUrl(img)} className="w-full h-full object-cover transition-transform duration-700 group-hover/vimg:scale-125" />
-                                         <div className="absolute inset-0 bg-charcoal/60 flex items-center justify-center opacity-0 group-hover/vimg:opacity-100 transition-all duration-300 backdrop-blur-sm">
-                                            <button 
-                                              type="button"
-                                              onClick={() => removeVariantImage(variant.id, i)}
-                                              className="p-3 bg-rose-500 text-white rounded-2xl hover:scale-110 active:scale-90 transition-all shadow-lg"
-                                            >
-                                               <Trash2 size={16} />
-                                            </button>
-                                         </div>
-                                      </div>
-                                    ))}
-                                    
-                                     {/* Add Asset Trigger */}
-                                    <div 
-                                      onClick={() => document.getElementById(`variant-image-${variant.id}`)?.click()}
-                                      className={`aspect-square rounded-[1.5rem] border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-500 relative overflow-hidden group/vadd ${
-                                        isDark 
-                                        ? "bg-white/3 border-white/10 hover:border-gold/40 hover:bg-gold/5" 
-                                        : "bg-charcoal/2 border-gold/10 hover:border-gold/30 hover:bg-gold/5"
-                                      }`}
-                                      style={{ 
-                                        backgroundColor: (variant.images?.length === 0 && getColor(variant.color)) ? getColor(variant.color) : undefined,
-                                        borderColor: (variant.images?.length === 0 && getColor(variant.color)) ? 'transparent' : undefined
-                                      }}
-                                    >
-                                       <Plus size={24} className={`mb-1 transition-transform group-hover/vadd:rotate-90 duration-500 ${(variant.images?.length === 0 && getColor(variant.color)) ? "text-white drop-shadow-md" : "text-gold/40 group-hover/vadd:text-gold"}`} />
-                                       <span className={`text-[8px] font-bold uppercase tracking-widest ${(variant.images?.length === 0 && getColor(variant.color)) ? "text-white/80" : "text-gold/30 group-hover/vadd:text-gold/60"}`}>Upload</span>
-                                       
-                                       {variant.images?.length === 0 && getColor(variant.color) && (
-                                          <div className="absolute inset-0 bg-black/10 group-hover/vadd:bg-black/0 transition-colors" />
-                                       )}
-                                       <input 
-                                         id={`variant-image-${variant.id}`}
-                                         type="file" 
-                                         accept="image/*" 
-                                         className="hidden" 
-                                         onChange={(e) => handleVariantFileUpload(variant.id, e)} 
-                                       />
-                                    </div>
-                                 </div>
-                              </div>
-
-                              {/* Right Column: Configuration */}
-                              <div className="xl:col-span-8 flex flex-col gap-8">
-                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                     <div className="space-y-3">
-                                          <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1 flex items-center gap-2">
-                                             Color / Shade 
-                                             {getColor(variant.color) && (
-                                               <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="w-2.5 h-2.5 rounded-full shadow-lg border border-white/20" style={{ backgroundColor: getColor(variant.color) }} />
-                                             )}
-                                          </label>
-                                         <input 
-                                           value={variant.color}
-                                           onChange={(e) => updateVariant(variant.id, "color", e.target.value)}
-                                           placeholder="e.g. Crimson Red"
-                                           className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold transition-all focus:ring-1 focus:ring-gold/30 outline-none ${
-                                             isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                                           }`}
-                                         />
-                                     </div>
-                                     <div className="space-y-3">
-                                        <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1">Size / Volume</label>
-                                        <input 
-                                          value={variant.size}
-                                          onChange={(e) => updateVariant(variant.id, "size", e.target.value)}
-                                          placeholder="e.g. 50ml"
-                                          className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold transition-all focus:ring-1 focus:ring-gold/30 outline-none ${
-                                            isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                                          }`}
-                                        />
-                                     </div>
-                                     <div className="space-y-3">
-                                        <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1">Selling Price (₹)</label>
-                                        <div className="relative">
-                                          <input 
-                                            type="number"
-                                            value={variant.price}
-                                            readOnly={!!variant.appliedPromotionId}
-                                            onChange={(e) => updateVariant(variant.id, "price", parseFloat(e.target.value))}
-                                            className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold transition-all focus:ring-1 focus:ring-gold/30 outline-none ${
-                                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                                            } ${variant.appliedPromotionId ? "opacity-60 cursor-not-allowed border-gold/30" : ""}`}
-                                          />
-                                          {variant.appliedPromotionId && <Zap size={12} className="absolute right-6 top-1/2 -translate-y-1/2 text-gold animate-pulse" />}
-                                        </div>
-                                     </div>
-                                     <div className="space-y-3">
-                                        <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1">Active Promotion</label>
-                                        <div className="relative group/sel">
-                                          <select 
-                                            value={variant.appliedPromotionId || ""} 
-                                            onChange={(e) => updateVariant(variant.id, "appliedPromotionId", e.target.value)} 
-                                            className={`w-full border rounded-2xl py-4 px-6 text-[10px] font-black uppercase tracking-widest appearance-none outline-none focus:ring-gold/30 transition-all ${
-                                              isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                                            }`}
-                                          >
-                                              <option value="">No Offer Applied</option>
-                                              {availablePromotions.map(promo => (
-                                                <option key={promo._id} value={promo._id} className={isDark ? "bg-charcoal" : "bg-white"}>
-                                                  {promo.discountText} Off
-                                                </option>
-                                              ))}
-                                          </select>
-                                          <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-gold/60 group-hover/sel:text-gold transition-colors">
-                                             <Sparkles size={12} />
+                            <div className="grid grid-cols-1 xl:grid-cols-12 gap-10">
+                                <div className="xl:col-span-4 space-y-6">
+                                  <label className="text-[10px] font-black text-gold uppercase tracking-[0.3em] leading-none ml-1 block mb-4">Variation Gallery</label>
+                                  <div className="grid grid-cols-3 gap-3">
+                                      {variant.images && variant.images.map((img: string, i: number) => (
+                                        <div key={i} className={`relative aspect-square rounded-[1.5rem] border overflow-hidden group/vimg transition-all duration-500 hover:shadow-xl ${
+                                          isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"
+                                        }`}>
+                                          <img src={getAssetUrl(img)} className="w-full h-full object-cover transition-transform duration-700 group-hover/vimg:scale-125" />
+                                          <div className="absolute inset-0 bg-charcoal/60 flex items-center justify-center opacity-0 group-hover/vimg:opacity-100 transition-all duration-300 backdrop-blur-sm">
+                                              <button type="button" onClick={() => removeVariantImage(variant.id, i)} className="p-3 bg-rose-500 text-white rounded-2xl hover:scale-110 active:scale-90 transition-all shadow-lg"><Trash2 size={16} /></button>
                                           </div>
                                         </div>
-                                     </div>
-                                     <div className="space-y-3">
-                                        <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1">Inventory Stock</label>
-                                        <input 
-                                          type="number"
-                                          value={variant.stock}
-                                          onChange={(e) => updateVariant(variant.id, "stock", parseInt(e.target.value))}
-                                          className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold transition-all focus:ring-1 focus:ring-gold/30 outline-none ${
-                                            isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"
-                                          }`}
-                                        />
-                                     </div>
-                                     <div className="flex items-end h-full">
-                                        <button 
-                                          type="button"
-                                          onClick={() => removeVariant(variant.id)}
-                                          className={`w-full py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 group/del ${
-                                            isDark ? "bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white" : "bg-rose-50 text-rose-500 border border-rose-100 hover:bg-rose-500 hover:text-white shadow-sm"
-                                          }`}
-                                        >
-                                           <Trash2 size={14} className="group-hover/del:scale-110 transition-transform" />
-                                           <span>Dissolve Variant</span>
-                                        </button>
-                                     </div>
-                                 </div>
-                              </div>
-                          </div>
-                       </motion.div>
-                     ))}
-                  </div>
-                ) : (
-                  <div className={`py-12 border-2 border-dashed rounded-[2.5rem] flex flex-col items-center justify-center gap-4 transition-colors ${
-                    isDark ? "border-white/5 text-white/20" : "border-charcoal/5 text-charcoal/20"
+                                      ))}
+                                      <div onClick={() => document.getElementById(`variant-image-${variant.id}`)?.click()} className={`aspect-square rounded-[1.5rem] border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-all duration-500 hover:bg-gold/5 ${isDark ? "bg-white/3 border-white/10" : "bg-charcoal/2 border-gold/10"}`}>
+                                        <Plus size={24} className="text-gold/40" />
+                                        <input id={`variant-image-${variant.id}`} type="file" accept="image/*" className="hidden" onChange={(e) => handleVariantFileUpload(variant.id, e)} />
+                                      </div>
+                                  </div>
+                                </div>
+
+                                <div className="xl:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-6">
+                                    <div className="space-y-3">
+                                        <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1">Color / Shade</label>
+                                        <input value={variant.color} onChange={(e) => updateVariant(variant.id, "color", e.target.value)} placeholder="e.g. Crimson Red" className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold transition-all focus:ring-1 focus:ring-gold/30 outline-none ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1">Size / Volume</label>
+                                        <input value={variant.size} onChange={(e) => updateVariant(variant.id, "size", e.target.value)} placeholder="e.g. 50ml" className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold transition-all focus:ring-1 focus:ring-gold/30 outline-none ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1">Stock</label>
+                                        <input type="number" value={variant.stock} onChange={(e) => updateVariant(variant.id, "stock", parseInt(e.target.value))} className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold transition-all focus:ring-1 focus:ring-gold/30 outline-none ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                                    </div>
+                                    <div className="space-y-3">
+                                        <label className="text-[9px] font-black text-gold uppercase tracking-[0.3em] ml-1">Price (₹)</label>
+                                        <input type="number" value={variant.price} onChange={(e) => updateVariant(variant.id, "price", parseFloat(e.target.value))} className={`w-full border rounded-2xl py-4 px-6 text-xs font-bold transition-all focus:ring-1 focus:ring-gold/30 outline-none ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                                    </div>
+                                    <div className="col-span-2 flex items-end">
+                                        <button type="button" onClick={() => removeVariant(variant.id)} className={`w-full py-4 rounded-2xl text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 group/del ${isDark ? "bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white" : "bg-rose-50 text-rose-500 border border-rose-100 hover:bg-rose-500 hover:text-white"}`}><Trash2 size={14} className="group-hover/del:scale-110 transition-transform" /><span>Remove Variant</span></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={`py-20 border-2 border-dashed rounded-[3rem] flex flex-col items-center justify-center gap-4 transition-colors ${isDark ? "border-white/5 text-white/20" : "border-charcoal/5 text-charcoal/20"}`}><p className="text-[10px] font-black uppercase tracking-[0.3em]">No Variants Added Yet</p></div>
+                  )}
+                </motion.div>
+              )}
+
+              {activeTab === "narrative" && (
+                <motion.div
+                  key="narrative"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-12"
+                >
+                  <div className={`p-10 rounded-[3.5rem] border backdrop-blur-3xl transition-all duration-700 ${
+                    isDark ? "bg-white/[0.01] border-white/5 shadow-2xl" : "bg-charcoal/[0.01] border-charcoal/5 shadow-sm"
                   }`}>
-                     <p className="text-[10px] font-black uppercase tracking-[0.3em]">No Variations Defined</p>
-                     <p className="text-[9px] font-bold uppercase tracking-widest opacity-60">Add variations for multiple SKUs (Size/Color)</p>
-                  </div>
-                )}
-            </div>
+                     <div className="space-y-10">
+                        <div className="space-y-4">
+                           <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic leading-none">Product Description</label>
+                           <textarea 
+                             name="description"
+                             value={formData.description}
+                             onChange={handleInputChange}
+                             placeholder="Enter product description and sensory details..."
+                             rows={6}
+                             className={`w-full border rounded-[2rem] py-6 px-8 font-body text-sm focus:ring-1 focus:ring-gold/30 outline-none resize-none transition-all ${
+                               isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
+                             }`}
+                           />
+                        </div>
 
-            {/* Narrative Sections */}
-            <div className={`p-10 rounded-[3.5rem] border backdrop-blur-3xl transition-all duration-700 ${
-              isDark ? "bg-white/[0.01] border-white/5 shadow-2xl" : "bg-charcoal/[0.01] border-charcoal/5 shadow-sm"
-            }`}>
-               <div className="space-y-10">
-                  <div className="space-y-4">
-                     <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic leading-none">The Story & Narrative</label>
-                     <textarea 
-                       name="description"
-                       value={formData.description}
-                       onChange={handleInputChange}
-                       placeholder="Describe the sensory experience and artisan ritual..."
-                       rows={4}
-                       className={`w-full border rounded-[2rem] py-6 px-8 font-body text-sm focus:ring-1 focus:ring-gold/30 outline-none resize-none transition-all ${
-                         isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
-                       }`}
-                     />
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                     <div className="space-y-4">
-                        <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Sacred Ingredients</label>
-                        <textarea 
-                          name="ingredients"
-                          value={formData.ingredients}
-                          onChange={handleInputChange}
-                          placeholder="List the high-potency molecules..."
-                          rows={6}
-                          className={`w-full border rounded-[2rem] py-6 px-8 font-body text-[11px] leading-relaxed focus:ring-1 focus:ring-gold/30 outline-none resize-none transition-all ${
-                            isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
-                          }`}
-                        />
-                     </div>
-                     <div className="space-y-4">
-                        <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Application Ritual</label>
-                        <textarea 
-                          name="howToUse"
-                          value={formData.howToUse}
-                          onChange={handleInputChange}
-                          placeholder="Describe the steps of the ritual..."
-                          rows={6}
-                          className={`w-full border rounded-[2rem] py-6 px-8 font-body text-[11px] leading-relaxed focus:ring-1 focus:ring-gold/30 outline-none resize-none transition-all ${
-                            isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
-                          }`}
-                        />
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                           <div className="space-y-4">
+                              <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>Ingredients</label>
+                              <textarea 
+                                name="ingredients"
+                                value={formData.ingredients}
+                                onChange={handleInputChange}
+                                placeholder="List main ingredients..."
+                                rows={8}
+                                className={`w-full border rounded-[2rem] py-6 px-8 font-body text-[11px] leading-relaxed focus:ring-1 focus:ring-gold/30 outline-none resize-none transition-all ${
+                                  isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
+                                }`}
+                              />
+                           </div>
+                           <div className="space-y-4">
+                              <label className={`text-[9px] font-black uppercase tracking-[0.4em] ml-2 ${isDark ? "text-white/30" : "text-charcoal/70"}`}>How to Use</label>
+                              <textarea 
+                                name="howToUse"
+                                value={formData.howToUse}
+                                onChange={handleInputChange}
+                                placeholder="Steps to apply the product..."
+                                rows={8}
+                                className={`w-full border rounded-[2rem] py-6 px-8 font-body text-[11px] leading-relaxed focus:ring-1 focus:ring-gold/30 outline-none resize-none transition-all ${
+                                  isDark ? "bg-white/5 border-white/10 text-white placeholder:text-white/10" : "bg-white border-charcoal/5 text-charcoal shadow-sm"
+                                }`}
+                              />
+                           </div>
+                        </div>
                      </div>
                   </div>
-               </div>
-            </div>
+                </motion.div>
+              )}
 
-            {/* SEO Section Integration */}
-            <div className={`p-10 rounded-[3.5rem] border transition-all duration-700 ${
-              isDark ? "bg-white/[0.01] border-white/5" : "bg-charcoal/[0.01] border-charcoal/5"
-            }`}>
-               <SEOForm 
-                 seo={formData.seo || { title: "", description: "", keywords: "" }} 
-                 onChange={(seo) => setFormData(prev => ({ ...prev, seo }))}
-                 isDark={isDark}
-               />
-            </div>
+              {activeTab === "seo" && (
+                <motion.div
+                  key="seo"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-8"
+                >
+                  <div className={`p-8 rounded-[3.5rem] border backdrop-blur-3xl transition-all duration-700 ${
+                    isDark ? "bg-white/[0.01] border-white/5 shadow-2xl" : "bg-charcoal/[0.01] border-charcoal/5 shadow-sm"
+                  }`}>
+                     <div className="space-y-6">
+                        {/* Tags Section */}
+                        <div className="space-y-2">
+                           <label className="text-[10px] font-black text-gold uppercase tracking-[0.4em] ml-2 italic">Search Tags</label>
+                           <div className={`w-full border rounded-[2rem] p-3 flex flex-wrap gap-2 min-h-[56px] transition-all focus-within:ring-1 focus-within:ring-gold/30 ${
+                             isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10 shadow-sm"
+                           }`}>
+                             <AnimatePresence>
+                               {Array.isArray(formData.tags) && formData.tags.map((tag: string) => (
+                                 <motion.span
+                                   key={tag}
+                                   initial={{ opacity: 0, scale: 0.8 }}
+                                   animate={{ opacity: 1, scale: 1 }}
+                                   exit={{ opacity: 0, scale: 0.8 }}
+                                   className="flex items-center gap-2 px-4 py-2 bg-gold/10 text-gold text-[10px] font-black uppercase tracking-widest rounded-xl border border-gold/20 group"
+                                 >
+                                   {tag}
+                                   <button 
+                                     type="button"
+                                     onClick={() => setFormData((prev: any) => ({ ...prev, tags: prev.tags.filter((t: string) => t !== tag) }))}
+                                     className="hover:text-rose-500 transition-colors"
+                                   >
+                                     <X size={10} />
+                                   </button>
+                                 </motion.span>
+                               ))}
+                             </AnimatePresence>
+                             <input 
+                               placeholder={formData.tags?.length === 0 ? "serum, glow, anti-aging..." : "Add tag..."}
+                               onKeyDown={(e) => {
+                                 if (e.key === "Enter" || e.key === ",") {
+                                   e.preventDefault();
+                                   const val = (e.target as HTMLInputElement).value.trim().replace(/,$/, "");
+                                   if (val && !formData.tags?.includes(val)) {
+                                     setFormData((prev: any) => ({ ...prev, tags: [...(prev.tags || []), val] }));
+                                     (e.target as HTMLInputElement).value = "";
+                                   }
+                                 }
+                               }}
+                               className={`flex-1 min-w-[120px] bg-transparent outline-none text-sm font-body px-4 ${
+                                 isDark ? "text-white" : "text-charcoal"
+                               }`}
+                             />
+                           </div>
+                           <p className="text-[9px] font-bold text-gold/60 uppercase tracking-widest ml-4">Press Enter or use commas to Manifest tags</p>
+                        </div>
+
+                        {/* SEO Form Component */}
+                        <div className="pt-4">
+                           <SEOForm 
+                             seo={formData.seo || { title: "", description: "", keywords: "" }} 
+                             onChange={(seo) => setFormData(prev => ({ ...prev, seo }))}
+                             isDark={isDark}
+                           />
+                        </div>
+                     </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </form>
 
            {/* Footer Action Bar */}
@@ -957,7 +872,7 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                  {isSubmitting && (
                    <div className="flex items-center gap-3">
                       <div className="w-4 h-4 border-2 border-gold/30 border-t-gold rounded-full animate-spin" />
-                      <span className="text-[9px] font-black text-gold uppercase tracking-widest">Seal the ritual...</span>
+                      <span className="text-[9px] font-black text-gold uppercase tracking-widest">Saving changes...</span>
                    </div>
                  )}
                  <button 
@@ -971,11 +886,11 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
                  >
                     <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover/submit:translate-x-[100%] transition-transform duration-1000 skew-x-[45deg]" />
                     {isSubmitting ? (
-                      <span className="animate-pulse">Archiving...</span>
+                      <span className="animate-pulse">Saving...</span>
                     ) : (
                       <>
                         <Save size={16} className="group-hover:scale-110 transition-transform" />
-                        <span>{product ? "Update Manifestation" : "Create Masterpiece"}</span>
+                        <span>{product ? "Update Product" : "Create Product"}</span>
                       </>
                     )}
                  </button>
