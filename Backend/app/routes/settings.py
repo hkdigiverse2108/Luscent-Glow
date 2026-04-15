@@ -17,8 +17,7 @@ async def get_global_settings():
             "copyrightText": "© 2026 Luscent Glow. All rights reserved.",
             "freeShippingThreshold": 999,
             "defaultShippingCharge": 0,
-            "promoText": "Use Code",
-            "promoCode": "GLOW15",
+            "announcementText": "FREE SHIPPING ABOVE ₹999 | USE CODE GLOW15",
             "priceFilters": [
                 { "label": "Under ₹500", "min": 0, "max": 500 },
                 { "label": "₹500 – ₹1000", "min": 500, "max": 1000 },

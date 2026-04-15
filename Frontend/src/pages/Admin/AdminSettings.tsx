@@ -83,9 +83,8 @@ const AdminSettings = () => {
   
   const [whatsappNumber, setWhatsappNumber] = useState("");
   const [copyrightText, setCopyrightText] = useState("");
+  const [announcementText, setAnnouncementText] = useState("");
   const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(0);
-  const [promoText, setPromoText] = useState("");
-  const [promoCode, setPromoCode] = useState("");
   const [defaultShippingCharge, setDefaultShippingCharge] = useState<number>(0);
   const [seo, setSeo] = useState({ title: "", description: "", keywords: "" });
   const [priceFilters, setPriceFilters] = useState<any[]>([]);
@@ -127,9 +126,8 @@ const AdminSettings = () => {
         const data = await response.json();
         setWhatsappNumber(data.whatsappNumber || "");
         setCopyrightText(data.copyrightText || "");
+        setAnnouncementText(data.announcementText || "");
         setFreeShippingThreshold(data.freeShippingThreshold || 999);
-        setPromoText(data.promoText || "");
-        setPromoCode(data.promoCode || "");
         setDefaultShippingCharge(data.defaultShippingCharge || 0);
         setSeo(data.seo || { title: "", description: "", keywords: "" });
         setPriceFilters(data.priceFilters || []);
@@ -150,10 +148,9 @@ const AdminSettings = () => {
         body: JSON.stringify({ 
           whatsappNumber,
           copyrightText,
+          announcementText,
           freeShippingThreshold,
           defaultShippingCharge,
-          promoText,
-          promoCode,
           seo,
           priceFilters
         })
@@ -325,87 +322,26 @@ const AdminSettings = () => {
               </div>
             </div>
 
-            {/* Announcement Bar Section */}
             <div className="md:col-span-2 pt-6 border-t border-gold/10 mt-2">
               <h4 className={`text-sm font-bold uppercase tracking-widest mb-6 flex items-center gap-2 ${isDark ? "text-white" : "text-charcoal"}`}>
                 <Tag size={16} className="text-gold" /> Announcement Bar
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                <div className="space-y-3">
-                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
-                    Free Shipping Above (₹)
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
-                      <Truck size={14} />
-                    </div>
-                    <input
-                      type="number"
-                      min="0"
-                      value={freeShippingThreshold}
-                      onChange={(e) => setFreeShippingThreshold(Number(e.target.value))}
-                      className={`${inputClass} pl-10`}
-                      placeholder="999"
-                    />
+              <div className="space-y-3">
+                <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                  Banner Announcement Text
+                </label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                    <Sparkles size={16} />
                   </div>
+                  <input
+                    type="text"
+                    value={announcementText}
+                    onChange={(e) => setAnnouncementText(e.target.value)}
+                    className={`${inputClass} pl-12`}
+                    placeholder="e.g. FREE SHIPPING ABOVE ₹999 | USE CODE GLOW15"
+                  />
                 </div>
-
-                <div className="space-y-3">
-                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
-                    Default Shipping (₹)
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
-                      <Store size={14} />
-                    </div>
-                    <input
-                      type="number"
-                      min="0"
-                      value={defaultShippingCharge}
-                      onChange={(e) => setDefaultShippingCharge(Number(e.target.value))}
-                      className={`${inputClass} pl-10`}
-                      placeholder="49"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
-                    Promo Text
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
-                      <Sparkles size={14} />
-                    </div>
-                    <input
-                      type="text"
-                      value={promoText}
-                      onChange={(e) => setPromoText(e.target.value)}
-                      className={`${inputClass} pl-10`}
-                      placeholder="Use Code"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
-                    Promo Code
-                  </label>
-                  <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
-                       <Hash size={14} />
-                    </div>
-                    <input
-                      type="text"
-                      value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
-                      className={`${inputClass} pl-10`}
-                      placeholder="GLOW15"
-                    />
-                  </div>
-                </div>
-
               </div>
             </div>
           </div>
