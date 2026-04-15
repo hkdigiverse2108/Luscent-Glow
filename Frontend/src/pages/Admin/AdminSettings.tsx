@@ -150,6 +150,8 @@ const AdminSettings = () => {
         body: JSON.stringify({ 
           whatsappNumber,
           copyrightText,
+          freeShippingThreshold,
+          defaultShippingCharge,
           promoText,
           promoCode,
           seo,
@@ -330,6 +332,43 @@ const AdminSettings = () => {
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
+                <div className="space-y-3">
+                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                    Free Shipping Above (₹)
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                      <Truck size={14} />
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      value={freeShippingThreshold}
+                      onChange={(e) => setFreeShippingThreshold(Number(e.target.value))}
+                      className={`${inputClass} pl-10`}
+                      placeholder="999"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
+                    Default Shipping (₹)
+                  </label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gold">
+                      <Store size={14} />
+                    </div>
+                    <input
+                      type="number"
+                      min="0"
+                      value={defaultShippingCharge}
+                      onChange={(e) => setDefaultShippingCharge(Number(e.target.value))}
+                      className={`${inputClass} pl-10`}
+                      placeholder="49"
+                    />
+                  </div>
+                </div>
 
                 <div className="space-y-3">
                   <label className={`text-[10px] font-extrabold uppercase tracking-[0.2em] ${isDark ? "text-slate-400" : "text-gold"}`}>
@@ -366,7 +405,6 @@ const AdminSettings = () => {
                     />
                   </div>
                 </div>
-
 
               </div>
             </div>
