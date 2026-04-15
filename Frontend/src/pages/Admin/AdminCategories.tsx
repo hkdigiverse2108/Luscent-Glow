@@ -109,13 +109,19 @@ const AdminCategories = () => {
               className={`relative overflow-hidden group rounded-[2.5rem] border transition-all duration-700 ${isDark ? "bg-charcoal/40 border-white/5 hover:border-gold/30 shadow-2xl shadow-black/40" : "bg-white border-charcoal/5 shadow-ethereal hover:shadow-2xl hover:border-gold/20"}`}
             >
               {/* Category Background Visual */}
-              <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity duration-700">
+              <div className="absolute inset-0 opacity-25 group-hover:opacity-40 transition-opacity duration-700">
                 {category.image ? (
-                  <img src={getAssetUrl(category.image)} alt="" className="w-full h-full object-cover grayscale" />
+                  <img src={getAssetUrl(category.image)} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gold/5" />
                 )}
               </div>
+              {/* Gradient overlay for text legibility */}
+              <div className={`absolute inset-0 ${
+                isDark
+                  ? "bg-gradient-to-br from-charcoal/80 via-charcoal/50 to-transparent"
+                  : "bg-gradient-to-br from-white/80 via-white/50 to-transparent"
+              }`} />
 
               <div className="relative z-10 p-8">
                 <div className="flex justify-between items-start mb-6">
