@@ -1227,8 +1227,8 @@ const AdminUsers = () => {
                         <div className="space-y-6">
                             {!isQuickView && (
                               <div className="flex items-center justify-between">
-                                 <h5 className="text-[13px] font-black uppercase tracking-[0.3em] text-gold">Sacred Tokens</h5>
-                                 <span className="text-[10px] font-black uppercase tracking-widest opacity-40">{userDetails.giftCards?.length || 0} Total Cards</span>
+                                 <h5 className="text-[13px] font-black uppercase tracking-[0.3em] text-gold">Gift Cards</h5>
+                                 <span className="text-[10px] font-black uppercase tracking-widest opacity-40">{userDetails.giftCards?.length || 0} Active Cards</span>
                               </div>
                             )}
 

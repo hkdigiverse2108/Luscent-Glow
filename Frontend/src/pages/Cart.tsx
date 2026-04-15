@@ -66,7 +66,10 @@ const Cart = () => {
 
   useEffect(() => {
     refreshSettings();
-  }, [refreshSettings]);
+    // Re-fetch received gift cards every time the cart page opens,
+    // so a user who just purchased a gift card for themselves can immediately apply it.
+    fetchReceivedGiftCards();
+  }, [refreshSettings, fetchReceivedGiftCards]);
   const { user } = useAuth();
   const { toggleWishlist, isInWishlist } = useWishlist();
   
@@ -471,7 +474,8 @@ const Cart = () => {
                         </Dialog>
                       </div>
 
-                      {/* Apply Gift Card Section */}
+                      {/* Apply Gift Card Section — hidden when purchasing gift cards */}
+                      {!items.some(i => i.category === "Gift Cards" || String(i.id).startsWith("giftcard-")) && (
                       <div className="space-y-5 pt-2 border-t border-gold/10">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 text-gold">
@@ -525,6 +529,7 @@ const Cart = () => {
                            </button>
                         </div>
                       </div>
+                      )}
 
                          <div className="space-y-6 pt-6 animate-in fade-in slide-in-from-top-4 border-t border-gold/10">
                             {giftCardDiscount > 0 && (

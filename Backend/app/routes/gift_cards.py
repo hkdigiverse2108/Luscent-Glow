@@ -75,24 +75,32 @@ async def get_received_gift_cards(mobileNumber: str):
     else:
         core_num = clean_num
         
-    # We use regex to find the core number string within the field to handle accidental formatting
+    # Match ONLY by recipientMobile — the card belongs to whoever is the recipient.
+    # If a user bought a card for themselves, recipientMobile = their own number → matches.
+    # If they bought for someone else, only that recipient sees it.
+    # Regex handles format differences: "+91 9876543210" vs "9876543210"
     query = {
         "isActive": True,
+        "currentBalance": {"$gt": 0},
         "$or": [
             {"recipientMobile": {"$regex": f".*{core_num}.*"}},
-            {"recipientName": mobileNumber},
-            {"recipientMobile": mobileNumber}
+            {"recipientMobile": mobileNumber},
         ]
     }
 
-    # Find active gift cards sent to this mobile number
+    # Find active gift cards the user can use (as recipient)
     received_cards = await db["gift_cards"].find(query).to_list(100)
     
-    # Format for frontend
+    # Deduplicate by code in case a card matches both sender and recipient
+    seen_codes = set()
     formatted_cards = []
     for card in received_cards:
+        code = card["code"]
+        if code in seen_codes:
+            continue
+        seen_codes.add(code)
         formatted_cards.append({
-            "code": card["code"],
+            "code": code,
             "balance": card["currentBalance"],
             "recipientName": card.get("recipientName"),
             "message": card.get("message"),
@@ -101,6 +109,57 @@ async def get_received_gift_cards(mobileNumber: str):
         })
         
     return formatted_cards
+
+@router.get("/by-user", response_description="List all gift cards grouped by user (Admin only)")
+async def list_gift_cards_by_user():
+    db = await get_database()
+    cards = await db["gift_cards"].find({}).sort("createdAt", -1).to_list(1000)
+    
+    # Group by senderMobile (normalize: strip spaces/+91)
+    groups: dict = {}
+    for card in cards:
+        raw_mobile = card.get("senderMobile") or "ADMIN"
+        # Normalize key: last 10 digits, or "ADMIN"
+        if raw_mobile == "ADMIN":
+            key = "ADMIN"
+        else:
+            digits = "".join(filter(str.isdigit, raw_mobile))
+            key = digits[-10:] if len(digits) >= 10 else digits or "UNKNOWN"
+
+        if key not in groups:
+            groups[key] = {
+                "senderMobile": raw_mobile,
+                "senderName": card.get("senderName") or ("Admin Panel" if key == "ADMIN" else None),
+                "normalizedMobile": key,
+                "totalCards": 0,
+                "activeCards": 0,
+                "totalBalance": 0,
+                "cards": []
+            }
+        
+        card_data = {
+            "id": str(card.get("_id", "")),
+            "code": card.get("code"),
+            "initialBalance": card.get("initialBalance", 0),
+            "currentBalance": card.get("currentBalance", 0),
+            "recipientName": card.get("recipientName"),
+            "recipientMobile": card.get("recipientMobile"),
+            "message": card.get("message"),
+            "theme": card.get("theme", "Gold Radiance"),
+            "isActive": card.get("isActive", False),
+            "expiryDate": card.get("expiryDate"),
+            "createdAt": card.get("createdAt"),
+            "orderNumber": card.get("orderNumber"),
+        }
+        groups[key]["cards"].append(card_data)
+        groups[key]["totalCards"] += 1
+        if card.get("isActive"):
+            groups[key]["activeCards"] += 1
+        groups[key]["totalBalance"] += card.get("currentBalance", 0)
+
+    # Sort groups: ADMIN last, then by total cards desc
+    result = sorted(groups.values(), key=lambda g: (g["normalizedMobile"] == "ADMIN", -g["totalCards"]))
+    return result
 
 @router.get("/", response_description="List all gift cards (Admin only)", response_model=list[GiftCardModel])
 async def list_gift_cards():

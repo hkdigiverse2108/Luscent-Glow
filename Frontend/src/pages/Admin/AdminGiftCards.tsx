@@ -4,9 +4,7 @@ import {
   Plus, 
   Search, 
   Trash2, 
-  Edit2, 
   Ticket, 
-  Copy, 
   CheckCircle2, 
   Calendar,
   Wallet,
@@ -15,11 +13,14 @@ import {
   Sparkles,
   X,
   Palette,
-  Send,
   CreditCard,
   ChevronRight,
+  ChevronDown,
   Upload, 
   Zap,
+  Phone,
+  Gift,
+  BadgeCheck,
   Image as ImageIcon
 } from "lucide-react";
 import DynamicIcon from "../../components/DynamicIcon.tsx";
@@ -31,11 +32,12 @@ import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 const AdminGiftCards = () => {
   const { isDark } = useAdminTheme();
   const [activeTab, setActiveTab] = useState<"list" | "config">("list");
-  const [giftCards, setGiftCards] = useState<any[]>([]);
+  const [userGroups, setUserGroups] = useState<any[]>([]);
+  const [giftCards, setGiftCards] = useState<any[]>([]); // kept for stats
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCard, setEditingCard] = useState<any>(null);
   
   // Page Configuration State
   const [config, setConfig] = useState<any>(null);
@@ -64,11 +66,12 @@ const AdminGiftCards = () => {
   const fetchGiftCards = async () => {
     setLoading(true);
     try {
-      const response = await fetch(getApiUrl("/api/gift-cards/"));
-      if (response.ok) {
-        const data = await response.json();
-        setGiftCards(data);
-      }
+      const [groupsRes, flatRes] = await Promise.all([
+        fetch(getApiUrl("/api/gift-cards/by-user")),
+        fetch(getApiUrl("/api/gift-cards/"))
+      ]);
+      if (groupsRes.ok) setUserGroups(await groupsRes.json());
+      if (flatRes.ok) setGiftCards(await flatRes.json());
     } catch (error) {
       toast.error("Could not retrieve the gift card list.");
     } finally {
@@ -218,9 +221,14 @@ const AdminGiftCards = () => {
     setIsModalOpen(true);
   };
 
-  const filteredCards = giftCards.filter(c => 
-    c.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.recipientName.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredGroups = userGroups.filter(g =>
+    !searchQuery ||
+    (g.senderName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (g.senderMobile || "").includes(searchQuery) ||
+    g.cards.some((c: any) =>
+      c.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (c.recipientName || "").toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   return (
@@ -228,7 +236,7 @@ const AdminGiftCards = () => {
       <AdminHeader 
         title="Gift Card"
         highlightedWord="Management"
-        subtitle="Manage the gift card list and storefront appearance"
+        subtitle="View gift cards by user, manage issuance and storefront settings"
         isDark={isDark}
         action={activeTab === "list" ? {
           label: "Create Card",
@@ -250,7 +258,7 @@ const AdminGiftCards = () => {
                 : isDark ? "text-white/40 hover:text-white" : "text-charcoal/40 hover:text-charcoal"
             }`}
           >
-            Card List
+            User View
           </button>
           <button 
             onClick={() => setActiveTab("config")}
@@ -268,58 +276,171 @@ const AdminGiftCards = () => {
       <AnimatePresence mode="wait">
         {activeTab === "list" ? (
           <motion.div key="list" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-2">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
               {[
-                { label: "Active Cards", value: giftCards.filter(c => c.isActive).length, icon: Ticket, tint: "text-gold" },
-                { label: "Total Balance", value: `₹${giftCards.reduce((acc, c) => acc + (c.currentBalance || 0), 0).toLocaleString()}`, icon: Wallet, tint: "text-gold/60" },
-                { label: "Total Issued", value: giftCards.length, icon: CheckCircle2, tint: "text-gold/40" }
+                { label: "Total Users", value: userGroups.length, icon: User },
+                { label: "Active Cards", value: giftCards.filter(c => c.isActive).length, icon: Ticket },
+                { label: "Total Balance", value: `₹${giftCards.reduce((acc, c) => acc + (c.currentBalance || 0), 0).toLocaleString()}`, icon: Wallet },
+                { label: "Total Issued", value: giftCards.length, icon: Gift }
               ].map((stat, i) => (
-                <div key={i} className={`p-3 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5"}`}>
+                <div key={i} className={`p-4 rounded-3xl border ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/5"}`}>
                   <p className="text-[10px] font-bold uppercase tracking-widest opacity-40">{stat.label}</p>
                   <h4 className="text-2xl font-display font-bold mt-1">{stat.value}</h4>
                 </div>
               ))}
             </div>
 
+            {/* Search */}
             <div className={`relative flex items-center p-2 rounded-2xl border ${isDark ? "bg-white/5 border-white/10" : "bg-charcoal/5 border-charcoal/10"}`}>
               <Search className="ml-4 text-muted-foreground" size={18} />
               <input 
-                placeholder="Search card by code or recipient name..."
+                placeholder="Search by user name, mobile, card code, or recipient..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-transparent border-none py-3 px-4 text-sm focus:ring-0"
               />
             </div>
 
-            <div className={`rounded-2xl border overflow-hidden min-h-[600px] ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/10"}`}>
-              <table className="w-full text-left border-collapse">
-                <thead className={isDark ? "bg-white/5" : "bg-charcoal/5"}>
-                  <tr>
-                    <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Code</th>
-                    <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Recipient</th>
-                    <th className="px-4 py-1.5 text-[10px] uppercase font-bold tracking-widest">Balance</th>
-                    <th className="px-6 py-3 text-[10px] uppercase font-bold tracking-widest text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {filteredCards.map(card => (
-                    <tr key={card._id} className="hover:bg-gold/5 transition-colors">
-                      <td className="px-6 py-3 font-bold tracking-widest text-xs uppercase">{card.code}</td>
-                      <td className="px-6 py-3">
-                         <p className="text-sm font-semibold">{card.recipientName}</p>
-                         <p className="text-[10px] text-muted-foreground">{card.recipientMobile}</p>
-                      </td>
-                      <td className="px-4 py-1.5 text-sm font-bold text-gold">₹{(card.currentBalance || 0).toLocaleString()}</td>
-                      <td className="px-6 py-3 text-right">
-                        <div className="flex justify-end gap-2 text-muted-foreground">
-                          <button onClick={() => handleDeleteToken(card._id)} className="p-2 hover:text-rose-500"><Trash2 size={14} /></button>
+            {/* User-wise grouped cards */}
+            {loading ? (
+              <div className="space-y-3">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className={`h-20 rounded-3xl animate-pulse ${isDark ? "bg-white/5" : "bg-charcoal/5"}`} />
+                ))}
+              </div>
+            ) : filteredGroups.length === 0 ? (
+              <div className={`py-24 text-center rounded-3xl border border-dashed ${isDark ? "border-white/10" : "border-charcoal/10"}`}>
+                <Gift size={40} className="mx-auto mb-4 opacity-20" />
+                <p className="text-sm opacity-40 font-bold uppercase tracking-widest">No gift cards found</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filteredGroups.map((group) => {
+                  const isExpanded = expandedUser === group.normalizedMobile;
+                  const isAdmin = group.normalizedMobile === "ADMIN";
+                  const filteredCards = searchQuery
+                    ? group.cards.filter((c: any) =>
+                        c.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (c.recipientName || "").toLowerCase().includes(searchQuery.toLowerCase())
+                      )
+                    : group.cards;
+
+                  return (
+                    <div key={group.normalizedMobile} className={`rounded-3xl border overflow-hidden transition-all ${isDark ? "bg-white/5 border-white/10" : "bg-white border-charcoal/8"}`}>
+                      {/* User Row Header */}
+                      <button
+                        className="w-full flex items-center justify-between px-6 py-4 hover:bg-gold/5 transition-colors group"
+                        onClick={() => setExpandedUser(isExpanded ? null : group.normalizedMobile)}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-sm ${
+                            isAdmin ? "bg-gold/10 text-gold" : "bg-charcoal/10 text-charcoal"
+                          } ${isDark ? "!bg-white/10 !text-white" : ""}`}>
+                            {isAdmin ? <Sparkles size={18} /> : <User size={18} />}
+                          </div>
+                          <div className="text-left">
+                            <p className="text-sm font-bold">
+                              {group.senderName || <span className="opacity-40 italic">Unknown</span>}
+                              {isAdmin && <span className="ml-2 text-[9px] bg-gold/20 text-gold px-2 py-0.5 rounded-full uppercase tracking-widest">Admin</span>}
+                            </p>
+                            <p className="text-[10px] opacity-50 flex items-center gap-1 mt-0.5">
+                              <Phone size={10} />{group.senderMobile}
+                            </p>
+                          </div>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+
+                        <div className="flex items-center gap-6">
+                          <div className="hidden md:flex items-center gap-6 text-right">
+                            <div>
+                              <p className="text-[9px] uppercase tracking-widest opacity-40 font-bold">Cards</p>
+                              <p className="text-base font-bold">{group.totalCards}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] uppercase tracking-widest opacity-40 font-bold">Active</p>
+                              <p className="text-base font-bold text-gold">{group.activeCards}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] uppercase tracking-widest opacity-40 font-bold">Balance</p>
+                              <p className="text-base font-bold">₹{group.totalBalance.toLocaleString()}</p>
+                            </div>
+                          </div>
+                          <ChevronDown size={16} className={`opacity-40 transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
+                        </div>
+                      </button>
+
+                      {/* Expanded Cards */}
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className={`border-t ${isDark ? "border-white/10" : "border-charcoal/5"}`}>
+                              <div className="p-4 space-y-2">
+                                {filteredCards.map((card: any, idx: number) => (
+                                  <div key={idx} className={`flex items-center justify-between px-5 py-4 rounded-2xl transition-colors ${
+                                    isDark ? "bg-white/5 hover:bg-white/10" : "bg-charcoal/3 hover:bg-gold/5"
+                                  }`}>
+                                    <div className="flex items-center gap-4">
+                                      {/* Status dot */}
+                                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${card.isActive ? "bg-emerald-400" : "bg-charcoal/20"}`} />
+                                      <div>
+                                        <p className="text-xs font-bold tracking-widest uppercase text-gold">{card.code}</p>
+                                        <p className="text-[10px] opacity-50 mt-0.5">
+                                          To: <span className="font-semibold">{card.recipientName || "—"}</span>
+                                          {card.recipientMobile && <span className="ml-2 opacity-70">{card.recipientMobile}</span>}
+                                        </p>
+                                        {card.message && (
+                                          <p className="text-[10px] italic opacity-40 mt-0.5 max-w-[260px] truncate">"{card.message}"</p>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-6">
+                                      <div className="text-right hidden sm:block">
+                                        <p className="text-[9px] uppercase tracking-widest opacity-40 font-bold">Balance</p>
+                                        <p className={`text-sm font-bold ${card.currentBalance > 0 ? "text-gold" : "opacity-30"}`}>
+                                          ₹{(card.currentBalance || 0).toLocaleString()}
+                                          {card.initialBalance !== card.currentBalance && (
+                                            <span className="text-[9px] opacity-40 ml-1">/ ₹{card.initialBalance?.toLocaleString()}</span>
+                                          )}
+                                        </p>
+                                      </div>
+                                      <div className="text-right hidden md:block">
+                                        <p className="text-[9px] uppercase tracking-widest opacity-40 font-bold">Theme</p>
+                                        <p className="text-[10px] font-bold">{card.theme}</p>
+                                      </div>
+                                      <div className="text-right hidden md:block">
+                                        <p className="text-[9px] uppercase tracking-widest opacity-40 font-bold">Status</p>
+                                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                          card.isActive ? "bg-emerald-400/10 text-emerald-500" : "bg-charcoal/10 opacity-40"
+                                        }`}>
+                                          {card.isActive ? "Active" : "Spent"}
+                                        </span>
+                                      </div>
+                                      <button
+                                        onClick={() => handleDeleteToken(card.id)}
+                                        className="p-2 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-500/10 transition-all"
+                                      >
+                                        <Trash2 size={14} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div key="config" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-3">

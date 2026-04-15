@@ -270,6 +270,7 @@ const Checkout = () => {
           price: item.price,
           quantity: item.quantity,
           image: item.image,
+          category: item.category,
           selectedShade: item.selectedShade,
           selectedSize: item.selectedSize,
           metadata: item.metadata || (isDirectBuy ? { directBuy: true } : {})

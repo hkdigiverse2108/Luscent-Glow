@@ -215,8 +215,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addItem = async (newItem: CartItem) => {
     const user = getLoggedInUser();
     const guestId = getGuestId();
-    
-    // Always sync with backend
+
+    // Business rule: If adding a gift card item, remove any applied gift card discount.
+    const isGiftCardItem = newItem.category === "Gift Cards" || String(newItem.id).startsWith("giftcard-");
+    if (isGiftCardItem && appliedGiftCard) {
+      setAppliedGiftCard(null);
+      localStorage.removeItem("luscent-glow-applied-giftcard");
+      toast.info("Gift card discount removed — gift cards cannot be purchased with a gift card.");
+    }
     try {
       await fetch(getApiUrl("/api/cart/add"), {
         method: "POST",
@@ -385,6 +391,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const applyGiftCard = async (code: string): Promise<boolean> => {
+    // Business rule: Gift cards cannot be purchased using another gift card as payment.
+    const hasGiftCardItem = items.some(
+      item => item.category === "Gift Cards" || String(item.id).startsWith("giftcard-")
+    );
+    if (hasGiftCardItem) {
+      toast.error("Gift cards cannot be used to purchase another gift card.");
+      return false;
+    }
+
     try {
       const response = await fetch(getApiUrl(`/api/gift-cards/validate/${code}`));
       if (response.ok) {
@@ -401,11 +416,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         toast.success(`Gift card ₹${data.balance} applied!`);
         return true;
+      } else {
+        // Show the actual error from the server so the user knows what went wrong
+        try {
+          const errData = await response.json();
+          toast.error(errData.detail || "Invalid or empty gift card");
+        } catch {
+          toast.error("Invalid or empty gift card");
+        }
       }
     } catch (error) {
       console.error("Error validating gift card:", error);
+      toast.error("Could not reach the server. Please try again.");
+
     }
-    toast.error("Invalid or empty gift card");
     return false;
   };
 

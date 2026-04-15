@@ -899,7 +899,13 @@ const Profile = () => {
                           <Gift size={14} className="opacity-50" />
                           <span className="text-[9px] font-body font-bold uppercase tracking-[0.4em]">My Account</span>
                         </div>
-                        <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">Gifting <span className="text-gold italic font-light">History</span></h3>
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-display text-4xl md:text-5xl font-bold text-charcoal capitalize">My <span className="text-gold italic font-light">Gift Cards</span></h3>
+                          <Link to="/cart" className="text-[10px] font-body font-bold text-gold uppercase tracking-widest px-4 py-2 bg-gold/10 rounded-full hover:bg-gold hover:text-white transition-all">
+                            Apply at Cart →
+                          </Link>
+                        </div>
+                        <p className="text-xs font-body text-muted-foreground/60">Gift cards you've purchased or received. Copy the code to apply it at checkout.</p>
                       </div>
 
                       {cardsLoading ? (
@@ -919,9 +925,17 @@ const Profile = () => {
                               <img src={getAssetUrl(card.image)} className="absolute inset-0 w-full h-full object-cover" />
                               <div className="absolute inset-0 p-8 flex flex-col justify-between text-white bg-black/30 backdrop-blur-[2px]">
                                 <div className="flex justify-between items-start">
-                                  <div className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+                                  <button
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(card.code);
+                                      toast.success(`Code ${card.code} copied! Paste it in your cart.`);
+                                    }}
+                                    className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 hover:bg-white/20 transition-all group/copy flex items-center gap-2"
+                                    title="Copy to clipboard"
+                                  >
                                     <span className="font-display text-[10px] tracking-widest uppercase font-bold text-white">{card.code}</span>
-                                  </div>
+                                    <Scan size={10} className="text-white/60 group-hover/copy:text-white transition-colors" />
+                                  </button>
                                   <div className="font-display text-2xl lg:text-3xl font-bold text-gold">₹{card.balance.toLocaleString()}</div>
                                 </div>
                                 <div className="space-y-2">
@@ -943,8 +957,11 @@ const Profile = () => {
                            </div>
                            <h4 className="font-display text-2xl font-bold text-charcoal opacity-60">No Gift Cards Found.</h4>
                            <p className="text-[10px] font-body text-muted-foreground mt-4 italic max-w-xs leading-relaxed uppercase tracking-widest">
-                             Cards added via the Admin Panel will appear here for the registered recipient.
+                             Purchase a gift card for yourself or receive one from a friend to see it here.
                            </p>
+                           <Link to="/gift-cards" className="mt-6 px-6 py-3 bg-gold text-charcoal font-bold text-[10px] uppercase tracking-widest rounded-full hover:bg-charcoal hover:text-white transition-all">
+                             Buy a Gift Card →
+                           </Link>
                         </div>
                       )}
                     </div>

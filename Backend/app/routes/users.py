@@ -100,19 +100,39 @@ async def get_user_details(userId: str):
                 "image": product["image"]
             })
             
-    # Fetch Gift Cards (sent or received)
-    gift_cards = await db["gift_cards"].find({
-        "$or": [
-            {"senderMobile": user_mobile},
-            {"recipientMobile": user_mobile}
-        ]
-    }).to_list(1000)
-    
+    # Fetch Gift Cards the user currently HAS (active, balance > 0)
+    # ONLY match by recipientMobile — the card belongs to the recipient, not the buyer.
+    # Self-purchased cards work because the buyer sets their own mobile as recipientMobile.
+    # Regex handles "+91 9876543210" vs "9876543210" format mismatches.
+    clean_mobile = "".join(filter(str.isdigit, user_mobile or ""))
+    core_mobile = clean_mobile[-10:] if len(clean_mobile) >= 10 else clean_mobile
+
+    if core_mobile:
+        gift_card_query = {
+            "isActive": True,
+            "currentBalance": {"$gt": 0},
+            "recipientMobile": {"$regex": f".*{core_mobile}.*"}
+        }
+    else:
+        gift_card_query = {
+            "isActive": True,
+            "currentBalance": {"$gt": 0},
+            "recipientMobile": user_mobile
+        }
+
+    gift_cards_raw = await db["gift_cards"].find(gift_card_query).sort("createdAt", -1).to_list(1000)
+
+    # Deduplicate by code (self-purchased card matches both sender + recipient)
+    seen_codes = set()
     formatted_cards = []
-    for card in gift_cards:
+    for card in gift_cards_raw:
+        code = card.get("code")
+        if code in seen_codes:
+            continue
+        seen_codes.add(code)
         formatted_cards.append({
             "id": str(card["_id"]),
-            "code": card["code"],
+            "code": code,
             "initialBalance": card.get("initialBalance", 0),
             "currentBalance": card.get("currentBalance", 0),
             "recipientName": card.get("recipientName"),
