@@ -37,7 +37,13 @@ async def upload_file(file: UploadFile = File(...)):
         file_url = f"/uploads/{unique_filename}"
         return JSONResponse(
             status_code=status.HTTP_201_CREATED,
-            content={"status": "success", "url": file_url, "filename": unique_filename}
+            content={
+                "status": "success", 
+                "url": file_url, 
+                "filePath": file_url,
+                "filepath": file_url,
+                "filename": unique_filename
+            }
         )
     except Exception as e:
         raise HTTPException(

@@ -151,6 +151,7 @@ class ReviewModel(BaseModel):
     selectedVariant: Optional[str] = Field(default=None)
     createdAt: str = Field(...)
     orderNumber: Optional[str] = Field(default=None)
+    helpfulCount: int = Field(default=0, ge=0)
 
     class Config:
         populate_by_name = True

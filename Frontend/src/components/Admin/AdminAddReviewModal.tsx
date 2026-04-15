@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Star, Send, Camera, Image as ImageIcon, Loader2, Plus, Info, Search, Package } from "lucide-react";
+import { X, Star, Send, Camera, Image as ImageIcon, Loader2, Plus, Info, Search, Package, Trash2 } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -30,6 +30,8 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
   const [comment, setComment] = useState("");
   const [title, setTitle] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [helpfulCount, setHelpfulCount] = useState(0);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -39,15 +41,20 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
 
   useEffect(() => {
     if (isOpen) {
-      fetchProducts();
+      if (products.length === 0) {
+        fetchProducts();
+      }
       
       if (review) {
+        // Find the product in our fetched list to get its actual catalog image
+        const actualProduct = products.find(p => (p._id || p.id) === review.productId);
+        
         // Populate for editing
         setSelectedProduct({
           id: review.productId,
           _id: review.productId,
           name: review.productName,
-          image: review.images?.[0] || "" // Fallback if no images
+          image: actualProduct?.image || review.productImage || review.images?.[0] || "" 
         });
         setRating(review.rating || 5);
         setUserName(review.userName || "");
@@ -55,6 +62,8 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
         setComment(review.comment || "");
         setTitle(review.title || "");
         setSelectedFiles([]);
+        setExistingImages(review.images || []);
+        setHelpfulCount(review.helpfulCount || 0);
       } else {
         // Reset for new creation
         setSelectedProduct(null);
@@ -64,10 +73,12 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
         setComment("");
         setTitle("");
         setSelectedFiles([]);
+        setExistingImages([]);
+        setHelpfulCount(0);
       }
       setError(null);
     }
-  }, [isOpen, review]);
+  }, [isOpen, review, products]);
 
   const fetchProducts = async () => {
     try {
@@ -88,8 +99,8 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      if (selectedFiles.length + files.length > 4) {
-        setError("Limit: 4 images per chronicle.");
+      if (existingImages.length + selectedFiles.length + files.length > 4) {
+        setError(`Maximum capacity reached (${existingImages.length + selectedFiles.length}/4)`);
         return;
       }
       setSelectedFiles(prev => [...prev, ...files]);
@@ -104,7 +115,7 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
       for (const file of selectedFiles) {
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch(getApiUrl("/api/upload/"), {
+        const res = await fetch(getApiUrl("/api/upload"), {
           method: "POST",
           body: formData,
         });
@@ -143,7 +154,8 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
         rating,
         title: title || `${rating} Star Experience`,
         comment,
-        images: imageUrls.length > 0 ? [...(review?.images || []), ...imageUrls] : (review?.images || []),
+        helpfulCount,
+        images: [...existingImages, ...imageUrls],
         createdAt: review?.createdAt || new Date().toISOString()
       };
 
@@ -256,14 +268,25 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
                   {isSearchFocused && <div className="fixed inset-0 z-[105]" onClick={() => setIsSearchFocused(false)} />}
                 </div>
               ) : (
-                <div className={`p-4 rounded-2xl border flex items-center justify-between ${
-                  isDark ? "bg-gold/5 border-gold/20" : "bg-gold/5 border-gold/20"
+                <div className={`p-5 rounded-3xl border flex items-center justify-between shadow-lg ${
+                  isDark ? "bg-gold/5 border-gold/20" : "bg-gold/5 border-gold/10 shadow-gold/5"
                 }`}>
-                  <div className="flex items-center gap-4">
-                     <img src={getAssetUrl(selectedProduct.image)} alt="" className="w-12 h-12 rounded-xl object-cover" />
-                     <p className={`text-sm font-black ${isDark ? "text-white" : "text-charcoal"}`}>{selectedProduct.name}</p>
+                  <div className="flex items-center gap-5">
+                     <div className="relative group">
+                        <img src={getAssetUrl(selectedProduct.image)} alt="" className="w-20 h-20 rounded-2xl object-cover shadow-2xl border-2 border-white/10" />
+                        <div className="absolute inset-0 bg-black/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                     </div>
+                     <div>
+                        <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-gold" : "text-gold"}`}>Selected Ritual</p>
+                        <p className={`text-lg font-display font-bold mt-1 ${isDark ? "text-white" : "text-charcoal"}`}>{selectedProduct.name}</p>
+                     </div>
                   </div>
-                  <button onClick={() => setSelectedProduct(null)} className="text-[10px] font-black uppercase text-gold hover:underline">Change</button>
+                  <button 
+                    onClick={() => setSelectedProduct(null)} 
+                    className="px-4 py-2 bg-charcoal/5 hover:bg-gold/10 rounded-full transition-colors text-[10px] font-black uppercase tracking-widest text-gold"
+                  >
+                    Change
+                  </button>
                 </div>
               )}
             </div>
@@ -288,14 +311,27 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
 
             {/* 3. Rating & Comment */}
             <div className="space-y-6">
-              <div className="space-y-2">
-                <label className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/40" : "text-charcoal/40"}`}>Rating</label>
-                <div className="flex gap-2">
-                   {[1,2,3,4,5].map(s => (
-                     <button key={s} onClick={() => setRating(s)} className="transition-transform active:scale-95">
-                        <Star size={24} className={s <= rating ? "fill-gold text-gold" : "text-white/10"} />
-                     </button>
-                   ))}
+              <div className="grid md:grid-cols-2 gap-6 items-end">
+                <div className="space-y-2">
+                  <label className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/40" : "text-charcoal/40"}`}>Rating</label>
+                  <div className="flex gap-2">
+                    {[1,2,3,4,5].map(s => (
+                      <button key={s} onClick={() => setRating(s)} className="transition-transform active:scale-95">
+                          <Star size={24} className={s <= rating ? "fill-gold text-gold" : "text-white/10"} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/40" : "text-charcoal/40"}`}>Helpful Count (Community)</label>
+                  <input 
+                    type="number" 
+                    min="0"
+                    value={helpfulCount}
+                    onChange={(e) => setHelpfulCount(parseInt(e.target.value) || 0)}
+                    className={`w-full px-5 py-2.5 rounded-xl border ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`}
+                  />
                 </div>
               </div>
 
@@ -310,30 +346,50 @@ const AdminAddReviewModal: React.FC<AdminAddReviewModalProps> = ({ isOpen, onClo
 
             {/* 4. Images */}
             <div className="space-y-4">
-               <div className="flex items-center justify-between">
-                  <label className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/40" : "text-charcoal/40"}`}>Visual Proof</label>
-                  <span className="text-[10px] font-bold text-gold">{selectedFiles.length} / 4</span>
+                <div className="flex items-center justify-between">
+                  <label className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/40" : "text-charcoal/40"}`}>Visual Proof (Review Photos)</label>
+                  <span className="text-[10px] font-bold text-gold">{existingImages.length + selectedFiles.length} / 4</span>
                </div>
                <div className="flex flex-wrap gap-4">
-                  {selectedFiles.map((f, i) => (
-                    <div key={i} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-white/10 group">
-                       <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+                  {/* Stored Database Images */}
+                  {existingImages.map((img, i) => (
+                    <div key={`stored-${i}`} className="relative w-28 h-28 rounded-2xl overflow-hidden border-2 border-gold/20 shadow-xl group">
+                       <img src={getAssetUrl(img)} alt="" className="w-full h-full object-cover" />
+                       <div className="absolute top-2 left-2 bg-gold text-charcoal text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-lg">Stored</div>
                        <button 
-                        onClick={() => setSelectedFiles(prev => prev.filter((_, idx) => idx !== i))}
-                        className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setExistingImages(prev => prev.filter((_, idx) => idx !== i))}
+                        className="absolute inset-0 bg-rose-500/80 backdrop-blur-sm flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
                        >
-                         <X size={20} className="text-white" />
+                         <Trash2 size={24} className="text-white" />
+                         <span className="text-[8px] font-black uppercase tracking-widest text-white mt-1">Remove Asset</span>
                        </button>
                     </div>
                   ))}
-                  {selectedFiles.length < 4 && (
+
+                  {/* Newly Selected Local Files */}
+                  {selectedFiles.map((f, i) => (
+                    <div key={`new-${i}`} className="relative w-28 h-28 rounded-2xl overflow-hidden border-2 border-emerald-500/20 shadow-xl group">
+                       <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+                       <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-lg">New</div>
+                       <button 
+                        onClick={() => setSelectedFiles(prev => prev.filter((_, idx) => idx !== i))}
+                        className="absolute inset-0 bg-charcoal/80 backdrop-blur-sm flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
+                       >
+                         <X size={24} className="text-white" />
+                         <span className="text-[8px] font-black uppercase tracking-widest text-white mt-1">Discard</span>
+                       </button>
+                    </div>
+                  ))}
+
+                  {(existingImages.length + selectedFiles.length) < 4 && (
                     <button 
                       onClick={() => fileInputRef.current?.click()}
-                      className={`w-24 h-24 rounded-2xl border-2 border-dashed flex items-center justify-center transition-colors ${
-                        isDark ? "border-white/10 hover:border-gold/30 hover:bg-gold/5" : "border-charcoal/10 hover:border-gold/30 hover:bg-gold/5"
+                      className={`w-28 h-28 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center transition-all duration-500 hover:scale-105 ${
+                        isDark ? "border-white/10 hover:border-gold/30 hover:bg-gold/5" : "border-charcoal/10 hover:border-gold/30 hover:bg-gold/5 shadow-inner"
                       }`}
                     >
                       <Plus size={24} className="text-gold" />
+                      <span className="text-[8px] font-black uppercase tracking-widest text-gold/40 mt-1">Add Visual</span>
                     </button>
                   )}
                   <input type="file" ref={fileInputRef} className="hidden" multiple accept="image/*" onChange={handleImageSelect} />

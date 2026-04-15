@@ -75,7 +75,7 @@ const ReviewModal = ({ isOpen, onClose, product, user, orderNumber, existingRevi
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch(getApiUrl("/api/upload/"), {
+        const response = await fetch(getApiUrl("/api/upload"), {
           method: "POST",
           body: formData,
         });

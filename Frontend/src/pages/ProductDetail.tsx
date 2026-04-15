@@ -37,6 +37,7 @@ const ProductDetail = () => {
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [votedReviews, setVotedReviews] = useState<string[]>([]);
   const lastFetchedProductId = useRef<string | null>(null);
 
   // Gallery Sanctuary States
@@ -97,6 +98,57 @@ const ProductDetail = () => {
   };
 
   // ─── Effects ─────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const voted = JSON.parse(localStorage.getItem("votedReviews") || "[]");
+    setVotedReviews(voted);
+  }, []);
+
+  const handleHelpfulClick = async (reviewId: string) => {
+    const isVoted = votedReviews.includes(reviewId);
+    
+    // Optimistic Update
+    if (isVoted) {
+      // Undo Helpful: Decrement count and remove from voted
+      setReviews(prev => prev.map(r => 
+        (r.id === reviewId || r._id === reviewId) 
+          ? { ...r, helpfulCount: Math.max(0, (r.helpfulCount || 1) - 1) } 
+          : r
+      ));
+      const newVoted = votedReviews.filter(id => id !== reviewId);
+      setVotedReviews(newVoted);
+      localStorage.setItem("votedReviews", JSON.stringify(newVoted));
+    } else {
+      // Mark as Helpful: Increment count and add to voted
+      setReviews(prev => prev.map(r => 
+        (r.id === reviewId || r._id === reviewId) 
+          ? { ...r, helpfulCount: (r.helpfulCount || 0) + 1 } 
+          : r
+      ));
+      const newVoted = [...votedReviews, reviewId];
+      setVotedReviews(newVoted);
+      localStorage.setItem("votedReviews", JSON.stringify(newVoted));
+    }
+
+    try {
+      const endpoint = isVoted ? `/api/reviews/${reviewId}/unhelpful` : `/api/reviews/${reviewId}/helpful`;
+      const response = await fetch(getApiUrl(endpoint), {
+        method: "POST"
+      });
+      
+      if (response.ok) {
+        if (isVoted) {
+          toast.info("Feedback retracted");
+        } else {
+          toast.success("Thank you for your feedback!");
+        }
+      } else {
+        console.error("Failed to sync helpful vote toggle with server");
+      }
+    } catch (error) {
+      console.error("Error toggling review helpfulness", error);
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -864,16 +916,43 @@ const ProductDetail = () => {
                                 )}
 
                                 {/* Social Connectivity Footer */}
-                                <div className="flex items-center justify-between pt-3 border-t border-charcoal/[0.02]">
-                                  <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-1.5 text-charcoal/40 group cursor-pointer hover:text-gold transition-colors">
-                                      <ThumbsUp size={12} className="group-hover:fill-gold/10" />
-                                      <span className="text-[10px] font-body font-black uppercase tracking-widest">Helpful?</span>
-                                    </div>
-                                    <p className="text-[10px] font-body text-charcoal/30 font-bold uppercase tracking-widest border-l border-charcoal/10 pl-4">
-                                      <span className="text-charcoal pr-0.5">{review.helpfulCount || 0}</span> Found this helpful
+                                <div className="flex items-center gap-4 mt-4 pt-3 border-t border-charcoal/[0.02]">
+                                    <button 
+                                     onClick={() => handleHelpfulClick(review.id || review._id)}
+                                     
+                                     className={`flex items-center gap-2 border rounded-lg px-4 py-1.5 transition-all font-body ${
+                                       votedReviews.includes(review.id || review._id) 
+                                         ? "bg-gold/5 text-gold border-gold/30 shadow-sm cursor-pointer" 
+                                         : "bg-white text-charcoal/40 border-charcoal/10 hover:text-gold hover:border-gold/30 cursor-pointer"
+                                     }`}
+                                    >
+                                      <ThumbsUp size={16} className={votedReviews.includes(review.id || review._id) ? "fill-gold" : ""} />
+                                      <span className="text-sm font-semibold">Helpful</span>
+                                    </button>
+
+                                                                        <p className="text-sm text-charcoal/60 font-body italic">
+                                      {votedReviews.includes(review.id || review._id) ? (
+                                        <>
+                                          <span className="text-gold font-bold not-italic">You</span>
+                                          {(review.helpfulCount || 1) - 1 > 0 ? (
+                                            <>
+                                              {" and "}
+                                              <span className="font-bold text-charcoal not-italic">{(review.helpfulCount || 1) - 1}</span>{" "}
+                                              {(review.helpfulCount || 0) - 1 === 1 ? "other" : "others"} found this helpful
+                                            </>
+                                          ) : (
+                                            <> found this helpful</>
+                                          )}
+                                        </>
+                                      ) : (
+                                        (review.helpfulCount || 0) > 0 && (
+                                          <>
+                                            <span className="font-bold text-charcoal not-italic">{review.helpfulCount}</span>{" "}
+                                            {review.helpfulCount === 1 ? "person" : "people"} found this helpful
+                                          </>
+                                        )
+                                      )}
                                     </p>
-                                  </div>
                                 </div>
                               </div>
                             </div>

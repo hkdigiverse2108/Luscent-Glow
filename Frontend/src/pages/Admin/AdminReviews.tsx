@@ -13,7 +13,10 @@ import {
   Package,
   ChevronLeft,
   ChevronRight,
-  Plus
+  Plus,
+  ThumbsUp,
+  Check,
+  X
 } from "lucide-react";
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
@@ -28,6 +31,9 @@ const AdminReviews = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<any>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("newest");
+  const [ratingFilter, setRatingFilter] = useState("all");
 
   const fetchReviews = async () => {
     setLoading(true);
@@ -66,11 +72,24 @@ const AdminReviews = () => {
     }
   };
 
-  const filteredReviews = reviews.filter(r => 
-    r.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.productName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.comment?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredReviews = reviews
+    .filter(r => {
+      const matchesSearch = 
+        r.userName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.productName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.comment?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesRating = ratingFilter === "all" || r.rating === parseInt(ratingFilter);
+      
+      return matchesSearch && matchesRating;
+    })
+    .sort((a, b) => {
+      if (sortBy === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      if (sortBy === "highest") return b.rating - a.rating;
+      if (sortBy === "lowest") return a.rating - b.rating;
+      if (sortBy === "helpful") return (b.helpfulCount || 0) - (a.helpfulCount || 0);
+      return 0;
+    });
 
   const cardStyle = `backdrop-blur-3xl border rounded-3xl overflow-hidden shadow-2xl transition-all duration-700 min-h-[600px] ${
     isDark ? "bg-charcoal/40 border-white/5 shadow-black/50" : "bg-white border-charcoal/5 shadow-charcoal/5"
@@ -107,14 +126,87 @@ const AdminReviews = () => {
             }`}
           />
         </div>
-        <button className={`flex items-center gap-3 px-6 py-3 backdrop-blur-2xl border rounded-2xl transition-all duration-500 font-bold uppercase tracking-widest text-xs ${
-          isDark 
-          ? "bg-charcoal/40 border-white/5 text-white/40 hover:text-white hover:border-white/10" 
-          : "bg-white border-charcoal/5 text-charcoal/40 hover:text-charcoal hover:border-charcoal/10 shadow-sm"
-        }`}>
-          <Filter size={18} />
-          <span>Filter</span>
-        </button>
+        <div className="relative">
+          <button 
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className={`flex items-center gap-3 px-6 py-3 backdrop-blur-2xl border rounded-2xl transition-all duration-500 font-bold uppercase tracking-widest text-xs ${
+              isFilterOpen || ratingFilter !== "all" || sortBy !== "newest"
+              ? "bg-gold border-gold text-white shadow-gold/20 shadow-lg"
+              : isDark 
+                ? "bg-charcoal/40 border-white/5 text-white/40 hover:text-white hover:border-white/10" 
+                : "bg-white border-charcoal/5 text-charcoal/40 hover:text-charcoal hover:border-charcoal/10 shadow-sm"
+            }`}>
+            <Filter size={18} />
+            <span>{ratingFilter === "all" ? "Filter" : `${ratingFilter} Stars`}</span>
+          </button>
+
+          <AnimatePresence>
+            {isFilterOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className={`absolute right-0 mt-3 w-72 p-6 rounded-3xl border shadow-2xl z-50 backdrop-blur-3xl ${
+                  isDark ? "bg-charcoal/90 border-white/10 shadow-black/50" : "bg-white/95 border-charcoal/10 shadow-charcoal/10"
+                }`}
+              >
+                <div className="space-y-6">
+                  {/* Rating Section */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-4 opacity-40">Filter by Rating</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["all", "5", "4", "3", "2", "1"].map((r) => (
+                        <button
+                          key={r}
+                          onClick={() => setRatingFilter(r)}
+                          className={`px-3 py-2 rounded-xl text-[10px] font-bold uppercase transition-all ${
+                            ratingFilter === r 
+                            ? "bg-gold text-white shadow-lg shadow-gold/20" 
+                            : isDark ? "bg-white/5 text-white/40 hover:bg-white/10" : "bg-charcoal/5 text-charcoal/60 hover:bg-charcoal/10"
+                          }`}
+                        >
+                          {r === "all" ? "All Ratings" : `${r} Star`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Sort Section */}
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-4 opacity-40">Sort Reviews</p>
+                    <div className="space-y-2">
+                      {[
+                        { label: "Newest First", value: "newest" },
+                        { label: "Top Rated", value: "highest" },
+                        { label: "Most Helpful", value: "helpful" }
+                      ].map((s) => (
+                        <button
+                          key={s.value}
+                          onClick={() => setSortBy(s.value)}
+                          className={`w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all ${
+                            sortBy === s.value 
+                            ? "bg-gold/10 text-gold font-black" 
+                            : isDark ? "hover:bg-white/5 text-white/60" : "hover:bg-charcoal/5 text-charcoal/80"
+                          }`}
+                        >
+                          <span className="text-[10px] uppercase tracking-widest">{s.label}</span>
+                          {sortBy === s.value && <Check size={14} />}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={() => { setRatingFilter("all"); setSortBy("newest"); setIsFilterOpen(false); }}
+                    className="w-full py-3 rounded-xl border border-charcoal/5 text-[10px] font-black uppercase tracking-widest opacity-40 hover:opacity-100 transition-opacity"
+                  >
+                    Reset Filters
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       <div className={cardStyle}>
@@ -127,6 +219,7 @@ const AdminReviews = () => {
                    <th className="px-6 py-4 font-black uppercase tracking-[0.3em]">Review Detail</th>
                    <th className="px-4 py-4 font-black uppercase tracking-[0.3em]">Customer</th>
                    <th className="px-4 py-4 font-black uppercase tracking-[0.3em]">Rating</th>
+                   <th className="px-4 py-4 font-black uppercase tracking-[0.3em]">Community</th>
                    <th className="px-4 py-4 font-black uppercase tracking-[0.3em]">Testimonial</th>
                    <th className="px-4 py-4 font-black uppercase tracking-[0.3em]">Date</th>
                    <th className="px-6 py-4 text-right font-black uppercase tracking-[0.3em]">Actions</th>
@@ -156,8 +249,12 @@ const AdminReviews = () => {
                     >
                        <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
-                             <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold border border-gold/20">
-                                <Package size={18} />
+                             <div className="w-12 h-12 rounded-xl bg-gold/5 flex items-center justify-center overflow-hidden border border-gold/10">
+                                {r.productImage ? (
+                                   <img src={getAssetUrl(r.productImage)} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                   <Package size={18} className="text-gold" />
+                                )}
                              </div>
                              <div>
                                 <h4 className={`text-[14px] font-bold mb-0.5 ${isDark ? "text-white" : "text-charcoal"}`}>{r.productName}</h4>
@@ -184,6 +281,15 @@ const AdminReviews = () => {
                                <Star key={i} size={11} className={i < r.rating ? "fill-gold text-gold" : "text-white/10"} />
                              ))}
                              <span className="ml-1 text-[11px] font-bold text-gold">{r.rating}/5</span>
+                          </div>
+                       </td>
+                       <td className="px-4 py-4">
+                          <div className="flex flex-col items-start gap-1">
+                             <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-gold/5 border border-gold/10">
+                                <ThumbsUp size={10} className="text-gold" />
+                                <span className="text-[11px] font-bold text-gold">{r.helpfulCount || 0}</span>
+                             </div>
+                             <span className="text-[8px] font-black uppercase tracking-widest opacity-30">Found Helpful</span>
                           </div>
                        </td>
                        <td className="px-4 py-4 max-w-[300px]">

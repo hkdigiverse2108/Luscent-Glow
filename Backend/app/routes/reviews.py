@@ -98,9 +98,10 @@ async def list_all_reviews():
                     p_query = {"_id": p_id}
                 
                 # 1. First try Products collection
-                product = await db["products"].find_one(p_query, {"name": 1})
+                product = await db["products"].find_one(p_query, {"name": 1, "image": 1})
                 if product:
                     r["productName"] = product.get("name")
+                    r["productImage"] = product.get("image")
                 else:
                     # 2. Fallback: Search Orders collection for this productId to recover the name
                     order_match = await db["orders"].find_one(
@@ -109,12 +110,16 @@ async def list_all_reviews():
                     )
                     if order_match and "items" in order_match:
                         r["productName"] = order_match["items"][0].get("name", "Unknown Product")
+                        r["productImage"] = order_match["items"][0].get("image", "")
                     else:
                         r["productName"] = "Unknown Product"
+                        r["productImage"] = ""
             except Exception:
                 r["productName"] = "Unknown Product"
+                r["productImage"] = ""
         else:
             r["productName"] = "Unknown Product"
+            r["productImage"] = ""
             
         enriched_reviews.append(r)
         
@@ -252,3 +257,46 @@ async def get_user_reviews(userMobile: str):
     db = await get_database()
     reviews = await db["reviews"].find({"userMobile": userMobile}).sort("createdAt", -1).to_list(100)
     return reviews
+
+@router.post("/{id}/helpful", response_description="Mark a review as helpful")
+async def mark_review_helpful(id: str):
+    db = await get_database()
+    query = {"_id": ObjectId(id)} if ObjectId.is_valid(id) else {"_id": id}
+    
+    # Check if review exists
+    existing = await db["reviews"].find_one(query)
+    if not existing:
+        raise HTTPException(status_code=404, detail=f"Review {id} not found")
+        
+    # Increment the helpfulCount atomically
+    await db["reviews"].update_one(query, {"$inc": {"helpfulCount": 1}})
+    
+    updated_review = await db["reviews"].find_one(query)
+    # Convert _id to id for consistency if needed by model response
+    if "_id" in updated_review:
+        updated_review["id"] = str(updated_review["_id"])
+        
+    return updated_review
+
+@router.post("/{id}/unhelpful", response_description="Undo marking a review as helpful")
+async def mark_review_unhelpful(id: str):
+    db = await get_database()
+    query = {"_id": ObjectId(id)} if ObjectId.is_valid(id) else {"_id": id}
+    
+    # Check if review exists
+    existing = await db["reviews"].find_one(query)
+    if not existing:
+        raise HTTPException(status_code=404, detail=f"Review {id} not found")
+        
+    # Decrement the helpfulCount atomically, ensuring it doesn't go below 0
+    # MongoDB $inc can be negative. We use $max to prevent negative counts if needed, 
+    # but simple $inc -1 is fine if we assume data integrity.
+    helpful_count = existing.get("helpfulCount", 0)
+    if helpful_count > 0:
+        await db["reviews"].update_one(query, {"$inc": {"helpfulCount": -1}})
+    
+    updated_review = await db["reviews"].find_one(query)
+    if "_id" in updated_review:
+        updated_review["id"] = str(updated_review["_id"])
+        
+    return updated_review

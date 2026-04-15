@@ -53,7 +53,7 @@ const PromotionFormModal: React.FC<PromotionFormModalProps> = ({ isOpen, onClose
     const uploadData = new FormData();
     uploadData.append("file", file);
     try {
-      const response = await fetch(getApiUrl("/api/upload/"), { method: "POST", body: uploadData });
+      const response = await fetch(getApiUrl("/api/upload"), { method: "POST", body: uploadData });
       if (response.ok) {
         const data = await response.json();
         setFormData({ ...formData, image: data.filepath });
