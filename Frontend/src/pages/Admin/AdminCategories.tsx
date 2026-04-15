@@ -84,7 +84,7 @@ const AdminCategories = () => {
 
       {/* Search Bar */}
       <div className="relative group max-w-2xl">
-        <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors ${isDark ? "text-white/20 group-focus-within:text-gold" : "text-charcoal/60 group-focus-within:text-gold"}`} size={18} />
+        <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors ${isDark ? "text-white/60 group-focus-within:text-gold" : "text-charcoal/90 group-focus-within:text-gold"}`} size={18} />
         <input 
           type="text" 
           placeholder="Search by name or slug..."
@@ -109,18 +109,18 @@ const AdminCategories = () => {
               className={`relative overflow-hidden group rounded-[2.5rem] border transition-all duration-700 ${isDark ? "bg-charcoal/40 border-white/5 hover:border-gold/30 shadow-2xl shadow-black/40" : "bg-white border-charcoal/5 shadow-ethereal hover:shadow-2xl hover:border-gold/20"}`}
             >
               {/* Category Background Visual */}
-              <div className="absolute inset-0 opacity-25 group-hover:opacity-40 transition-opacity duration-700">
+              <div className="absolute inset-0 opacity-60 group-hover:opacity-80 transition-opacity duration-700">
                 {category.image ? (
                   <img src={getAssetUrl(category.image)} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gold/5" />
                 )}
               </div>
-              {/* Gradient overlay for text legibility */}
+              {/* Gradient overlay for text legibility - Softened for clarity */}
               <div className={`absolute inset-0 ${
                 isDark
-                  ? "bg-gradient-to-br from-charcoal/80 via-charcoal/50 to-transparent"
-                  : "bg-gradient-to-br from-white/80 via-white/50 to-transparent"
+                  ? "bg-gradient-to-br from-charcoal/60 via-charcoal/30 to-transparent"
+                  : "bg-gradient-to-br from-white/60 via-white/30 to-transparent"
               }`} />
 
               <div className="relative z-10 p-8">
@@ -131,13 +131,13 @@ const AdminCategories = () => {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => { setEditingCategory(category); setIsModalOpen(true); }}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "bg-white/5 text-white/30 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/50 hover:text-gold shadow-sm"}`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "bg-white/12 text-white/80 hover:text-gold hover:bg-gold/10" : "bg-charcoal/5 text-charcoal/70 hover:text-gold shadow-sm"}`}
                     >
                       <Edit2 size={16} />
                     </button>
                     <button 
                       onClick={() => handleDelete(category)}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "bg-white/5 text-white/30 hover:text-rose-500 hover:bg-rose-500/10" : "bg-charcoal/5 text-charcoal/50 hover:text-rose-500 shadow-sm"}`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isDark ? "bg-white/12 text-white/80 hover:text-rose-500 hover:bg-rose-500/10" : "bg-charcoal/5 text-charcoal/70 hover:text-rose-500 shadow-sm"}`}
                     >
                       <Trash2 size={16} />
                     </button>

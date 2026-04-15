@@ -49,7 +49,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
         {onBack && (
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-gold/50 hover:text-gold transition-colors duration-500 text-[9px] font-black uppercase tracking-[0.3em] group w-fit"
+            className="flex items-center gap-2 text-gold/80 hover:text-gold transition-colors duration-500 text-[9px] font-black uppercase tracking-[0.3em] group w-fit"
           >
             <Plus size={12} className="rotate-45 group-hover:-translate-x-1 transition-transform duration-300" />
             Back to Sanctuary
@@ -90,8 +90,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
                 ? "bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white"
                 : action.variant === "secondary"
                 ? isDark
-                  ? "bg-white/5 text-white/50 border border-white/10 hover:bg-white/10 hover:text-white"
-                  : "bg-charcoal/5 text-charcoal/60 border border-charcoal/10 hover:bg-charcoal/10"
+                  ? "bg-white/10 text-white/80 border border-white/20 hover:bg-white/20 hover:text-white"
+                  : "bg-charcoal/5 text-charcoal/80 border border-charcoal/10 hover:bg-charcoal/10"
                 : "bg-gold text-charcoal shadow-gold/20 hover:bg-white hover:shadow-xl"
             }`}
           >
@@ -111,8 +111,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
           {/* Sun icon */}
           <Sun
             size={14}
-            className="transition-all duration-500"
-            style={{ color: !isDark ? themeConfig.vars["--adm-accent"] : themeConfig.vars["--adm-text-dim"] }}
+            className="transition-all duration-500 outline-none"
+            style={{ color: !isDark ? themeConfig.vars["--adm-accent"] : themeConfig.vars["--adm-text-muted"] }}
           />
 
           {/* Toggle Track */}
@@ -143,8 +143,8 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
           {/* Moon icon */}
           <Moon
             size={14}
-            className="transition-all duration-500"
-            style={{ color: isDark ? themeConfig.vars["--adm-accent"] : themeConfig.vars["--adm-text-dim"] }}
+            className="transition-all duration-500 outline-none"
+            style={{ color: isDark ? themeConfig.vars["--adm-accent"] : themeConfig.vars["--adm-text-muted"] }}
           />
 
           {/* Divider */}
@@ -159,7 +159,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="transition-colors duration-300"
-            style={{ color: isDark ? "rgba(251,113,133,0.6)" : "rgba(225,29,72,0.6)" }}
+            style={{ color: isDark ? "rgba(251,113,133,0.9)" : "rgba(225,29,72,0.9)" }}
             title="Logout"
           >
             <LogOut size={15} />
