@@ -38,7 +38,13 @@ const GiftCards = () => {
   const [recipientName, setRecipientName] = useState("");
   const [recipientMobile, setRecipientMobile] = useState("");
   const [message, setMessage] = useState("");
-  const [senderName, setSenderName] = useState("");
+  const [senderName, setSenderName] = useState(user?.fullName || "");
+  
+  useEffect(() => {
+    if (user?.fullName && !senderName) {
+      setSenderName(user.fullName);
+    }
+  }, [user, senderName]);
   
   const { addItem } = useCart();
 
@@ -239,11 +245,6 @@ const GiftCards = () => {
                       type="text"
                       placeholder=" "
                       value={senderName}
-                      onFocus={() => {
-                        if (user && !senderName) {
-                          setSenderName(user.fullName);
-                        }
-                      }}
                       onChange={(e) => setSenderName(e.target.value)}
                       className="w-full bg-transparent font-body text-sm text-charcoal outline-none placeholder:opacity-0"
                     />
