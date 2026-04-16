@@ -28,7 +28,9 @@ import {
   CreditCard,
   Tag,
   Zap,
-  Instagram
+  Instagram,
+  Menu,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
@@ -87,6 +89,8 @@ const menuGroups = [
 ];
 
 const AdminLayout = () => {
+  const [isCollapsed, setIsCollapsed] = React.useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = React.useState(false);
   const { adminLogout } = useAuth();
   const location = useLocation();
   const { isDark, themeConfig } = useAdminTheme();
@@ -127,8 +131,29 @@ const AdminLayout = () => {
       </AnimatePresence>
 
       {/* ── Sidebar ────────────────────────────────────────────────────────── */}
-      <aside
-        className="w-[230px] flex-shrink-0 backdrop-blur-3xl border-r flex flex-col relative z-20 transition-all duration-700"
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {isMobileNavOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsMobileNavOpen(false)}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+          />
+        )}
+      </AnimatePresence>
+
+      <motion.aside
+        initial={false}
+        animate={{ 
+          width: isCollapsed ? 80 : 230,
+          x: typeof window !== 'undefined' && window.innerWidth < 1024 
+            ? (isMobileNavOpen ? 0 : -230) 
+            : 0
+        }}
+        transition={{ type: "spring", damping: 25, stiffness: 200 }}
+        className={`fixed lg:relative flex-shrink-0 backdrop-blur-3xl border-r flex flex-col z-50 transition-colors duration-700 h-full`}
         style={{
           backgroundColor: isDark ? 'rgba(20,20,20,0.75)' : 'rgba(255,255,255,0.92)',
           borderColor: themeConfig.vars['--adm-border'],
@@ -136,8 +161,8 @@ const AdminLayout = () => {
         }}
       >
 
-        {/* Brand Mark */}
-        <div className="px-5 pt-6 pb-5">
+        {/* Brand Mark & Toggle */}
+        <div className={`px-5 pt-6 pb-5 flex items-center justify-between ${isCollapsed ? 'flex-col gap-6' : ''}`}>
           <Link to="/" className="flex items-center gap-3 group">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center shadow-[0_6px_18px_rgba(212,175,55,0.25)] group-hover:scale-110 transition-all duration-500 flex-shrink-0"
@@ -145,13 +170,37 @@ const AdminLayout = () => {
             >
               <Sparkles className="text-white" size={18} />
             </div>
-            <div className="leading-none">
-              <h1 className="font-display text-[1.05rem] font-bold tracking-tight italic transition-colors duration-700" style={{ color: themeConfig.vars['--adm-text'] }}>
-                Luscent <span style={{ color: themeConfig.vars['--adm-accent'] }}>Glow</span>
-              </h1>
-              <p className="text-[8px] font-black uppercase tracking-[0.5em] mt-0.5 transition-colors duration-700" style={{ color: themeConfig.vars['--adm-text-dim'] }}>Admin Panel</p>
-            </div>
+            
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -10 }}
+                  className="leading-none"
+                >
+                  <h1 className="font-display text-[1.05rem] font-bold tracking-tight italic transition-colors duration-700" style={{ color: themeConfig.vars['--adm-text'] }}>
+                    Luscent <span style={{ color: themeConfig.vars['--adm-accent'] }}>Glow</span>
+                  </h1>
+                  <p className="text-[8px] font-black uppercase tracking-[0.5em] mt-0.5 transition-colors duration-700" style={{ color: themeConfig.vars['--adm-text-dim'] }}>Admin Panel</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Link>
+
+          <button
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="hidden lg:flex w-8 h-8 rounded-lg items-center justify-center hover:bg-gold/10 text-muted-foreground hover:text-gold transition-all duration-300"
+          >
+            <Menu size={18} className={`transition-transform duration-500 ${isCollapsed ? 'rotate-180' : ''}`} />
+          </button>
+
+          <button
+            onClick={() => setIsMobileNavOpen(false)}
+            className="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gold/10 text-muted-foreground hover:text-gold transition-all duration-300"
+          >
+            <X size={18} />
+          </button>
         </div>
 
         {/* Divider */}
@@ -163,12 +212,19 @@ const AdminLayout = () => {
             return (
               <div key={group.label}>
                 {/* Group Label */}
-                <p
-                  className="px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.35em] transition-colors duration-700"
-                  style={{ color: themeConfig.vars['--adm-text-dim'] }}
-                >
-                  {group.label}
-                </p>
+                <AnimatePresence>
+                  {!isCollapsed && (
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="px-3 mb-1.5 text-[9px] font-black uppercase tracking-[0.35em] transition-colors duration-700 pointer-events-none"
+                      style={{ color: themeConfig.vars['--adm-text-dim'] }}
+                    >
+                      {group.label}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
 
                 {/* Items */}
                 <div className="space-y-0.5">
@@ -202,20 +258,24 @@ const AdminLayout = () => {
                             />
                           )}
 
-                          <div className="flex items-center gap-2.5 relative z-10">
+                          <div className={`flex items-center gap-2.5 relative z-10 ${isCollapsed ? 'w-full justify-center' : ''}`}>
                             <item.icon
                               size={15}
                               className="flex-shrink-0 transition-colors"
                               style={{ color: isActive ? themeConfig.vars['--adm-accent'] : 'inherit' }}
                             />
-                            <span
-                              className="text-[0.78rem] font-semibold tracking-wide transition-colors leading-none"
-                            >
-                              {item.label}
-                            </span>
+                            {!isCollapsed && (
+                              <motion.span
+                                initial={{ opacity: 0, x: -5 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="text-[0.78rem] font-semibold tracking-wide transition-colors leading-none"
+                              >
+                                {item.label}
+                              </motion.span>
+                            )}
                           </div>
 
-                          {isActive && (
+                          {isActive && !isCollapsed && (
                             <ChevronRight
                               size={11}
                               className="text-gold/60 relative z-10 flex-shrink-0"
@@ -231,10 +291,27 @@ const AdminLayout = () => {
           })}
         </nav>
 
-      </aside>
+      </motion.aside>
 
       {/* ── Main Stage ─────────────────────────────────────────────────────── */}
       <main className="flex-1 overflow-y-auto relative z-10 scrollbar-hide flex flex-col">
+        {/* Mobile Header Ritual */}
+        <header 
+          className="lg:hidden flex items-center justify-between px-6 py-4 border-b backdrop-blur-3xl sticky top-0 z-40"
+          style={{ backgroundColor: isDark ? 'rgba(20,20,20,0.8)' : 'rgba(255,255,255,0.92)', borderColor: themeConfig.vars['--adm-border'] }}
+        >
+          <div className="flex items-center gap-3">
+             <Sparkles style={{ color: themeConfig.vars['--adm-accent'] }} size={20} />
+             <span className="font-display font-bold italic text-sm">Luscent <span style={{ color: themeConfig.vars['--adm-accent'] }}>Glow</span></span>
+          </div>
+          <button 
+            onClick={() => setIsMobileNavOpen(true)}
+            className="p-2 -mr-2 text-muted-foreground hover:text-gold transition-colors"
+          >
+            <Menu size={20} />
+          </button>
+        </header>
+
         <div className="relative z-10 p-4 md:p-8 lg:p-12 max-w-[1600px] mx-auto w-full">
           <Outlet />
         </div>
