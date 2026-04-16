@@ -976,11 +976,15 @@ class CouponModel(BaseModel):
     """
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     code: str = Field(...)
-    discountType: str = Field(...) # percentage, fixed, shipping
+    discountType: str = Field(...) # percentage, fixed, shipping, bogo
     value: float = Field(..., ge=0)
+    buyQuantity: Optional[int] = Field(default=1, ge=1)
+    getQuantity: Optional[int] = Field(default=1, ge=1)
     minPurchase: float = Field(default=0, ge=0)
+    minQuantity: Optional[int] = Field(default=0, ge=0)
     expiryDate: str = Field(...)
     description: Optional[str] = Field(default=None)
+    applicableCategory: Optional[str] = Field(default=None)
     isActive: bool = Field(default=True)
     createdAt: Optional[str] = None
     updatedAt: Optional[str] = None
@@ -1002,12 +1006,15 @@ class UpdateCouponModel(BaseModel):
     """
     Schema for updating coupons.
     """
-    code: Optional[str] = None
     discountType: Optional[str] = None
     value: Optional[float] = None
+    buyQuantity: Optional[int] = None
+    getQuantity: Optional[int] = None
     minPurchase: Optional[float] = None
+    minQuantity: Optional[int] = None
     expiryDate: Optional[str] = None
     description: Optional[str] = None
+    applicableCategory: Optional[str] = None
     isActive: Optional[bool] = None
 
 class QuizSubmissionModel(BaseModel):

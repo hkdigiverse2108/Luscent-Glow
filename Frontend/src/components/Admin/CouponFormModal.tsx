@@ -18,13 +18,33 @@ const CouponFormModal = ({ isOpen, onClose, coupon, onSuccess }: CouponFormModal
     code: "",
     discountType: "percentage",
     value: 0,
+    buyQuantity: 1,
+    getQuantity: 1,
     minPurchase: 0,
+    minQuantity: 0,
     expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     description: "",
+    applicableCategory: "",
     isActive: true
   });
+  const [categories, setCategories] = useState<any[]>([]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(getApiUrl("/api/categories/"));
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (coupon) {
@@ -37,9 +57,13 @@ const CouponFormModal = ({ isOpen, onClose, coupon, onSuccess }: CouponFormModal
         code: "",
         discountType: "percentage",
         value: 0,
+        buyQuantity: 1,
+        getQuantity: 1,
         minPurchase: 0,
+        minQuantity: 0,
         expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         description: "",
+        applicableCategory: "",
         isActive: true
       });
     }
@@ -128,20 +152,39 @@ const CouponFormModal = ({ isOpen, onClose, coupon, onSuccess }: CouponFormModal
                   <option value="percentage">Percentage (%)</option>
                   <option value="fixed">Fixed Amount (₹)</option>
                   <option value="shipping">Free Shipping</option>
+                  <option value="bogo">BOGO (Buy X Get Y)</option>
                 </select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Value</label>
-                <input name="value" type="number" value={formData.value} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+            {formData.discountType !== "bogo" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Value</label>
+                  <input name="value" type="number" value={formData.value} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                </div>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Min Purchase (₹)</label>
+                  <input name="minPurchase" type="number" value={formData.minPurchase} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                </div>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Min Quantity</label>
+                  <input name="minQuantity" type="number" min="0" value={formData.minQuantity} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                </div>
               </div>
-              <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Min Purchase (₹)</label>
-                <input name="minPurchase" type="number" value={formData.minPurchase} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Buy Quantity</label>
+                  <input name="buyQuantity" type="number" min="1" value={formData.buyQuantity} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                </div>
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Get Quantity (Free)</label>
+                  <input name="getQuantity" type="number" min="1" value={formData.getQuantity} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
+                </div>
               </div>
-            </div>
+            )}
+
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
@@ -151,15 +194,25 @@ const CouponFormModal = ({ isOpen, onClose, coupon, onSuccess }: CouponFormModal
                   <input name="expiryDate" type="date" value={formData.expiryDate} onChange={handleInputChange} required className={`w-full border rounded-2xl py-4 pl-16 pr-6 text-sm ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`} />
                 </div>
               </div>
-              <div className="flex items-center gap-4 pt-10">
-                <label className="flex items-center gap-3 cursor-pointer group">
-                  <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleInputChange} className="peer sr-only" />
-                  <div className={`w-12 h-6 rounded-full p-1 transition-all duration-500 ${formData.isActive ? "bg-gold" : "bg-charcoal/20"} relative`}>
-                    <div className={`w-4 h-4 bg-white rounded-full transition-all duration-500 ${formData.isActive ? "translate-x-6" : "translate-x-0"}`} />
-                  </div>
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/40" : "text-charcoal/70"}`}>Is Active</span>
-                </label>
+              <div className="space-y-4">
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-gold ml-2">Applicable Category</label>
+                <select name="applicableCategory" value={formData.applicableCategory} onChange={handleInputChange} className={`w-full border rounded-2xl py-4 px-6 text-sm outline-none focus:ring-1 focus:ring-gold/30 ${isDark ? "bg-white/5 border-white/10 text-white" : "bg-charcoal/5 border-charcoal/10 text-charcoal"}`}>
+                  <option value="">All Categories</option>
+                  {categories.map(cat => (
+                    <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+                  ))}
+                </select>
               </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleInputChange} className="peer sr-only" />
+                <div className={`w-12 h-6 rounded-full p-1 transition-all duration-500 ${formData.isActive ? "bg-gold" : "bg-charcoal/20"} relative`}>
+                  <div className={`w-4 h-4 bg-white rounded-full transition-all duration-500 ${formData.isActive ? "translate-x-6" : "translate-x-0"}`} />
+                </div>
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? "text-white/40" : "text-charcoal/70"}`}>Is Active</span>
+              </label>
             </div>
 
             <div className="space-y-4 pt-4">

@@ -19,8 +19,10 @@ export interface Coupon {
   id?: string;
   _id?: string;
   code: string;
-  discountType: "percentage" | "fixed" | "shipping";
+  discountType: "percentage" | "fixed" | "shipping" | "bogo";
   value: number;
+  buyQuantity?: number;
+  getQuantity?: number;
   minPurchase?: number;
   expiryDate: string;
   description?: string;
@@ -382,6 +384,45 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         toast.error(`Order total must be at least ₹${coupon.minPurchase} for this coupon`);
         return false;
       }
+
+      // Check minQuantity requirements
+      if (coupon.minQuantity && coupon.minQuantity > 0) {
+        const relevantItems = coupon.applicableCategory 
+          ? items.filter(item => item.category === coupon.applicableCategory)
+          : items;
+        const totalQty = relevantItems.reduce((sum, item) => sum + item.quantity, 0);
+        
+        if (totalQty < coupon.minQuantity) {
+          toast.error(`You need at least ${coupon.minQuantity} items ${coupon.applicableCategory ? `from the "${coupon.applicableCategory}" category ` : ""}to use this coupon.`);
+          return false;
+        }
+      }
+
+      // Check category requirements
+      if (coupon.applicableCategory) {
+        const hasCategoryItem = items.some(item => item.category === coupon.applicableCategory);
+        if (!hasCategoryItem) {
+          toast.error(`This coupon is only valid for items in the ${coupon.applicableCategory} category.`);
+          return false;
+        }
+      }
+
+      // Check BOGO quantity requirements
+      if (coupon.discountType === "bogo") {
+        const relevantItems = coupon.applicableCategory 
+          ? items.filter(item => item.category === coupon.applicableCategory)
+          : items;
+        const totalQty = relevantItems.reduce((sum, item) => sum + item.quantity, 0);
+        const groupSize = (coupon.buyQuantity || 1) + (coupon.getQuantity || 1);
+        
+        if (totalQty < groupSize) {
+          const msg = coupon.applicableCategory 
+            ? `You need at least ${groupSize} items from ${coupon.applicableCategory} to unlock this BOGO deal!`
+            : `You need at least ${groupSize} items to unlock this BOGO deal!`;
+          toast.error(msg);
+          return false;
+        }
+      }
       if (appliedGiftCard) {
         setAppliedGiftCard(null);
         toast.info("Gift card removed. Only one offer can be applied at a time.");
@@ -453,20 +494,60 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   let discountAmount = 0;
   if (appliedCoupon) {
-    if (appliedCoupon.discountType === "percentage") discountAmount = (subtotal * appliedCoupon.value) / 100;
-    else if (appliedCoupon.discountType === "fixed") discountAmount = appliedCoupon.value;
-    else if (appliedCoupon.discountType === "shipping") discountAmount = appliedCoupon.value;
+    // Filter items if there's a category restriction
+    const applicableItems = appliedCoupon.applicableCategory 
+      ? items.filter(item => item.category === appliedCoupon.applicableCategory)
+      : items;
+    
+    const applicableSubtotal = applicableItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+    if (appliedCoupon.discountType === "percentage") {
+      discountAmount = (applicableSubtotal * appliedCoupon.value) / 100;
+    } else if (appliedCoupon.discountType === "fixed") {
+      discountAmount = Math.min(applicableSubtotal, appliedCoupon.value);
+    } else if (appliedCoupon.discountType === "shipping") {
+      discountAmount = appliedCoupon.value;
+    } else if (appliedCoupon.discountType === "bogo") {
+      const buyQty = appliedCoupon.buyQuantity || 1;
+      const getQty = appliedCoupon.getQuantity || 1;
+      const groupSize = buyQty + getQty;
+      
+      // Only flatten items from the applicable category
+      const allPrices = applicableItems.flatMap(item => 
+        Array(Number(item.quantity)).fill(Number(item.price))
+      );
+      
+      // Sort prices descending to ensure we give the cheapest items away for free
+      allPrices.sort((a, b) => b - a);
+      
+      const numGroups = Math.floor(allPrices.length / groupSize);
+      const freeItemsCount = numGroups * getQty;
+      
+      // The free items are the cheapest ones (at the end of the sorted list)
+      const freePrices = freeItemsCount > 0 ? allPrices.slice(-freeItemsCount) : [];
+      discountAmount = freePrices.reduce((sum, price) => sum + price, 0);
+    }
   }
 
   const giftCardDiscount = appliedGiftCard ? Math.min(subtotal - discountAmount, appliedGiftCard.balance) : 0;
 
-  // Re-validate coupon minimum purchase continuously
+  // Re-validate coupon minimum purchase and quantity continuously
   useEffect(() => {
-    if (appliedCoupon && subtotal < (appliedCoupon.minPurchase || 0)) {
-       setAppliedCoupon(null);
-       toast.info(`Coupon ${appliedCoupon.code} removed: Order total must be at least ₹${appliedCoupon.minPurchase}`);
+    if (appliedCoupon) {
+      const relevantItems = appliedCoupon.applicableCategory 
+        ? items.filter(item => item.category === appliedCoupon.applicableCategory)
+        : items;
+      const totalQty = relevantItems.reduce((sum, item) => sum + item.quantity, 0);
+
+      if (subtotal < (appliedCoupon.minPurchase || 0)) {
+         setAppliedCoupon(null);
+         toast.info(`Coupon ${appliedCoupon.code} removed: Order total must be at least ₹${appliedCoupon.minPurchase}`);
+      } else if (appliedCoupon.minQuantity && totalQty < appliedCoupon.minQuantity) {
+         setAppliedCoupon(null);
+         toast.info(`Coupon ${appliedCoupon.code} removed: At least ${appliedCoupon.minQuantity} items required`);
+      }
     }
-  }, [subtotal, appliedCoupon]);
+  }, [subtotal, items, appliedCoupon]);
 
   return (
     <CartContext.Provider

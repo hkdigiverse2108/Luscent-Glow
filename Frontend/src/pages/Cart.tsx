@@ -447,16 +447,22 @@ const Cart = () => {
                                        <div key={coupon.code} className={`relative bg-white rounded-[2rem] p-6 shadow-sm border transition-all duration-500 ${appliedCoupon?.code === coupon.code ? 'border-gold shadow-gold/10' : 'border-gold/5'}`}>
                                          <div className="flex justify-between items-start gap-4 mb-6">
                                            <div className="space-y-3 flex-1">
-                                              <h6 className="font-display text-lg font-bold text-gold/80 tracking-tight uppercase italic">Glow Boutique</h6>
+                                                                          <div className="flex items-center gap-3">
+                                                  <h6 className="font-display text-lg font-bold text-gold/80 tracking-tight uppercase italic">Glow Boutique</h6>
+                                                  {coupon.discountType === "bogo" && (
+                                                    <span className="px-2 py-0.5 bg-gold/10 border border-gold/20 rounded text-[7px] font-black text-gold uppercase tracking-widest">BOGO Offer</span>
+                                                  )}
+                                               </div>
                                               <h4 className="text-xl font-display font-medium text-charcoal leading-tight tracking-tight">
                                                 {coupon.description || (
-                                                  coupon.discountType === "percentage" ? `${coupon.value}% Radiance` :
-                                                  coupon.discountType === "fixed" ? `₹${coupon.value} Ritual Offset` :
+                                                  coupon.discountType === "percentage" ? `${coupon.value}% Off ${coupon.applicableCategory || "Site-wide"}` :
+                                                   coupon.discountType === "bogo" ? `Buy ${coupon.buyQuantity} Get ${coupon.getQuantity} Free on ${coupon.applicableCategory || "All Items"}` :
+                                                   coupon.discountType === "fixed" ? `₹${coupon.value} Off ${coupon.applicableCategory || "Site-wide"}` :
                                                   "Free Logistics"
                                                 )}
                                               </h4>
                                            </div>
-                                           <button disabled={appliedCoupon?.code === coupon.code} onClick={async () => { if(await applyCoupon(coupon.code)) { triggerSparkles(); setIsCouponsModalOpen(false); } }} className={`px-8 py-3 rounded-full border text-[10px] font-body font-bold uppercase tracking-widest transition-all ${appliedCoupon?.code === coupon.code ? 'bg-gold/10 border-gold/20 text-gold cursor-default' : 'bg-charcoal text-white hover:bg-gold hover:text-charcoal border-transparent active:scale-95'}`}>{appliedCoupon?.code === coupon.code ? "Active" : "Apply"}</button>
+                                           <button disabled={appliedCoupon?.code === coupon.code} onClick={async () => { if(await applyCoupon(coupon.code)) { triggerSparkles(); setIsCouponsModalOpen(false); } }} className={`px-8 py-3 rounded-full border text-[10px] font-body font-bold uppercase tracking-widest transition-all ${appliedCoupon?.code === coupon.code ? 'bg-gold/10 border-gold/20 text-gold cursor-default' : 'bg-charcoal text-white hover:bg-gold hover:text-charcoal border-transparent active:scale-95'}`}>{appliedCoupon?.code === coupon.code ? "Applied" : "Apply"}</button>
                                          </div>
                                           <div className="flex items-center justify-between bg-secondary rounded-xl px-4 py-3 border border-gold/5">
                                             <span className="text-[11px] font-mono font-bold text-charcoal tracking-widest">{coupon.code}</span>

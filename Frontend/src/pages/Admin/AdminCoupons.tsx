@@ -113,17 +113,31 @@ const AdminCoupons = () => {
                 <p className={`text-2xl font-mono font-black tracking-[0.2em] ${isDark ? "text-white" : "text-charcoal"}`}>{coupon.code}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 mb-8 pt-6 border-t border-gold/10">
+              <div className={`grid ${coupon.discountType === "bogo" ? "grid-cols-1" : "grid-cols-2"} gap-6 mb-8 pt-6 border-t border-gold/10`}>
                 <div className="space-y-1">
                   <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Discount</p>
                   <p className="text-lg font-display font-bold text-gold">
-                    {coupon.discountType === "percentage" ? `${coupon.value}%` : coupon.discountType === "fixed" ? `₹${coupon.value}` : (coupon.value > 0 ? `₹${coupon.value} Fee` : "Free Ship")}
+                    {coupon.discountType === "percentage" 
+                      ? `${coupon.value}%` 
+                      : coupon.discountType === "fixed" 
+                        ? `₹${coupon.value}` 
+                        : coupon.discountType === "bogo" 
+                          ? `BOGO ${coupon.buyQuantity}+${coupon.getQuantity}`
+                          : (coupon.value > 0 ? `₹${coupon.value} Fee` : "Free Ship")}
                   </p>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Min Order</p>
-                  <p className={`text-lg font-display font-bold ${isDark ? "text-white" : "text-charcoal"}`}>₹{coupon.minPurchase || 0}</p>
-                </div>
+                {coupon.discountType !== "bogo" && (
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Min Order</p>
+                    <p className={`text-lg font-display font-bold ${isDark ? "text-white" : "text-charcoal"}`}>₹{coupon.minPurchase || 0}</p>
+                  </div>
+                )}
+                {coupon.applicableCategory && (
+                  <div className="col-span-full pt-4 border-t border-gold/5 space-y-1">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60">Restricted To</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gold">{coupon.applicableCategory}</p>
+                  </div>
+                )}
               </div>
 
               <div className={`flex items-center gap-4 py-4 px-6 rounded-2xl ${isDark ? "bg-white/5" : "bg-charcoal/5"}`}>
