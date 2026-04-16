@@ -94,6 +94,17 @@ const AdminLayout = () => {
   const { adminLogout } = useAuth();
   const location = useLocation();
   const { isDark, themeConfig } = useAdminTheme();
+  const [isLargeScreen, setIsLargeScreen] = React.useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      const isLg = window.innerWidth >= 1024;
+      setIsLargeScreen(isLg);
+      if (isLg) setIsMobileNavOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Theme-specific backdrops — each palette gets its own cinematic signature
   const backdropGlows = {
@@ -139,7 +150,7 @@ const AdminLayout = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setIsMobileNavOpen(false)}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] lg:hidden"
           />
         )}
       </AnimatePresence>
@@ -147,15 +158,13 @@ const AdminLayout = () => {
       <motion.aside
         initial={false}
         animate={{ 
-          width: isCollapsed ? 80 : 230,
-          x: typeof window !== 'undefined' && window.innerWidth < 1024 
-            ? (isMobileNavOpen ? 0 : -230) 
-            : 0
+          width: isCollapsed && isLargeScreen ? 80 : 230,
+          x: isLargeScreen ? 0 : (isMobileNavOpen ? 0 : -230)
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className={`fixed lg:relative flex-shrink-0 backdrop-blur-3xl border-r flex flex-col z-50 transition-colors duration-700 h-full`}
+        className={`fixed lg:relative flex-shrink-0 backdrop-blur-3xl border-r flex flex-col z-[70] transition-colors duration-700 h-full`}
         style={{
-          backgroundColor: isDark ? 'rgba(20,20,20,0.75)' : 'rgba(255,255,255,0.92)',
+          backgroundColor: isDark ? 'rgba(20,20,20,0.85)' : 'rgba(255,255,255,0.95)',
           borderColor: themeConfig.vars['--adm-border'],
           boxShadow: isDark ? '0 0 60px rgba(0,0,0,0.5)' : '0 0 40px rgba(0,0,0,0.06)'
         }}
