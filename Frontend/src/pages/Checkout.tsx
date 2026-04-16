@@ -57,12 +57,18 @@ const INDIAN_STATES = [
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { items, subtotal, discountAmount, giftCardDiscount, appliedGiftCard, clearCart, shippingSettings, appliedCoupon, availableCoupons, refreshSettings } = useCart();
+  const { items, subtotal, discountAmount, giftCardDiscount, appliedGiftCard, clearCart, shippingSettings, appliedCoupon, availableCoupons, refreshSettings, isCodEnabled } = useCart();
   const { user, syncUser } = useAuth();
 
   useEffect(() => {
     refreshSettings();
   }, [refreshSettings]);
+
+  useEffect(() => {
+    if (!isCodEnabled && activePaymentTab === "COD") {
+      setActivePaymentTab("UPI");
+    }
+  }, [isCodEnabled, activePaymentTab]);
 
   // "Buy Now" (Direct Checkout) logic
   const directBuyItem = location.state?.directBuyItem;
@@ -666,7 +672,7 @@ const Checkout = () => {
                             <span className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold font-bold text-sm">3</span>
                             <h3 className="text-2xl font-body font-bold text-charcoal">Payment Method</h3>
                          </div>
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div className={`grid grid-cols-1 ${isCodEnabled ? 'md:grid-cols-2' : ''} gap-4`}>
                             <button 
                                 type="button"
                                 onClick={() => setActivePaymentTab("UPI")}
@@ -684,24 +690,26 @@ const Checkout = () => {
                                 </div>
                                 {activePaymentTab !== "COD" && <CheckCircle2 size={18} className="text-gold" />}
                             </button>
-                            <button 
-                                type="button"
-                                onClick={() => setActivePaymentTab("COD")}
-                                className={`p-4 rounded-2xl border flex items-center justify-between transition-all group ${
-                                    activePaymentTab === "COD" 
-                                    ? "bg-charcoal text-white border-charcoal shadow-xl shadow-charcoal/20" 
-                                    : "bg-white border-gray-100 text-gray-400 hover:border-gold/30 hover:text-gold"
-                                }`}
-                            >
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${activePaymentTab === "COD" ? "bg-white/10" : "bg-gold/5 text-gold group-hover:bg-gold group-hover:text-white"}`}>
-                                        <Banknote size={18} />
+                            {isCodEnabled && (
+                                <button 
+                                    type="button"
+                                    onClick={() => setActivePaymentTab("COD")}
+                                    className={`p-4 rounded-2xl border flex items-center justify-between transition-all group ${
+                                        activePaymentTab === "COD" 
+                                        ? "bg-charcoal text-white border-charcoal shadow-xl shadow-charcoal/20" 
+                                        : "bg-white border-gray-100 text-gray-400 hover:border-gold/30 hover:text-gold"
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${activePaymentTab === "COD" ? "bg-white/10" : "bg-gold/5 text-gold group-hover:bg-gold group-hover:text-white"}`}>
+                                            <Banknote size={18} />
+                                        </div>
+                                        <div className="text-left font-black text-[9px] uppercase tracking-[0.2em]">Cash on Delivery</div>
                                     </div>
-                                    <div className="text-left font-black text-[9px] uppercase tracking-[0.2em]">Cash on Delivery</div>
-                                </div>
-                                {activePaymentTab === "COD" && <CheckCircle2 size={18} className="text-gold" />}
-                            </button>
-                         </div>
+                                    {activePaymentTab === "COD" && <CheckCircle2 size={18} className="text-gold" />}
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <button 

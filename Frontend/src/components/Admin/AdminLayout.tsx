@@ -39,6 +39,7 @@ const menuGroups = [
     label: "Overview",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", path: "/admin/dashboard" },
+      { icon: Settings, label: "Settings", path: "/admin/settings" },
     ]
   },
   {
@@ -57,6 +58,7 @@ const menuGroups = [
     items: [
       { icon: ClipboardList,   label: "Orders",        path: "/admin/orders" },
       { icon: CreditCard,      label: "Payments",      path: "/admin/payments" },
+      { icon: Package,         label: "Inventory",     path: "/admin/inventory" },
       { icon: Ticket,          label: "Gift Cards",    path: "/admin/gift-cards" },
       { icon: Zap,             label: "Home Promotions", path: "/admin/promotions" },
       { icon: Tag,             label: "Coupons",       path: "/admin/coupons" },
@@ -80,12 +82,6 @@ const menuGroups = [
       { icon: HelpCircle, label: "FAQ", path: "/admin/faq" },
       { icon: Shield, label: "Policies", path: "/admin/policies" },
       { icon: Globe, label: "Global Footer", path: "/admin/footer" },
-    ]
-  },
-  {
-    label: "System",
-    items: [
-      { icon: Settings, label: "Settings", path: "/admin/settings" },
     ]
   },
 ];

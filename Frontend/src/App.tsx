@@ -55,6 +55,7 @@ import QuizSettings from "./pages/Admin/QuizSettings.tsx";
 import AdminFooter from "./pages/Admin/AdminFooter.tsx";
 import AdminPayments from "./pages/Admin/AdminPayments.tsx";
 import AdminCategories from "./pages/Admin/AdminCategories.tsx";
+import AdminInventory from "./pages/Admin/AdminInventory.tsx";
 import AdminSocialMedia from "./pages/Admin/AdminSocialMedia.tsx";
 import AdminProtectedRoute from "./components/Admin/AdminProtectedRoute.tsx";
 import { AdminThemeProvider } from "./context/AdminThemeContext.tsx";
@@ -129,6 +130,7 @@ const App = () => (
                         <Route path="dashboard" element={<AdminDashboard />} />
                         <Route path="home" element={<AdminHome />} />
                         <Route path="products" element={<AdminProducts />} />
+                        <Route path="inventory" element={<AdminInventory />} />
                         <Route path="categories" element={<AdminCategories />} />
                         <Route path="orders" element={<AdminOrders />} />
                         <Route path="payments" element={<AdminPayments />} />

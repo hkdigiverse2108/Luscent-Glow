@@ -22,7 +22,8 @@ import {
   Tag,
   Copyright,
   Store,
-  MapPin
+  MapPin,
+  HandCoins
 } from "lucide-react";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
 import { getApiUrl } from "../../lib/api";
@@ -39,6 +40,7 @@ type PaymentCreds = {
   cashfreeAppId: string;
   cashfreeSecretKey: string;
   cashfreeMode: "sandbox" | "live";
+  isCodEnabled: boolean;
 };
 
 type ShiprocketCreds = {
@@ -62,6 +64,7 @@ const DEFAULT_PAYMENT: PaymentCreds = {
   cashfreeAppId: "",
   cashfreeSecretKey: "",
   cashfreeMode: "sandbox",
+  isCodEnabled: true
 };
 
 const DEFAULT_SHIPROCKET: ShiprocketCreds = {
@@ -184,6 +187,7 @@ const AdminSettings = () => {
           cashfreeAppId: data.cashfreeAppId || "",
           cashfreeSecretKey: data.cashfreeSecretKey || "",
           cashfreeMode: data.cashfreeMode || "sandbox",
+          isCodEnabled: data.isCodEnabled !== undefined ? data.isCodEnabled : true
         });
       }
     } catch {
@@ -521,6 +525,37 @@ const AdminSettings = () => {
                       {g}
                     </button>
                   ))}
+                </div>
+              </div>
+
+              {/* Master COD Toggle */}
+              <div className={`p-6 rounded-3xl border-2 transition-all duration-500 ${
+                payment.isCodEnabled 
+                  ? isDark ? "bg-emerald-500/10 border-emerald-500/30" : "bg-emerald-50 border-emerald-100" 
+                  : isDark ? "bg-amber-500/10 border-amber-500/30" : "bg-amber-50 border-amber-100"
+              }`}>
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <h4 className={`text-sm font-bold uppercase tracking-wide flex items-center gap-2 ${isDark ? "text-white" : "text-charcoal"}`}>
+                      <HandCoins size={16} className={payment.isCodEnabled ? "text-emerald-500" : "text-amber-500"} />
+                      Enable Cash on Delivery (COD)
+                    </h4>
+                    <p className={`text-[10px] font-medium ${isDark ? "text-white/40" : "text-charcoal/60"}`}>
+                      {payment.isCodEnabled 
+                        ? "COD is currently active. Customers can pay at the door." 
+                        : "COD is disabled. Only online payments are accepted."}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setPayment({ ...payment, isCodEnabled: !payment.isCodEnabled })}
+                    className={`relative w-14 h-7 rounded-full transition-all duration-500 ${
+                      payment.isCodEnabled ? "bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "bg-slate-400"
+                    }`}
+                  >
+                    <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all duration-500 shadow-md ${
+                      payment.isCodEnabled ? "left-8" : "left-1"
+                    }`} />
+                  </button>
                 </div>
               </div>
 

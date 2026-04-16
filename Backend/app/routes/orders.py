@@ -5,6 +5,7 @@ from ..models import OrderModel
 from ..database import get_database
 from datetime import datetime
 from bson import ObjectId
+from ..utils.stock import adjust_stock
 import random
 import string
 from ..shiprocket import shiprocket_client
@@ -120,6 +121,9 @@ async def create_order(order_data: dict = Body(...)):
             
             await db["gift_cards"].insert_one(gift_card)
     
+    # ─── AUTOMATIC STOCK MANAGEMENT ───
+    await adjust_stock(db, order_data.get("items"), direction="decrement")
+
     return created_order
 
 @router.get("/", response_description="List all systemic orders")
@@ -490,6 +494,9 @@ async def cancel_order(id: str):
     )
 
     if update_result.modified_count == 1:
+        # ─── AUTOMATIC STOCK RESTORATION ───
+        await adjust_stock(db, order.get("items", []), direction="increment")
+        
         return {"message": "Ritual cancelled successfully", "orderNumber": order.get("orderNumber")}
     
     return {"message": "Ritual was already cancelled or updated"}

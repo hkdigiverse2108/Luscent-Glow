@@ -56,6 +56,7 @@ interface CartContextType {
   fetchReceivedGiftCards: () => Promise<void>;
   syncCart: () => Promise<void>;
   shippingSettings: { threshold: number; fee: number };
+  isCodEnabled: boolean;
   refreshSettings: () => Promise<void>;
 }
 
@@ -98,6 +99,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [receivedGiftCards, setReceivedGiftCards] = useState<AppliedGiftCard[]>([]);
   const [availableCoupons, setAvailableCoupons] = useState<Coupon[]>([]);
   const [shippingSettings, setShippingSettings] = useState({ threshold: 0, fee: 0 });
+  const [isCodEnabled, setIsCodEnabled] = useState(true);
 
   const refreshSettings = useCallback(async () => {
     try {
@@ -114,8 +116,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         setAvailableCoupons(coupons);
       }
+
+      // Sync Payment Settings (COD Toggle)
+      const payRes = await fetch(getApiUrl("/api/settings/global/payment-credentials"));
+      if (payRes.ok) {
+        const payData = await payRes.json();
+        setIsCodEnabled(payData.isCodEnabled !== undefined ? payData.isCodEnabled : true);
+      }
     } catch (error) {
-      console.error("Error syncing shipping rules from coupons:", error);
+      console.error("Error syncing platform settings:", error);
     }
   }, []);
 
@@ -483,6 +492,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         fetchReceivedGiftCards,
         syncCart: fetchServerCart,
         shippingSettings,
+        isCodEnabled,
         refreshSettings
       }}
     >

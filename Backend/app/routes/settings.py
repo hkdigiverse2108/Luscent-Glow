@@ -62,7 +62,8 @@ def get_default_payment_creds():
         "mode": "sandbox",
         "cashfreeAppId": "",
         "cashfreeSecretKey": "",
-        "cashfreeMode": "sandbox"
+        "cashfreeMode": "sandbox",
+        "isCodEnabled": True
     }
 
 async def get_payment_credentials() -> dict:

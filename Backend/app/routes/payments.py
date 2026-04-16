@@ -9,6 +9,7 @@ from ..config import settings
 from ..database import get_database
 from .settings import get_payment_credentials
 from datetime import datetime
+from ..utils.stock import adjust_stock
 import random
 import string
 import razorpay
@@ -164,6 +165,9 @@ async def initiate_payment(order_data: dict = Body(...)):
         identifier = order_data.get("userMobile")
         if identifier:
             await db["cart"].delete_many({"$or": [{"userMobile": identifier}, {"guestId": identifier}]})
+            
+        # ─── AUTOMATIC STOCK MANAGEMENT ───
+        await adjust_stock(db, order_data.get("items"), direction="decrement")
             
         return {
             "success": True,
@@ -424,6 +428,9 @@ async def verify_payment(payload: dict = Body(...)):
                     identifier = order_data.get("userMobile")
                     if identifier:
                         await db["cart"].delete_many({"$or": [{"userMobile": identifier}, {"guestId": identifier}]})
+                        
+                    # ─── AUTOMATIC STOCK MANAGEMENT ───
+                    await adjust_stock(db, order_data.get("items"), direction="decrement")
             
             await db["payments"].update_one(
                 {"merchantTransactionId": merchant_txn_id},

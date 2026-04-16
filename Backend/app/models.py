@@ -942,6 +942,7 @@ class PaymentCredentialsModel(BaseModel):
     cashfreeAppId: str = Field(default="")
     cashfreeSecretKey: str = Field(default="")
     cashfreeMode: str = Field(default="sandbox")
+    isCodEnabled: bool = Field(default=True)
     updatedAt: Optional[str] = None
 
     class Config:
