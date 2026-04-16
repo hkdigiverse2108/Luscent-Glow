@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
-import { categories, Product, products } from "@/data/products";
+import { Product, products } from "@/data/products";
 import SEO from "@/components/SEO";
 import { 
   Select,
@@ -42,7 +42,7 @@ const Products = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [fetchedProducts, setFetchedProducts] = useState<Product[]>([]);
   const [promotions, setPromotions] = useState<any[]>([]);
-  const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
   const [dynamicPriceRanges, setDynamicPriceRanges] = useState<any[]>(DEFAULT_PRICE_RANGES);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

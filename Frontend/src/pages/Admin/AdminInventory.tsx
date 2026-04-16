@@ -26,6 +26,7 @@ const AdminInventory = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [categories, setCategories] = useState<string[]>(["all"]);
   const [expandedProducts, setExpandedProducts] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
@@ -44,8 +45,22 @@ const AdminInventory = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/categories/"));
+      if (response.ok) {
+        const data = await response.json();
+        // Master list of {name, slug} objects
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
+    fetchCategories();
   }, []);
 
   const toggleProduct = (id: string) => {
@@ -87,13 +102,42 @@ const AdminInventory = () => {
     }
   };
 
+  // Intelligent Category Normalization Ritual
+  const finalCategories = React.useMemo(() => {
+    const categoryMap = new Map<string, { label: string, slug: string }>(); 
+
+    // 1. Seed with Master Categories from Database
+    categories.forEach(cat => {
+      if (cat && cat.slug) {
+        const slug = cat.slug.toLowerCase();
+        if (!categoryMap.has(slug)) {
+          categoryMap.set(slug, { label: cat.name || cat.slug, slug: cat.slug });
+        }
+      }
+    });
+
+    // 2. Identify "Phantom" Categories (strings in products not in Master List)
+    products.forEach(p => {
+      if (p.category) {
+        const pCat = p.category.toLowerCase();
+        if (!categoryMap.has(pCat)) {
+          // If it doesn't exist even as a name, we add it as its own label
+          categoryMap.set(pCat, { label: p.category, slug: p.category });
+        }
+      }
+    });
+
+    const result = Array.from(categoryMap.values());
+    return [{ label: "All Rituals", slug: "all" }, ...result];
+  }, [categories, products]);
+
   const filteredProducts = products.filter(p => {
     const matchesSearch = (p.name || "").toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || p.category.toLowerCase() === selectedCategory.toLowerCase();
+    const pCat = (p.category || "").toLowerCase();
+    const selCat = selectedCategory.toLowerCase();
+    const matchesCategory = selectedCategory === "all" || pCat === selCat;
     return matchesSearch && matchesCategory;
   });
-
-  const categories = ["all", ...new Set(products.map(p => p.category).filter(Boolean))];
 
   // Stats
   const totalVariants = products.reduce((acc, p) => acc + (p.variants?.length || 0), 0);
@@ -175,21 +219,21 @@ const AdminInventory = () => {
           
           <div className="flex gap-2.5 overflow-x-auto pb-2 md:pb-0 scrollbar-hide items-center px-1">
             <div className="p-1 rounded-2xl border flex gap-1 backdrop-blur-xl" style={{ borderColor: themeConfig.vars['--adm-border'], backgroundColor: isDark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.4)' }}>
-              {categories.map(cat => (
+              {finalCategories.map(cat => (
                 <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat)}
+                  key={cat.slug}
+                  onClick={() => setSelectedCategory(cat.slug)}
                   className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-[0.25em] whitespace-nowrap transition-all duration-500 ${
-                    selectedCategory === cat 
+                    selectedCategory === cat.slug 
                       ? "shadow-xl scale-[1.02]" 
                       : "opacity-40 hover:opacity-100"
                   }`}
                   style={{ 
-                    backgroundColor: selectedCategory === cat ? themeConfig.vars['--adm-accent'] : 'transparent',
-                    color: selectedCategory === cat ? '#fff' : themeConfig.vars['--adm-text']
+                    backgroundColor: selectedCategory === cat.slug ? themeConfig.vars['--adm-accent'] : 'transparent',
+                    color: selectedCategory === cat.slug ? '#fff' : themeConfig.vars['--adm-text']
                   }}
                 >
-                  {cat}
+                  {cat.label}
                 </button>
               ))}
             </div>

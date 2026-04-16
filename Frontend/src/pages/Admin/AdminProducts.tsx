@@ -30,6 +30,7 @@ const AdminProducts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
   const [promotions, setPromotions] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>(["all"]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -57,9 +58,22 @@ const AdminProducts = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/categories/"));
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data);
+      }
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchPromotions();
+    fetchCategories();
   }, []);
 
   const handleDelete = async (id: string) => {
@@ -93,11 +107,39 @@ const AdminProducts = () => {
   const filteredProducts = products.filter(p => {
     const matchesSearch = (p.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (p.category || "").toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || p.category.toLowerCase() === selectedCategory.toLowerCase();
+    const pCat = (p.category || "").toLowerCase();
+    const selCat = selectedCategory.toLowerCase();
+    const matchesCategory = selectedCategory === "all" || pCat === selCat;
     return matchesSearch && matchesCategory;
   });
 
-  const availableCategories = ["all", ...new Set(products.map(p => p.category).filter(Boolean))];
+  // Intelligent Category Normalization Ritual
+  const availableCategories = React.useMemo(() => {
+    const categoryMap = new Map<string, { label: string, slug: string }>(); 
+
+    // 1. Seed with Master Categories
+    categories.forEach(cat => {
+      if (cat && cat.slug) {
+        const slug = cat.slug.toLowerCase();
+        if (!categoryMap.has(slug)) {
+          categoryMap.set(slug, { label: cat.name || cat.slug, slug: cat.slug });
+        }
+      }
+    });
+
+    // 2. Identify "Phantom" Categories from Products
+    products.forEach(p => {
+      if (p.category) {
+        const pCat = p.category.toLowerCase();
+        if (!categoryMap.has(pCat)) {
+          categoryMap.set(pCat, { label: p.category, slug: p.category });
+        }
+      }
+    });
+
+    const result = Array.from(categoryMap.values());
+    return [{ label: "All Products", slug: "all" }, ...result];
+  }, [categories, products]);
 
   return (
     <div className="space-y-2 pb-4">
@@ -159,19 +201,19 @@ const AdminProducts = () => {
               >
                 {availableCategories.map((category: any) => (
                   <button
-                    key={category}
+                    key={category.slug}
                     onClick={() => {
-                      setSelectedCategory(category);
+                      setSelectedCategory(category.slug);
                       setIsFilterOpen(false);
                     }}
                     className={`w-full flex items-center justify-between px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${
-                      selectedCategory === category
+                      selectedCategory === category.slug
                       ? "bg-gold text-charcoal"
                       : isDark ? "hover:bg-white/5 text-white/60" : "hover:bg-charcoal/5 text-charcoal/60"
                     }`}
                   >
-                    {category}
-                    {selectedCategory === category && <div className="w-1.5 h-1.5 rounded-full bg-charcoal" />}
+                    {category.label}
+                    {selectedCategory === category.slug && <div className="w-1.5 h-1.5 rounded-full bg-charcoal" />}
                   </button>
                 ))}
                 
