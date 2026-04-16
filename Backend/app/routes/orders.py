@@ -275,6 +275,14 @@ async def fulfill_order_via_shiprocket(db, order, creds):
 
     # 1. Proactive Pickup Location Check
     pickup_data = await shiprocket_client.get_pickup_locations(creds)
+    
+    # Check for authentication or API errors before assuming "no address"
+    if "error" in pickup_data:
+        error_detail = pickup_data.get("details", "")
+        if "403" in pickup_data["error"] or "401" in pickup_data["error"]:
+            return False, {"error": "Shiprocket Authentication Failed. Please verify your credentials in Admin Settings."}
+        return False, {"error": f"Shiprocket API Error: {pickup_data['error']}. {error_detail}"}
+
     shipping_addresses = pickup_data.get("data", {}).get("shipping_address", [])
     
     if not shipping_addresses:
@@ -314,16 +322,21 @@ async def fulfill_order_via_shiprocket(db, order, creds):
 
     # 2. Generate AWB
     sr_awb = await shiprocket_client.generate_awb(shipment_id, creds)
-    if "response" in sr_awb and "awb_code" in sr_awb["response"]:
-        awb_code = sr_awb["response"]["awb_code"]
+    
+    # Shiprocket response structure: {"response": {"data": {"awb_code": "...", "courier_name": "..."}}}
+    sr_resp = sr_awb.get("response", {})
+    sr_data = sr_resp.get("data", {})
+    
+    if sr_data and "awb_code" in sr_data:
+        awb_code = sr_data["awb_code"]
         tracking_update.update({
             "trackingNumber": awb_code,
-            "courierPartner": sr_awb["response"].get("courier_name", "Shiprocket Partner"),
+            "courierPartner": sr_data.get("courier_name", "Shiprocket Partner"),
             "trackingUrl": f"https://shiprocket.co/tracking/{awb_code}"
         })
         return True, tracking_update
     else:
-        error_msg = sr_awb.get("error") or "Order created, but AWB generation failed."
+        error_msg = sr_data.get("awb_assign_error") or sr_resp.get("message") or sr_awb.get("error") or "Order created, but AWB generation failed."
         return True, {**tracking_update, "warning": error_msg}
 
 @router.put("/{id}/status", response_description="Update order status")
@@ -392,8 +405,10 @@ async def trigger_fulfillment(id: str):
     success, result = await fulfill_order_via_shiprocket(db, order, creds)
     
     if success:
-        # Store in DB
+        # Store in DB and update status to Shipped
         db_update = {k: v for k, v in result.items() if k != "warning"}
+        db_update["status"] = "Shipped"
+        
         await db["orders"].update_one({"_id": order["_id"]}, {"$set": db_update})
         return {"success": True, "tracking": result}
     else:
