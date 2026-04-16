@@ -4,7 +4,6 @@ import { X, Save, Sparkles, Image as ImageIcon, Info, Plus, Trash2, Zap, Camera 
 import { getApiUrl, getAssetUrl } from "@/lib/api";
 import { toast } from "sonner";
 import { useAdminTheme } from "../../context/AdminThemeContext.tsx";
-import { categories } from "@/data/products";
 import SEOForm from "./SEOForm";
 
 
@@ -57,9 +56,25 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [activeTab, setActiveTab] = useState("master");
-  const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
   const [availablePromotions, setAvailablePromotions] = useState<any[]>([]);
   const formRef = React.useRef<HTMLFormElement>(null);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch(getApiUrl("/api/categories/"));
+      if (response.ok) {
+        const data = await response.json();
+        setDynamicCategories(data);
+        // If adding a new product, pre-select the first category if available
+        if (!product && data.length > 0) {
+          setFormData(prev => ({ ...prev, category: data[0].slug }));
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
 
   // Scroll to top on tab change
   useEffect(() => {
@@ -146,20 +161,6 @@ const ProductFormModal = ({ isOpen, onClose, product, onSuccess }: ProductFormMo
       })
     }));
     toast.info("Variant image removed.");
-  };
-
-  // ─── Utility Functions ──────────────────────────────────────────────────
-
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch(getApiUrl("/api/categories/"));
-      if (response.ok) {
-        const data = await response.json();
-        if (data.length > 0) setDynamicCategories(data);
-      }
-    } catch (err) {
-      console.error("Error fetching categories:", err);
-    }
   };
 
   const fetchPromotions = async () => {

@@ -76,7 +76,7 @@ const AdminHeader: React.FC<AdminHeaderProps> = ({
       </div>
 
       {/* ── Action Cluster ── */}
-      <div className="flex items-center gap-4 shrink-0 flex-wrap justify-end">
+      <div className="flex items-center gap-4 shrink-0 flex-wrap justify-start md:justify-end">
         {/* Action Buttons */}
         {allActions.map((action, idx) => (
           <motion.button

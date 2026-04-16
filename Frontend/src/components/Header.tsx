@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Search, Heart, ShoppingBag, User, Menu, X, Gift, Package, Sparkles, LogOut, ChevronDown } from "lucide-react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { categories, Product, products } from "@/data/products";
+import { Product, products } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { toast } from "sonner";
@@ -29,7 +29,7 @@ const Header = () => {
   const location = useLocation();
 
   // Dynamic Content State
-  const [dynamicCategories, setDynamicCategories] = useState<any[]>(categories);
+  const [dynamicCategories, setDynamicCategories] = useState<any[]>([]);
   const [branding, setBranding] = useState<any>({
     logoText: "Luscent Glow",
     logoImage: null,
