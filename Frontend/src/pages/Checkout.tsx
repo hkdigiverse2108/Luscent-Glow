@@ -60,27 +60,11 @@ const Checkout = () => {
   const { items, subtotal, discountAmount, giftCardDiscount, appliedGiftCard, clearCart, shippingSettings, appliedCoupon, availableCoupons, refreshSettings, isCodEnabled } = useCart();
   const { user, syncUser } = useAuth();
 
-  useEffect(() => {
-    refreshSettings();
-  }, [refreshSettings]);
-
-  useEffect(() => {
-    if (!isCodEnabled && activePaymentTab === "COD") {
-      setActivePaymentTab("UPI");
-    }
-  }, [isCodEnabled, activePaymentTab]);
-
-  // "Buy Now" (Direct Checkout) logic
-  const directBuyItem = location.state?.directBuyItem;
-  const isDirectBuy = !!directBuyItem;
-
-  const checkoutItems = isDirectBuy ? [directBuyItem] : items;
-  const checkoutSubtotal = isDirectBuy ? (directBuyItem.price * directBuyItem.quantity) : subtotal;
-  
   const [step, setStep] = useState(1); // 1: Identify, 2: Address
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [activePaymentTab, setActivePaymentTab] = useState<"UPI" | "CARD" | "COD" | "NETBANKING" | "WALLET" | "EMI">("UPI");
-  
+  const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "COD">("ONLINE");
+
   // Sidebar toggles
   const [showBag, setShowBag] = useState(false);
   const [showAddress, setShowAddress] = useState(false);
@@ -102,8 +86,24 @@ const Checkout = () => {
     isDefault: false
   });
 
-  const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "COD">("ONLINE");
+  // "Buy Now" (Direct Checkout) logic
+  const directBuyItem = location.state?.directBuyItem;
+  const isDirectBuy = !!directBuyItem;
+
+  const checkoutItems = isDirectBuy ? [directBuyItem] : items;
+  const checkoutSubtotal = isDirectBuy ? (directBuyItem.price * directBuyItem.quantity) : subtotal;
+
   const [isLookingUp, setIsLookingUp] = useState(false);
+
+  useEffect(() => {
+    refreshSettings();
+  }, [refreshSettings]);
+
+  useEffect(() => {
+    if (!isCodEnabled && activePaymentTab === "COD") {
+      setActivePaymentTab("UPI");
+    }
+  }, [isCodEnabled, activePaymentTab]);
 
   // Auto-fill logged in user data
   useEffect(() => {
