@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getApiUrl } from "../lib/api";
 
-const WhatsappIcon = ({ size = 26, className = "" }) => (
+export const WhatsappIcon = ({ size = 26, className = "" }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={size}

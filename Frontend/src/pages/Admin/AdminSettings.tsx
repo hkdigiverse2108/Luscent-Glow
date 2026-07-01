@@ -31,6 +31,7 @@ import { toast } from "sonner";
 import AdminHeader from "../../components/Admin/AdminHeader.tsx";
 import SEOForm from "../../components/Admin/SEOForm.tsx";
 import { useCart } from "../../context/CartContext.tsx";
+import { WhatsappIcon } from "../../components/WhatsAppButton.tsx";
 
 type PaymentCreds = {
   activeGateway: "razorpay" | "cashfree";
@@ -314,7 +315,7 @@ const AdminSettings = () => {
               </label>
               <div className="relative">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500">
-                  <MessageCircle size={18} />
+                  <WhatsappIcon size={18} />
                 </div>
                 <input
                   type="text"
@@ -443,7 +444,11 @@ const AdminSettings = () => {
         >
           <SEOForm 
             seo={seo} 
-            onChange={setSeo} 
+            onChange={(newSeo) => setSeo({
+              title: newSeo.title || "",
+              description: newSeo.description || "",
+              keywords: newSeo.keywords || "",
+            })} 
             isDark={isDark} 
           />
           <div className="flex flex-col sm:flex-row gap-3 mt-10">
