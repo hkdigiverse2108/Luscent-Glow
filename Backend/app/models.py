@@ -701,6 +701,7 @@ class GlobalSettingsModel(BaseModel):
     copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
     priceFilters: List[dict] = Field(default_factory=list)
     seo: Optional[SEOModel] = Field(default=None)
+    activeDeliveryPartner: str = Field(default="shiprocket")
     updatedAt: Optional[str] = None
 
     class Config:
@@ -953,6 +954,16 @@ class ShiprocketCredentialsModel(BaseModel):
     shiprocketEmail: str = Field(default="")
     shiprocketPassword: str = Field(default="")
     shiprocketPickupLocation: str = Field(default="Primary")
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+class DelhiveryCredentialsModel(BaseModel):
+    id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    delhiveryToken: str = Field(default="")
+    delhiveryPickupLocation: str = Field(default="Primary")
+    delhiveryMode: str = Field(default="sandbox") # sandbox or production
     updatedAt: Optional[str] = None
 
     class Config:

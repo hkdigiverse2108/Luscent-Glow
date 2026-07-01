@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from ..database import get_database
-from ..models import GlobalSettingsModel, PaymentCredentialsModel, ShiprocketCredentialsModel, SmtpCredentialsModel
+from ..models import GlobalSettingsModel, PaymentCredentialsModel, ShiprocketCredentialsModel, SmtpCredentialsModel, DelhiveryCredentialsModel
 from datetime import datetime
 from ..config import settings as app_settings
 
@@ -18,6 +18,7 @@ async def get_global_settings():
             "freeShippingThreshold": 999,
             "defaultShippingCharge": 0,
             "announcementText": "FREE SHIPPING ABOVE ₹999 | USE CODE GLOW15",
+            "activeDeliveryPartner": "shiprocket",
             "priceFilters": [
                 { "label": "Under ₹500", "min": 0, "max": 500 },
                 { "label": "₹500 – ₹1000", "min": 500, "max": 1000 },
@@ -90,6 +91,22 @@ async def get_shiprocket_credentials() -> dict:
     creds = await db["shiprocket_credentials"].find_one({})
     if not creds:
         return get_default_shiprocket_creds()
+    return creds
+
+# ─── Delhivery Credentials Helpers ───────────────────────────────────────────
+
+def get_default_delhivery_creds():
+    return {
+        "delhiveryToken": "",
+        "delhiveryPickupLocation": "Primary",
+        "delhiveryMode": "sandbox"
+    }
+
+async def get_delhivery_credentials() -> dict:
+    db = await get_database()
+    creds = await db["delhivery_credentials"].find_one({})
+    if not creds:
+        return get_default_delhivery_creds()
     return creds
 
 # ─── SMTP Credentials Helpers ────────────────────────────────────────────────
@@ -168,6 +185,30 @@ async def reset_shiprocket_creds():
     await db["shiprocket_credentials"].delete_many({})
     result = await db["shiprocket_credentials"].find_one_and_update({}, {"$set": defaults}, upsert=True, return_document=True)
     return {"status": "reset", "message": "Shiprocket credentials re-seeded from .env baseline.", "data": result}
+
+# ─── Delhivery Routes ────────────────────────────────────────────────────────
+
+@router.get("/delhivery-credentials", response_description="Get Delhivery credentials", response_model=DelhiveryCredentialsModel)
+async def get_delhivery_creds():
+    return await get_delhivery_credentials()
+
+@router.put("/delhivery-credentials", response_description="Update Delhivery credentials", response_model=DelhiveryCredentialsModel)
+async def update_delhivery_creds(creds: DelhiveryCredentialsModel):
+    db = await get_database()
+    creds_dict = creds.model_dump(by_alias=True, exclude=["id"])
+    creds_dict["updatedAt"] = datetime.utcnow().isoformat()
+    result = await db["delhivery_credentials"].find_one_and_update({}, {"$set": creds_dict}, upsert=True, return_document=True)
+    return result
+
+@router.delete("/delhivery-credentials", response_description="Reset Delhivery credentials to defaults")
+async def reset_delhivery_creds():
+    db = await get_database()
+    defaults = get_default_delhivery_creds()
+    defaults["updatedAt"] = datetime.utcnow().isoformat()
+    
+    await db["delhivery_credentials"].delete_many({})
+    result = await db["delhivery_credentials"].find_one_and_update({}, {"$set": defaults}, upsert=True, return_document=True)
+    return {"status": "reset", "message": "Delhivery credentials re-seeded baseline.", "data": result}
 
 # ─── SMTP Routes ────────────────────────────────────────────────────────────
 

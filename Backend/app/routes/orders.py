@@ -9,7 +9,8 @@ from ..utils.stock import adjust_stock
 import random
 import string
 from ..shiprocket import shiprocket_client
-from .settings import get_shiprocket_credentials
+from ..delhivery import delhivery_client
+from .settings import get_shiprocket_credentials, get_delhivery_credentials
 import logging
 
 logger = logging.getLogger(__name__)
@@ -339,6 +340,113 @@ async def fulfill_order_via_shiprocket(db, order, creds):
         error_msg = sr_data.get("awb_assign_error") or sr_resp.get("message") or sr_awb.get("error") or "Order created, but AWB generation failed."
         return True, {**tracking_update, "warning": error_msg}
 
+async def fulfill_order_via_delhivery(db, order, creds):
+    """
+    Helper function to handle the Delhivery fulfillment flow.
+    Returns (success_bool, data_or_error_dict)
+    """
+    # Map Address
+    raw_address = order.get("shippingAddress")
+    address = {}
+    
+    if isinstance(raw_address, dict):
+        address = raw_address
+    elif isinstance(raw_address, str):
+        address = {"street": raw_address, "city": "Update Required", "state": "Update Required", "zipCode": "000000"}
+    else:
+        address = {}
+
+    street = address.get("street", "").strip()
+    city = address.get("city", "").strip()
+    pincode = address.get("zipCode", "").strip()
+    state = address.get("state") or "State"
+    mobile = order.get("userMobile", "").strip()
+
+    if len(street) < 10 and len(street) > 0:
+        street = f"{street}, {city}, {state}"
+    
+    if len(street) < 10:
+        return False, {"error": "Valid street address required (min 10 characters). Please update the address first."}
+    
+    if not city or city.lower() == "city":
+        return False, {"error": "Valid city required. Please update the address first."}
+        
+    if not pincode or pincode == "000000":
+        return False, {"error": "Valid 6-digit pincode required. Please update the address first."}
+
+    clean_mobile = "".join(filter(str.isdigit, mobile))
+    if len(clean_mobile) < 10:
+        return False, {"error": "Valid 10-digit mobile number required for fulfillment."}
+
+    # Determine Payment Method
+    payment_method = "Prepaid" if order.get("paymentStatus") == "Paid" else "Postpaid"
+
+    # Pre-flight check on pickup locations to verify credentials/token
+    pickup_data = await delhivery_client.get_pickup_locations(creds)
+    if "error" in pickup_data:
+        error_detail = pickup_data.get("details", "")
+        if "403" in pickup_data["error"] or "401" in pickup_data["error"]:
+            return False, {"error": "Delhivery Authentication Failed. Please verify your token in Admin Settings."}
+        return False, {"error": f"Delhivery API Error: {pickup_data['error']}. {error_detail}"}
+
+    # Prepare Delhivery Order Payload
+    full_name = (order.get("userName") or address.get("fullName") or "Valued Customer").strip()
+    products_desc = ", ".join([item.get("name", "Product") for item in order.get("items", [])])
+    total_qty = sum(int(item.get("quantity", 1)) for item in order.get("items", []))
+    
+    payload = {
+        "shipments": [
+            {
+                "name": full_name,
+                "add": street,
+                "pin": pincode,
+                "phone": clean_mobile[:10],
+                "order": order.get("orderNumber"),
+                "payment_mode": "COD" if payment_method == "Postpaid" else "Prepaid",
+                "amount": str(round(float(order.get("totalAmount", 0)), 2)),
+                "total_amount": str(round(float(order.get("totalAmount", 0)), 2)),
+                "cod_amount": str(round(float(order.get("totalAmount", 0)), 2)) if payment_method == "Postpaid" else "0.0",
+                "products_desc": products_desc[:250],
+                "quantity": str(total_qty),
+                "weight": 500  # Default weight in grams
+            }
+        ],
+        "pickup_location": {
+            "name": creds.get("delhiveryPickupLocation", "Primary")
+        }
+    }
+
+    logger.info(f"Initiating Delhivery fulfillment for order {order.get('orderNumber')}")
+    logger.debug(f"Delhivery Payload: {payload}")
+
+    response = await delhivery_client.create_custom_order(payload, creds)
+    
+    if not response or "packages" not in response:
+        error_msg = response.get("error") or "Delhivery order creation failed."
+        if "details" in response:
+            error_msg += f" Details: {response['details']}"
+        return False, {"error": error_msg}
+
+    package_list = response.get("packages", [])
+    if not package_list:
+        return False, {"error": "Delhivery response did not contain package information."}
+
+    pkg = package_list[0]
+    if pkg.get("status") != "Success" and not pkg.get("waybill"):
+        return False, {"error": f"Delhivery order creation failed status: {pkg.get('status')}. Reason: {response.get('rmk', 'Unknown')}"}
+
+    waybill = pkg.get("waybill")
+    mode = creds.get("delhiveryMode", "sandbox")
+    tracking_url = f"https://staging-express.delhivery.com/query/type=wb&data={waybill}" if mode == "sandbox" else f"https://track.delhivery.com/query/type=wb&data={waybill}"
+    
+    tracking_update = {
+        "trackingNumber": waybill,
+        "courierPartner": "Delhivery",
+        "trackingUrl": tracking_url
+    }
+    
+    return True, tracking_update
+
 @router.put("/{id}/status", response_description="Update order status")
 async def update_order_status(id: str, body: dict = Body(...)):
     db = await get_database()
@@ -361,8 +469,15 @@ async def update_order_status(id: str, body: dict = Body(...)):
     fulfillment_error = None
     
     if new_status == "Shipped" and not order.get("trackingNumber"):
-        creds = await get_shiprocket_credentials()
-        success, result = await fulfill_order_via_shiprocket(db, order, creds)
+        global_settings = await db["global_settings"].find_one({})
+        partner = (global_settings or {}).get("activeDeliveryPartner", "shiprocket")
+        if partner == "delhivery":
+            creds = await get_delhivery_credentials()
+            success, result = await fulfill_order_via_delhivery(db, order, creds)
+        else:
+            creds = await get_shiprocket_credentials()
+            success, result = await fulfill_order_via_shiprocket(db, order, creds)
+            
         if success:
             tracking_update = result
         else:
@@ -401,8 +516,14 @@ async def trigger_fulfillment(id: str):
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    creds = await get_shiprocket_credentials()
-    success, result = await fulfill_order_via_shiprocket(db, order, creds)
+    global_settings = await db["global_settings"].find_one({})
+    partner = (global_settings or {}).get("activeDeliveryPartner", "shiprocket")
+    if partner == "delhivery":
+        creds = await get_delhivery_credentials()
+        success, result = await fulfill_order_via_delhivery(db, order, creds)
+    else:
+        creds = await get_shiprocket_credentials()
+        success, result = await fulfill_order_via_shiprocket(db, order, creds)
     
     if success:
         # Store in DB and update status to Shipped
@@ -430,15 +551,51 @@ async def track_order_live(id: str):
     if not order:
         raise HTTPException(status_code=404, detail=f"Order {id} not found")
         
-    creds = await get_shiprocket_credentials()
-    tracking_data = {}
-    
     tracking_number = order.get("trackingNumber")
     shiprocket_order_id = order.get("shiprocketOrderId")
+    courier_partner = order.get("courierPartner", "")
     
+    tracking_data = {}
     if tracking_number:
-        tracking_data = await shiprocket_client.track_by_awb(tracking_number, creds)
+        if courier_partner == "Delhivery":
+            delhivery_creds = await get_delhivery_credentials()
+            delhivery_raw = await delhivery_client.track_by_awb(tracking_number, delhivery_creds)
+            # Map to Shiprocket structure
+            shipment_data = delhivery_raw.get("ShipmentData", []) if isinstance(delhivery_raw, dict) else []
+            if shipment_data and isinstance(shipment_data, list):
+                shipment = shipment_data[0].get("Shipment", {})
+                scans = shipment.get("Scans", [])
+                activities = []
+                for scan_wrapper in scans:
+                    scan = scan_wrapper.get("ScanDetail", {})
+                    if scan:
+                        activities.append({
+                            "status": scan.get("Scan", "In Transit"),
+                            "date": scan.get("ScanDateTime", ""),
+                            "activity": scan.get("Instructions") or scan.get("Scan", "In Transit"),
+                            "location": scan.get("ScanLocation", "")
+                        })
+                status_obj = shipment.get("Status", {})
+                tracking_data = {
+                    "tracking_data": {
+                        "shipment_track": [
+                            {
+                                "current_status": status_obj.get("Status", "In Transit"),
+                                "expected_date": shipment.get("ExpectedDeliveryDate", ""),
+                                "courier_name": "Delhivery",
+                                "awb_code": tracking_number,
+                                "shipment_track_activities": activities
+                            }
+                        ]
+                    }
+                }
+            else:
+                tracking_data = delhivery_raw
+        else:
+            creds = await get_shiprocket_credentials()
+            tracking_data = await shiprocket_client.track_by_awb(tracking_number, creds)
     elif shiprocket_order_id:
+        creds = await get_shiprocket_credentials()
         tracking_data = await shiprocket_client.track_by_order_id(shiprocket_order_id, creds)
     
     return {
