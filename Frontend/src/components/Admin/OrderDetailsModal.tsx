@@ -87,7 +87,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order, onStatusUpdate }: OrderDeta
           onStatusUpdate(order._id || order.id, "Shipped");
         }
       } else {
-        toast.error("Shiprocket Rejection", {
+        toast.error("Fulfillment Rejection", {
           description: data.detail || "Fulfillment failed."
         });
       }
