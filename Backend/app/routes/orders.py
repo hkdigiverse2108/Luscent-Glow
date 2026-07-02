@@ -598,6 +598,31 @@ async def track_order_live(id: str):
         creds = await get_shiprocket_credentials()
         tracking_data = await shiprocket_client.track_by_order_id(shiprocket_order_id, creds)
     
+    # Auto-update database order status if tracking status is Delivered, Cancelled, or Returned
+    try:
+        if tracking_data and "tracking_data" in tracking_data:
+            shipment_track = tracking_data["tracking_data"].get("shipment_track", [])
+            if shipment_track and len(shipment_track) > 0:
+                live_status = shipment_track[0].get("current_status", "")
+                if live_status:
+                    normalized = str(live_status).strip().lower()
+                    new_status = None
+                    if normalized in ["delivered", "dlv"]:
+                        new_status = "Delivered"
+                    elif normalized in ["cancelled", "canceled"]:
+                        new_status = "Cancelled"
+                    elif normalized in ["returned", "rto", "returned to origin"]:
+                        new_status = "Returned"
+                    
+                    if new_status and order.get("status") != new_status:
+                        await db["orders"].update_one(
+                            {"_id": order["_id"]},
+                            {"$set": {"status": new_status}}
+                        )
+                        order["status"] = new_status
+    except Exception as e:
+        logger.error(f"Error auto-updating order status from tracking: {e}")
+
     return {
         "order": serialize_order(order),
         "tracking": tracking_data
