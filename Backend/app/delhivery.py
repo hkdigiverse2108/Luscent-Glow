@@ -93,10 +93,12 @@ class DelhiveryClient:
     async def get_pickup_locations(cls, db_creds: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """
         Fetch registered warehouses / pickup locations in Delhivery.
+        We query the pincode serviceability API as a pre-flight check to validate credentials,
+        since the raw warehouse list endpoint is not exposed in the same manner.
         """
         base_url = cls._get_base_url(db_creds)
         token = (db_creds or {}).get("delhiveryToken", "")
-        url = f"{base_url}/api/backend/client/warehouse/all/"
+        url = f"{base_url}/c/api/pin-codes/json/?filter_codes=110001"
         
         headers = {
             "Authorization": f"Token {token}"
@@ -112,7 +114,7 @@ class DelhiveryClient:
                 if response.status_code == 200:
                     return response.json()
                 else:
-                    logger.error(f"Delhivery pickup locations fetch failed: {response.status_code} - {response.text}")
+                    logger.error(f"Delhivery credentials validation failed: {response.status_code} - {response.text}")
                     return {"error": f"API Error: {response.status_code}", "details": response.text}
         except Exception as e:
             return {"error": str(e)}
