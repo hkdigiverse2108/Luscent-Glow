@@ -67,7 +67,7 @@ const Login = () => {
     const mobileParts = mobileNumber.split(" ");
     const pureNumber = mobileParts.length === 2 ? mobileParts[1] : mobileNumber.replace(/\D/g, "");
     
-    if (pureNumber.length !== 10) {
+    if (view === "signup" && pureNumber.length !== 10) {
       toast.error("Please enter a valid 10-digit mobile number");
       return;
     }
@@ -80,13 +80,13 @@ const Login = () => {
 
       if (view === "login") {
         endpoint = getApiUrl("/api/auth/signin");
-        payload = { mobileNumber, password };
+        payload = { email, password };
       } else if (view === "signup") {
         endpoint = getApiUrl("/api/auth/signup");
         payload = { fullName, mobileNumber, email, password };
       } else if (view === "forgot-password") {
         endpoint = getApiUrl("/api/auth/forgot-password");
-        payload = { mobileNumber };
+        payload = { email };
       } else if (view === "verify-otp") {
         if (prevView === "forgot-password") {
           // For password reset, we don't call verify-otp yet.
@@ -96,7 +96,7 @@ const Login = () => {
           return;
         }
         endpoint = getApiUrl("/api/auth/verify-otp");
-        payload = { mobileNumber, otp: otpValue };
+        payload = { email, otp: otpValue };
       } else if (view === "new-password") {
         if (password !== confirmPassword) {
           toast.error("Passwords do not match");
@@ -104,7 +104,7 @@ const Login = () => {
           return;
         }
         endpoint = getApiUrl("/api/auth/reset-password");
-        payload = { mobileNumber, otp: otpValue, newPassword: password, userId: targetUserId };
+        payload = { email, otp: otpValue, newPassword: password, userId: targetUserId };
       }
 
       const response = await fetch(endpoint, {
@@ -131,9 +131,9 @@ const Login = () => {
       setPrevView(view);
 
       if (view === "login") {
-        if (data.status === "unverified") {
+        if (data.status === "pending_otp") {
           setView("verify-otp");
-          toast.info(data.message);
+          toast.success(data.message);
         } else {
           toast.success("Login Successful!");
           authLogin(data.user);
@@ -148,8 +148,13 @@ const Login = () => {
         toast.success("OTP sent for password reset.");
       } else if (view === "verify-otp") {
         toast.success("Verification successful!");
-        navigate("/login"); 
-        setView("login");
+        if (prevView === "login") {
+          authLogin(data.user);
+          navigate("/");
+        } else {
+          navigate("/login"); 
+          setView("login");
+        }
       } else if (view === "new-password") {
         toast.success("Password updated successfully!");
         setView("login");
@@ -280,14 +285,17 @@ const Login = () => {
                 <form onSubmit={handleAction} className="space-y-8">
                   <div className="space-y-6">
                     <motion.div variants={childVariants} className="space-y-2 group">
-                      <Label htmlFor="mobile" className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold group-focus-within:text-gold transition-colors">Mobile Number</Label>
+                      <Label htmlFor="email" className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold group-focus-within:text-gold transition-colors">Email Address</Label>
                       <div className="relative group/field">
-                        <Smartphone className="absolute left-0 top-1/2 -translate-y-1/2 text-white/10 group-focus-within/field:text-gold transition-all duration-500" size={18} />
-                        <PhoneInput 
-                          value={mobileNumber}
-                          onChange={(val) => setMobileNumber(val)}
-                          className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-8 h-12 focus-within:border-gold transition-all duration-500"
-                          placeholder="00000 00000"
+                        <Mail className="absolute left-0 top-1/2 -translate-y-1/2 text-white/10 group-focus-within/field:text-gold transition-all duration-500" size={18} />
+                        <Input 
+                          id="email"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-12 h-12 focus:border-gold transition-all duration-500 placeholder:text-white/5 ring-0 focus-visible:ring-0"
+                          placeholder="aura@radiance.com"
+                          required
                         />
                       </div>
                     </motion.div>
@@ -468,19 +476,21 @@ const Login = () => {
                 <div className="space-y-3 text-center">
                   <motion.span variants={childVariants} className="text-gold text-[10px] uppercase tracking-[0.3em] font-bold">Reset Password</motion.span>
                   <motion.h2 variants={childVariants} className="text-4xl lg:text-5xl font-display text-white font-medium">Forgot Password</motion.h2>
-                  <motion.p variants={childVariants} className="text-white/40 font-light text-sm">Enter your mobile number to reset your password.</motion.p>
+                  <motion.p variants={childVariants} className="text-white/40 font-light text-sm">Enter your email address to reset your password.</motion.p>
                 </div>
 
                 <form onSubmit={handleAction} className="space-y-10">
                   <motion.div variants={childVariants} className="space-y-4 group">
-                    <Label className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold">Mobile Number</Label>
+                    <Label className="text-white/40 text-[10px] uppercase tracking-[0.2em] font-bold">Email Address</Label>
                     <div className="relative">
-                      <Phone className="absolute left-0 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-gold transition-colors" size={18} />
-                      <PhoneInput 
-                         value={mobileNumber}
-                         onChange={(val) => setMobileNumber(val)}
-                         className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-8 h-12 focus-within:border-gold transition-all duration-500"
-                         placeholder="00000 00000"
+                      <Mail className="absolute left-0 top-1/2 -translate-y-1/2 text-white/10 group-focus-within:text-gold transition-colors" size={18} />
+                      <Input 
+                         type="email"
+                         value={email}
+                         onChange={(e) => setEmail(e.target.value)}
+                         className="bg-transparent border-0 border-b border-white/10 rounded-none text-white pl-12 h-12 focus:border-gold transition-all duration-500 placeholder:text-white/5 ring-0 focus-visible:ring-0"
+                         placeholder="aura@radiance.com"
+                         required
                       />
                     </div>
                   </motion.div>
@@ -526,8 +536,8 @@ const Login = () => {
                   </motion.div>
                   <motion.h2 variants={childVariants} className="text-4xl lg:text-5xl font-display text-white font-medium">Verification</motion.h2>
                   <motion.p variants={childVariants} className="text-white/40 font-light text-xs tracking-widest leading-loose">
-                    Enter the OTP sent to <br/>
-                    <span className="text-gold font-bold font-body tracking-widest">{mobileNumber || "+91 ••••• ••042"}</span>
+                    Enter the OTP sent to your email <br/>
+                    <span className="text-gold font-bold font-body tracking-widest">{email || "your email address"}</span>
                   </motion.p>
                 </div>
 
@@ -556,9 +566,6 @@ const Login = () => {
                       >
                         {loading ? "Verifying..." : "Verify OTP"}
                       </Button>
-                      <button type="button" className="text-gold/40 text-[10px] uppercase tracking-[0.2em] hover:text-gold transition-colors duration-500 font-bold">
-                        Resend OTP (59s)
-                      </button>
                     </div>
                   </motion.div>
                 </form>
@@ -568,7 +575,7 @@ const Login = () => {
                    onClick={handleBack}
                    className="text-white/20 text-[10px] uppercase tracking-[0.2em] hover:text-white transition-colors font-bold"
                 >
-                  Change Mobile Number
+                  Change Email Address
                 </motion.button>
               </motion.div>
             )}

@@ -33,7 +33,7 @@ export default defineConfig(({ mode }) => ({
           if (!seo) return html;
 
           // Guard: skip empty-string values from DB — use fallback instead
-          const title = (seo.title || "").trim() || "Luscent Glow | Pure Botanical Radiance";
+          const title = (seo.title || "").trim() || "LUSCENT GLOW | THE NEW ERA OF RADIANCE";
           const description = (seo.description || "").trim() || "Premium, cruelty-free botanical skincare and makeup crafted for your authentic brilliance.";
           const keywords = (seo.keywords || "").trim() || "skincare, beauty, botanical, cruelty-free, luscent glow";
           const image = (seo.ogImage || "").trim() || "/og-image.png";

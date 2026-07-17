@@ -28,54 +28,61 @@ def serialize_user(user):
 async def signup(user: UserModel = Body(...)):
     db = await get_database()
     # Check if user already exists
-    existing_user = await db["users"].find_one({"mobileNumber": user.mobileNumber})
+    existing_user = await db["users"].find_one({"email": user.email})
     if existing_user:
-        raise HTTPException(status_code=400, detail="Mobile number already registered")
+        raise HTTPException(status_code=400, detail="Email already registered")
     
     # Hash password and setup user
     user_dict = user.model_dump(by_alias=True, exclude=["id"])
     user_dict["password"] = hash_password(user.password)
-    user_dict["otp"] = "123456"  # Mock OTP for development
+    
+    import random
+    otp = str(random.randint(100000, 999999))
+    user_dict["otp"] = otp
     user_dict["isVerified"] = False
     user_dict["createdAt"] = datetime.utcnow().isoformat()
     
     new_user = await db["users"].insert_one(user_dict)
+    
+    from ..utils.email_service import send_login_otp_email
+    import asyncio
+    asyncio.create_task(send_login_otp_email(user.email, otp))
+    
     return {"message": "Success! Verification code sent.", "userId": str(new_user.inserted_id)}
 
 @router.post("/signin")
 async def signin(auth: UserAuthModel = Body(...)):
     db = await get_database()
     
-    clean_mobile = sanitize_mobile(auth.mobileNumber)
-    user = await db["users"].find_one({"mobileNumber": {"$regex": f"{clean_mobile}$"}})
+    user = await db["users"].find_one({"email": auth.email})
     
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid mobile number or password")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
     
     if not verify_password(auth.password, user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid mobile number or password")
+        raise HTTPException(status_code=401, detail="Invalid email or password")
     
-    if not user.get("isVerified", False):
-        return {"status": "unverified", "message": "Account not verified. Please verify OTP."}
+    # Generate OTP
+    import random
+    otp = str(random.randint(100000, 999999))
     
-    return {
-        "status": "success",
-        "user": {
-            "id": str(user["_id"]),
-            "fullName": user["fullName"],
-            "mobileNumber": user["mobileNumber"],
-            "email": user["email"],
-            "isAdmin": user.get("isAdmin", False),
-            "profilePicture": user.get("profilePicture"),
-            "shippingAddress": user.get("shippingAddress"),
-            "addresses": user.get("addresses", [])
-        }
-    }
+    # Save OTP to DB
+    await db["users"].update_one(
+        {"_id": user["_id"]},
+        {"$set": {"otp": otp}}
+    )
+    
+    # Send email
+    from ..utils.email_service import send_login_otp_email
+    import asyncio
+    asyncio.create_task(send_login_otp_email(user["email"], otp))
+    
+    return {"status": "pending_otp", "message": "OTP sent to your email", "email": user["email"]}
 
 @router.post("/verify-otp")
 async def verify_otp(data: OTPVerifyModel = Body(...)):
     db = await get_database()
-    user = await db["users"].find_one({"mobileNumber": data.mobileNumber, "otp": data.otp})
+    user = await db["users"].find_one({"email": data.email, "otp": data.otp})
     
     if not user:
         raise HTTPException(status_code=400, detail="Invalid verification code")
@@ -85,7 +92,20 @@ async def verify_otp(data: OTPVerifyModel = Body(...)):
         {"$set": {"isVerified": True, "otp": None}}
     )
     
-    return {"message": "Identity verified successfully"}
+    return {
+        "status": "success",
+        "message": "Identity verified successfully",
+        "user": {
+            "id": str(user["_id"]),
+            "fullName": user["fullName"],
+            "mobileNumber": user.get("mobileNumber", ""),
+            "email": user["email"],
+            "isAdmin": user.get("isAdmin", False),
+            "profilePicture": user.get("profilePicture"),
+            "shippingAddress": user.get("shippingAddress"),
+            "addresses": user.get("addresses", [])
+        }
+    }
 
 import secrets
 from ..utils.email_service import send_password_reset_otp_email
@@ -102,8 +122,7 @@ def sanitize_mobile(mobile: str) -> str:
 @router.post("/forgot-password")
 async def forgot_password(data: ForgotPasswordModel = Body(...)):
     db = await get_database()
-    clean_mobile = sanitize_mobile(data.mobileNumber)
-    user = await db["users"].find_one({"mobileNumber": {"$regex": f"{clean_mobile}$"}})
+    user = await db["users"].find_one({"email": data.email})
     
     if not user:
         raise HTTPException(status_code=404, detail="Identity not found in the sanctuary registry.")
@@ -112,16 +131,12 @@ async def forgot_password(data: ForgotPasswordModel = Body(...)):
     otp = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
     await db["users"].update_one({"_id": user["_id"]}, {"$set": {"otp": otp}})
     
-    # If Admin, send direct Email Ritual
-    if user.get("isAdmin", False) and user.get("email"):
-        await send_password_reset_otp_email(user["email"], otp)
-        return {
-            "message": "Success! A secure reset code has been sent to your administrative email.",
-            "userId": str(user["_id"])
-        }
+    from ..utils.email_service import send_password_reset_otp_email
+    import asyncio
+    asyncio.create_task(send_password_reset_otp_email(user["email"], otp))
     
     return {
-        "message": "Password reset ritual initiated. Check your secure channels.",
+        "message": "Password reset initiated. Check your email for OTP.",
         "userId": str(user["_id"])
     }
 
@@ -130,22 +145,16 @@ async def reset_password(data: PasswordResetModel = Body(...)):
     db = await get_database()
     user = None
     
-    # --- Multi-Vector Identity Ritual ---
     # Vector 1: Unique Database Identifier
     if data.userId:
         try:
             user = await db["users"].find_one({"_id": ObjectId(data.userId)})
         except:
-             pass # Fall through to next vector
+             pass 
 
-    # Vector 2: Mobile Number Ritual Alignment
-    if not user and data.mobileNumber:
-        clean_mobile = sanitize_mobile(data.mobileNumber)
-        user = await db["users"].find_one({"mobileNumber": {"$regex": f"{clean_mobile}$"}})
-
-    # Vector 3: Secondary email lookup (Strictly for Admins)
-    if not user:
-        pass
+    # Vector 2: Email Lookup
+    if not user and data.email:
+        user = await db["users"].find_one({"email": data.email})
 
     if not user:
          raise HTTPException(status_code=400, detail="Identity could not be anchored in the sanctuary.")
@@ -157,7 +166,7 @@ async def reset_password(data: PasswordResetModel = Body(...)):
     if stored_otp != received_otp or not stored_otp:
          # Internal Diagnostic Registry
          print(f"DEBUG: Ritual Mismatch. Expected: '{stored_otp}', Received: '{received_otp}'")
-         raise HTTPException(status_code=400, detail="Invalid or expired reset token.")
+         raise HTTPException(status_code=400, detail="Invalid reset token.")
     
     hashed_password = hash_password(data.newPassword)
     await db["users"].update_one(

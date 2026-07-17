@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { 
   Sparkles, 
   Lock, 
-  Phone, 
+  Mail, 
   ShieldCheck, 
   ArrowRight, 
   ChevronLeft,
@@ -27,12 +27,12 @@ const AdminLogin = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const [isMobileFocused, setIsMobileFocused] = useState(false);
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [isRecoveryFlow, setIsRecoveryFlow] = useState(false);
   const [recoveryUserId, setRecoveryUserId] = useState<string | null>(null);
   
   const [formData, setFormData] = useState({
-    mobileNumber: "",
+    email: "",
     password: "",
     otp: "",
     newPassword: "",
@@ -61,7 +61,7 @@ const AdminLogin = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mobileNumber: sanitizeInput(formData.mobileNumber),
+          email: formData.email,
           password: formData.password
         }),
       });
@@ -69,18 +69,10 @@ const AdminLogin = () => {
       const data = await response.json();
 
       if (response.ok) {
-        if (data.status === "unverified") {
+        if (data.status === "pending_otp" || data.status === "unverified") {
           toast.info("Identity verification required.");
           setIsRecoveryFlow(false);
           setStage("otp");
-        } else if (data.status === "success") {
-          if (!data.user.isAdmin) {
-             toast.error("Access Denied: Administrative Clearance Required");
-             return;
-          }
-          adminLogin(data.user);
-          toast.success("Welcome back to the Admin Panel.");
-          navigate(from, { replace: true });
         }
       } else {
         toast.error(data.detail || "Login failed.");
@@ -108,14 +100,20 @@ const AdminLogin = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mobileNumber: sanitizeInput(formData.mobileNumber),
+          email: formData.email,
           otp: formData.otp.trim()
         }),
       });
 
       if (response.ok) {
+        const data = await response.json();
+        if (!data.user.isAdmin) {
+             toast.error("Access Denied: Administrative Clearance Required");
+             return;
+        }
         toast.success("Access identity verified.");
-        handleCredentialsSubmit(new Event('submit') as any);
+        adminLogin(data.user);
+        navigate(from, { replace: true });
       } else {
         const data = await response.json();
         toast.error(data.detail || "Invalid validation code.");
@@ -134,7 +132,7 @@ const AdminLogin = () => {
         const response = await fetch(getApiUrl("/api/auth/forgot-password"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ mobileNumber: sanitizeInput(formData.mobileNumber) }),
+            body: JSON.stringify({ email: formData.email }),
         });
         if (response.ok) {
             const data = await response.json();
@@ -168,7 +166,7 @@ const AdminLogin = () => {
     setLoading(true);
     const cleanOTP = formData.otp.trim().replace(/\s/g, "");
     const resetPayload = {
-      mobileNumber: sanitizeInput(formData.mobileNumber),
+      email: formData.email,
       otp: cleanOTP,
       newPassword: formData.newPassword,
       userId: recoveryUserId
@@ -236,17 +234,17 @@ const AdminLogin = () => {
               >
                 <div className="space-y-6">
                   <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] ml-2">Mobile Number</label>
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] ml-2">Email Address</label>
                     <div className="relative group">
-                      <Phone className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold transition-colors" size={20} />
+                      <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold transition-colors" size={20} />
                       <input 
-                        type="tel"
+                        type="email"
                         required
-                        value={formData.mobileNumber}
-                        onChange={(e) => setFormData({...formData, mobileNumber: e.target.value})}
-                        onFocus={() => setIsMobileFocused(true)}
-                        onBlur={() => setIsMobileFocused(false)}
-                        placeholder={isMobileFocused ? "" : "e.g. 8200549898"}
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        onFocus={() => setIsEmailFocused(true)}
+                        onBlur={() => setIsEmailFocused(false)}
+                        placeholder={isEmailFocused ? "" : "admin@luscentglow.com"}
                         className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-16 pr-6 text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all font-body"
                       />
                     </div>
@@ -315,7 +313,7 @@ const AdminLogin = () => {
                     <p className="text-white/40 text-sm italic">
                       {isRecoveryFlow 
                         ? "Enter the 6-digit ritual code sent to your administrative email." 
-                        : "Enter the code sent to your registered mobile number."}
+                        : "Enter the code sent to your registered email address."}
                     </p>
                  </div>
 
@@ -329,14 +327,6 @@ const AdminLogin = () => {
                     placeholder="Verification Code"
                     className="w-full bg-white/5 border border-white/10 rounded-2xl py-6 text-center text-3xl font-display font-medium tracking-[0.5em] text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all"
                   />
-                  <div className="text-center">
-                    <button 
-                      type="button"
-                      className="text-xs font-bold text-white/20 hover:text-gold uppercase tracking-widest transition-colors"
-                    >
-                      Resend Validation Code
-                    </button>
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -369,19 +359,19 @@ const AdminLogin = () => {
                 <div className="text-center space-y-4">
                    <KeyRound className="text-gold mx-auto" size={48} />
                    <h3 className="text-xl font-bold uppercase tracking-tight">Forgot Password</h3>
-                   <p className="text-white/40 text-sm italic">Provide your registered mobile number to reset your password.</p>
+                   <p className="text-white/40 text-sm italic">Provide your registered email address to reset your password.</p>
                 </div>
 
                 <div className="space-y-4">
-                  <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] ml-2">Registered Mobile</label>
+                  <label className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] ml-2">Registered Email</label>
                   <div className="relative group">
-                    <Phone className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold transition-colors" size={20} />
+                    <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-gold transition-colors" size={20} />
                     <input 
-                      type="tel"
+                      type="email"
                       required
-                      value={formData.mobileNumber}
-                      onChange={(e) => setFormData({...formData, mobileNumber: e.target.value})}
-                      placeholder="e.g. 8200549898"
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
+                      placeholder="admin@luscentglow.com"
                       className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-16 pr-6 text-white outline-none focus:ring-1 focus:ring-gold/30 transition-all font-body"
                     />
                   </div>

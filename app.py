@@ -61,7 +61,7 @@ def start_services():
         t_frontend.start()
         t_backend.start()
 
-        print("\n[✔] Both services are starting up!")
+        print("\n[OK] Both services are starting up!")
         print("    Frontend: http://localhost:5173")
         print("    Backend:  http://localhost:5172/docs (Swagger UI)")
         print("\nPress Ctrl+C to stop both services.\n")
@@ -88,7 +88,7 @@ def start_services():
         if p_backend:
             print("[*] Terminating Backend...")
             p_backend.terminate()
-        print("[✔] Sanctuary services have returned to dormancy.")
+        print("[OK] Sanctuary services have returned to dormancy.")
 
 if __name__ == "__main__":
     start_services()
