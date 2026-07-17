@@ -16,7 +16,7 @@ INDEX_HTML_PATH = os.path.join(BASE_DIR, "Frontend", "index.html")
 # ─────────────────────────────────────────────────────────────────────────────
 ROUTE_FALLBACKS: dict = {
     "/": {
-        "title": "Luscent Glow | Pure Botanical Radiance",
+        "title": "LUSCENT GLOW | THE NEW ERA OF RADIANCE",
         "description": "Elevate your beauty routine with Luscent Glow. Discover premium, cruelty-free botanical skincare and artisanal makeup crafted for your authentic brilliance.",
         "keywords": "skincare, beauty, botanical, cruelty-free, luscent glow, botanical skincare",
     },
@@ -213,7 +213,7 @@ def inject_seo(html: str, seo: dict):
         return html
 
     # Only use non-empty values — skip empty strings
-    title       = _val(seo.get("title"))       or "Luscent Glow | Pure Botanical Radiance"
+    title       = _val(seo.get("title"))       or "LUSCENT GLOW | THE NEW ERA OF RADIANCE"
     description = _val(seo.get("description")) or "Premium, cruelty-free botanical skincare and makeup crafted for your authentic brilliance."
     keywords    = _val(seo.get("keywords"))    or "skincare, beauty, botanical, cruelty-free, luscent glow"
     image       = (seo.get("ogImage") or "").strip() or "/og-image.png"

@@ -18,7 +18,9 @@ async def subscribe_newsletter(data: NewsletterSubscribe, background_tasks: Back
     # Check if already exists
     existing = await db["newsletter_subs"].find_one({"email": data.email})
     if existing:
-        return {"message": "You are already part of our inner circle."}
+        # Also send email if they subscribe again, for testing/resending purposes
+        background_tasks.add_task(send_welcome_email, str(data.email))
+        return {"message": "Welcome back to the inner circle of radiance."}
     
     new_sub = {
         "email": data.email,
@@ -66,6 +68,7 @@ async def get_newsletter_settings():
         "body1": db_settings.get("body1") or "We are honored...",
         "body2": db_settings.get("body2") or "As a cherished member...",
         "buttonText": db_settings.get("buttonText") or "Begin Your Ritual",
+        "buttonLink": db_settings.get("buttonLink") or "https://luscentglow.com",
         "quote": db_settings.get("quote") or "\"In the pursuit of light...\"",
         "smtpHost": db_settings.get("smtpHost") or app_settings.SMTP_HOST or "smtp.gmail.com",
         "smtpPort": db_settings.get("smtpPort") or app_settings.SMTP_PORT or 587,

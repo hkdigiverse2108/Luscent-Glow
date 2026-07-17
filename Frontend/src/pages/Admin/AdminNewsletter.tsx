@@ -36,6 +36,7 @@ const AdminNewsletter = () => {
     body1: "",
     body2: "",
     buttonText: "",
+    buttonLink: "",
     quote: "",
     smtpHost: "",
     smtpPort: 587,
@@ -416,6 +417,17 @@ const AdminNewsletter = () => {
                       type="text" 
                       value={settings.buttonText}
                       onChange={(e) => setSettings({...settings, buttonText: e.target.value})}
+                      className={`w-full bg-transparent border-2 rounded-2xl py-4 px-6 font-body text-sm font-bold focus:outline-none focus:border-gold/50 transition-all ${
+                        isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
+                      }`}
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-gold/60 ml-1">Button Link</label>
+                    <input 
+                      type="text" 
+                      value={settings.buttonLink}
+                      onChange={(e) => setSettings({...settings, buttonLink: e.target.value})}
                       className={`w-full bg-transparent border-2 rounded-2xl py-4 px-6 font-body text-sm font-bold focus:outline-none focus:border-gold/50 transition-all ${
                         isDark ? "border-white/10 text-white" : "border-charcoal/10 text-charcoal"
                       }`}

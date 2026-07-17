@@ -4,6 +4,7 @@ from pydantic import BaseModel
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from app.database import get_database
 
 # Explicitly load the .env file from the Backend directory
 _env_path = Path(__file__).parent.parent.parent / ".env"
@@ -71,12 +72,47 @@ async def chat_with_lumina(request: ChatRequest = Body(...)):
                 )
             )
 
+        # Build Dynamic Context from DB
+        db = await get_database()
+        
+        # Products
+        products_cursor = db["products"].find({}, {"name": 1, "price": 1, "category": 1, "stock": 1, "description": 1})
+        products_list = await products_cursor.to_list(length=50)
+        product_info = "\n".join([f"- {p.get('name')} (Category: {p.get('category', 'N/A')}) - Price: ₹{p.get('price')} - Stock: {p.get('stock')}" for p in products_list])
+        
+        # Categories
+        categories_cursor = db["categories"].find({}, {"name": 1})
+        categories_list = await categories_cursor.to_list(length=20)
+        cat_info = ", ".join([c.get("name", "") for c in categories_list])
+        
+        # Global Settings
+        global_settings = await db["global_settings"].find_one({}) or {}
+        shop_settings = global_settings.get("shop", {})
+        shipping_policy = shop_settings.get("shippingPolicy", "Free shipping above ₹999")
+        return_policy = shop_settings.get("returnPolicy", "Standard 7-day returns on unopened items.")
+        
+        dynamic_context = f"""
+        
+--- LIVE DATABASE INFORMATION ---
+Always use this factual information if asked about products, prices, or policies:
+Categories Available: {cat_info}
+
+Our Current Products & Prices:
+{product_info}
+
+Store Policies:
+- Shipping: {shipping_policy}
+- Returns: {return_policy}
+---------------------------------
+"""
+        final_system_prompt = SYSTEM_PROMPT + dynamic_context
+
         # Create chat session and send message
         chat = client.chats.create(
             model="gemini-2.5-flash-lite",
             config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.8,
+                system_instruction=final_system_prompt,
+                temperature=0.7,
                 max_output_tokens=512,
             ),
             history=history,

@@ -171,14 +171,14 @@ class UserAuthModel(BaseModel):
     """
     Schema for login credentials.
     """
-    mobileNumber: str = Field(...)
+    email: str = Field(...)
     password: str = Field(...)
 
 class OTPVerifyModel(BaseModel):
     """
     Schema for OTP verification.
     """
-    mobileNumber: str = Field(...)
+    email: str = Field(...)
     otp: str = Field(...)
 
 class WishlistItem(BaseModel):
@@ -204,13 +204,13 @@ class ForgotPasswordModel(BaseModel):
     """
     Schema for initiating a password reset.
     """
-    mobileNumber: str = Field(...)
+    email: str = Field(...)
 
 class PasswordResetModel(BaseModel):
     """
     Schema for password reset.
     """
-    mobileNumber: Optional[str] = Field(default=None)
+    email: Optional[str] = Field(default=None)
     otp: str = Field(...)
     newPassword: str = Field(...)
     userId: Optional[str] = Field(default=None)
@@ -701,7 +701,6 @@ class GlobalSettingsModel(BaseModel):
     copyrightText: str = Field(default="© 2026 Luscent Glow. All rights reserved.")
     priceFilters: List[dict] = Field(default_factory=list)
     seo: Optional[SEOModel] = Field(default=None)
-    activeDeliveryPartner: str = Field(default="shiprocket")
     updatedAt: Optional[str] = None
 
     class Config:
@@ -902,6 +901,7 @@ class NewsletterEmailSettingsModel(BaseModel):
     body1: str = Field(default="We are honored to welcome you to the Luscent Glow sanctuary. You have entered a curated space where botanical alchemy meets modern science to unveil the authentic brilliance of your skin.")
     body2: str = Field(default="As a cherished member of our inner circle, you will now receive priority access to our artisanal small-batch launches, intimate beauty philosophies, and exclusive invitations reserved for those who prioritize their glow.")
     buttonText: str = Field(default="Begin Your Ritual")
+    buttonLink: str = Field(default="https://luscentglow.com")
     quote: str = Field(default='"In the pursuit of light, we find our most authentic selves."')
     
     # SMTP Configuration
@@ -954,16 +954,6 @@ class ShiprocketCredentialsModel(BaseModel):
     shiprocketEmail: str = Field(default="")
     shiprocketPassword: str = Field(default="")
     shiprocketPickupLocation: str = Field(default="Primary")
-    updatedAt: Optional[str] = None
-
-    class Config:
-        populate_by_name = True
-
-class DelhiveryCredentialsModel(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id", default=None)
-    delhiveryToken: str = Field(default="")
-    delhiveryPickupLocation: str = Field(default="Primary")
-    delhiveryMode: str = Field(default="sandbox") # sandbox or production
     updatedAt: Optional[str] = None
 
     class Config:

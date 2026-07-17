@@ -11,7 +11,7 @@ async def get_seo_metadata(path: str = Query(..., description="The relative path
     data = await get_seo_data(path)
     if not data:
         return {
-            "title": "Luscent Glow | Pure Botanical Radiance",
+            "title": "LUSCENT GLOW | THE NEW ERA OF RADIANCE",
             "description": "Premium, cruelty-free botanical skincare and makeup.",
             "keywords": "skincare, beauty, botanical"
         }

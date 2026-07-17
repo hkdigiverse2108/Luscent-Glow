@@ -46,13 +46,14 @@ async def send_welcome_email(to_email: str):
     else:
         from_email = smtp_user or settings.SMTP_FROM_EMAIL
 
-    from_name = db_settings.get("fromName") if db_settings else "Luscent Glow"
-    subject = db_settings.get("subject") if db_settings else "Your Invitation to Radiance"
-    headline = db_settings.get("headline") if db_settings else "The Ritual Begins"
-    body1 = db_settings.get("body1") if db_settings else "We are honored to welcome you to the Luscent Glow sanctuary. You have entered a curated space where botanical alchemy meets modern science to unveil the authentic brilliance of your skin."
-    body2 = db_settings.get("body2") if db_settings else "As a cherished member of our inner circle, you will now receive priority access to our artisanal small-batch launches, intimate beauty philosophies, and exclusive invitations reserved for those who prioritize their glow."
-    button_text = db_settings.get("buttonText") if db_settings else "Begin Your Ritual"
-    quote = db_settings.get("quote") if db_settings else '"In the pursuit of light, we find our most authentic selves."'
+    from_name = (db_settings or {}).get("fromName") or "Luscent Glow"
+    subject = (db_settings or {}).get("subject") or "Your Invitation to Radiance"
+    headline = (db_settings or {}).get("headline") or "The Ritual Begins"
+    body1 = (db_settings or {}).get("body1") or "We are honored to welcome you to the Luscent Glow sanctuary. You have entered a curated space where botanical alchemy meets modern science to unveil the authentic brilliance of your skin."
+    body2 = (db_settings or {}).get("body2") or "As a cherished member of our inner circle, you will now receive priority access to our artisanal small-batch launches, intimate beauty philosophies, and exclusive invitations reserved for those who prioritize their glow."
+    button_text = (db_settings or {}).get("buttonText") or "Begin Your Ritual"
+    button_link = (db_settings or {}).get("buttonLink") or "https://luscentglow.com"
+    quote = (db_settings or {}).get("quote") or '"In the pursuit of light, we find our most authentic selves."'
 
     if not smtp_user or not smtp_pass:
         logger.warning(f"SMTP credentials not configured. Skipping welcome email to {to_email}")
@@ -93,8 +94,8 @@ async def send_welcome_email(to_email: str):
                                     </p>
                                     
                                     <!-- CTA -->
-                                    <div align="center" style="margin: 40px 0;">
-                                        <a href="{settings.FRONTEND_URL}/products" style="background-color: #c5a059; color: #000000; padding: 15px 35px; text-decoration: none; font-size: 14px; font-weight: bold; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;">{button_text}</a>
+                                    <div align="center" style="margin: 30px 0;">
+                                        <a href="{button_link}" style="display: inline-block; padding: 16px 40px; background-color: #c5a059; color: #0c0c0c; text-decoration: none; font-size: 14px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; border-radius: 4px;">{button_text}</a>
                                     </div>
                                     
                                     <p style="margin: 25px 0 0; font-size: 14px; line-height: 1.6; color: #888888; text-align: center; font-style: italic;">
@@ -124,35 +125,40 @@ async def send_welcome_email(to_email: str):
         msg.attach(MIMEText(html, 'html'))
 
         # Connect to SMTP server
-        server = smtplib.SMTP(smtp_host, smtp_port)
+        print(f"[DEBUG] Sending Welcome Email via {smtp_host}:{smtp_port} as {smtp_user}")
+        server = smtplib.SMTP(smtp_host, int(smtp_port))
         server.starttls()
         server.login(smtp_user, smtp_pass)
         server.send_message(msg)
         server.quit()
         
         logger.info(f"Successfully sent welcome email to {to_email}")
+        print(f"[SUCCESS] Sent welcome email to {to_email}")
     except Exception as e:
         logger.error(f"Failed to send welcome email to {to_email}: {str(e)}")
+        print(f"[ERROR] Failed to send email: {e}")
 
 async def send_password_reset_otp_email(to_email: str, otp: str):
     """
     Sends a high-fidelity, luxury-branded password reset OTP email to an administrator.
     """
     db = await get_database()
+    db_settings = await db["newsletter_settings"].find_one({})
     db_creds = await get_smtp_credentials()
     
     # Credentials & Content Setup (matching welcome email logic)
-    smtp_host = (db_creds or {}).get("smtpHost") or settings.SMTP_HOST
-    smtp_port = (db_creds or {}).get("smtpPort") or settings.SMTP_PORT
-    smtp_user = (db_creds or {}).get("smtpUser") or settings.SMTP_USER
-    smtp_pass = (db_creds or {}).get("smtpPassword") or settings.SMTP_PASSWORD
-    smtp_from_db = (db_creds or {}).get("smtpFromEmail")
+    smtp_host = (db_settings or {}).get("smtpHost") or (db_creds or {}).get("smtpHost") or settings.SMTP_HOST
+    smtp_port = (db_settings or {}).get("smtpPort") or (db_creds or {}).get("smtpPort") or settings.SMTP_PORT
+    smtp_user = (db_settings or {}).get("smtpUser") or (db_creds or {}).get("smtpUser") or settings.SMTP_USER
+    smtp_pass = (db_settings or {}).get("smtpPassword") or (db_creds or {}).get("smtpPassword") or settings.SMTP_PASSWORD
+    smtp_from_db = (db_settings or {}).get("fromEmail") or (db_creds or {}).get("smtpFromEmail")
     
     from_email = smtp_from_db or smtp_user or settings.SMTP_FROM_EMAIL
     from_name = settings.SMTP_FROM_NAME or "Luscent Glow Sanctuary"
     
     if not smtp_user or not smtp_pass:
         logger.warning(f"SMTP credentials not configured. Skipping password reset email to {to_email}")
+        print(f"\n[DEBUG - DEVELOPMENT MODE] Password Reset OTP for {to_email}: {otp}\n")
         return
 
     try:
@@ -189,11 +195,6 @@ async def send_password_reset_otp_email(to_email: str, otp: str):
                                     <div align="center" style="margin: 40px 0; background-color: #111111; padding: 30px; border: 1px dashed #c5a059; border-radius: 4px;">
                                         <span style="font-size: 48px; letter-spacing: 15px; color: #c5a059; font-weight: bold; font-family: 'Courier New', monospace;">{otp}</span>
                                     </div>
-                                    
-                                    <p style="margin: 25px 0; font-size: 13px; line-height: 1.6; color: #888888; text-align: center;">
-                                        This code is only valid for a limited window. If you did not initiate this recovery, 
-                                        please secure your workstation immediately.
-                                    </p>
                                 </td>
                             </tr>
                             
@@ -215,7 +216,8 @@ async def send_password_reset_otp_email(to_email: str, otp: str):
         """
 
         msg.attach(MIMEText(html, 'html'))
-        server = smtplib.SMTP(smtp_host, smtp_port)
+        print(f"[DEBUG] Sending Reset OTP Email via {smtp_host}:{smtp_port} as {smtp_user}")
+        server = smtplib.SMTP(smtp_host, int(smtp_port))
         server.starttls()
         server.login(smtp_user, smtp_pass)
         server.send_message(msg)
@@ -224,3 +226,76 @@ async def send_password_reset_otp_email(to_email: str, otp: str):
         logger.info(f"Successfully sent password reset OTP to {to_email}")
     except Exception as e:
         logger.error(f"Failed to send password reset email to {to_email}: {str(e)}")
+
+async def send_login_otp_email(to_email: str, otp: str):
+    """
+    Sends a high-fidelity, luxury-branded login OTP email.
+    """
+    db = await get_database()
+    db_settings = await db["newsletter_settings"].find_one({})
+    db_creds = await get_smtp_credentials()
+    
+    smtp_host = (db_settings or {}).get("smtpHost") or (db_creds or {}).get("smtpHost") or settings.SMTP_HOST
+    smtp_port = (db_settings or {}).get("smtpPort") or (db_creds or {}).get("smtpPort") or settings.SMTP_PORT
+    smtp_user = (db_settings or {}).get("smtpUser") or (db_creds or {}).get("smtpUser") or settings.SMTP_USER
+    smtp_pass = (db_settings or {}).get("smtpPassword") or (db_creds or {}).get("smtpPassword") or settings.SMTP_PASSWORD
+    smtp_from_db = (db_settings or {}).get("fromEmail") or (db_creds or {}).get("smtpFromEmail")
+    
+    from_email = smtp_from_db or smtp_user or settings.SMTP_FROM_EMAIL
+    from_name = settings.SMTP_FROM_NAME or "Luscent Glow Sanctuary"
+    
+    if not smtp_user or not smtp_pass:
+        logger.warning(f"SMTP credentials not configured. Skipping login OTP email to {to_email}")
+        print(f"\n[DEBUG - DEVELOPMENT MODE] Login OTP for {to_email}: {otp}\n")
+        return
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = f"{from_name} <{from_email}>"
+        msg['To'] = to_email
+        msg['Subject'] = "Your Login Authentication Code"
+
+        html = f"""
+        <html>
+        <body style="margin: 0; padding: 0; font-family: 'Playfair Display', serif; background-color: #0c0c0c; color: #ffffff;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0c0c0c;">
+                <tr>
+                    <td align="center" style="padding: 40px 0;">
+                        <table width="600" border="0" cellspacing="0" cellpadding="0" style="background-color: #1a1a1a; border: 1px solid #c5a059; border-radius: 8px; overflow: hidden;">
+                            <tr>
+                                <td align="center" style="padding: 40px 0; background-color: #111111;">
+                                    <h1 style="margin: 0; font-size: 28px; letter-spacing: 3px; color: #c5a059; text-transform: uppercase;">Luscent Glow</h1>
+                                    <p style="margin: 10px 0 0; font-size: 10px; letter-spacing: 4px; color: #888888; text-transform: uppercase;">Login Authentication</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 40px 30px;">
+                                    <h2 style="margin: 0; font-size: 22px; color: #ffffff; font-weight: 300; text-align: center;">Verify Your Identity</h2>
+                                    <p style="margin: 25px 0; font-size: 16px; line-height: 1.6; color: #aaaaaa; text-align: center; font-style: italic;">
+                                        A request has been made to log in to your account. Please use the verification code below to authorize this action.
+                                    </p>
+                                    <div align="center" style="margin: 40px 0; background-color: #111111; padding: 30px; border: 1px dashed #c5a059; border-radius: 4px;">
+                                        <span style="font-size: 48px; letter-spacing: 15px; color: #c5a059; font-weight: bold; font-family: 'Courier New', monospace;">{otp}</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """
+
+        msg.attach(MIMEText(html, 'html'))
+        print(f"[DEBUG] Sending Login OTP Email via {smtp_host}:{smtp_port} as {smtp_user}")
+        server = smtplib.SMTP(smtp_host, int(smtp_port))
+        server.starttls()
+        server.login(smtp_user, smtp_pass)
+        server.send_message(msg)
+        server.quit()
+        
+        logger.info(f"Successfully sent login OTP to {to_email}")
+    except Exception as e:
+        logger.error(f"Failed to send login OTP email to {to_email}: {str(e)}")
+
