@@ -1,11 +1,19 @@
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
+**/*.py[cod]
 *$py.class
+**/*.pyc
+**/*.pyo
+**/*.pyd
 .venv/
 env/
 venv/
 .env
+.env.*
+.env.local
+*.env
 
 # Node
 node_modules/
